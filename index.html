@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arka.fund - On-Chain Asset Management Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'arka-green': '#22c55e',
+                        'arka-lime': '#84cc16',
+                        'arka-emerald': '#10b981',
+                        'arka-yellow': '#eab308',
+                        'dark-bg': '#0f172a',
+                        'card-bg': '#1e293b',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #eab308 0%, #84cc16 25%, #22c55e 75%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #eab308 0%, #84cc16 25%, #22c55e 75%, #10b981 100%);
+        }
+        .gradient-bg-alt {
+            background: linear-gradient(135deg, #10b981 0%, #22c55e 50%, #84cc16 100%);
+        }
+        .crypto-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .protocol-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(132, 204, 22, 0.4);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-pulse-slow {
+            animation: pulse 4s infinite;
+        }
+        .logo-container {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+        }
+        .logo-container img {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+        }
+        .hero-logo {
+            height: 120px;
+            margin-bottom: 2rem;
+        }
+        .hero-logo img {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+        }
+        @media (min-width: 768px) {
+            .hero-logo {
+                height: 180px;
+            }
+        }
+        .video-container {
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, #eab308, #84cc16, #22c55e, #10b981) border-box;
+            border-radius: 12px;
+            padding: 4px;
+        }
+        .video-inner {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-white overflow-x-hidden">
+    <!-- Navigation -->
+    <nav class="fixed w-full top-0 z-50 bg-dark-bg/95 backdrop-blur-md border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="logo-container">
+                        <img src="logo-arkafund.png" alt="Arka Fund" />
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a href="#features" class="hover:text-arka-green transition-colors">Features</a>
+                        <a href="#architecture" class="hover:text-arka-lime transition-colors">Architecture</a>
+                        <a href="#protocols" class="hover:text-arka-emerald transition-colors">Protocols</a>
+                        <a href="#governance" class="hover:text-arka-green transition-colors">Governance</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-300 hover:text-white">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-32 pb-20">
+        <div class="absolute inset-0 bg-gradient-to-br from-arka-yellow/20 via-arka-green/20 to-arka-emerald/20"></div>
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-arka-green/10 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-arka-lime/10 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-arka-emerald/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+            <div class="animate-float">
+                <div class="hero-logo flex justify-center mb-8">
+                    <img src="logo-arkafund.png" alt="Arka Fund" />
+                </div>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8 leading-relaxed">
+                    On-Chain Asset Management Protocol<br>
+                    <span class="text-arka-green">Built on Soroban/Stellar</span>
+                </p>
+            </div>
+            
+            <div class="text-lg md:text-xl text-gray-400 mb-12 max-w-3xl mx-auto">
+                Create customizable investment arkas with diverse DeFi strategies. 
+                Leverage integrations with AMMs and lending protocols for optimal execution.
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+                <button onclick="alert('Launch App - Coming Soon!')" class="gradient-bg px-8 py-4 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform duration-300 shadow-2xl">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Launch App
+                </button>
+                <a href="#architecture" class="border-2 border-arka-green px-8 py-4 rounded-xl text-arka-green font-semibold text-lg hover:bg-arka-green hover:text-white transition-all duration-300 text-center">
+                    <i class="fas fa-book mr-2"></i>
+                    Documentation
+                </a>
+            </div>
+
+            <!-- Video Section -->
+            <div class="max-w-4xl mx-auto px-8 sm:px-12 lg:px-16">
+                <div class="video-container mb-8">
+                    <div class="video-inner">
+                        <video 
+                            controls 
+                            autoplay 
+                            muted 
+                            loop 
+                            class="w-full h-auto"
+                            poster=""
+                        >
+                            <source src="akrfund.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    <span class="gradient-text">Key Features</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Powerful tools for managers and investors in the decentralized finance ecosystem
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="crypto-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <div class="text-arka-green text-4xl mb-4">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Customizable Arkas</h3>
+                    <p class="text-gray-400">
+                        Managers define denomination assets, fees, whitelisted assets, and deposit/redemption limits.
+                    </p>
+                </div>
+                
+                <div class="crypto-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <div class="text-arka-lime text-4xl mb-4">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">DeFi Integration</h3>
+                    <p class="text-gray-400">
+                        Router and Adapter system for seamless interaction with multiple AMMs and lending protocols.
+                    </p>
+                </div>
+                
+                <div class="crypto-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <div class="text-arka-emerald text-4xl mb-4">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">DAO Governance</h3>
+                    <p class="text-gray-400">
+                        Token holders propose and vote on protocol changes through Governor and Timelock systems.
+                    </p>
+                </div>
+                
+                <div class="crypto-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <div class="text-arka-green text-4xl mb-4">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">On-Chain Transparency</h3>
+                    <p class="text-gray-400">
+                        All operations emit events for easy tracking and auditing. Complete transparency guaranteed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-20 px-4 sm:px-6 lg:px-8 bg-card-bg/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    <span class="gradient-text">Technical Architecture</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Built with security, scalability, and interoperability in mind
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="space-y-8">
+                        <div class="crypto-card p-6 rounded-xl">
+                            <h3 class="text-xl font-bold text-arka-green mb-3">
+                                <i class="fas fa-industry mr-2"></i>
+                                ArkaFactory
+                            </h3>
+                            <p class="text-gray-400">
+                                Deploys Proxy contracts pointing to ArkaLogic implementation. Handles upgrades through Timelock governance.
+                            </p>
+                        </div>
+                        
+                        <div class="crypto-card p-6 rounded-xl">
+                            <h3 class="text-xl font-bold text-arka-lime mb-3">
+                                <i class="fas fa-cube mr-2"></i>
+                                ArkaProxy & Logic
+                            </h3>
+                            <p class="text-gray-400">
+                                Smart contracts handling deposits, redemptions, rebalancing, and fee management with full event logging.
+                            </p>
+                        </div>
+                        
+                        <div class="crypto-card p-6 rounded-xl">
+                            <h3 class="text-xl font-bold text-arka-emerald mb-3">
+                                <i class="fas fa-route mr-2"></i>
+                                Router & Adapters
+                            </h3>
+                            <p class="text-gray-400">
+                                Orchestrates multi-hop swaps across different protocols with validation and optimal execution.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="crypto-card p-8 rounded-xl">
+                        <div class="text-6xl mb-6 gradient-text">
+                            <i class="fas fa-network-wired"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Soroban/Stellar Network</h3>
+                        <p class="text-gray-400 mb-6">
+                            Built on the high-performance Stellar blockchain with Soroban smart contracts
+                        </p>
+                        <div class="flex justify-center space-x-4">
+                            <div class="bg-arka-green/20 p-3 rounded-lg">
+                                <i class="fas fa-shield-alt text-arka-green"></i>
+                            </div>
+                            <div class="bg-arka-lime/20 p-3 rounded-lg">
+                                <i class="fas fa-bolt text-arka-lime"></i>
+                            </div>
+                            <div class="bg-arka-emerald/20 p-3 rounded-lg">
+                                <i class="fas fa-coins text-arka-emerald"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Protocols Section -->
+    <section id="protocols" class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    <span class="gradient-text">Integrated Protocols</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Seamless integration with leading DeFi protocols on Stellar
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-lime">Aquarius AMM</h3>
+                    <p class="text-gray-400 mb-4">Automated Market Maker with swap, add/remove liquidity operations</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-lime/20 text-arka-lime px-2 py-1 rounded text-sm">Swap</span>
+                        <span class="bg-arka-lime/20 text-arka-lime px-2 py-1 rounded text-sm">LP</span>
+                    </div>
+                </div>
+                
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-green">SoroSwap</h3>
+                    <p class="text-gray-400 mb-4">Decentralized exchange with liquidity provision and trading features</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-green/20 text-arka-green px-2 py-1 rounded text-sm">DEX</span>
+                        <span class="bg-arka-green/20 text-arka-green px-2 py-1 rounded text-sm">Liquidity</span>
+                    </div>
+                </div>
+                
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-emerald">Phoenix AMM</h3>
+                    <p class="text-gray-400 mb-4">Advanced AMM with deposit, withdraw and swap functionality</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-emerald/20 text-arka-emerald px-2 py-1 rounded text-sm">AMM</span>
+                        <span class="bg-arka-emerald/20 text-arka-emerald px-2 py-1 rounded text-sm">Advanced</span>
+                    </div>
+                </div>
+                
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-lime">Comet AMM</h3>
+                    <p class="text-gray-400 mb-4">Liquidity protocol with mint/burn mechanisms and swap capabilities</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-lime/20 text-arka-lime px-2 py-1 rounded text-sm">Mint</span>
+                        <span class="bg-arka-lime/20 text-arka-lime px-2 py-1 rounded text-sm">Burn</span>
+                    </div>
+                </div>
+                
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-green">Balanced AMM</h3>
+                    <p class="text-gray-400 mb-4">Balanced liquidity pools with reserve management and swap features</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-green/20 text-arka-green px-2 py-1 rounded text-sm">Balanced</span>
+                        <span class="bg-arka-green/20 text-arka-green px-2 py-1 rounded text-sm">Reserves</span>
+                    </div>
+                </div>
+                
+                <div class="protocol-card p-8 rounded-xl hover:scale-105 transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-4 text-arka-emerald">Blend</h3>
+                    <p class="text-gray-400 mb-4">Lending and borrowing protocol with liquidation mechanisms</p>
+                    <div class="flex space-x-2">
+                        <span class="bg-arka-emerald/20 text-arka-emerald px-2 py-1 rounded text-sm">Lending</span>
+                        <span class="bg-arka-emerald/20 text-arka-emerald px-2 py-1 rounded text-sm">Borrowing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Governance Section -->
+    <section id="governance" class="py-20 px-4 sm:px-6 lg:px-8 bg-card-bg/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    <span class="gradient-text">DAO Governance</span>
+                </h2>
+                <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+                    Decentralized decision-making for protocol evolution
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="crypto-card p-8 rounded-xl text-center">
+                    <div class="text-arka-green text-5xl mb-6">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Governor</h3>
+                    <p class="text-gray-400 mb-6">
+                        Proposal creation and voting with configurable thresholds and quorums
+                    </p>
+                    <div class="space-y-2">
+                        <div class="bg-arka-green/20 p-2 rounded text-sm">Proposal Creation</div>
+                        <div class="bg-arka-green/20 p-2 rounded text-sm">Voting Mechanisms</div>
+                        <div class="bg-arka-green/20 p-2 rounded text-sm">Quorum Management</div>
+                    </div>
+                </div>
+                
+                <div class="crypto-card p-8 rounded-xl text-center">
+                    <div class="text-arka-lime text-5xl mb-6">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Timelock</h3>
+                    <p class="text-gray-400 mb-6">
+                        Configurable delay (48h) before executing approved changes for security
+                    </p>
+                    <div class="space-y-2">
+                        <div class="bg-arka-lime/20 p-2 rounded text-sm">48h Delay</div>
+                        <div class="bg-arka-lime/20 p-2 rounded text-sm">Execution Queue</div>
+                        <div class="bg-arka-lime/20 p-2 rounded text-sm">Emergency Pause</div>
+                    </div>
+                </div>
+                
+                <div class="crypto-card p-8 rounded-xl text-center">
+                    <div class="text-arka-emerald text-5xl mb-6">
+                        <i class="fas fa-treasure-chest"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Treasury</h3>
+                    <p class="text-gray-400 mb-6">
+                        Receives fees and distributes revenue share to token holders
+                    </p>
+                    <div class="space-y-2">
+                        <div class="bg-arka-emerald/20 p-2 rounded text-sm">Fee Collection</div>
+                        <div class="bg-arka-emerald/20 p-2 rounded text-sm">Revenue Distribution</div>
+                        <div class="bg-arka-emerald/20 p-2 rounded text-sm">Token Rewards</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center">
+                <div class="crypto-card p-8 rounded-xl max-w-4xl mx-auto">
+                    <h3 class="text-2xl font-bold mb-6">Governance Powers</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div>
+                            <h4 class="text-lg font-semibold text-arka-green mb-3">Protocol Updates</h4>
+                            <ul class="text-gray-400 space-y-2">
+                                <li><i class="fas fa-check text-arka-green mr-2"></i>Asset whitelist management</li>
+                                <li><i class="fas fa-check text-arka-green mr-2"></i>Fee structure modifications</li>
+                                <li><i class="fas fa-check text-arka-green mr-2"></i>Adapter integrations</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-arka-lime mb-3">System Parameters</h4>
+                            <ul class="text-gray-400 space-y-2">
+                                <li><i class="fas fa-check text-arka-lime mr-2"></i>AUM limits configuration</li>
+                                <li><i class="fas fa-check text-arka-lime mr-2"></i>Contract upgrades</li>
+                                <li><i class="fas fa-check text-arka-lime mr-2"></i>Emergency procedures</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="crypto-card p-12 rounded-2xl">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    <span class="gradient-text">Ready to Start?</span>
+                </h2>
+                <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                    Join the future of decentralized asset management. Create your first Arka or invest in existing strategies.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                    <button onclick="alert('Launch App - Coming Soon!')" class="gradient-bg px-10 py-4 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform duration-300 shadow-2xl">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create Arka
+                    </button>
+                    <a href="#architecture" class="border-2 border-arka-green px-10 py-4 rounded-xl text-arka-green font-semibold text-lg hover:bg-arka-green hover:text-white transition-all duration-300 text-center">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Explore Strategies
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 sm:px-6 lg:px-8 bg-card-bg/50 border-t border-gray-700">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="logo-container mb-4">
+                        <img src="logo-arkafund.png" alt="Arka Fund" />
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        On-chain asset management protocol built on Soroban/Stellar
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Protocol</h4>
+                    <ul class="text-gray-400 space-y-2">
+                        <li><a href="#architecture" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="#governance" class="hover:text-white transition-colors">Governance</a></li>
+                        <li><a href="#protocols" class="hover:text-white transition-colors">Protocols</a></li>
+                        <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Developers</h4>
+                    <ul class="text-gray-400 space-y-2">
+                        <li><a href="#architecture" class="hover:text-white transition-colors">Technical Docs</a></li>
+                        <li><a href="#protocols" class="hover:text-white transition-colors">Integration Guide</a></li>
+                        <li><a href="#governance" class="hover:text-white transition-colors">DAO Participation</a></li>
+                        <li><a href="#features" class="hover:text-white transition-colors">SDK Coming Soon</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400">
+                    © 2024 Arka.fund. Built on Stellar with ❤️ for DeFi.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('bg-dark-bg/95');
+            } else {
+                nav.classList.remove('bg-dark-bg/95');
+            }
+        });
+    </script>
+</body>
+</html> 

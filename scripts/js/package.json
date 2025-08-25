@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "run-proposal": "ts-node proposeSnapshot.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^13.1.0"
+  }
+}

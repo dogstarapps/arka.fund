@@ -1,0 +1,35 @@
+# Sistema / editor
+.DS_Store
+*.log
+
+# Entornos
+.env
+.env.*
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds / caches
+dist/
+build/
+out/
+tmp/
+.cache/
+*.tsbuildinfo
+
+# Assets pesados (mantenerlos fuera del repo)
+/resources/
+/screens/
+
+/plan.md
+
+# Dependencias vendorizadas (si no se usa submódulo)
+vendor/
+
+# Rust build artifacts
+/contracts/target/
+*.tmp

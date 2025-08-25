@@ -36,6 +36,7 @@ mod test {
         let id = env.register_contract(None, BlendAdapter);
         let client = BlendAdapterClient::new(&env, &id);
         let caller = Address::generate(&env);
+        env.mock_all_auths();
         let params = ActionParams { market_id: 7, amount: 66, receiver: Address::generate(&env) };
         let out = client.execute(&caller, &Action::Lend, &params);
         assert_eq!(out, 66);

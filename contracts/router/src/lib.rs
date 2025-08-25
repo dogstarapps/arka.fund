@@ -21,19 +21,27 @@ pub struct Router;
 #[contractimpl]
 impl Router {
     pub fn execute(env: Env, caller: Address, steps: Vec<SwapStep>) -> i128 {
-        // Call each adapter's execute(caller, pool_id, amount_in, min_out, receiver)
+        // Multi-hop: forward previous output as next input unless explicit amount_in provided (>0)
+        let mut last_out: i128 = 0;
         let mut out_total: i128 = 0;
         let receiver = env.current_contract_address();
         for s in steps.iter() {
+            let amount_in = if s.amount_in > 0 { s.amount_in } else { last_out };
+            // basic guard
+            assert!(amount_in > 0, "amount_in_zero");
+
             let args = vec![
                 &env,
                 caller.clone().into_val(&env),
                 s.pool_id.into_val(&env),
-                s.amount_in.into_val(&env),
+                amount_in.into_val(&env),
                 s.min_out.into_val(&env),
                 receiver.clone().into_val(&env),
             ];
             let out: i128 = env.invoke_contract(&s.adapter, &symbol_short!("execute"), args);
+            // per-step slippage check already enforced by adapter; keep parity here
+            assert!(out >= s.min_out, "slippage_exceeded");
+            last_out = out;
             out_total += out;
         }
         out_total

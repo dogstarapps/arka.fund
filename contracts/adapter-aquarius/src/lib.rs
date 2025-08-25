@@ -18,7 +18,7 @@ impl AquariusAdapter {
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Env, Address};
+    use soroban_sdk::{testutils::{Address as _, MockAuth}, Env, Address};
 
     #[test]
     fn test_execute_placeholder() {
@@ -26,6 +26,7 @@ mod test {
         let id = env.register_contract(None, AquariusAdapter);
         let client = AquariusAdapterClient::new(&env, &id);
         let caller = Address::generate(&env);
+        env.mock_all_auths();
         let out = client.execute(&caller, &1u128, &42i128, &40i128, &Address::generate(&env));
         assert_eq!(out, 42);
     }

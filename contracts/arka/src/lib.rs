@@ -163,7 +163,15 @@ impl ArkaContract {
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{vec, testutils::Address as _, Address};
+    use soroban_sdk::{vec, testutils::Address as _, Address, contract, contractimpl};
+
+    #[contract]
+    struct DummyToken;
+    #[contractimpl]
+    impl DummyToken {
+        pub fn xfer_from(_env: Env, _from: Address, _to: Address, _amount: i128) {}
+        pub fn xfer(_env: Env, _from: Address, _to: Address, _amount: i128) {}
+    }
 
     fn asset(env: &Env) -> Asset { Asset { contract: Address::generate(env) } }
     fn manager(env: &Env) -> Address { Address::generate(env) }
@@ -173,8 +181,9 @@ mod test {
         let env = Env::default();
         let contract_id = env.register_contract(None, ArkaContract);
         let client = ArkaContractClient::new(&env, &contract_id);
-
-        let denom = asset(&env);
+        // Register dummy token to satisfy invoke_contract calls
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = Asset { contract: token_id.clone() };
         let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
         let wl = vec![&env, denom.clone()];
         let mgr = manager(&env);
@@ -182,6 +191,7 @@ mod test {
 
         let user = Address::generate(&env);
         let amount: i128 = 100;
+        env.mock_all_auths();
         let minted = client.deposit(&user, &denom, &amount);
         assert_eq!(minted, amount);
 

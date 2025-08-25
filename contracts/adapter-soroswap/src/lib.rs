@@ -1,30 +1,25 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
-
-#[derive(Clone)]
-#[contracttype]
-pub struct SwapParams {
-    pub pool_id: u128,
-    pub amount_in: i128,
-    pub min_out: i128,
-    pub receiver: Address,
-}
+use soroban_sdk::{contract, contractimpl, Address, Env};
 
 #[contract]
 pub struct SoroSwapAdapter;
 
 #[contractimpl]
 impl SoroSwapAdapter {
-    pub fn execute(env: Env, caller: Address, params: SwapParams) -> i128 {
+    // Unified adapter interface: execute(caller, pool_id, amount_in, min_out, receiver) -> amount_out
+    pub fn execute(_env: Env, caller: Address, pool_id: u128, amount_in: i128, min_out: i128, receiver: Address) -> i128 {
+        let _ = (pool_id, receiver);
         caller.require_auth();
-        params.amount_in
+        // Placeholder slippage check: simulate out == amount_in and require min_out satisfied
+        assert!(amount_in >= min_out, "slippage_exceeded");
+        amount_in
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Env};
+    use soroban_sdk::{testutils::Address as _, Env, Address};
 
     #[test]
     fn test_execute_placeholder() {
@@ -32,11 +27,9 @@ mod test {
         let id = env.register_contract(None, SoroSwapAdapter);
         let client = SoroSwapAdapterClient::new(&env, &id);
         let caller = Address::generate(&env);
-        let params = SwapParams { pool_id: 1, amount_in: 22, min_out: 21, receiver: Address::generate(&env) };
-        let out = client.execute(&caller, &params);
+        env.mock_all_auths();
+        let out = client.execute(&caller, &1u128, &22i128, &21i128, &Address::generate(&env));
         assert_eq!(out, 22);
     }
 }
-
-
 

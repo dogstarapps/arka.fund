@@ -32,6 +32,7 @@ mod test {
         let id = env.register_contract(None, CometAdapter);
         let client = CometAdapterClient::new(&env, &id);
         let caller = Address::generate(&env);
+        env.mock_all_auths();
         let params = SwapParams { pool_id: 1, amount_in: 44, min_out: 40, receiver: Address::generate(&env) };
         let out = client.execute(&caller, &params);
         assert_eq!(out, 44);

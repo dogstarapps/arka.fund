@@ -13,8 +13,27 @@ Depositors can easily invest in these arkas, gaining exposure to different strat
 
 ## Technical Architecture
 
-For a detailed explanation of the system's design, components, and flows, please refer to the [Technical Architecture Document](technical-architecture.md).
+For a detailed explanation of the system's design, components, and flows, please refer to the [Architecture](docs/ARCHITECTURE.md).
 
 ---
 
 *This project is currently under development.* 
+
+## Reproduce E2E (Testnet)
+
+- Prerequisites: Soroban/Stellar CLI v23+, funded testnet key alias (e.g., `arka-holder`).
+- Contract IDs and accounts: see `deployments.testnet.json`.
+- Full walkthrough and context: `docs/Tranche1.md`.
+- Aquarius end-to-end helper:
+  
+  ```bash
+  NETWORK=testnet HOLDER_ALIAS=arka-holder bash scripts/aquarius/e2e.sh
+  ```
+
+This runs fee acquisition (if needed), pool creation, liquidity deposit, and a test swap (including via `adapter-aquarius`).
+
+SoroSwap end-to-end helper:
+
+```bash
+NETWORK=testnet HOLDER_ALIAS=arka-holder bash scripts/soroswap/e2e.sh
+``` 

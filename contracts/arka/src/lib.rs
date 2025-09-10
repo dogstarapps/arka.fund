@@ -37,6 +37,7 @@ pub enum DataKey {
     Whitelist,
     Manager,
     Router,
+    Balance(Address),
 }
 
 const EVENT_DEPOSIT: Symbol = symbol_short!("deposit");
@@ -102,6 +103,9 @@ impl ArkaContract {
         assert!(shares_minted > 0, "shares_zero");
         store.set(&DataKey::TotalShares, &(total + shares_minted));
         store.set(&DataKey::Aum, &(aum + net_amount));
+        // Track per-user shares
+        let bal: i128 = store.get(&DataKey::Balance(user.clone())).unwrap_or(0);
+        store.set(&DataKey::Balance(user.clone()), &(bal + shares_minted));
 
         env.events().publish((EVENT_DEPOSIT,), (user.clone(), amount, shares_minted));
         shares_minted
@@ -111,6 +115,9 @@ impl ArkaContract {
         user.require_auth();
         assert!(shares > 0, "shares_zero");
         let store = env.storage().instance();
+        // Ensure user has shares
+        let user_bal: i128 = store.get(&DataKey::Balance(user.clone())).unwrap_or(0);
+        assert!(shares <= user_bal, "insufficient_user_shares");
         let total: i128 = store.get(&DataKey::TotalShares).unwrap_or(0);
         assert!(shares <= total, "insufficient_shares");
         let aum: i128 = store.get(&DataKey::Aum).unwrap_or(0);
@@ -118,6 +125,7 @@ impl ArkaContract {
         let mut amount_out = if total == 0 { 0 } else { (shares * aum) / total };
 
         store.set(&DataKey::TotalShares, &(total - shares));
+        store.set(&DataKey::Balance(user.clone()), &(user_bal - shares));
         // Apply redeem fee and update AUM with gross amount removed
         let fees: FeeStructure = store.get(&DataKey::Fees).unwrap_or(FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 });
         let net_out = Self::apply_fee_bps(amount_out, fees.redeem_bps);
@@ -157,6 +165,27 @@ impl ArkaContract {
         store.set(&DataKey::Aum, &(aum + profit));
         env.events().publish((EVENT_PROFIT,), (profit, steps.len() as u32));
         profit
+    }
+
+    // --- Getters for dApp/UI ---
+    pub fn manager(env: Env) -> Address {
+        let store = env.storage().instance();
+        store.get(&DataKey::Manager).expect("not_initialized")
+    }
+
+    pub fn router(env: Env) -> Address {
+        let store = env.storage().instance();
+        store.get(&DataKey::Router).expect("router_not_set")
+    }
+
+    pub fn denomination(env: Env) -> Asset {
+        let store = env.storage().instance();
+        store.get(&DataKey::Denomination).expect("not_initialized")
+    }
+
+    pub fn shares_of(env: Env, user: Address) -> i128 {
+        let store = env.storage().instance();
+        store.get(&DataKey::Balance(user)).unwrap_or(0)
     }
 }
 

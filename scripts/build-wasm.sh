@@ -23,6 +23,7 @@ CRATES=(
   coverage-vault
   coverage-fund
   governance-token
+  test-token
 )
 
 echo "🚀 Building Soroban contracts (wasm, release)..."
@@ -38,8 +39,11 @@ for CRATE in "${CRATES[@]}"; do
   else
     echo "    ⚠️  Missing wasm for $CRATE at $WASM_PATH"
   fi
+
 done
 popd >/dev/null
+
+printenv >/dev/null 2>&1 || true
 
 echo "✅ Artifacts ready in: $ARTIFACTS_DIR"
 

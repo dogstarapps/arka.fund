@@ -2,6 +2,7 @@
 members = [
     "arka",
     "arka-factory",
+    "arka-registry",
     "router",
     "adapter-aquarius",
     "adapter-soroswap",
@@ -12,6 +13,7 @@ members = [
     "coverage-vault",
     "coverage-fund",
     "governance-token",
+    "test-token",
 ]
 resolver = "2"
 
@@ -22,6 +24,6 @@ version = "0.1.0"
 authors = ["Arka.fund Team"]
 
 [workspace.dependencies]
-soroban-sdk = { version = "22.0.0" }
+soroban-sdk = { version = "23.0.0" }
 
 

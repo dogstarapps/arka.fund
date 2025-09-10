@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, BytesN};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, BytesN, Vec, IntoVal, vec, symbol_short};
 #[cfg(test)]
 use soroban_sdk::testutils::Address as _;
 
@@ -9,6 +9,9 @@ pub enum DataKey {
     Implementation,
     LastArka,
     Governor,
+    AllArkas,
+    ManagerArkas(Address),
+    Registry,
 }
 
 #[contract]
@@ -31,38 +34,98 @@ impl ArkaFactory {
         store.set(&DataKey::Implementation, &impl_wasm_hash);
     }
 
-    pub fn create_arka(env: Env, salt: BytesN<32>) -> Address {
+    pub fn set_registry(env: Env, registry: Address) {
+        let store = env.storage().instance();
+        if let Some(gov) = store.get::<DataKey, Address>(&DataKey::Governor) { gov.require_auth(); }
+        store.set(&DataKey::Registry, &registry);
+    }
+
+    pub fn create_arka(env: Env, salt: BytesN<32>, manager: Address) -> Address {
         // Restricted by governor/timelock (relaxed in tests when governor not set)
         let store = env.storage().instance();
         if let Some(gov) = store.get::<DataKey, Address>(&DataKey::Governor) {
             gov.require_auth();
         }
-        #[cfg(test)]
-        {
-            // In tests, avoid deploying actual wasm. Simulate a new address to validate flow.
-            let arka_addr = Address::generate(&env);
-            store.set(&DataKey::LastArka, &arka_addr);
-            return arka_addr;
+        // Manager must authorize creation for proper indexing
+        manager.require_auth();
+        // Deploy or simulate address depending on build
+        let arka_addr: Address = {
+            #[cfg(test)]
+            {
+                Address::generate(&env)
+            }
+            #[cfg(not(test))]
+            {
+                let wasm_hash: BytesN<32> = store.get(&DataKey::Implementation).expect("impl_not_set");
+                env.deployer().with_current_contract(salt).deploy_v2(wasm_hash, ())
+            }
+        };
+
+        // Update in-factory simple lists (optional)
+        let mut all: Vec<Address> = store.get(&DataKey::AllArkas).unwrap_or(Vec::new(&env));
+        all.push_back(arka_addr.clone());
+        store.set(&DataKey::AllArkas, &all);
+        let mut mine: Vec<Address> = store.get(&DataKey::ManagerArkas(manager.clone())).unwrap_or(Vec::new(&env));
+        mine.push_back(arka_addr.clone());
+        store.set(&DataKey::ManagerArkas(manager.clone()), &mine);
+
+        // Auto-register in external registry if configured
+        if let Some(reg) = store.get::<DataKey, Address>(&DataKey::Registry) {
+            // call: Registry.register(manager, arka)
+            let args2 = vec![
+                &env,
+                manager.clone().into_val(&env),
+                arka_addr.clone().into_val(&env),
+            ];
+            // Try (manager, arka)
+            let _ = env.invoke_contract::<()>(&reg, &symbol_short!("register"), args2);
         }
-        #[cfg(not(test))]
-        {
-            let wasm_hash: BytesN<32> = store.get(&DataKey::Implementation).expect("impl_not_set");
-            // No constructor args for logic here; initialization executed by caller after deployment
-            let arka_addr = env.deployer().with_current_contract(salt).deploy_v2(wasm_hash, ());
-            store.set(&DataKey::LastArka, &arka_addr);
-            arka_addr
-        }
+
+        store.set(&DataKey::LastArka, &arka_addr);
+        arka_addr
     }
+
+    pub fn get_arkas(env: Env, offset: u32, limit: u32) -> Vec<Address> {
+        let store = env.storage().instance();
+        let list: Vec<Address> = store.get(&DataKey::AllArkas).unwrap_or(Vec::new(&env));
+        slice_addresses(&env, list, offset, limit)
+    }
+
+    pub fn get_arkas_by_manager(env: Env, manager: Address, offset: u32, limit: u32) -> Vec<Address> {
+        let store = env.storage().instance();
+        let list: Vec<Address> = store.get(&DataKey::ManagerArkas(manager)).unwrap_or(Vec::new(&env));
+        slice_addresses(&env, list, offset, limit)
+    }
+}
+
+fn slice_addresses(env: &Env, list: Vec<Address>, offset: u32, limit: u32) -> Vec<Address> {
+    let len = list.len();
+    if len == 0 { return Vec::new(env); }
+    let start = core::cmp::min(offset as u32, len) as u32;
+    let end = core::cmp::min(start + limit, len);
+    let mut out: Vec<Address> = Vec::new(env);
+    let mut i = start;
+    while i < end {
+        out.push_back(list.get_unchecked(i));
+        i += 1;
+    }
+    out
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
     use soroban_sdk::{BytesN, Env, testutils::Address as _, Address};
+    use crate as arka_factory;
+    use arka_registry as registry_mod;
 
     #[test]
     fn test_set_and_create() {
         let env = Env::default();
+        // Deploy registry
+        let reg_id = env.register_contract(None, registry_mod::ArkaRegistry);
+        let reg = registry_mod::ArkaRegistryClient::new(&env, &reg_id);
+
         let contract_id = env.register_contract(None, ArkaFactory);
         let client = ArkaFactoryClient::new(&env, &contract_id);
         let gov = Address::generate(&env);
@@ -72,13 +135,14 @@ mod test {
         let hash = env.deployer().upload_contract_wasm(wasm_bytes);
         env.mock_all_auths();
         client.set_implementation(&hash);
-
-        let salt = BytesN::from_array(&env, &[2u8; 32]);
-        let addr = client.create_arka(&salt);
-        // Deploy another with different salt and ensure addresses differ
-        let salt2 = BytesN::from_array(&env, &[3u8; 32]);
-        let addr2 = client.create_arka(&salt2);
-        assert!(addr != addr2);
+        client.set_registry(&reg_id);
+        // Create and auto-register
+        let manager = Address::generate(&env);
+        let salt = BytesN::from_array(&env, &[1u8; 32]);
+        let _arka = client.create_arka(&salt, &manager);
+        assert_eq!(reg.count(), 1);
+        assert_eq!(reg.get_arkas(&0, &10).len(), 1);
+        assert_eq!(reg.get_arkas_by_manager(&manager, &0, &10).len(), 1);
     }
 }
 

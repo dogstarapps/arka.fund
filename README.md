@@ -11,9 +11,13 @@ Depositors can easily invest in these arkas, gaining exposure to different strat
 *   **DAO Governance:** Token holders can propose and vote on protocol changes through a Governor and Timelock system.
 *   **On-chain Transparency:** All major operations (deposits, redemptions, rebalances, profit logging) emit events for easy tracking and auditing.
 
-## Technical Architecture
+## Documentation
 
-For a detailed explanation of the system's design, components, and flows, please refer to the [Architecture](docs/ARCHITECTURE.md).
+- Architecture: `docs/ARCHITECTURE.md`
+- Deployment: `docs/DEPLOYMENT.md`
+- Governance: `docs/GOVERNANCE.md`
+- Security: `docs/SECURITY.md`
+- UI Spec: `docs/UI_SPEC.md`
 
 ---
 
@@ -23,7 +27,7 @@ For a detailed explanation of the system's design, components, and flows, please
 
 - Prerequisites: Soroban/Stellar CLI v23+, funded testnet key alias (e.g., `arka-holder`).
 - Contract IDs and accounts: see `deployments.testnet.json`.
-- Full walkthrough and context: `docs/Tranche1.md`.
+- Full walkthrough and context: `docs/TRANCHE1_E2E.md`.
 - Aquarius end-to-end helper:
   
   ```bash

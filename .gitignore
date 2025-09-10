@@ -22,8 +22,8 @@ tmp/
 *.tsbuildinfo
 
 # Assets pesados (mantenerlos fuera del repo)
-/resources/
-/screens/
+# Media moved fuera del repo de contratos
+/arkafund-assets/
 
 /plan.md
 
@@ -32,4 +32,7 @@ vendor/
 
 # Rust build artifacts
 /contracts/target/
+**/target/
+artifacts/
+*.wasm
 *.tmp

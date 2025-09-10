@@ -1,8 +1,8 @@
-# Sistema / editor
+# System / editor
 .DS_Store
 *.log
 
-# Entornos
+# Environments
 .env
 .env.*
 
@@ -21,13 +21,13 @@ tmp/
 .cache/
 *.tsbuildinfo
 
-# Assets pesados (mantenerlos fuera del repo)
-# Media moved fuera del repo de contratos
+# Heavy assets (keep them out of this repo)
+# Media moved out of the contracts repo
 /arkafund-assets/
 
 /plan.md
 
-# Dependencias vendorizadas (si no se usa submódulo)
+# Vendored dependencies (if not using submodules)
 vendor/
 
 # Rust build artifacts

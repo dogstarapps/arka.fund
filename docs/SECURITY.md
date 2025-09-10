@@ -7,4 +7,10 @@ We apply defence-in-depth safeguards (negligible cost <1%):
 - Short-window TWAP check: blocks swaps that drift beyond a safe threshold.
 - Auto-split of large orders: keeps each chunk small, lowering potential MEV payoff.
 
+Additional hardening (roadmap):
+- Per-hop slippage caps and max path length enforced by `Arka` policy.
+- Allowlist of tokens/adapters; optional DAO-approved static paths for sensitive markets.
+- Randomised chunk sizing and subtle delays across chunks to decorrelate from price updates.
+- Post-trade invariant checks (e.g., pool reserves sanity) to detect anomalies.
+
 These protections ensure robustness today and if future tooling ever exposes more mempool data.

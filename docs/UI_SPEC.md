@@ -1,31 +1,30 @@
-## Arka.fund – UI Spec (extracto MVP alineado por tranches)
+## Arka.fund – UI Spec (MVP aligned by tranches)
 
-### Objetivo
-Concretar qué pantallas/funciones se entregan por tranche y qué depende del Indexer & NAV API.
+### Goal
+Define which screens/functions are delivered per tranche and which depend on the Indexer & NAV API.
 
-### Tranche 1 (MVP técnico)
-- Conexión de wallet (Freighter/xBull/Albedo) y swaps de prueba (Router y Adapter SoroSwap/Aquarius).
-- Sin Discover/Leaderboards/Arka Detail completos.
+### Tranche 1 (Technical MVP)
+- Wallet connection (Freighter/xBull/Albedo) and test swaps (Router and SoroSwap/Aquarius Adapters).
+- No full Discover/Leaderboards/Arka Detail yet.
 
 ### Tranche 2 (Vaults & Manager)
-- Wizard de creación/configuración (subset MVP): Basics, Fees, Transferability, Deposits, Redemptions, Assets mgmt, Review.
-- Depósitos/reembolsos con tokenización de shares (SAC) y políticas clave (allowlists, caps, slippage guard).
-- DAO wiring: setters gobernados y upgrades/migraciones.
-- Smart routing “best‑of candidates” multi‑AMM (on‑chain verificado).
+- Creation/configuration wizard (MVP subset): Basics, Fees, Transferability, Deposits, Redemptions, Assets mgmt, Review.
+- Deposits/redemptions with share tokenization (SAC) and key policies (allowlists, caps, slippage guard).
+- DAO wiring: governed setters and upgrades/migrations.
+- Smart routing “best‑of candidates” multi‑AMM (on‑chain verified).
 
-### Tranche 3 (UX completa + Indexer)
-- Indexer & NAV API: NAV/share, TVL, retornos por periodo, contadores, feeds de eventos.
+### Tranche 3 (Full UX + Indexer)
+- Indexer & NAV API: NAV/share, TVL, period returns, counters, event feeds.
 - UI: Discover, Arkas Leaderboard, Arka Detail (Overview/Portfolio/Financials/Fees/Policies/Depositors/Activity/My Deposit), Managers leaderboard, Integrations grid, Assets explorer.
-- Quotes multi‑protocolo y fallback path en UI, cobertura (UI) y telemetría.
+- Multi‑protocol quotes and fallback paths in UI, coverage UI, telemetry.
 
-### Dependencias técnicas
-- Indexer: requerido para KPIs, gráficas y listados con ordenación/paginación.
-- Contratos: `ArkaFactory`, `Arka`, `Router`, `Adapters`, `Governor`, `Timelock`.
+### Technical dependencies
+- Indexer: required for KPIs, charts, and sortable/paginated lists.
+- Contracts: `ArkaFactory`, `Arka`, `Router`, `Adapters`, `Governor`, `Timelock`.
 
 ### Checklist (MVP)
-- [ ] Wizard subset operativo (Tranche 2)
-- [ ] SAC por Arka visible en wallet (Tranche 2)
-- [ ] Indexer básico para NAV/TVL (Tranche 3)
+- [ ] Wizard subset operational (Tranche 2)
+- [ ] Per‑Arka SAC visible in wallets (Tranche 2)
+- [ ] Basic Indexer for NAV/TVL (Tranche 3)
 - [ ] Discover/Leaderboards (Tranche 3)
-
 

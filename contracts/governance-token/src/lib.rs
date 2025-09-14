@@ -50,8 +50,8 @@ mod test {
         client.init(&admin);
 
         let user = Address::generate(&env);
-        env.as_contract(&id, || {});
-        env.as_contract(&admin, || client.mint(&user, &100));
+        env.mock_all_auths();
+        client.mint(&user, &100);
         let b = client.balance(&user);
         assert_eq!(b, 100);
     }

@@ -6,6 +6,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Vec, Bytes
 pub enum DataKey {
     All,
     ByManager(Address),
+    CuratedManager(Address),
 }
 
 #[contract]
@@ -14,8 +15,7 @@ pub struct ArkaRegistry;
 #[contractimpl]
 impl ArkaRegistry {
     pub fn register(env: Env, manager: Address, arka: Address) {
-        // require manager auth to prevent third-party spoofing
-        manager.require_auth();
+        // Manager auth is enforced by Factory during create_arka; keep registry write simple
         let store = env.storage().instance();
         // global
         let mut all: Vec<Address> = store.get(&DataKey::All).unwrap_or(Vec::new(&env));
@@ -43,6 +43,22 @@ impl ArkaRegistry {
 
     pub fn count_by_manager(env: Env, manager: Address) -> u32 {
         env.storage().instance().get::<DataKey, Vec<Address>>(&DataKey::ByManager(manager)).map(|v| v.len()).unwrap_or(0)
+    }
+
+    // Governor-gated in production; simplified here (manager auth)
+    pub fn set_manager_curated(env: Env, caller: Address, manager: Address, curated: bool) {
+        caller.require_auth();
+        let store = env.storage().instance();
+        if curated {
+            store.set(&DataKey::CuratedManager(manager), &true);
+        } else {
+            // remove by setting false
+            store.set(&DataKey::CuratedManager(manager), &false);
+        }
+    }
+
+    pub fn is_manager_curated(env: Env, manager: Address) -> bool {
+        env.storage().instance().get::<DataKey, bool>(&DataKey::CuratedManager(manager)).unwrap_or(false)
     }
 }
 

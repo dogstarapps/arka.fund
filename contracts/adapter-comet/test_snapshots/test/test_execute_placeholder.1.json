@@ -1,7 +1,8 @@
 {
   "generators": {
     "address": 3,
-    "nonce": 0
+    "nonce": 0,
+    "mux_id": 0
   },
   "auth": [
     [],
@@ -24,10 +25,7 @@
                         "symbol": "amount_in"
                       },
                       "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 44
-                        }
+                        "i128": "44"
                       }
                     },
                     {
@@ -35,10 +33,7 @@
                         "symbol": "min_out"
                       },
                       "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 40
-                        }
+                        "i128": "40"
                       }
                     },
                     {
@@ -46,10 +41,7 @@
                         "symbol": "pool_id"
                       },
                       "val": {
-                        "u128": {
-                          "hi": 0,
-                          "lo": 1
-                        }
+                        "u128": "1"
                       }
                     },
                     {
@@ -71,7 +63,7 @@
     ]
   ],
   "ledger": {
-    "protocol_version": 22,
+    "protocol_version": 23,
     "sequence_number": 0,
     "timestamp": 0,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
@@ -118,7 +110,7 @@
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
             "key": {
               "ledger_key_nonce": {
-                "nonce": 801925984706572462
+                "nonce": "801925984706572462"
               }
             },
             "durability": "temporary"
@@ -133,7 +125,7 @@
                 "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
                 "key": {
                   "ledger_key_nonce": {
-                    "nonce": 801925984706572462
+                    "nonce": "801925984706572462"
                   }
                 },
                 "durability": "temporary",

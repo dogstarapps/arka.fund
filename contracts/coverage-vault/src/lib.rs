@@ -57,6 +57,7 @@ mod test {
         let mgr = Address::generate(&env);
         client.init(&mgr, &1000);
         let user = Address::generate(&env);
+        env.mock_all_auths();
         client.deposit(&user, &50);
         client.withdraw(&mgr, &20);
     }

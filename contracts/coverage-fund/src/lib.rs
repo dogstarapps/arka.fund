@@ -44,6 +44,7 @@ mod test {
         let id = env.register_contract(None, CoverageFund);
         let client = CoverageFundClient::new(&env, &id);
         let user = Address::generate(&env);
+        env.mock_all_auths();
         client.stake(&user, &100);
         client.unstake(&user, &40);
     }

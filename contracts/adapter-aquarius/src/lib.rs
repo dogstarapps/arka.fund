@@ -41,9 +41,9 @@ impl AquariusAdapter {
             min_out.into_val(&env),
             receiver.into_val(&env),
         ];
-        let out: u128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
-        assert!((out as i128) >= min_out, "slippage_exceeded");
-        out as i128
+        let out: i128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
+        assert!(out >= min_out, "slippage_exceeded");
+        out
     }
 
     // Direct swap against Aquarius router using its swap signature.
@@ -74,9 +74,9 @@ impl AquariusAdapter {
             (in_amount as u128).into_val(&env),
             (out_min as u128).into_val(&env),
         ];
-        let out: u128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
-        assert!((out as i128) >= out_min, "slippage_exceeded");
-        out as i128
+        let out: i128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
+        assert!(out >= out_min, "slippage_exceeded");
+        out
     }
 
     // Same as swap_direct but the caller provides the `tokens` vector in the exact order required by Aquarius.
@@ -104,9 +104,9 @@ impl AquariusAdapter {
             (in_amount as u128).into_val(&env),
             (out_min as u128).into_val(&env),
         ];
-        let out: u128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
-        assert!((out as i128) >= out_min, "slippage_exceeded");
-        out as i128
+        let out: i128 = env.invoke_contract(&router, &symbol_short!("swap"), args);
+        assert!(out >= out_min, "slippage_exceeded");
+        out
     }
 }
 
@@ -119,6 +119,7 @@ mod test {
     struct DummyRouter;
     #[contractimpl]
     impl DummyRouter {
+        // Match the adapter.execute signature expectations in tests: returns i128
         pub fn swap(_env: Env, _caller: Address, _pool_id: u128, amount_in: i128, _min_out: i128, _receiver: Address) -> i128 {
             amount_in
         }

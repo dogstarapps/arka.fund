@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env, Symbol, Vec, IntoVal, vec};
+use soroban_sdk::{contract, contractimpl, contracttype, contracterror, panic_with_error, symbol_short, Address, Env, Symbol, Vec, IntoVal, vec};
 
 #[derive(Clone)]
 #[contracttype]
@@ -44,23 +44,56 @@ const EVENT_DEPOSIT: Symbol = symbol_short!("deposit");
 const EVENT_REDEEM: Symbol = symbol_short!("redeem");
 const EVENT_PROFIT: Symbol = symbol_short!("profit");
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[contracterror]
+pub enum Error {
+    NotInitialized = 1,
+    AlreadyInitialized = 2,
+    OnlyManager = 3,
+    AmountZero = 4,
+    AssetNotWhitelisted = 5,
+    SharesZero = 6,
+    InsufficientUserShares = 7,
+    InsufficientShares = 8,
+    RouterNotSet = 9,
+}
+
 #[contract]
 pub struct ArkaContract;
 
 #[contractimpl]
 impl ArkaContract {
+    // ----- Errors defined at module level -----
     fn apply_fee_bps(amount: i128, fee_bps: i32) -> i128 {
         // fee_bps in [0,10000]; returns net amount after fee
         let bps = 10000i128 - (fee_bps as i128);
         (amount * bps) / 10000i128
     }
 
-    pub fn init(env: Env, denomination: Asset, fees: FeeStructure, whitelist: Vec<Asset>, manager: Address) {
+    pub fn init(
+        env: Env,
+        denomination_contract: Address,
+        mgmt_bps: i32,
+        perf_bps: i32,
+        deposit_bps: i32,
+        redeem_bps: i32,
+        whitelist_contracts: Vec<Address>,
+        manager: Address,
+    ) {
         let store = env.storage().instance();
-        assert!(!store.has(&DataKey::Denomination), "already_initialized");
+        if store.has(&DataKey::Denomination) {
+            panic_with_error!(&env, Error::AlreadyInitialized);
+        }
+        let denomination = Asset { contract: denomination_contract };
+        let fees = FeeStructure { mgmt_bps, perf_bps, deposit_bps, redeem_bps };
+        // Map whitelist addresses to Asset structs
+        let mut wl_assets: Vec<Asset> = Vec::new(&env);
+        for addr in whitelist_contracts.iter() {
+            wl_assets.push_back(Asset { contract: addr });
+        }
         store.set(&DataKey::Denomination, &denomination);
         store.set(&DataKey::Fees, &fees);
-        store.set(&DataKey::Whitelist, &whitelist);
+        store.set(&DataKey::Whitelist, &wl_assets);
         store.set(&DataKey::Manager, &manager);
         store.set(&DataKey::TotalShares, &0i128);
         store.set(&DataKey::Aum, &0i128);
@@ -68,15 +101,18 @@ impl ArkaContract {
 
     pub fn set_router(env: Env, caller: Address, router: Address) {
         let store = env.storage().instance();
-        let mgr: Address = store.get(&DataKey::Manager).expect("not_initialized");
-        assert!(caller == mgr, "only_manager");
+        let mgr: Address = match store.get(&DataKey::Manager) {
+            Some(m) => m,
+            None => panic_with_error!(&env, Error::NotInitialized),
+        };
+        if caller != mgr { panic_with_error!(&env, Error::OnlyManager); }
         caller.require_auth();
         store.set(&DataKey::Router, &router);
     }
 
     pub fn deposit(env: Env, user: Address, asset: Asset, amount: i128) -> i128 {
         user.require_auth();
-        assert!(amount > 0, "amount_zero");
+        if amount <= 0 { panic_with_error!(&env, Error::AmountZero); }
         // Validate asset whitelist (placeholder contains check)
         let store = env.storage().instance();
         let wl: Vec<Asset> = store.get(&DataKey::Whitelist).unwrap_or(Vec::new(&env));
@@ -84,23 +120,25 @@ impl ArkaContract {
         for a in wl.iter() {
             if a.contract == asset.contract { allowed = true; break; }
         }
-        assert!(allowed, "asset_not_whitelisted");
+        if !allowed { panic_with_error!(&env, Error::AssetNotWhitelisted); }
         // Transfer tokens from user to this contract (expects token standard)
         let self_addr = env.current_contract_address();
+        // SAC: transfer_from(spender, from, to, amount)
         let args = vec![
             &env,
+            self_addr.clone().into_val(&env),
             user.clone().into_val(&env),
             self_addr.clone().into_val(&env),
             amount.into_val(&env),
         ];
-        let _ = env.invoke_contract::<()>(&asset.contract, &symbol_short!("xfer_from"), args);
+        let _ = env.invoke_contract::<()>(&asset.contract, &Symbol::new(&env, "transfer_from"), args);
         // Compute shares based on NAV
         let fees: FeeStructure = store.get(&DataKey::Fees).unwrap_or(FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 });
         let net_amount = Self::apply_fee_bps(amount, fees.deposit_bps);
         let total: i128 = store.get(&DataKey::TotalShares).unwrap_or(0);
         let aum: i128 = store.get(&DataKey::Aum).unwrap_or(0);
         let shares_minted = if total == 0 || aum == 0 { net_amount } else { (net_amount * total) / aum };
-        assert!(shares_minted > 0, "shares_zero");
+        if shares_minted <= 0 { panic_with_error!(&env, Error::SharesZero); }
         store.set(&DataKey::TotalShares, &(total + shares_minted));
         store.set(&DataKey::Aum, &(aum + net_amount));
         // Track per-user shares
@@ -113,13 +151,13 @@ impl ArkaContract {
 
     pub fn redeem(env: Env, user: Address, shares: i128) -> i128 {
         user.require_auth();
-        assert!(shares > 0, "shares_zero");
+        if shares <= 0 { panic_with_error!(&env, Error::SharesZero); }
         let store = env.storage().instance();
         // Ensure user has shares
         let user_bal: i128 = store.get(&DataKey::Balance(user.clone())).unwrap_or(0);
-        assert!(shares <= user_bal, "insufficient_user_shares");
+        if shares > user_bal { panic_with_error!(&env, Error::InsufficientUserShares); }
         let total: i128 = store.get(&DataKey::TotalShares).unwrap_or(0);
-        assert!(shares <= total, "insufficient_shares");
+        if shares > total { panic_with_error!(&env, Error::InsufficientShares); }
         let aum: i128 = store.get(&DataKey::Aum).unwrap_or(0);
         // proportional return in denomination asset (placeholder)
         let mut amount_out = if total == 0 { 0 } else { (shares * aum) / total };
@@ -131,7 +169,7 @@ impl ArkaContract {
         let net_out = Self::apply_fee_bps(amount_out, fees.redeem_bps);
         store.set(&DataKey::Aum, &(aum - amount_out));
         // Send denomination asset from vault to user
-        let denom: Asset = store.get(&DataKey::Denomination).expect("not_initialized");
+        let denom: Asset = match store.get(&DataKey::Denomination) { Some(d) => d, None => panic_with_error!(&env, Error::NotInitialized) };
         let self_addr = env.current_contract_address();
         let args = vec![
             &env,
@@ -146,11 +184,11 @@ impl ArkaContract {
 
     pub fn rebalance(env: Env, manager: Address, steps: Vec<SwapStep>) -> i128 {
         let store = env.storage().instance();
-        let stored_manager: Address = store.get(&DataKey::Manager).expect("not_initialized");
-        assert!(manager == stored_manager, "only_manager");
+        let stored_manager: Address = match store.get(&DataKey::Manager) { Some(m) => m, None => panic_with_error!(&env, Error::NotInitialized) };
+        if manager != stored_manager { panic_with_error!(&env, Error::OnlyManager); }
         manager.require_auth();
 
-        let router: Address = store.get(&DataKey::Router).expect("router_not_set");
+        let router: Address = match store.get(&DataKey::Router) { Some(r) => r, None => panic_with_error!(&env, Error::RouterNotSet) };
         // Call router.execute(manager, steps) and receive total output in denomination units (placeholder)
         let args = vec![
             &env,
@@ -170,17 +208,17 @@ impl ArkaContract {
     // --- Getters for dApp/UI ---
     pub fn manager(env: Env) -> Address {
         let store = env.storage().instance();
-        store.get(&DataKey::Manager).expect("not_initialized")
+        match store.get(&DataKey::Manager) { Some(m) => m, None => panic_with_error!(&env, Error::NotInitialized) }
     }
 
     pub fn router(env: Env) -> Address {
         let store = env.storage().instance();
-        store.get(&DataKey::Router).expect("router_not_set")
+        match store.get(&DataKey::Router) { Some(r) => r, None => panic_with_error!(&env, Error::RouterNotSet) }
     }
 
     pub fn denomination(env: Env) -> Asset {
         let store = env.storage().instance();
-        store.get(&DataKey::Denomination).expect("not_initialized")
+        match store.get(&DataKey::Denomination) { Some(d) => d, None => panic_with_error!(&env, Error::NotInitialized) }
     }
 
     pub fn shares_of(env: Env, user: Address) -> i128 {
@@ -226,6 +264,39 @@ mod test {
 
         let out = client.redeem(&user, &40);
         assert_eq!(out, 40);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_error_already_initialized() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = Asset { contract: token_id.clone() };
+        let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
+        let wl = vec![&env, denom.clone()];
+        let mgr = Address::generate(&env);
+        client.init(&denom, &fees, &wl, &mgr);
+        // Second init should panic with AlreadyInitialized
+        client.init(&denom, &fees, &wl, &mgr);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_error_only_manager() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = Asset { contract: token_id.clone() };
+        let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
+        let wl = vec![&env, denom.clone()];
+        let mgr = Address::generate(&env);
+        client.init(&denom, &fees, &wl, &mgr);
+        let not_mgr = Address::generate(&env);
+        env.mock_all_auths();
+        client.set_router(&not_mgr, &Address::generate(&env));
     }
 }
 

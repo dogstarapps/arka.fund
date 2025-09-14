@@ -38,6 +38,13 @@ Notes
 - In `arka-factory`, admin functions require `require_auth(admin)`, so only the Timelock can call them.
 - For staking/escrow voting, replace `governance-token` with a wrapper contract and point Governor to that.
 
+### DAO controls for Fees & Listings
+- Protocol treasury address and creation fee (token + amount) are governed. The Factory charges the fee on `create_arka` and routes it to the treasury.
+- Allowed assets/adapters and global limits are governed.
+- Curated listings: the Registry exposes `set_manager_curated`/`is_manager_curated` to mark managers as curated (governor‑gated in production). The dApp defaults to showing curated vaults and allows toggling "All".
+
+See also: `docs/FEES.md` for detailed fee model and UI %→bps conversion.
+
 
 
 

@@ -130,6 +130,8 @@ impl Adapter for GenericAdapter {
 - Asset whitelist, fees, adapters list, AUM limits.
 - Upgradeable contract implementation (ArkaLogic).
 
+See also: `docs/FEES.md` for detailed fee model and DAO-controlled splits.
+
 ---
 
 ## V. Off-chain Services

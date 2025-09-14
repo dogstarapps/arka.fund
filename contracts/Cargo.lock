@@ -209,6 +209,7 @@ dependencies = [
 name = "arka-factory"
 version = "0.1.0"
 dependencies = [
+ "arka-registry",
  "soroban-sdk",
 ]
 

@@ -13,6 +13,7 @@ mkdir -p "$ARTIFACTS_DIR"
 CRATES=(
   arka
   arka-factory
+  arka-registry
   router
   adapter-aquarius
   adapter-soroswap

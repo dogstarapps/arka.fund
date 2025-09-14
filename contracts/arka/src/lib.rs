@@ -177,7 +177,7 @@ impl ArkaContract {
             user.clone().into_val(&env),
             net_out.into_val(&env),
         ];
-        let _ = env.invoke_contract::<()>(&denom.contract, &symbol_short!("xfer"), args);
+        let _ = env.invoke_contract::<()>(&denom.contract, &symbol_short!("transfer"), args);
         env.events().publish((EVENT_REDEEM,), (user.clone(), shares, net_out));
         net_out
     }

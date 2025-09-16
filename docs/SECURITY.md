@@ -13,4 +13,9 @@ Additional hardening (roadmap):
 - Randomised chunk sizing and subtle delays across chunks to decorrelate from price updates.
 - Post-trade invariant checks (e.g., pool reserves sanity) to detect anomalies.
 
+Auth model notes (Testnet):
+- SoroSwap requires root invoker auth for nested calls (`require_auth`). Two approaches:
+  - Quick path (current): receive swap proceeds at the manager (root signer), then transfer to Arka within the same transaction.
+  - Definitive: dApp simulates and assembles non-root auth entries for `rebalance→router→adapter→amm`; manager signs once; receiver is Arka.
+
 These protections ensure robustness today and if future tooling ever exposes more mempool data.

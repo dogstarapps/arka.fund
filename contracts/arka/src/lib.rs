@@ -20,7 +20,7 @@ pub struct Asset {
 #[derive(Clone)]
 #[contracttype]
 pub struct SwapStep {
-    pub adapter_id: u32,
+    pub adapter: Address,
     pub pool_id: u128,
     pub amount_in: i128,
     pub min_out: i128,
@@ -189,6 +189,8 @@ impl ArkaContract {
         manager.require_auth();
 
         let router: Address = match store.get(&DataKey::Router) { Some(r) => r, None => panic_with_error!(&env, Error::RouterNotSet) };
+        // Ensure the router is authorized at the root invocation to allow nested require_auth in downstream calls
+        router.require_auth();
         // Call router.execute(manager, steps) and receive total output in denomination units (placeholder)
         let args = vec![
             &env,

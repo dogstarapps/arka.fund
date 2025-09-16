@@ -8,6 +8,10 @@
   - Keep a unified UI flow in the dApp even if the wallet shows multiple prompts.
   - Default to Router path for simple swaps; use Adapter only when multi-protocol routing is needed.
 
+#### 1.1) Interim vs definitive routing
+- Interim (quick path): funds from SoroSwap swaps are received by the manager (root signer), then forwarded to the Arka within the same transaction to bypass nested `require_auth` constraints.
+- Definitive: the dApp simulates/assembles nested auth entries so the Arka remains the receiver; requires minor client updates and possibly Arka-initiated token approvals to protocol routers.
+
 ### 2) Governance coverage (DAO)
 Goal: DAO governs protocol upgrades, configuration setters, adapter onboarding, and routing policies.
 

@@ -73,8 +73,9 @@ This document describes in detail the technical architecture of Arka.fund, cover
 
 ### 4. Router and Adapters
 - The `Router` orchestrates multi-hop swaps receiving a vector of *SwapStep*.
-- Each *SwapStep* defines: `adapter_id`, `pool_id`, `amt_in`, `min_out`, `asset_out`.
-- **Adapters**: Implement the `Trait Adapter { validate(env, &step) -> Result<()>; execute(env, &step, amount_in) -> Result<i128>; }`.
+- Each *SwapStep* defines: `adapter` (Address), `pool_id` (u128), `amount_in` (i128), `min_out` (i128), `asset_out` (Asset).
+- **Adapters**: Implement protocol-specific `execute(caller, pool_id, amount_in, min_out, receiver)`.
+- Current Testnet integration uses a “quick path” to bypass SoroSwap nested-auth constraints; the definitive model signs non-root auth entries assembled by the dApp so the receiver is the Arka directly.
 
 **Integrated Protocols:**
 | Protocol           | Type      | Key Operations                       |

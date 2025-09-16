@@ -68,6 +68,13 @@ Note: CLI encoding for complex types (like `Asset` and `Vec<Asset>`) must follow
 - Implement adapters with real protocol ABIs (start with Aquarius)
 - Add indexer and monitoring
 
+### Router & dApp config (Testnet)
+- Deploy internal `Router` exposing `execute()` (not a protocol router). Record its ID in `deployments.testnet.json`.
+- dApp `.env.local`:
+  - `NEXT_PUBLIC_SOROSWAP_ROUTER`: protocol router ID (for direct tests and adapter init).
+  - `NEXT_PUBLIC_ARKA_ROUTER`: internal Router ID (used by Arka during Create & Init).
+- If rebalance fails with SoroSwap due to nested auth, use the quick path and later migrate to non-root auth by assembling auth entries in the dApp.
+
 ## Files
 - `scripts/build-wasm.sh` — builds all WASMs into `artifacts/`
 - `scripts/deploy.sh` — deploys `arka`, `arka-factory`, `router`

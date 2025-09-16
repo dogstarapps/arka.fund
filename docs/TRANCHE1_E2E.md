@@ -83,6 +83,10 @@ stellar contract invoke --id "CCMAPXWVZD4USEK..." --network testnet --source-acc
 - SAC allowances are required prior to liquidity/swap.
 - CLI differences: use `contract info interface` for function signatures; some subcommands changed recently.
 
+### Quick path vs definitive routing
+- Quick path (current): Arka → Router (execute) → Adapter → SoroSwap, with funds temporarily received by the manager (root signer) and then transferred to the Arka in the same transaction. This avoids nested require_auth issues on SoroSwap and delivers an immediate E2E.
+- Definitive path (next): Non-root auth end-to-end. The dApp simulates `rebalance → router → adapter → sAMM`, assembles the transaction including nested auth entries, and the manager signs once. Receiver is the Arka directly. This requires minor dApp updates and token approvals initiated by the Arka logic.
+
 ### Pending to complete Tranche 1
 - **Aquarius**
   - Script de init/ops (fee query, pool create, deposit, swap) y README snippets.

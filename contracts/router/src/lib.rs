@@ -24,8 +24,8 @@ impl Router {
         // Multi-hop: forward previous output as next input unless explicit amount_in provided (>0)
         let mut last_out: i128 = 0;
         let mut out_total: i128 = 0;
-        // Send proceeds directly to the calling vault (the contract that invoked Router)
-        let receiver: Address = env.current_contract_address();
+        // Quick path: send proceeds to the manager (root signer) passed as `caller`
+        let receiver: Address = caller.clone();
         for s in steps.iter() {
             let amount_in = if s.amount_in > 0 { s.amount_in } else { last_out };
             // basic guard

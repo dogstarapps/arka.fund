@@ -7,6 +7,8 @@ pub enum DataKey {
     All,
     ByManager(Address),
     CuratedManager(Address),
+    Delisted(Address),
+    Admin,
 }
 
 #[contract]
@@ -14,6 +16,19 @@ pub struct ArkaRegistry;
 
 #[contractimpl]
 impl ArkaRegistry {
+    // One-time admin initializer
+    pub fn init_admin(env: Env, admin: Address) {
+        let store = env.storage().instance();
+        if store.has(&DataKey::Admin) { return; }
+        store.set(&DataKey::Admin, &admin);
+    }
+
+    fn require_admin(env: &Env, caller: &Address) {
+        let store = env.storage().instance();
+        let admin: Address = store.get(&DataKey::Admin).expect("admin_not_set");
+        if *caller != admin { panic!("only_admin"); }
+        caller.require_auth();
+    }
     pub fn register(env: Env, manager: Address, arka: Address) {
         // Manager auth is enforced by Factory during create_arka; keep registry write simple
         let store = env.storage().instance();
@@ -29,25 +44,27 @@ impl ArkaRegistry {
 
     pub fn get_arkas(env: Env, offset: u32, limit: u32) -> Vec<Address> {
         let list: Vec<Address> = env.storage().instance().get(&DataKey::All).unwrap_or(Vec::new(&env));
-        slice(&env, list, offset, limit)
+        filter_and_slice(&env, list, offset, limit)
     }
 
     pub fn get_arkas_by_manager(env: Env, manager: Address, offset: u32, limit: u32) -> Vec<Address> {
         let list: Vec<Address> = env.storage().instance().get(&DataKey::ByManager(manager)).unwrap_or(Vec::new(&env));
-        slice(&env, list, offset, limit)
+        filter_and_slice(&env, list, offset, limit)
     }
 
     pub fn count(env: Env) -> u32 {
-        env.storage().instance().get::<DataKey, Vec<Address>>(&DataKey::All).map(|v| v.len()).unwrap_or(0)
+        let list: Vec<Address> = env.storage().instance().get(&DataKey::All).unwrap_or(Vec::new(&env));
+        count_active(&env, list)
     }
 
     pub fn count_by_manager(env: Env, manager: Address) -> u32 {
-        env.storage().instance().get::<DataKey, Vec<Address>>(&DataKey::ByManager(manager)).map(|v| v.len()).unwrap_or(0)
+        let list: Vec<Address> = env.storage().instance().get(&DataKey::ByManager(manager)).unwrap_or(Vec::new(&env));
+        count_active(&env, list)
     }
 
-    // Governor-gated in production; simplified here (manager auth)
+    // Admin-only in production
     pub fn set_manager_curated(env: Env, caller: Address, manager: Address, curated: bool) {
-        caller.require_auth();
+        Self::require_admin(&env, &caller);
         let store = env.storage().instance();
         if curated {
             store.set(&DataKey::CuratedManager(manager), &true);
@@ -59,6 +76,27 @@ impl ArkaRegistry {
 
     pub fn is_manager_curated(env: Env, manager: Address) -> bool {
         env.storage().instance().get::<DataKey, bool>(&DataKey::CuratedManager(manager)).unwrap_or(false)
+    }
+
+    // Admin-only: Mark an Arka as delisted/inactive
+    pub fn set_delisted(env: Env, caller: Address, arka: Address, delisted: bool) {
+        Self::require_admin(&env, &caller);
+        let store = env.storage().instance();
+        if delisted {
+            store.set(&DataKey::Delisted(arka), &true);
+        } else {
+            store.set(&DataKey::Delisted(arka), &false);
+        }
+    }
+
+    pub fn is_delisted(env: Env, arka: Address) -> bool {
+        env.storage().instance().get::<DataKey, bool>(&DataKey::Delisted(arka)).unwrap_or(false)
+    }
+
+    // Admin-only: register legacy Arkas
+    pub fn register_admin(env: Env, caller: Address, manager: Address, arka: Address) {
+        Self::require_admin(&env, &caller);
+        Self::register(env, manager, arka);
     }
 }
 
@@ -78,6 +116,33 @@ fn slice(env: &Env, list: Vec<Address>, offset: u32, limit: u32) -> Vec<Address>
     let mut i = start;
     while i < end { out.push_back(list.get_unchecked(i)); i += 1; }
     out
+}
+
+fn filter_and_slice(env: &Env, list: Vec<Address>, offset: u32, limit: u32) -> Vec<Address> {
+    // Build filtered list excluding delisted entries
+    let mut filtered: Vec<Address> = Vec::new(env);
+    let mut i: u32 = 0;
+    let len = list.len();
+    while i < len {
+        let a = list.get_unchecked(i);
+        if !ArkaRegistry::is_delisted(env.clone(), a.clone()) {
+            filtered.push_back(a);
+        }
+        i += 1;
+    }
+    slice(env, filtered, offset, limit)
+}
+
+fn count_active(env: &Env, list: Vec<Address>) -> u32 {
+    let mut n: u32 = 0;
+    let mut i: u32 = 0;
+    let len = list.len();
+    while i < len {
+        let a = list.get_unchecked(i);
+        if !ArkaRegistry::is_delisted(env.clone(), a) { n += 1; }
+        i += 1;
+    }
+    n
 }
 
 #[cfg(test)]

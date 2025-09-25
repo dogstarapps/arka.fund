@@ -22,6 +22,19 @@ pub struct Asset {
 pub struct SwapStep {
     pub adapter: Address,
     pub pool_id: u128,
+    pub asset_in: Asset,
+    pub amount_in: i128,
+    pub min_out: i128,
+    pub asset_out: Asset,
+    pub router_addr: Address,
+}
+
+// Shape expected by Router.execute
+#[derive(Clone)]
+#[contracttype]
+pub struct RouterStep {
+    pub adapter: Address,
+    pub pool_id: u128,
     pub amount_in: i128,
     pub min_out: i128,
     pub asset_out: Asset,
@@ -188,23 +201,96 @@ impl ArkaContract {
         if manager != stored_manager { panic_with_error!(&env, Error::OnlyManager); }
         manager.require_auth();
 
-        let router: Address = match store.get(&DataKey::Router) { Some(r) => r, None => panic_with_error!(&env, Error::RouterNotSet) };
-        // Ensure the router is authorized at the root invocation to allow nested require_auth in downstream calls
-        router.require_auth();
-        // Call router.execute(manager, steps) and receive total output in denomination units (placeholder)
-        let args = vec![
-            &env,
-            manager.clone().into_val(&env),
-            steps.clone().into_val(&env),
-        ];
-        let out_total: i128 = env.invoke_contract(&router, &symbol_short!("execute"), args);
+        let router_internal: Address = match store.get(&DataKey::Router) { Some(r) => r, None => panic_with_error!(&env, Error::RouterNotSet) };
+        let self_addr = env.current_contract_address();
+        let latest = env.ledger().sequence();
+        let exp: u32 = latest + 100_000; // long-lived approve
 
-        // For now, treat out_total as profit delta (placeholder)
+        let mut total_out: i128 = 0;
+
+        // Process each step. If the provided router_addr differs from our internal router,
+        // call that external router directly (e.g., SoroSwap) as the vault (invoker=self).
+        // Otherwise, use the internal Router with the adapter pipeline.
+        let mut internal_steps: Vec<RouterStep> = Vec::new(&env);
+
+        for s in steps.iter() {
+            if s.router_addr != router_internal {
+                // Direct router path (e.g., SoroSwap):
+                // 1) Approve router to spend from this vault
+                let args_approve = vec![
+                    &env,
+                    self_addr.clone().into_val(&env),
+                    s.router_addr.clone().into_val(&env),
+                    s.amount_in.into_val(&env),
+                    exp.into_val(&env),
+                ];
+                let _ = env.invoke_contract::<()>(&s.asset_in.contract, &symbol_short!("approve"), args_approve);
+                // 2) Build path [asset_in, asset_out]
+                let mut path: Vec<Address> = Vec::new(&env);
+                path.push_back(s.asset_in.contract.clone());
+                path.push_back(s.asset_out.contract.clone());
+                // 3) Call router.swap_exact_tokens_for_tokens(amount_in, min_out, path, to=self, deadline)
+                let deadline: u64 = env.ledger().timestamp() + 1800u64;
+                let args_swap = vec![
+                    &env,
+                    s.amount_in.into_val(&env),
+                    s.min_out.into_val(&env),
+                    path.into_val(&env),
+                    self_addr.clone().into_val(&env),
+                    deadline.into_val(&env),
+                ];
+                let func = Symbol::new(&env, "swap_exact_tokens_for_tokens");
+                let amounts: Vec<i128> = env.invoke_contract(&s.router_addr, &func, args_swap);
+                // last entry is out amount
+                let mut out: i128 = 0;
+                for v in amounts.iter() { out = v; }
+                total_out += out;
+            } else {
+                // Internal router step (keeps adapter flow). Move input to manager as before.
+                let args_transfer = vec![
+                    &env,
+                    self_addr.clone().into_val(&env),
+                    manager.clone().into_val(&env),
+                    s.amount_in.into_val(&env),
+                ];
+                let _ = env.invoke_contract::<()>(&s.asset_in.contract, &symbol_short!("transfer"), args_transfer);
+                internal_steps.push_back(RouterStep {
+                    adapter: s.adapter,
+                    pool_id: s.pool_id,
+                    amount_in: s.amount_in,
+                    min_out: s.min_out,
+                    asset_out: s.asset_out.clone(),
+                });
+            }
+        }
+
+        if internal_steps.len() > 0 {
+            let args = vec![
+                &env,
+                manager.clone().into_val(&env),
+                internal_steps.into_val(&env),
+            ];
+            let out_internal: i128 = env.invoke_contract(&router_internal, &symbol_short!("execute"), args);
+            // Forward proceeds from manager back to vault
+            let mut last_asset: Option<Asset> = None;
+            for s in steps.iter() { last_asset = Some(s.asset_out.clone()); }
+            if let Some(asset) = last_asset {
+                let args = vec![
+                    &env,
+                    manager.clone().into_val(&env),
+                    self_addr.clone().into_val(&env),
+                    out_internal.into_val(&env),
+                ];
+                let _ = env.invoke_contract::<()>(&asset.contract, &symbol_short!("transfer"), args);
+            }
+            total_out += out_internal;
+        }
+
+        // Update AUM with total_out as placeholder profit
         let aum: i128 = store.get(&DataKey::Aum).unwrap_or(0);
-        let profit = out_total;
-        store.set(&DataKey::Aum, &(aum + profit));
-        env.events().publish((EVENT_PROFIT,), (profit, steps.len() as u32));
-        profit
+        store.set(&DataKey::Aum, &(aum + total_out));
+        env.events().publish((EVENT_PROFIT,), (total_out, steps.len() as u32));
+        total_out
     }
 
     // --- Getters for dApp/UI ---

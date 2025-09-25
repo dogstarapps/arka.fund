@@ -39,12 +39,29 @@ impl SoroSwapAdapter {
     }
 
     // Unified adapter interface: execute(caller, _pool_id, amount_in, min_out, receiver) -> amount_out
-    pub fn execute(env: Env, caller: Address, _pool_id: u128, amount_in: i128, min_out: i128, receiver: Address) -> i128 {
-        caller.require_auth();
+    // Assumptions:
+    //  - Token_in amount has already been transferred into this adapter contract by the caller
+    //  - `receiver` is where resulting token_out will be transferred after swap
+    pub fn execute(env: Env, _caller: Address, _pool_id: u128, amount_in: i128, min_out: i128, receiver: Address) -> i128 {
         assert!(amount_in > 0, "amount_zero");
         let store = env.storage().instance();
         let router: Address = store.get(&DataKey::Router).expect("router_not_set");
         let path: Vec<Address> = store.get(&DataKey::Path).expect("path_not_set");
+        let self_addr = env.current_contract_address();
+        // Determine token_in as the first address in the path
+        let mut token_in_opt: Option<Address> = None;
+        for addr in path.iter() { token_in_opt = Some(addr); break; }
+        let token_in: Address = token_in_opt.expect("path_empty");
+        // Approve router to spend from this adapter balance
+        let exp: u32 = env.ledger().sequence() + 100_000u32;
+        let args_approve = vec![
+            &env,
+            self_addr.clone().into_val(&env),
+            router.clone().into_val(&env),
+            amount_in.into_val(&env),
+            exp.into_val(&env),
+        ];
+        let _ = env.invoke_contract::<()>(&token_in, &Symbol::new(&env, "approve"), args_approve);
         // deadline: use ledger timestamp + 1800s (30 minutes)
         let deadline: u64 = env.ledger().timestamp() + 1800u64;
         let args = vec![
@@ -52,7 +69,7 @@ impl SoroSwapAdapter {
             amount_in.into_val(&env),
             min_out.into_val(&env),
             path.into_val(&env),
-            receiver.into_val(&env),
+            self_addr.clone().into_val(&env),
             deadline.into_val(&env),
         ];
         // call Soroswap router swap_exact_tokens_for_tokens
@@ -62,6 +79,18 @@ impl SoroSwapAdapter {
         let mut out: i128 = 0;
         for v in amounts.iter() { out = v; }
         assert!(out >= min_out, "slippage_exceeded");
+        // Transfer token_out from adapter to receiver
+        // token_out is the last element in path
+        let mut token_out_opt: Option<Address> = None;
+        for addr in path.iter() { token_out_opt = Some(addr); }
+        let token_out = token_out_opt.expect("path_empty");
+        let args_xfer = vec![
+            &env,
+            self_addr.clone().into_val(&env),
+            receiver.into_val(&env),
+            out.into_val(&env),
+        ];
+        let _ = env.invoke_contract::<()>(&token_out, &Symbol::new(&env, "transfer"), args_xfer);
         out
     }
 }

@@ -1,53 +1,39 @@
-import { Keypair } from '@stellar/stellar-sdk';
-import fs from 'fs';
-import path from 'path';
-import { Client as GovernorClient } from './generated/governor/src/index.ts';
+import {
+  getNetworkPassphrase,
+  getRequiredEnv,
+  loadDeployments,
+  makeGovernorClient,
+  signAndSendTx,
+} from './governorCommon.ts'
 
 async function main() {
-  const deploymentsPath = path.resolve(__dirname, '..', '..', 'deployments.testnet.json');
-  const deployments = JSON.parse(fs.readFileSync(deploymentsPath, 'utf8'));
-
-  const GOV_ID: string = deployments.contracts.governor;
-  const rpcUrl: string = deployments.rpcUrl || 'https://soroban-testnet.stellar.org';
-  const networkPassphrase: string = deployments.network === 'testnet' ? 'Test SDF Network ; September 2015' : (deployments.networkPassphrase || '');
-
-  const ADMIN_SECRET = process.env.ADMIN_SECRET;
-  const CREATOR = process.env.CREATOR_ADDRESS;
-  if (!ADMIN_SECRET || !CREATOR) {
-    console.error('Missing ADMIN_SECRET or CREATOR_ADDRESS env vars');
-    process.exit(1);
-  }
-
-  const adminKeypair = Keypair.fromSecret(ADMIN_SECRET);
-
-  const client = new GovernorClient({
-    contractId: GOV_ID,
-    networkPassphrase,
-    rpcUrl,
-  });
+  const deployments = loadDeployments()
+  const adminSecret = getRequiredEnv('ADMIN_SECRET')
+  const creator = getRequiredEnv('CREATOR_ADDRESS')
+  const client = makeGovernorClient(deployments)
 
   // Use helper that avoids enum marshalling from CLI
   const assembled = await client.propose_snapshot({
-    creator: CREATOR,
+    creator,
     title: 'Snapshot Test',
     description: 'No-op snapshot',
-  }, { simulate: true });
+  }, { simulate: true })
 
   if (assembled.result === undefined || assembled.result === null) {
-    console.error('Simulation did not return a result');
-    process.exit(1);
+    throw new Error('Simulation did not return a result')
   }
 
-  const simId = assembled.result;
-  console.log('Simulated proposal_id:', simId);
+  console.log(`PROPOSAL_ID=${assembled.result}`)
 
-  const sent = await assembled.signAndSend(adminKeypair);
-  console.log('Submitted. Result:', sent);
+  const sent = await signAndSendTx(assembled, adminSecret, getNetworkPassphrase(deployments))
+  const txHash = (sent as { hash?: string }).hash
+  if (txHash) {
+    console.log(`TX_HASH=${txHash}`)
+  }
+  console.log(JSON.stringify(sent, null, 2))
 }
 
 main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
-
-
+  console.error(e)
+  process.exit(1)
+})

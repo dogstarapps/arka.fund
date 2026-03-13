@@ -9,9 +9,12 @@ members = [
     "adapter-phoenix",
     "adapter-comet",
     "adapter-balanced",
+    "balanced-router-mock",
     "adapter-blend",
+    "blend-router-mock",
     "coverage-vault",
     "coverage-fund",
+    "manager-tier",
     "governance-token",
     "test-token",
 ]

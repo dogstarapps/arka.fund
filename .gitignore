@@ -36,3 +36,6 @@ vendor/
 artifacts/
 *.wasm
 *.tmp
+
+# Local generated proposal artifacts
+scripts/js/.codex-dist/

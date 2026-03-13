@@ -45,10 +45,12 @@ pub struct RouterStep {
 pub enum DataKey {
     Denomination,
     TotalShares,
+    ShareToken,
     Aum,
     Fees,
     Whitelist,
     Manager,
+    Governor,
     Router,
     Balance(Address),
 }
@@ -69,6 +71,8 @@ pub enum Error {
     InsufficientUserShares = 7,
     InsufficientShares = 8,
     RouterNotSet = 9,
+    InvalidFeeBps = 10,
+    UnauthorizedPolicy = 11,
 }
 
 #[contract]
@@ -83,6 +87,66 @@ impl ArkaContract {
         (amount * bps) / 10000i128
     }
 
+    fn assert_fee_bps(env: &Env, bps: i32) {
+        if !(0..=10_000).contains(&bps) {
+            panic_with_error!(env, Error::InvalidFeeBps);
+        }
+    }
+
+    fn require_policy_auth(env: &Env, caller: &Address) {
+        let store = env.storage().instance();
+        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+            if *caller != governor {
+                panic_with_error!(env, Error::UnauthorizedPolicy);
+            }
+            caller.require_auth();
+            return;
+        }
+        let manager: Address = match store.get(&DataKey::Manager) {
+            Some(m) => m,
+            None => panic_with_error!(env, Error::NotInitialized),
+        };
+        if *caller != manager {
+            panic_with_error!(env, Error::UnauthorizedPolicy);
+        }
+        caller.require_auth();
+    }
+
+    fn maybe_mint_share_token(env: &Env, to: &Address, amount: i128) {
+        let store = env.storage().instance();
+        let share_token: Option<Address> = store.get(&DataKey::ShareToken);
+        if let Some(share_token) = share_token {
+            let args = vec![
+                env,
+                to.clone().into_val(env),
+                amount.into_val(env),
+            ];
+            let _ = env.invoke_contract::<()>(&share_token, &Symbol::new(env, "mint"), args);
+        }
+    }
+
+    fn maybe_burn_share_token(env: &Env, from: &Address, amount: i128) {
+        let store = env.storage().instance();
+        let share_token: Option<Address> = store.get(&DataKey::ShareToken);
+        if let Some(share_token) = share_token {
+            let args = vec![
+                env,
+                from.clone().into_val(env),
+                amount.into_val(env),
+            ];
+            let _ = env.invoke_contract::<()>(&share_token, &Symbol::new(env, "burn"), args);
+        }
+    }
+
+    fn maybe_share_token_balance(env: &Env, user: &Address) -> Option<i128> {
+        let store = env.storage().instance();
+        let share_token: Option<Address> = store.get(&DataKey::ShareToken);
+        share_token.map(|token| {
+            let args = vec![env, user.clone().into_val(env)];
+            env.invoke_contract::<i128>(&token, &Symbol::new(env, "balance"), args)
+        })
+    }
+
     pub fn init(
         env: Env,
         denomination_contract: Address,
@@ -93,6 +157,11 @@ impl ArkaContract {
         whitelist_contracts: Vec<Address>,
         manager: Address,
     ) {
+        Self::assert_fee_bps(&env, mgmt_bps);
+        Self::assert_fee_bps(&env, perf_bps);
+        Self::assert_fee_bps(&env, deposit_bps);
+        Self::assert_fee_bps(&env, redeem_bps);
+
         let store = env.storage().instance();
         if store.has(&DataKey::Denomination) {
             panic_with_error!(&env, Error::AlreadyInitialized);
@@ -112,15 +181,59 @@ impl ArkaContract {
         store.set(&DataKey::Aum, &0i128);
     }
 
-    pub fn set_router(env: Env, caller: Address, router: Address) {
+    pub fn set_governor(env: Env, caller: Address, governor: Address) {
         let store = env.storage().instance();
-        let mgr: Address = match store.get(&DataKey::Manager) {
-            Some(m) => m,
-            None => panic_with_error!(&env, Error::NotInitialized),
-        };
-        if caller != mgr { panic_with_error!(&env, Error::OnlyManager); }
-        caller.require_auth();
-        store.set(&DataKey::Router, &router);
+        if let Some(current_governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+            if caller != current_governor {
+                panic_with_error!(&env, Error::UnauthorizedPolicy);
+            }
+            caller.require_auth();
+        } else {
+            let manager: Address = match store.get(&DataKey::Manager) {
+                Some(m) => m,
+                None => panic_with_error!(&env, Error::NotInitialized),
+            };
+            if caller != manager {
+                panic_with_error!(&env, Error::UnauthorizedPolicy);
+            }
+            caller.require_auth();
+        }
+        store.set(&DataKey::Governor, &governor);
+    }
+
+    pub fn set_fees(env: Env, caller: Address, mgmt_bps: i32, perf_bps: i32, deposit_bps: i32, redeem_bps: i32) {
+        Self::assert_fee_bps(&env, mgmt_bps);
+        Self::assert_fee_bps(&env, perf_bps);
+        Self::assert_fee_bps(&env, deposit_bps);
+        Self::assert_fee_bps(&env, redeem_bps);
+        Self::require_policy_auth(&env, &caller);
+        let store = env.storage().instance();
+        let fees = FeeStructure { mgmt_bps, perf_bps, deposit_bps, redeem_bps };
+        store.set(&DataKey::Fees, &fees);
+    }
+
+    pub fn set_whitelist(env: Env, caller: Address, whitelist_contracts: Vec<Address>) {
+        Self::require_policy_auth(&env, &caller);
+        let mut wl_assets: Vec<Asset> = Vec::new(&env);
+        for addr in whitelist_contracts.iter() {
+            wl_assets.push_back(Asset { contract: addr });
+        }
+        env.storage().instance().set(&DataKey::Whitelist, &wl_assets);
+    }
+
+    pub fn set_manager(env: Env, caller: Address, manager: Address) {
+        Self::require_policy_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::Manager, &manager);
+    }
+
+    pub fn set_router(env: Env, caller: Address, router: Address) {
+        Self::require_policy_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::Router, &router);
+    }
+
+    pub fn set_share_token(env: Env, caller: Address, share_token: Address) {
+        Self::require_policy_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::ShareToken, &share_token);
     }
 
     pub fn deposit(env: Env, user: Address, asset: Asset, amount: i128) -> i128 {
@@ -157,6 +270,7 @@ impl ArkaContract {
         // Track per-user shares
         let bal: i128 = store.get(&DataKey::Balance(user.clone())).unwrap_or(0);
         store.set(&DataKey::Balance(user.clone()), &(bal + shares_minted));
+        Self::maybe_mint_share_token(&env, &user, shares_minted);
 
         env.events().publish((EVENT_DEPOSIT,), (user.clone(), amount, shares_minted));
         shares_minted
@@ -177,6 +291,7 @@ impl ArkaContract {
 
         store.set(&DataKey::TotalShares, &(total - shares));
         store.set(&DataKey::Balance(user.clone()), &(user_bal - shares));
+        Self::maybe_burn_share_token(&env, &user, shares);
         // Apply redeem fee and update AUM with gross amount removed
         let fees: FeeStructure = store.get(&DataKey::Fees).unwrap_or(FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 });
         let net_out = Self::apply_fee_bps(amount_out, fees.redeem_bps);
@@ -310,25 +425,65 @@ impl ArkaContract {
     }
 
     pub fn shares_of(env: Env, user: Address) -> i128 {
+        if let Some(balance) = Self::maybe_share_token_balance(&env, &user) {
+            return balance;
+        }
         let store = env.storage().instance();
         store.get(&DataKey::Balance(user)).unwrap_or(0)
+    }
+
+    pub fn share_token(env: Env) -> Option<Address> {
+        env.storage().instance().get(&DataKey::ShareToken)
+    }
+
+    pub fn governor(env: Env) -> Option<Address> {
+        env.storage().instance().get(&DataKey::Governor)
+    }
+
+    pub fn fees(env: Env) -> FeeStructure {
+        env.storage().instance().get(&DataKey::Fees).unwrap_or(FeeStructure {
+            mgmt_bps: 0,
+            perf_bps: 0,
+            deposit_bps: 0,
+            redeem_bps: 0,
+        })
+    }
+
+    pub fn whitelist(env: Env) -> Vec<Asset> {
+        env.storage().instance().get(&DataKey::Whitelist).unwrap_or(Vec::new(&env))
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{vec, testutils::Address as _, Address, contract, contractimpl};
+    use soroban_sdk::{vec, testutils::Address as _, Address, contract, contractimpl, symbol_short};
 
     #[contract]
     struct DummyToken;
     #[contractimpl]
     impl DummyToken {
-        pub fn xfer_from(_env: Env, _from: Address, _to: Address, _amount: i128) {}
-        pub fn xfer(_env: Env, _from: Address, _to: Address, _amount: i128) {}
+        pub fn transfer_from(_env: Env, _spender: Address, _from: Address, _to: Address, _amount: i128) {}
+        pub fn transfer(_env: Env, _from: Address, _to: Address, _amount: i128) {}
+        pub fn mint(env: Env, to: Address, amount: i128) {
+            let store = env.storage().instance();
+            let key = (symbol_short!("bal"), to);
+            let prev: i128 = store.get(&key).unwrap_or(0);
+            store.set(&key, &(prev + amount));
+        }
+        pub fn burn(env: Env, from: Address, amount: i128) {
+            let store = env.storage().instance();
+            let key = (symbol_short!("bal"), from);
+            let prev: i128 = store.get(&key).unwrap_or(0);
+            store.set(&key, &(prev - amount));
+        }
+        pub fn balance(env: Env, owner: Address) -> i128 {
+            let store = env.storage().instance();
+            let key = (symbol_short!("bal"), owner);
+            store.get(&key).unwrap_or(0)
+        }
     }
 
-    fn asset(env: &Env) -> Asset { Asset { contract: Address::generate(env) } }
     fn manager(env: &Env) -> Address { Address::generate(env) }
 
     #[test]
@@ -338,16 +493,16 @@ mod test {
         let client = ArkaContractClient::new(&env, &contract_id);
         // Register dummy token to satisfy invoke_contract calls
         let token_id = env.register_contract(None, DummyToken);
-        let denom = Asset { contract: token_id.clone() };
-        let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
+        let denom = token_id.clone();
+        let denom_asset = Asset { contract: token_id.clone() };
         let wl = vec![&env, denom.clone()];
         let mgr = manager(&env);
-        client.init(&denom, &fees, &wl, &mgr);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
 
         let user = Address::generate(&env);
         let amount: i128 = 100;
         env.mock_all_auths();
-        let minted = client.deposit(&user, &denom, &amount);
+        let minted = client.deposit(&user, &denom_asset, &amount);
         assert_eq!(minted, amount);
 
         let out = client.redeem(&user, &40);
@@ -361,13 +516,12 @@ mod test {
         let contract_id = env.register_contract(None, ArkaContract);
         let client = ArkaContractClient::new(&env, &contract_id);
         let token_id = env.register_contract(None, DummyToken);
-        let denom = Asset { contract: token_id.clone() };
-        let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
+        let denom = token_id.clone();
         let wl = vec![&env, denom.clone()];
         let mgr = Address::generate(&env);
-        client.init(&denom, &fees, &wl, &mgr);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
         // Second init should panic with AlreadyInitialized
-        client.init(&denom, &fees, &wl, &mgr);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
     }
 
     #[test]
@@ -377,15 +531,120 @@ mod test {
         let contract_id = env.register_contract(None, ArkaContract);
         let client = ArkaContractClient::new(&env, &contract_id);
         let token_id = env.register_contract(None, DummyToken);
-        let denom = Asset { contract: token_id.clone() };
-        let fees = FeeStructure { mgmt_bps: 0, perf_bps: 0, deposit_bps: 0, redeem_bps: 0 };
+        let denom = token_id.clone();
         let wl = vec![&env, denom.clone()];
         let mgr = Address::generate(&env);
-        client.init(&denom, &fees, &wl, &mgr);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
         let not_mgr = Address::generate(&env);
         env.mock_all_auths();
         client.set_router(&not_mgr, &Address::generate(&env));
     }
+
+    #[test]
+    fn test_governor_controls_policy_after_set() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = token_id.clone();
+        let wl = vec![&env, denom.clone()];
+        let mgr = manager(&env);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
+
+        let gov = Address::generate(&env);
+        env.mock_all_auths();
+        client.set_governor(&mgr, &gov);
+        assert_eq!(client.governor(), Some(gov.clone()));
+
+        let new_router = Address::generate(&env);
+        client.set_router(&gov, &new_router);
+        assert_eq!(client.router(), new_router);
+
+        client.set_fees(&gov, &10, &20, &30, &40);
+        let fees = client.fees();
+        assert_eq!(fees.mgmt_bps, 10);
+        assert_eq!(fees.perf_bps, 20);
+        assert_eq!(fees.deposit_bps, 30);
+        assert_eq!(fees.redeem_bps, 40);
+
+        let new_mgr = Address::generate(&env);
+        client.set_manager(&gov, &new_mgr);
+        assert_eq!(client.manager(), new_mgr);
+    }
+
+    #[test]
+    fn test_share_token_config_exposed() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = token_id.clone();
+        let wl = vec![&env, denom.clone()];
+        let mgr = manager(&env);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
+
+        let share_token = Address::generate(&env);
+        env.mock_all_auths();
+        client.set_share_token(&mgr, &share_token);
+        assert_eq!(client.share_token(), Some(share_token));
+    }
+
+    #[test]
+    fn test_share_token_mints_and_burns_with_deposit_and_redeem() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let denom_id = env.register_contract(None, DummyToken);
+        let share_token_id = env.register_contract(None, DummyToken);
+        let denom_asset = Asset { contract: denom_id.clone() };
+        let wl = vec![&env, denom_id.clone()];
+        let mgr = manager(&env);
+        client.init(&denom_id, &0, &0, &0, &0, &wl, &mgr);
+
+        env.mock_all_auths();
+        client.set_share_token(&mgr, &share_token_id);
+
+        let user = Address::generate(&env);
+        let minted = client.deposit(&user, &denom_asset, &100);
+        assert_eq!(minted, 100);
+        assert_eq!(client.shares_of(&user), 100);
+
+        let out = client.redeem(&user, &40);
+        assert_eq!(out, 40);
+        assert_eq!(client.shares_of(&user), 60);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_manager_cannot_set_policy_after_governor_assigned() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = token_id.clone();
+        let wl = vec![&env, denom.clone()];
+        let mgr = manager(&env);
+        client.init(&denom, &0, &0, &0, &0, &wl, &mgr);
+        let gov = Address::generate(&env);
+        env.mock_all_auths();
+        client.set_governor(&mgr, &gov);
+
+        // Once governor is set, manager can no longer mutate policy.
+        client.set_router(&mgr, &Address::generate(&env));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_fee_bps_rejected() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, ArkaContract);
+        let client = ArkaContractClient::new(&env, &contract_id);
+        let token_id = env.register_contract(None, DummyToken);
+        let denom = token_id.clone();
+        let wl = vec![&env, denom.clone()];
+        let mgr = manager(&env);
+
+        // init should fail on invalid bps
+        client.init(&denom, &20_000, &0, &0, &0, &wl, &mgr);
+    }
 }
-
-

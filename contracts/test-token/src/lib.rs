@@ -27,6 +27,17 @@ impl TestToken {
         store.set(&key, &(prev + amount));
     }
 
+    pub fn burn(env: Env, from: Address, amount: i128) {
+        let store = env.storage().instance();
+        let admin: Address = store.get(&DataKey::Admin).expect("no_admin");
+        admin.require_auth();
+        let key = (symbol_short!("bal"), from.clone());
+        let prev: i128 = store.get(&key).unwrap_or(0);
+        assert!(amount > 0, "amount_zero");
+        assert!(prev >= amount, "insufficient_balance");
+        store.set(&key, &(prev - amount));
+    }
+
     pub fn approve(env: Env, owner: Address, spender: Address, amount: i128) {
         owner.require_auth();
         let store = env.storage().instance();

@@ -202,6 +202,8 @@ dependencies = [
 name = "arka"
 version = "0.1.0"
 dependencies = [
+ "adapter-blend",
+ "blend-router-mock",
  "soroban-sdk",
 ]
 

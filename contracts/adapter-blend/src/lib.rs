@@ -15,6 +15,7 @@ pub enum Action {
     Lend,
     Borrow,
     Repay,
+    Withdraw,
     Liquidate,
 }
 
@@ -42,6 +43,72 @@ pub struct BlendAdapter;
 
 #[contractimpl]
 impl BlendAdapter {
+    fn execute_internal(
+        env: Env,
+        caller: Address,
+        action: Action,
+        market_id: u128,
+        amount: i128,
+        asset_override: Option<Address>,
+        receiver: Address,
+    ) -> i128 {
+        caller.require_auth();
+        if amount <= 0 {
+            panic_with_error!(&env, Error::AmountZero);
+        }
+        let store = env.storage().instance();
+        let router: Address = match store.get(&DataKey::Router) {
+            Some(r) => r,
+            None => panic_with_error!(&env, Error::NotInitialized),
+        };
+
+        if let Some(asset) = asset_override.or_else(|| store.get::<DataKey, Address>(&DataKey::AssetByMarket(market_id))) {
+            let request_type: u32 = match action {
+                Action::Lend => 2,
+                Action::Withdraw => 3,
+                Action::Borrow => 4,
+                Action::Repay => 5,
+                Action::Liquidate => panic_with_error!(&env, Error::UnsupportedAction),
+            };
+            let req = Request {
+                address: asset,
+                amount,
+                request_type,
+            };
+            let requests = vec![&env, req];
+            let args = vec![
+                &env,
+                caller.into_val(&env),
+                caller.into_val(&env),
+                receiver.into_val(&env),
+                requests.into_val(&env),
+            ];
+            let _: Val = env.invoke_contract(&router, &Symbol::new(&env, "submit"), args);
+            return amount;
+        }
+
+        let action_code: u32 = match action {
+            Action::Lend => 0,
+            Action::Borrow => 1,
+            Action::Repay => 2,
+            Action::Liquidate => 3,
+            Action::Withdraw => 4,
+        };
+        let args = vec![
+            &env,
+            caller.into_val(&env),
+            action_code.into_val(&env),
+            market_id.into_val(&env),
+            amount.into_val(&env),
+            receiver.into_val(&env),
+        ];
+        let out: i128 = env.invoke_contract(&router, &Symbol::new(&env, "execute_action"), args);
+        if out <= 0 {
+            panic_with_error!(&env, Error::InvalidOut);
+        }
+        out
+    }
+
     pub fn init(env: Env, admin: Address, router: Address) {
         let store = env.storage().instance();
         if store.has(&DataKey::Admin) {
@@ -89,59 +156,19 @@ impl BlendAdapter {
     }
 
     pub fn execute(env: Env, caller: Address, action: Action, market_id: u128, amount: i128, receiver: Address) -> i128 {
-        caller.require_auth();
-        if amount <= 0 {
-            panic_with_error!(&env, Error::AmountZero);
-        }
-        let store = env.storage().instance();
-        let router: Address = match store.get(&DataKey::Router) {
-            Some(r) => r,
-            None => panic_with_error!(&env, Error::NotInitialized),
-        };
+        Self::execute_internal(env, caller, action, market_id, amount, None, receiver)
+    }
 
-        if let Some(asset) = store.get::<DataKey, Address>(&DataKey::AssetByMarket(market_id)) {
-            let request_type: u32 = match action {
-                Action::Lend => 2,   // Deposit Collateral
-                Action::Borrow => 4, // Borrow
-                Action::Repay => 5,  // Repay
-                Action::Liquidate => panic_with_error!(&env, Error::UnsupportedAction),
-            };
-            let req = Request {
-                address: asset,
-                amount,
-                request_type,
-            };
-            let requests = vec![&env, req];
-            let args = vec![
-                &env,
-                caller.into_val(&env),   // from
-                caller.into_val(&env),   // spender
-                receiver.into_val(&env), // to
-                requests.into_val(&env),
-            ];
-            let _: Val = env.invoke_contract(&router, &Symbol::new(&env, "submit"), args);
-            return amount;
-        }
-
-        let action_code: u32 = match action {
-            Action::Lend => 0,
-            Action::Borrow => 1,
-            Action::Repay => 2,
-            Action::Liquidate => 3,
-        };
-        let args = vec![
-            &env,
-            caller.into_val(&env),
-            action_code.into_val(&env),
-            market_id.into_val(&env),
-            amount.into_val(&env),
-            receiver.into_val(&env),
-        ];
-        let out: i128 = env.invoke_contract(&router, &Symbol::new(&env, "execute_action"), args);
-        if out <= 0 {
-            panic_with_error!(&env, Error::InvalidOut);
-        }
-        out
+    pub fn execute_with_asset(
+        env: Env,
+        caller: Address,
+        action: Action,
+        market_id: u128,
+        asset: Address,
+        amount: i128,
+        receiver: Address,
+    ) -> i128 {
+        Self::execute_internal(env, caller, action, market_id, amount, Some(asset), receiver)
     }
 }
 
@@ -165,6 +192,13 @@ mod test {
         }
     }
 
+    #[contract]
+    struct DummySubmitRouter;
+    #[contractimpl]
+    impl DummySubmitRouter {
+        pub fn submit(_env: Env, _from: Address, _spender: Address, _to: Address, _requests: soroban_sdk::Vec<Request>) {}
+    }
+
     #[test]
     fn test_execute_lend_and_borrow() {
         let env = Env::default();
@@ -181,5 +215,26 @@ mod test {
         assert_eq!(out_lend, 1_000);
         let out_borrow = client.execute(&caller, &Action::Borrow, &7u128, &1_000i128, &receiver);
         assert_eq!(out_borrow, 950);
+    }
+
+    #[test]
+    fn test_execute_submit_path_with_market_asset() {
+        let env = Env::default();
+        let id = env.register_contract(None, BlendAdapter);
+        let client = BlendAdapterClient::new(&env, &id);
+        let admin = Address::generate(&env);
+        let router = env.register_contract(None, DummySubmitRouter);
+        let asset = Address::generate(&env);
+        client.init(&admin, &router);
+        env.mock_all_auths();
+        client.set_market_asset(&admin, &7u128, &asset);
+
+        let caller = Address::generate(&env);
+        let receiver = Address::generate(&env);
+        let out_lend = client.execute(&caller, &Action::Lend, &7u128, &500i128, &receiver);
+        assert_eq!(out_lend, 500);
+
+        let out_withdraw = client.execute(&caller, &Action::Withdraw, &7u128, &200i128, &receiver);
+        assert_eq!(out_withdraw, 200);
     }
 }

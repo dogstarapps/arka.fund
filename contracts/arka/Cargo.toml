@@ -13,10 +13,11 @@ soroban-sdk = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+adapter-blend = { path = "../adapter-blend" }
+blend-router-mock = { path = "../blend-router-mock" }
 
 [features]
 default = []
 testutils = ["soroban-sdk/testutils"]
-
 
 

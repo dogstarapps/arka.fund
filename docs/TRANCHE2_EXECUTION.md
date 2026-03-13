@@ -456,3 +456,200 @@ The four previously open closure items are now addressed in the repo as follows:
   - implemented through factory-managed per-Arka share-token deployment
   - mint on deposit / burn on redeem
   - exposed via `Arka.share_token()` and `ArkaFactory.share_token_of(arka)`
+
+### Iteration 17
+- Closed the Blend vault-owned strategy gap in repo with live-valued multi-asset support:
+  - `arka` now exposes:
+    - `blend_lend`
+    - `blend_borrow`
+    - `blend_repay`
+    - `blend_withdraw`
+    - `blend_market_assets(market_id)`
+    - `blend_position_value(market_id, asset)`
+    - `blend_market_value(market_id)`
+    - `blend_health_factor(market_id)`
+    - `nav()`
+  - Blend positions are now vault-owned and persisted per `(market_id, asset)` inside the Arka contract.
+  - `nav()` now re-prices Blend positions using:
+    - pool `get_positions(owner)`
+    - reserve `get_reserve(asset)`
+    - pool `get_config().oracle`
+    - oracle `lastprice(asset)`
+- Contract integration coverage added:
+  - `cargo test -p blend-router-mock -p adapter-blend -p arka` (pass)
+  - covers:
+    - vault-owned lend/borrow/repay/withdraw lifecycle
+    - live-position valuation from pool reserve/oracle reads
+    - health-factor calculation
+    - liquidity-aware redeem restrictions
+- Repo-level multi-asset validation completed:
+  - same market can carry more than one whitelisted asset
+  - per-asset valuation aggregates into `blend_market_value(market_id)`
+  - dApp reads and renders the market aggregate plus per-asset rows
+- Current public testnet status:
+  - the `Arka` currently referenced in `deployments.testnet.json` does not yet expose the new multi-asset Blend ABI
+  - readonly probe on `CCMA27FK5QULMDIOLYZ7ASSDX7TBRIZUORWSBMRIFLENPBLI73C7ZBJH` rejects:
+    - `blend_market_assets`
+    - `blend_position(market_id, asset)`
+  - therefore the multi-asset refactor is validated in repo, but still pending deployment/migration to the public testnet environment
+- dApp closure for Blend vault strategy:
+  - Arka detail page now renders Blend as a vault position, not a manager-side sidecar action.
+  - dApp reads and displays:
+    - collateral principal/live value
+    - debt principal/live value
+    - net value
+    - oracle price
+    - health factor
+    - market aggregate value across assets
+  - browser smoke E2E passes against the new UI surface.
+- dApp validation:
+  - `arkafund-dapp`: `npm run build` (pass)
+  - `arkafund-dapp`: `npm run e2e` (pass)
+  - wallet-backed live Blend browser E2E remains gated on a testnet environment where the upgraded ABI is deployed
+
+## Closure Status
+
+With Iteration 17, Tranche 2 remains closed across both repos for the originally delivered scope, and the Blend model is corrected in repo for:
+- contracts
+- executable governance on testnet
+- share tokenization per Arka
+- dApp wiring
+- Blend as a vault-owned, live-valued strategy
+- Blend multi-asset-per-market modeling in repo
+
+Remaining work on top of the already closed Tranche 2 baseline:
+- deploy/migrate the multi-asset Blend ABI to the public testnet environment
+- broader multi-asset risk controls beyond the currently validated market/policy
+- additional browser E2E matrix expansion
+
+### Iteration 18
+- Fixed the live Blend auth path against the real pool:
+  - `Arka` now resolves the pool router from the adapter but calls `pool.submit(...)` directly for the live path
+  - this avoids the extra live auth hop that was failing through `adapter.execute_with_asset(...)`
+  - the mock pool was tightened to require `spender.require_auth()` so local integration is closer to the real pool behavior
+- Live standalone validation was executed on testnet with fresh contracts:
+  - validation adapter: `CALBSAX6ZOYRX7YD6HOIKGH2GSQKUXQS3RZ5GGQKXPUMRECRXE66AN4Y`
+  - validation Arka: `CCU346HUBMZ7ZIRNNTWPIDHU2Y2OQ5XGTNPG25PZMVM64O7KWUBKB36X`
+  - live pool: `CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF`
+  - live asset: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
+- Live flow completed successfully with calibrated amounts for the current market limits:
+  - deposit `10_000_000`
+  - `blend_lend 1_000_000`
+  - `blend_borrow 100_000`
+  - `blend_repay 50_000`
+  - `blend_withdraw 50_000`
+- Live post-state verified on the validation Arka:
+  - `blend_position(0, asset)`:
+    - collateral amount: `950_000`
+    - debt amount: `50_000`
+  - `blend_position_value(0, asset)`:
+    - collateral value: `949_998`
+    - debt value: `50_000`
+    - net value: `899_998`
+    - health factor: `170_999_640`
+    - oracle price: `4_200_000`
+  - `blend_market_value(0)`:
+    - net value: `899_998`
+  - `liquid_balance(asset)`:
+    - `9_100_000`
+  - `nav()`:
+    - `9_999_998`
+- Scope note:
+  - the live Blend market used here is still a single-reserve market path
+  - multi-asset-per-market logic is implemented and integration-tested in repo
+  - heterogeneous multi-asset live validation remains future matrix work, not a blocker for the auth-path fix
+
+### Iteration 19
+- Added on-chain Blend hardening in `Arka`:
+  - governance-controlled `blend_risk_policy(market_id)`
+  - readonly `blend_market_status(market_id)`
+  - `nav()` fail-close on stale oracle data when the policy requires it
+  - `blend_borrow` / `blend_withdraw` rejection if:
+    - oracle data is stale, or
+    - resulting health factor falls below the configured floor
+- Default policy now ships with:
+  - `max_oracle_age = 3600`
+  - `min_health_factor = 12_500_000`
+  - `fail_close_nav = true`
+  - `fail_close_actions = true`
+- Contract validation added:
+  - stale oracle status test
+  - stale oracle `nav()` fail-close test
+  - minimum health-factor rejection test
+  - `cargo test -p arka` (pass)
+- dApp now reads and surfaces:
+  - `blend_risk_policy`
+  - `blend_market_status`
+  - stale-oracle banner
+  - action-blocked / NAV-blocked state
+  - policy floor and oracle-age telemetry
+- Browser validation:
+  - `arkafund-dapp`: `npm run build` (pass)
+  - `arkafund-dapp`: `npm run e2e` (pass, `5 passed / 3 skipped`)
+- Fresh live testnet validation executed with the hardened ABI:
+  - validation adapter: `CCQHJ5DJZFLFZ4JKLE5X4YDJN5HSFO6XLJ2GR6GPF76RBKKVJOEOK5OH`
+  - validation Arka: `CBQNH4RGZODYGPOHVMBM3TJYH74PVM5ECM5VZJQU2DMOJFLEK2WUP4ME`
+  - live pool: `CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF`
+  - live asset: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
+  - configured policy:
+    - `max_oracle_age = 3600`
+    - `min_health_factor = 12_500_000`
+    - `fail_close_nav = true`
+    - `fail_close_actions = true`
+- Live post-state from the hardened runbook:
+  - `blend_market_status(0)`:
+    - `has_live_pricing = true`
+    - `has_stale_oracle = false`
+    - `nav_blocked = false`
+    - `risky_actions_blocked = false`
+    - `health_factor = 170_999_800`
+  - `blend_market_value(0)`:
+    - `net_value = 899_999`
+  - `liquid_balance(asset)`:
+    - `9_100_000`
+  - `nav()`:
+    - `9_999_999`
+
+### Iteration 20
+- Refined oracle/feed integrity checks so they target data validity, not market volatility:
+  - `blend_market_status(0)` now also exposes:
+    - `has_invalid_oracle_data`
+    - `has_future_oracle_timestamp`
+    - `has_disabled_reserve`
+    - `pool_status`
+  - these flags feed the same fail-close / action-block logic as stale-oracle checks
+- Added contract validation for invalid feed data:
+  - invalid oracle price blocks market status
+  - invalid oracle price blocks risky Blend actions
+  - `cargo test -p arka` (pass)
+- dApp now surfaces oracle/feed integrity explicitly:
+  - oracle integrity line
+  - reserve enabled line
+  - pool status line
+  - integrity warning banner when any of those checks fail
+- Reduced live execution budget on Blend mutations:
+  - removed unused `Aum` refresh from Blend mutation paths
+  - `nav()` remains the live source of truth
+  - this unblocked the full live `lend -> borrow -> repay -> withdraw` path on the hardened ABI
+- Final live testnet validation after the budget-safe oracle-integrity patch:
+  - validation adapter: `CAVTLHVRGDNOABR3PPDBEMPN66545VG25WX3AOMCEP2IEZLMTZLZ7CRS`
+  - validation Arka: `CAACTDDXPZDU3TFJNJD5XWDF4NBYC4VCAEBM2FZVFJ5FSGLETLWQWIL3`
+  - live pool: `CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF`
+  - live asset: `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`
+- Live post-state from the final runbook:
+  - `blend_market_status(0)`:
+    - `has_live_pricing = true`
+    - `has_stale_oracle = false`
+    - `has_invalid_oracle_data = false`
+    - `has_future_oracle_timestamp = false`
+    - `has_disabled_reserve = false`
+    - `pool_status = 0`
+    - `nav_blocked = false`
+    - `risky_actions_blocked = false`
+    - `health_factor = 170_999_800`
+  - `blend_market_value(0)`:
+    - `net_value = 899_999`
+  - `liquid_balance(asset)`:
+    - `9_100_000`
+  - `nav()`:
+    - `9_999_999`

@@ -22,11 +22,11 @@ jobs:
             ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
-            arkafund/contracts/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('arkafund/contracts/**/Cargo.lock') }}
+            contracts/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/**/Cargo.lock') }}
       - name: Build WASM
         run: |
-          cd arkafund/scripts
+          cd scripts
           bash build-wasm.sh
 
   build-dapp:
@@ -38,10 +38,9 @@ jobs:
           node-version: 20
       - name: Install and build dapp
         run: |
-          cd arkafund-dapp
+          cd ../arkafund-dapp
           npm ci
           npm run build
-
 
 
 

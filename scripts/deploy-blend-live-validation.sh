@@ -113,7 +113,24 @@ stellar contract invoke \
   --fail_close_nav true \
   --fail_close_actions true >/dev/null
 
-echo "7) Execute Blend live validation"
+echo "7) Configure credit market registry"
+stellar contract invoke \
+  --id "$ARKA_ID" \
+  --source-account "$ADMIN_SECRET" \
+  --rpc-url "$RPC_URL" \
+  --network-passphrase "$NETWORK_PASSPHRASE" \
+  --send=yes -- configure_credit_market \
+  --caller "$ADMIN_ADDR" \
+  --protocol '["Blend"]' \
+  --market_id 0 \
+  --adapter "$ADAPTER_ID" \
+  --allow_supply true \
+  --allow_borrow true \
+  --allow_repay true \
+  --allow_withdraw true \
+  --enabled true >/dev/null
+
+echo "8) Execute Blend live validation"
 ARKA_ID="$ARKA_ID" \
 ADAPTER_ID="$ADAPTER_ID" \
 ASSET_ID="$ASSET_ID" \
@@ -139,4 +156,4 @@ cat >"$OUT_JSON" <<JSON
 }
 JSON
 
-echo "8) Wrote environment summary to $OUT_JSON"
+echo "9) Wrote environment summary to $OUT_JSON"

@@ -51,6 +51,34 @@ pub enum BlendAction {
     Withdraw,
 }
 
+#[derive(Clone, Eq, PartialEq)]
+#[contracttype]
+pub enum CreditProtocol {
+    Blend,
+}
+
+#[derive(Clone, Eq, PartialEq)]
+#[contracttype]
+pub enum CreditAction {
+    Supply,
+    Borrow,
+    Repay,
+    Withdraw,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct CreditMarketConfig {
+    pub protocol: CreditProtocol,
+    pub market_id: u128,
+    pub adapter: Address,
+    pub allow_supply: bool,
+    pub allow_borrow: bool,
+    pub allow_repay: bool,
+    pub allow_withdraw: bool,
+    pub enabled: bool,
+}
+
 #[derive(Clone)]
 #[contracttype]
 pub struct BlendPosition {
@@ -62,7 +90,34 @@ pub struct BlendPosition {
 
 #[derive(Clone)]
 #[contracttype]
+pub struct CreditPosition {
+    pub market_id: u128,
+    pub asset: Address,
+    pub collateral_amount: i128,
+    pub debt_amount: i128,
+}
+
+#[derive(Clone)]
+#[contracttype]
 pub struct BlendPositionValue {
+    pub market_id: u128,
+    pub asset: Address,
+    pub collateral_shares: i128,
+    pub collateral_amount: i128,
+    pub collateral_value: i128,
+    pub debt_shares: i128,
+    pub debt_amount: i128,
+    pub debt_value: i128,
+    pub net_value: i128,
+    pub price: i128,
+    pub health_factor: i128,
+    pub c_factor: u32,
+    pub oracle_timestamp: u64,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct CreditPositionValue {
     pub market_id: u128,
     pub asset: Address,
     pub collateral_shares: i128,
@@ -91,6 +146,17 @@ pub struct BlendMarketValue {
 
 #[derive(Clone)]
 #[contracttype]
+pub struct CreditMarketValue {
+    pub market_id: u128,
+    pub collateral_value: i128,
+    pub debt_value: i128,
+    pub net_value: i128,
+    pub health_factor: i128,
+    pub oracle_timestamp: u64,
+}
+
+#[derive(Clone)]
+#[contracttype]
 pub struct BlendRiskPolicy {
     pub market_id: u128,
     pub max_oracle_age: u64,
@@ -101,7 +167,36 @@ pub struct BlendRiskPolicy {
 
 #[derive(Clone)]
 #[contracttype]
+pub struct CreditRiskPolicy {
+    pub market_id: u128,
+    pub max_oracle_age: u64,
+    pub min_health_factor: i128,
+    pub fail_close_nav: bool,
+    pub fail_close_actions: bool,
+}
+
+#[derive(Clone)]
+#[contracttype]
 pub struct BlendMarketStatus {
+    pub market_id: u128,
+    pub has_live_pricing: bool,
+    pub has_stale_oracle: bool,
+    pub has_invalid_oracle_data: bool,
+    pub has_future_oracle_timestamp: bool,
+    pub has_disabled_reserve: bool,
+    pub oracle_age: u64,
+    pub max_oracle_age: u64,
+    pub min_health_factor: i128,
+    pub health_factor: i128,
+    pub debt_value: i128,
+    pub pool_status: u32,
+    pub risky_actions_blocked: bool,
+    pub nav_blocked: bool,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct CreditMarketStatus {
     pub market_id: u128,
     pub has_live_pricing: bool,
     pub has_stale_oracle: bool,
@@ -146,6 +241,9 @@ pub enum DataKey {
     BlendPosition(u128, Address),
     BlendAdapter(u128),
     BlendRiskPolicy(u128),
+    CreditProtocols,
+    CreditMarkets(CreditProtocol),
+    CreditMarketConfig(CreditProtocol, u128),
 }
 
 #[derive(Clone)]
@@ -221,6 +319,83 @@ struct BlendPositionDiagnostics {
     has_future_oracle_timestamp: bool,
 }
 
+impl From<BlendPosition> for CreditPosition {
+    fn from(value: BlendPosition) -> Self {
+        Self {
+            market_id: value.market_id,
+            asset: value.asset,
+            collateral_amount: value.collateral_amount,
+            debt_amount: value.debt_amount,
+        }
+    }
+}
+
+impl From<BlendPositionValue> for CreditPositionValue {
+    fn from(value: BlendPositionValue) -> Self {
+        Self {
+            market_id: value.market_id,
+            asset: value.asset,
+            collateral_shares: value.collateral_shares,
+            collateral_amount: value.collateral_amount,
+            collateral_value: value.collateral_value,
+            debt_shares: value.debt_shares,
+            debt_amount: value.debt_amount,
+            debt_value: value.debt_value,
+            net_value: value.net_value,
+            price: value.price,
+            health_factor: value.health_factor,
+            c_factor: value.c_factor,
+            oracle_timestamp: value.oracle_timestamp,
+        }
+    }
+}
+
+impl From<BlendMarketValue> for CreditMarketValue {
+    fn from(value: BlendMarketValue) -> Self {
+        Self {
+            market_id: value.market_id,
+            collateral_value: value.collateral_value,
+            debt_value: value.debt_value,
+            net_value: value.net_value,
+            health_factor: value.health_factor,
+            oracle_timestamp: value.oracle_timestamp,
+        }
+    }
+}
+
+impl From<BlendRiskPolicy> for CreditRiskPolicy {
+    fn from(value: BlendRiskPolicy) -> Self {
+        Self {
+            market_id: value.market_id,
+            max_oracle_age: value.max_oracle_age,
+            min_health_factor: value.min_health_factor,
+            fail_close_nav: value.fail_close_nav,
+            fail_close_actions: value.fail_close_actions,
+        }
+    }
+}
+
+impl From<BlendMarketStatus> for CreditMarketStatus {
+    fn from(value: BlendMarketStatus) -> Self {
+        Self {
+            market_id: value.market_id,
+            has_live_pricing: value.has_live_pricing,
+            has_stale_oracle: value.has_stale_oracle,
+            has_invalid_oracle_data: value.has_invalid_oracle_data,
+            has_future_oracle_timestamp: value.has_future_oracle_timestamp,
+            has_disabled_reserve: value.has_disabled_reserve,
+            oracle_age: value.oracle_age,
+            max_oracle_age: value.max_oracle_age,
+            min_health_factor: value.min_health_factor,
+            health_factor: value.health_factor,
+            debt_value: value.debt_value,
+            pool_status: value.pool_status,
+            risky_actions_blocked: value.risky_actions_blocked,
+            nav_blocked: value.nav_blocked,
+        }
+    }
+}
+
 #[derive(Clone)]
 #[contracttype]
 pub enum OracleAsset {
@@ -258,6 +433,8 @@ pub enum Error {
     BlendHealthFactorTooLow = 17,
     BlendNavUnavailable = 18,
     BlendOracleInvalid = 19,
+    CreditMarketNotConfigured = 20,
+    CreditActionNotAllowed = 21,
 }
 
 #[contract]
@@ -509,6 +686,88 @@ impl ArkaContract {
 
     fn clear_blend_adapter(env: &Env, market_id: u128) {
         env.storage().instance().remove(&DataKey::BlendAdapter(market_id));
+    }
+
+    fn add_credit_protocol(env: &Env, protocol: &CreditProtocol) {
+        let mut protocols: Vec<CreditProtocol> = env.storage().instance().get(&DataKey::CreditProtocols).unwrap_or(Vec::new(env));
+        let mut found = false;
+        for existing in protocols.iter() {
+            if existing == *protocol {
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            protocols.push_back(protocol.clone());
+            env.storage().instance().set(&DataKey::CreditProtocols, &protocols);
+        }
+    }
+
+    fn read_credit_markets_internal(env: &Env, protocol: &CreditProtocol) -> Vec<u128> {
+        env.storage()
+            .instance()
+            .get(&DataKey::CreditMarkets(protocol.clone()))
+            .unwrap_or(Vec::new(env))
+    }
+
+    fn add_credit_market(env: &Env, protocol: &CreditProtocol, market_id: u128) {
+        let mut markets = Self::read_credit_markets_internal(env, protocol);
+        let mut found = false;
+        for existing in markets.iter() {
+            if existing == market_id {
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            markets.push_back(market_id);
+            env.storage()
+                .instance()
+                .set(&DataKey::CreditMarkets(protocol.clone()), &markets);
+        }
+        Self::add_credit_protocol(env, protocol);
+    }
+
+    fn write_credit_market_config(env: &Env, config: &CreditMarketConfig) {
+        Self::add_credit_market(env, &config.protocol, config.market_id);
+        env.storage()
+            .instance()
+            .set(&DataKey::CreditMarketConfig(config.protocol.clone(), config.market_id), config);
+    }
+
+    fn read_credit_market_config_internal(env: &Env, protocol: &CreditProtocol, market_id: u128) -> Option<CreditMarketConfig> {
+        env.storage()
+            .instance()
+            .get(&DataKey::CreditMarketConfig(protocol.clone(), market_id))
+    }
+
+    fn read_credit_market_configs_internal(env: &Env, protocol: &CreditProtocol) -> Vec<CreditMarketConfig> {
+        let mut configs = Vec::new(env);
+        for market_id in Self::read_credit_markets_internal(env, protocol).iter() {
+            if let Some(config) = Self::read_credit_market_config_internal(env, protocol, market_id) {
+                configs.push_back(config);
+            }
+        }
+        configs
+    }
+
+    fn require_credit_market_config(env: &Env, protocol: &CreditProtocol, market_id: u128) -> CreditMarketConfig {
+        match Self::read_credit_market_config_internal(env, protocol, market_id) {
+            Some(config) if config.enabled => config,
+            _ => panic_with_error!(env, Error::CreditMarketNotConfigured),
+        }
+    }
+
+    fn assert_credit_action_allowed(env: &Env, config: &CreditMarketConfig, action: &CreditAction) {
+        let allowed = match action {
+            CreditAction::Supply => config.allow_supply,
+            CreditAction::Borrow => config.allow_borrow,
+            CreditAction::Repay => config.allow_repay,
+            CreditAction::Withdraw => config.allow_withdraw,
+        };
+        if !allowed {
+            panic_with_error!(env, Error::CreditActionNotAllowed);
+        }
     }
 
     fn default_blend_risk_policy(market_id: u128) -> BlendRiskPolicy {
@@ -1008,6 +1267,34 @@ impl ArkaContract {
         );
     }
 
+    pub fn configure_credit_market(
+        env: Env,
+        caller: Address,
+        protocol: CreditProtocol,
+        market_id: u128,
+        adapter: Address,
+        allow_supply: bool,
+        allow_borrow: bool,
+        allow_repay: bool,
+        allow_withdraw: bool,
+        enabled: bool,
+    ) {
+        Self::require_policy_auth(&env, &caller);
+        Self::write_credit_market_config(
+            &env,
+            &CreditMarketConfig {
+                protocol,
+                market_id,
+                adapter,
+                allow_supply,
+                allow_borrow,
+                allow_repay,
+                allow_withdraw,
+                enabled,
+            },
+        );
+    }
+
     pub fn deposit(env: Env, user: Address, asset: Asset, amount: i128) -> i128 {
         user.require_auth();
         if amount <= 0 {
@@ -1182,6 +1469,66 @@ impl ArkaContract {
         Self::refresh_aum(&env);
         env.events().publish((EVENT_PROFIT,), (total_out, steps.len() as u32));
         total_out
+    }
+
+    pub fn credit_supply(
+        env: Env,
+        manager: Address,
+        protocol: CreditProtocol,
+        market_id: u128,
+        asset: Address,
+        amount: i128,
+    ) -> i128 {
+        let config = Self::require_credit_market_config(&env, &protocol, market_id);
+        Self::assert_credit_action_allowed(&env, &config, &CreditAction::Supply);
+        match protocol {
+            CreditProtocol::Blend => Self::blend_lend(env, manager, config.adapter, market_id, asset, amount),
+        }
+    }
+
+    pub fn credit_borrow(
+        env: Env,
+        manager: Address,
+        protocol: CreditProtocol,
+        market_id: u128,
+        asset: Address,
+        amount: i128,
+    ) -> i128 {
+        let config = Self::require_credit_market_config(&env, &protocol, market_id);
+        Self::assert_credit_action_allowed(&env, &config, &CreditAction::Borrow);
+        match protocol {
+            CreditProtocol::Blend => Self::blend_borrow(env, manager, config.adapter, market_id, asset, amount),
+        }
+    }
+
+    pub fn credit_repay(
+        env: Env,
+        manager: Address,
+        protocol: CreditProtocol,
+        market_id: u128,
+        asset: Address,
+        amount: i128,
+    ) -> i128 {
+        let config = Self::require_credit_market_config(&env, &protocol, market_id);
+        Self::assert_credit_action_allowed(&env, &config, &CreditAction::Repay);
+        match protocol {
+            CreditProtocol::Blend => Self::blend_repay(env, manager, config.adapter, market_id, asset, amount),
+        }
+    }
+
+    pub fn credit_withdraw(
+        env: Env,
+        manager: Address,
+        protocol: CreditProtocol,
+        market_id: u128,
+        asset: Address,
+        amount: i128,
+    ) -> i128 {
+        let config = Self::require_credit_market_config(&env, &protocol, market_id);
+        Self::assert_credit_action_allowed(&env, &config, &CreditAction::Withdraw);
+        match protocol {
+            CreditProtocol::Blend => Self::blend_withdraw(env, manager, config.adapter, market_id, asset, amount),
+        }
     }
 
     pub fn blend_lend(env: Env, manager: Address, adapter: Address, market_id: u128, asset: Address, amount: i128) -> i128 {
@@ -1404,6 +1751,93 @@ impl ArkaContract {
     pub fn blend_market_status(env: Env, market_id: u128) -> Option<BlendMarketStatus> {
         Self::blend_market_status_internal(&env, market_id)
     }
+
+    pub fn credit_markets(env: Env, protocol: CreditProtocol) -> Vec<u128> {
+        Self::read_credit_markets_internal(&env, &protocol)
+    }
+
+    pub fn credit_protocols(env: Env) -> Vec<CreditProtocol> {
+        env.storage().instance().get(&DataKey::CreditProtocols).unwrap_or(Vec::new(&env))
+    }
+
+    pub fn credit_market_config(env: Env, protocol: CreditProtocol, market_id: u128) -> Option<CreditMarketConfig> {
+        Self::read_credit_market_config_internal(&env, &protocol, market_id)
+    }
+
+    pub fn credit_market_configs(env: Env, protocol: CreditProtocol) -> Vec<CreditMarketConfig> {
+        Self::read_credit_market_configs_internal(&env, &protocol)
+    }
+
+    pub fn credit_market_assets(env: Env, protocol: CreditProtocol, market_id: u128) -> Vec<Address> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_market_assets(env, market_id),
+        }
+    }
+
+    pub fn credit_position(env: Env, protocol: CreditProtocol, market_id: u128, asset: Address) -> Option<CreditPosition> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_position(env, market_id, asset).map(Into::into),
+        }
+    }
+
+    pub fn credit_positions(env: Env, protocol: CreditProtocol, market_id: u128) -> Vec<CreditPosition> {
+        let mut positions = Vec::new(&env);
+        match protocol {
+            CreditProtocol::Blend => {
+                for position in Self::blend_positions(env.clone(), market_id).iter() {
+                    positions.push_back(position.into());
+                }
+            }
+        }
+        positions
+    }
+
+    pub fn credit_position_value(
+        env: Env,
+        protocol: CreditProtocol,
+        market_id: u128,
+        asset: Address,
+    ) -> Option<CreditPositionValue> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_position_value(env, market_id, asset).map(Into::into),
+        }
+    }
+
+    pub fn credit_position_values(env: Env, protocol: CreditProtocol, market_id: u128) -> Vec<CreditPositionValue> {
+        let mut values = Vec::new(&env);
+        match protocol {
+            CreditProtocol::Blend => {
+                for value in Self::blend_position_values(env.clone(), market_id).iter() {
+                    values.push_back(value.into());
+                }
+            }
+        }
+        values
+    }
+
+    pub fn credit_market_value(env: Env, protocol: CreditProtocol, market_id: u128) -> Option<CreditMarketValue> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_market_value(env, market_id).map(Into::into),
+        }
+    }
+
+    pub fn credit_health_factor(env: Env, protocol: CreditProtocol, market_id: u128) -> Option<i128> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_health_factor(env, market_id),
+        }
+    }
+
+    pub fn credit_risk_policy(env: Env, protocol: CreditProtocol, market_id: u128) -> CreditRiskPolicy {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_risk_policy(env, market_id).into(),
+        }
+    }
+
+    pub fn credit_market_status(env: Env, protocol: CreditProtocol, market_id: u128) -> Option<CreditMarketStatus> {
+        match protocol {
+            CreditProtocol::Blend => Self::blend_market_status(env, market_id).map(Into::into),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -1520,6 +1954,20 @@ mod test {
         let mgr = manager(env);
         client.init(&token_id, &0, &0, &0, &0, &wl, &mgr);
         (client, token_id, mgr, denom_asset)
+    }
+
+    fn configure_blend_credit_market(client: &ArkaContractClient<'_>, mgr: &Address, adapter: &Address, market_id: u128) {
+        client.configure_credit_market(
+            mgr,
+            &CreditProtocol::Blend,
+            &market_id,
+            adapter,
+            &true,
+            &true,
+            &true,
+            &true,
+            &true,
+        );
     }
 
     #[test]
@@ -1677,6 +2125,87 @@ mod test {
         let market_value = client.blend_market_value(&7u128).unwrap();
         assert!(market_value.net_value > 0);
         assert_eq!(client.nav(), 900);
+    }
+
+    #[test]
+    fn test_credit_position_wrappers_delegate_to_blend() {
+        let env = Env::default();
+        let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+        let user = Address::generate(&env);
+        env.mock_all_auths_allowing_non_root_auth();
+        let (oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+        let oracle = DummyOracleClient::new(&env, &oracle_id);
+        oracle.set_price(&denom_id, &10_000_000i128, &1_000u64);
+        router.set_reserve(&denom_id, &0u32, &9_000_000u32, &1_000_000_000_000i128, &1_000_000_000_000i128, &10_000_000i128);
+
+        client.deposit(&user, &denom_asset, &1_000);
+        configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+        client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+        client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &100);
+        client.credit_repay(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &50);
+        client.credit_withdraw(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &25);
+
+        let position = client.credit_position(&CreditProtocol::Blend, &0u128, &denom_id).unwrap();
+        assert_eq!(position.collateral_amount, 375);
+        assert_eq!(position.debt_amount, 50);
+
+        let protocols = client.credit_protocols();
+        assert_eq!(protocols.len(), 1);
+        let configs = client.credit_market_configs(&CreditProtocol::Blend);
+        assert_eq!(configs.len(), 1);
+        assert_eq!(configs.get(0).unwrap().adapter, adapter_id);
+        let values = client.credit_position_values(&CreditProtocol::Blend, &0u128);
+        assert_eq!(values.len(), 1);
+        let market_value = client.credit_market_value(&CreditProtocol::Blend, &0u128).unwrap();
+        assert_eq!(market_value.net_value, 325);
+        assert_eq!(client.credit_health_factor(&CreditProtocol::Blend, &0u128), Some(67_400_000));
+    }
+
+    #[test]
+    fn test_credit_market_status_wrapper_matches_blend_status() {
+        let env = Env::default();
+        let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+        let user = Address::generate(&env);
+        env.mock_all_auths_allowing_non_root_auth();
+        let (oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+        let oracle = DummyOracleClient::new(&env, &oracle_id);
+        oracle.set_price(&denom_id, &10_000_000i128, &1_000u64);
+
+        client.deposit(&user, &denom_asset, &1_000);
+        configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+        client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+        let policy = client.credit_risk_policy(&CreditProtocol::Blend, &0u128);
+        assert_eq!(policy.max_oracle_age, DEFAULT_BLEND_MAX_ORACLE_AGE);
+
+        env.ledger().with_mut(|li| li.timestamp = 1_000 + DEFAULT_BLEND_MAX_ORACLE_AGE + 1);
+        let status = client.credit_market_status(&CreditProtocol::Blend, &0u128).unwrap();
+        assert!(status.has_stale_oracle);
+        assert!(status.risky_actions_blocked);
+        assert!(status.nav_blocked);
+    }
+
+    #[test]
+    #[should_panic(expected = "Error(Contract, #21)")]
+    fn test_credit_market_capabilities_block_disallowed_action() {
+        let env = Env::default();
+        let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+        let user = Address::generate(&env);
+        env.mock_all_auths_allowing_non_root_auth();
+        let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+        client.deposit(&user, &denom_asset, &1_000);
+        client.configure_credit_market(
+            &mgr,
+            &CreditProtocol::Blend,
+            &0u128,
+            &adapter_id,
+            &true,
+            &false,
+            &true,
+            &true,
+            &true,
+        );
+        client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &100);
     }
 
     #[test]

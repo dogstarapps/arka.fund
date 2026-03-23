@@ -65,7 +65,7 @@ mod test {
     }
 
     #[test]
-    fn test_execute_placeholder() {
+    fn test_execute_accumulates_step_outputs() {
         let env = Env::default();
         let router_id = env.register_contract(None, Router);
         let client = RouterClient::new(&env, &router_id);
@@ -80,5 +80,4 @@ mod test {
         assert_eq!(out, 15);
     }
 }
-
 

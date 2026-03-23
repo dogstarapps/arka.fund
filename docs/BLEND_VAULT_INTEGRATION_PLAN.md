@@ -90,7 +90,7 @@ Current gap:
 - the public testnet environment still exposes the earlier single-asset ABI
 
 Hardening target:
-- migrate the new multi-asset ABI into the canonical public testnet deployment record
+- migrate the new multi-asset ABI into the active testnet deployment record
 - validate additional Blend markets
 - validate heterogeneous collateral/debt pairs
 - validate redeem behavior under multi-asset exposure

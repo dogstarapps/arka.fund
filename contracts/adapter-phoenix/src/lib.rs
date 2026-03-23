@@ -1,4 +1,6 @@
 #![no_std]
+//! Experimental adapter reserved for future Phoenix integration work.
+
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
 
 #[derive(Clone)]
@@ -15,7 +17,7 @@ pub struct PhoenixAdapter;
 
 #[contractimpl]
 impl PhoenixAdapter {
-    pub fn execute(env: Env, caller: Address, params: SwapParams) -> i128 {
+    pub fn execute(_env: Env, caller: Address, params: SwapParams) -> i128 {
         caller.require_auth();
         params.amount_in
     }
@@ -27,7 +29,7 @@ mod test {
     use soroban_sdk::{testutils::Address as _, Env};
 
     #[test]
-    fn test_execute_placeholder() {
+    fn test_execute_smoke() {
         let env = Env::default();
         let id = env.register_contract(None, PhoenixAdapter);
         let client = PhoenixAdapterClient::new(&env, &id);
@@ -38,6 +40,4 @@ mod test {
         assert_eq!(out, 33);
     }
 }
-
-
 

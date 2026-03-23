@@ -2,7 +2,7 @@
 
 This document is the execution baseline for Tranche 2, assuming Tranche 1 has already been approved.
 
-## Scope Baseline (from `plan.md`)
+## Scope Baseline
 
 Tranche 2 target items:
 - Balanced adapter (AMM)
@@ -34,7 +34,7 @@ Implemented groundwork:
 Known gaps relevant to Tranche 2 at the start of execution:
 - Arka policy setters are still mostly manager-driven (not DAO-governed end-to-end).
 - Rebalance slippage guardrails included hardcoded safety offsets in UI logic.
-- Timelock-delayed upgrades/migrations for existing Arkas are not fully closed with an E2E proof.
+- Delay-governed upgrades and migrations for existing Arkas are not fully closed with an E2E proof.
 
 ## Execution Order (Recommended)
 
@@ -115,7 +115,7 @@ Tranche 2 is considered complete when all items below are true:
   - `cargo test -p arka` (pass)
 
 ### Iteration 4
-- Delivered enterprise-grade Coverage Vault implementation:
+- Delivered validated Coverage Vault implementation:
   - token-backed deposits (`transfer_from`) and withdrawals (`transfer`)
   - enforced lock ratio (`lock_bps`) on every withdrawal
   - governor-aware policy auth (`set_governor`, `set_lock_bps`)
@@ -133,7 +133,7 @@ Tranche 2 is considered complete when all items below are true:
   - `scripts/e2e-coverage-vault.sh`
 
 ### Iteration 5
-- Delivered enterprise-grade Community Coverage Fund implementation:
+- Delivered validated Community Coverage Fund implementation:
   - explicit `init(admin, stake_token, reward_token)`
   - token-backed `stake` / `unstake`
   - reward distribution via `add_rewards` + pro-rata accumulator (`acc_reward_per_share`)
@@ -276,7 +276,7 @@ Tranche 2 is considered complete when all items below are true:
   - made adapter E2E scripts idempotent by skipping `init` when already initialized.
 
 ### Iteration 12
-- Delivered governance lifecycle wiring (enterprise-ready, no stubs):
+- Delivered governance lifecycle wiring with a fully executable UI path:
   - new `governance` page in `arkafund-dapp` with wallet-driven actions:
     - `propose_snapshot_self`
     - `vote` (`0=Against`, `1=For`, `2=Abstain`)
@@ -442,8 +442,8 @@ For the remaining dApp-side alignment items that are not contract gaps, see:
 - `docs/DAPP_TRANCHE2_ALIGNMENT_GAPS.md`
 
 The four previously open closure items are now addressed in the repo as follows:
-- Timelock real deployed/used:
-  - interpreted correctly as Governor timelock delay in this implementation
+- Execution delay configured and used:
+  - interpreted correctly as the Governor timelock-delay parameter in this implementation
   - bootstrap now defaults to non-zero delay and persists it in deployments metadata
   - executable scripts wait for `eta` before `execute`
 - `set_fees` executed by proposal:

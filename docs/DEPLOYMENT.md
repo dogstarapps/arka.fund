@@ -1,85 +1,86 @@
 # Arkafund Deployment Guide (Testnet)
 
-All commands, code, and docs are in English.
+This guide documents the current testnet deployment flow for the contract repository.
 
 ## Prerequisites
-- soroban-cli installed
-- Rust toolchain + wasm target: `rustup target add wasm32-unknown-unknown`
-- Admin key funded on the target network (for bootstrap)
 
-## 1) Build WASM artifacts
+- `stellar` CLI v23+
+- Rust toolchain with `wasm32-unknown-unknown`
+- funded testnet admin account
+- `jq`
+
+## 1) Build WASM Artifacts
+
 ```bash
-bash arkafund/scripts/build-wasm.sh
-ls arkafund/artifacts
+bash scripts/build-wasm.sh
+ls artifacts
 ```
 
-## 2) Deploy core contracts
+## 2) Deploy Core Contracts
+
 ```bash
 export NETWORK=testnet
-export RPC_URL=https://soroban-testnet.stellar.org
-export ADMIN_ADDRESS=G...
-export ADMIN_SECRET=S...
+export RPC_URL="https://soroban-testnet.stellar.org"
+export NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+export ADMIN_ADDRESS="G..."
+export ADMIN_SECRET="S..."
 
-bash arkafund/scripts/deploy.sh
-# Outputs deployments.testnet.json with contract IDs
+bash scripts/deploy.sh
 ```
 
-## 3) Deploy and initialize Governance (Script3 Votes + Governor)
+This writes `deployments.testnet.json` with the core contract IDs.
+
+## 3) Bootstrap Governance
+
+The current governance model uses `votes` plus `governor`, with a non-zero execution delay configured on the Governor.
+
 ```bash
-# Deploy Votes and Governor from artifacts
-bash arkafund/scripts/deploy-governor.sh
-
-# Initialize Votes (Admin mode) and Governor
-export COUNCIL_ADDRESS=$ADMIN_ADDRESS
-export PROPOSAL_THRESHOLD=1
-export VOTE_DELAY=0
-export VOTE_PERIOD=10
-export TIMELOCK=5
-export GRACE_PERIOD=20
-export QUORUM_BPS=1000
-export COUNTING_TYPE=5
-export VOTE_THRESHOLD_BPS=5000
-
-bash arkafund/scripts/init-governor.sh
+bash scripts/bootstrap-governance-user-admin.sh
 ```
 
-## 4) Initialize Factory with Arka logic
+This script:
+
+- deploys `votes.wasm`
+- deploys `governor.wasm`
+- initializes the votes contract
+- initializes the Governor with a non-zero execution delay
+- persists the resulting contract IDs and governance parameters to `deployments.testnet.json`
+
+## 4) Initialize the Factory
+
 ```bash
-# Optionally create the first Arka by adding CREATE_FIRST_ARKA=true
 export CREATE_FIRST_ARKA=false
-bash arkafund/scripts/init-factory.sh
+bash scripts/init-factory.sh
 ```
 
-## 5) Transfer Factory governor to Timelock (Script3)
-Deploy Script3 Governor + Timelock (external repo). Once you have the Timelock address:
+This installs the `arka.wasm` hash in the factory and sets the current implementation.
+
+## 5) Validate Live Flows
+
+The repository includes reproducible testnet validation helpers for the main public contract surface:
+
 ```bash
-export TIMELOCK_ADDRESS=G...
-bash arkafund/scripts/transfer-governor-to-timelock.sh
+bash scripts/e2e-governed-policy.sh
+bash scripts/e2e-arka-migration.sh
+bash scripts/e2e-coverage-vault.sh
+bash scripts/e2e-coverage-fund.sh
+bash scripts/e2e-manager-tier.sh
+bash scripts/e2e-adapter-balanced.sh
+bash scripts/e2e-adapter-blend.sh
+bash scripts/deploy-create-live-validation.sh
+bash scripts/deploy-deposit-redeem-live-validation.sh
+bash scripts/deploy-rebalance-live-validation.sh
+bash scripts/deploy-governance-live-validation.sh
+bash scripts/deploy-blend-live-validation.sh
 ```
 
-## 5) Configure Arka instance (after create_arka)
-- Call `init(denomination, fees, whitelist, manager)` on the Arka address
-- Then call `set_router(manager, routerAddress)`
+## 6) Contract IDs and Runbooks
 
-Note: CLI encoding for complex types (like `Asset` and `Vec<Asset>`) must follow Soroban CLI SCVal rules (JSON/SCVal). We recommend wiring a small helper script or using a TS/Rust client for this step.
+- Canonical deployment metadata: `deployments.testnet.json`
+- Canonical validation log: `docs/TRANCHE2_EXECUTION.md`
+- Governance model and flow: `docs/GOVERNANCE.md`
 
-## 6) Next steps
-- Integrate Script3 Governor proposals for `set_implementation` and `create_arka` calls via Timelock
-- Implement adapters with real protocol ABIs (start with Aquarius)
-- Add indexer and monitoring
+## Notes
 
-### Router & dApp config (Testnet)
-- Deploy internal `Router` exposing `execute()` (not a protocol router). Record its ID in `deployments.testnet.json`.
-- dApp `.env.local`:
-  - `NEXT_PUBLIC_SOROSWAP_ROUTER`: protocol router ID (for direct tests and adapter init).
-  - `NEXT_PUBLIC_ARKA_ROUTER`: internal Router ID (used by Arka during Create & Init).
-- If rebalance fails with SoroSwap due to nested auth, use the quick path and later migrate to non-root auth by assembling auth entries in the dApp.
-
-## Files
-- `scripts/build-wasm.sh` — builds all WASMs into `artifacts/`
-- `scripts/deploy.sh` — deploys `arka`, `arka-factory`, `router`
-- `scripts/deploy-governor.sh` — deploys `votes` and `governor`
-- `scripts/init-governor.sh` — initializes `votes` (admin) and `governor`
-- `scripts/init-factory.sh` — installs `arka.wasm` hash, sets governor (bootstrap), sets implementation, optional first Arka
-- `scripts/transfer-governor-to-timelock.sh` — hands Factory admin to Timelock
-
+- The current validation flow does not use a separate Timelock contract.
+- Some protocol integrations remain experimental and are not part of the current validated surface. See `docs/REPO_SCOPE.md`.

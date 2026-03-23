@@ -39,3 +39,8 @@ artifacts/
 
 # Local generated proposal artifacts
 scripts/js/.codex-dist/
+
+# Submission and review artifacts that should stay local
+/DELIVERABLE_FORM.md
+/docs/DELIVERABLE_VERIFICATION_FORM_RESPONSE.md
+/docs/DEMO_VIDEO_SCRIPT.md

@@ -77,5 +77,4 @@ if [[ "${CREATE_FIRST_ARKA:-false}" == "true" ]]; then
     --salt "$SALT_HEX"
 fi
 
-echo "✅ Factory initialized. Governor can later be moved to Timelock."
-
+echo "✅ Factory initialized."

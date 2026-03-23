@@ -126,7 +126,7 @@ mod test {
     }
 
     #[test]
-    fn test_execute_placeholder() {
+    fn test_execute_smoke() {
         let env = Env::default();
         let id = env.register_contract(None, AquariusAdapter);
         let client = AquariusAdapterClient::new(&env, &id);
@@ -139,5 +139,4 @@ mod test {
         assert_eq!(out, 42);
     }
 }
-
 

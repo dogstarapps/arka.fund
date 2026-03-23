@@ -1,148 +1,75 @@
-## Arka.fund – UI Spec (v0.1)
+## Arka.fund Product Surface Reference
 
-> Product context
->
-> Arka.fund is a non‑custodial protocol on Soroban that lets portfolio managers launch automated multi‑asset funds (Arkas) and retail users invest via a single participation token (SAC). The dApp covers: Arka creation, deposits/redemptions, atomic rebalancing via a multi‑AMM Router, dual coverage program, and DAO governance (Governor+Timelock).
+This file describes the user-facing surface aligned with the current validated contract set.
 
-### 1) Global UI/UX patterns
+## Current User Flows
 
-- Shared elements:
-  - Logo/Brand (top‑left)
-  - Currency selector (e.g., USDC) for denominating KPIs (TVL, AUM, share price)
-  - CONNECT WALLET button (top‑right and side panel). Network selector (Testnet/Mainnet)
-  - Right side panel: Discover, Arkas, Governance, Assets, Managers, Integrations, Dashboard
-  - Global search “Search Arkas” with typeahead
-  - Pagination component
-  - States: loading, empty, error, wallet not connected, unsupported network
-  - Units/format: thousands separators, currency, green/red percentages, relative timestamps
-  - Charts: range (1D/1W/6M/1Y/ALL), tooltip, time axis
-- Roles:
-  - Visitor: read‑only
-  - Investor: deposit/redeem, personal view
-  - Manager: create/configure Arka, policies/fees modules
-  - Governance: propose/vote
-- Data sources (high level):
-  - Soroban contracts: `ArkaFactory`, `Arka`, `Router`, `Adapters` (Aquarius, SoroSwap, Balanced, Blend), `Governor`, `Timelock`, `ArkaRegistry`
-  - Indexer & NAV API: NAV/share, TVL, AUM, aggregated returns, counters, events
+### Arkas
 
-### 2) Discover (Home)
+- list available Arkas
+- open an Arka detail page
+- inspect denomination, fee policy, whitelist, shares, and recent activity
 
-- Goal: overview and discovery of popular/curated/new Arkas
-- KPI header: Arkas count, TVL, Withdrawals/Deposits count, Managers count, Managers fees earned, Total Arkas profits, Protocol fees
-- Discovery tabs: Popular, Curated, New
-- Arka cards (grid): name, depositors, AUM, sparkline, share price + 24h change, CTA
+### Create Arka
 
-### 3) Arkas Leaderboard
+Manager flow for creating a new vault with:
 
-- Controls: currency selector, CONNECT WALLET, search
-- Table columns: Arka (name/manager), Managed (AUM), returns by period, Risk score, Points, Row action → detail
-- Features: sorting, pagination, filtering
+- denomination asset
+- fee structure
+- asset whitelist
+- manager-controlled settings exposed by the current flow
 
-### 4) Arka Detail
+### Deposit and Redeem
 
-- Top bar: currency selector, CONNECT WALLET, DEPOSIT button
-- Tabs: Overview, Portfolio, Financials, Fees, Policies, Depositors, Activity, My Deposit
-- Overview: AUM, Depositors, Avg Monthly Return, Denomination asset, main chart (NAV/share)
-- Portfolio: composition by asset (code, issuer, weight, amount, valuation, sparkline)
-- Financials: AUM, TVL, fees paid (manager/protocol), PnL total/by period (CSV export)
-- Fees: management/performance/entry/exit fees, splits, accrual cadence
-- Policies: asset whitelist, share transferability (free/permit‑list), deposit caps (per tx/wallet/window) and global cap, redemptions (notice/cooldown/exit‑fee), coverage lock
-- Depositors: table (wallet, shares, value, since, last action)
-- Activity: on‑chain feed (DEPOSIT, REDEEM, REBALANCE, FEE_CHARGED, POLICY_UPDATE, …)
-- My Deposit: my_shares, avg_entry_price, current_value, pnl_%/abs, actions: Deposit, Redeem
+Depositors can:
 
-### 5) Create Arka – Wizard (Manager)
+- deposit supported assets
+- receive Arka shares
+- redeem shares back into the vault denomination flow
 
-- Steps: Before you start → Basics → Fees → Shares transferability → Deposits → Redemptions → Assets management → Review
-- Basics: Name, Symbol (SAC), Denomination asset(s)
-- Fees: Management %/y, Performance %, Entry/Exit %, splits, cadence
-- Shares transferability: freely transferable vs permit‑listed
-- Deposits: permit‑list of depositors, min/max per deposit, reject all, global cap
-- Redemptions: notice/cooldown/exit‑fee window, max slippage on liquidation path
-- Assets management: whitelist, rebalance cadence, router, slippage tolerances, coverage lock %, CCF params
-- Review: summary + gas/tx estimate; actions: `ArkaFactory.create_arka`, post‑init setters
+### Rebalance
 
-### 6) Assets (explorer)
+The current validated rebalance surface covers:
 
-- Table: asset_code+issuer, supply/held, 24h change, price, price 24h change, AUM exposure; controls: currency selector, search, pagination
+- SoroSwap
+- Aquarius
+- Balanced
 
-### 7) Integrations
+These flows are reflected in the Arka detail view and use the contract-layer adapters and router wiring exposed by this repository.
 
-- Partners grid (logo + details): Blend, SoroSwap, Aquarius, Balanced, Phoenix, Comet, etc.
-- Tile shows if adapter is active; links to external details
+### Credit Positions
 
-### 8) Governance (DAO)
+The current validated credit-position surface is backed by Blend and includes:
 
-- Tabs: Overview, Members, Proposals (primary)
-- Left panel (proposals list): id, title, submitted ago, status; actions: Approve/Reject
-- Right panel: counters, user voting power (delegate), stats
-- Contracts: Script3 `Governor` + `Timelock`. Current tranche: Governor controls `ArkaFactory` admin via Timelock. Next: governed setters in `Arka`.
+- supply collateral
+- borrow
+- repay
+- withdraw collateral
+- read market status and risk-policy information
 
-### 9) Dashboard (user)
+### Coverage
 
-- Tabs: My deposits, My Arkas, Activity
-- Header: Total Portfolio Value + change; chart with ranges
-- Table: name, all‑time/this‑month/7d sparkline, share price, shares, value; summary totals
+The current product surface includes:
 
-### 10) Deposits – Policies (wizard)
+- coverage-vault manager lock mechanics
+- community coverage-fund staking and claiming flows
 
-- Modules: Limit wallets permitted to deposit (permit‑list), Deposit limits (min/max, reject all). Banner: restrictive nature of policies
+### Governance
 
-### 11) Managers Leaderboard
+The current governance UI surface is aligned with:
 
-- Table: Rank, Manager (handle/avatar/level), Level int, Arkas count, AUM total, Joined, Total Return %, Fees earned total; sorting, pagination, search
+- `votes`
+- `governor`
+- Governor execution delay
 
-### 12) Router & Rebalance (functional logic reflected in UI)
+The validated flow is `propose -> vote -> close -> execute`.
 
-- Atomic Rebalancing Router: UI shows best‑path across Aquarius/SoroSwap/Balanced/Blend with slippage guard; Activity logs
-- Slippage limit editable per Arka/policy
-- Pre‑trade checks: per‑hop quotes with fallback path
+## Related Capabilities Not Covered Here
 
-### 13) Coverage (Dual Coverage System)
+The following items may appear in planning material, but they are not part of the current surface described here:
 
-- Managers: coverage lock % (vault insurance)
-- Users: Community Coverage Fund (staking with yield)
-- UI: indicators in Overview/Policies and deposit/withdraw module for the fund
-
-### 14) Security, states, validations
-
-- Wallet connection & network checks
-- Limits: min/max, caps, allowlists
-- Temporal locks: cooldowns, notice periods
-- Errors: actionable messages (retry, slippage, insufficient funds, missing approval)
-
-### 15) Telemetry & metrics
-
-- Indexer & NAV API latency < 200 ms (Tranche 3); monitoring & alerting
-
-### 16) Screen → contracts/events mapping
-
-- Discover/Leaderboards: `ArkaFactory`, `Arka` → `ArkaCreated`, `Deposit`, `Redeem`, `FeeCharged`
-- Arka Detail: `Arka` → `Rebalance`, `PolicyUpdated`, `CoverageLocked`
-- Wizard: `ArkaFactory`, `Arka` → `ArkaCreated`, `ParamSet`
-- Integrations: `Router`, `Adapters` → `SwapExecuted`, `RouteQuoted`
-- Governance: `Governor`, `Timelock` → `ProposalCreated`, `VoteCast`, `ProposalExecuted`
-- Dashboard: `Arka`, `SAC` → `Deposit`, `Redeem`
-
-### 17) Acceptance checklist (MVP)
-
-- Discover: KPIs from indexer; Popular/Curated/New lists with pagination
-- Arkas Leaderboard: sortable columns; risk/points badges
-- Arka Detail: Overview + chart; tabs Portfolio/Financials/Fees/Policies/Depositors/Activity/My Deposit
-- Wizard: Basics, Fees, Transferability, Deposits, Redemptions, Assets mgmt, Review
-- Assets: price + AUM table
-- Integrations: grid with adapter status
-- Governance: proposals list + actions; Delegation
-- Dashboard: portfolio chart + positions + KPIs
-- Managers: ranking with Level/Tier and metrics
-
-### 18) Glossary
-
-- Arka: tokenized automated multi‑asset fund (SAC)
-- SAC: Share Asset Class – the Arka participation token
-- AUM/TVL: assets under management / total value locked
-- NAV/share: net asset value per participation
-- Router/Adapter: multi‑hop routing engine and protocol connectors
-- Governor/Timelock: governance contracts with execution delay
-- Coverage lock: % of assets locked as insurance
-
+- indexer-backed leaderboards
+- profit ranking across Arkas
+- public NAV API
+- broad protocol coverage beyond the validated set
+- a separate Timelock deployment model

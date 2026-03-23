@@ -49,10 +49,10 @@
   - Input `100`, output `97` (meets slippage ≤ 0.5% target at small size; verify with larger sizes as needed).
 
 ### E2E performed (Aquarius)
-- Fee token (AQUA) acquired vía swap XLM→AQUA en Aquarius; trustline clásica AQUA creada en `holder`.
-- Pool ARKA1/ARKA2 creado y liquidez inicial añadida (5,000 / 5,000); LP minted: 5,000.
-- Swap test en router directo (ARKA1 → ARKA2): in `1,000`, out `831`.
-- Swap test vía `adapter-aquarius` (`swap_with_tokens`): in `200`, out `133`.
+- Fee token (AQUA) acquired through an XLM → AQUA swap on Aquarius; a classic AQUA trustline was created for `holder`.
+- ARKA1/ARKA2 pool created and seeded with initial liquidity (5,000 / 5,000); LP minted: 5,000.
+- Direct router swap test (ARKA1 → ARKA2): in `1,000`, out `831`.
+- Adapter-driven swap test through `adapter-aquarius` (`swap_with_tokens`): in `200`, out `133`.
 
 ### Quick reference commands
 ```bash
@@ -89,8 +89,8 @@ stellar contract invoke --id "CCMAPXWVZD4USEK..." --network testnet --source-acc
 
 ### Pending to complete Tranche 1
 - **Aquarius**
-  - Script de init/ops (fee query, pool create, deposit, swap) y README snippets.
-  - Validar slippage objetivo a tamaños mayores; monitor de pools.
+  - Init and ops script coverage (fee query, pool create, deposit, swap) and README snippets.
+  - Validate target slippage at larger trade sizes and monitor pool behavior.
 
 - **SoroSwap**
   - Adapter admin setup: use `scripts/soroswap/adapter_admin.sh` to set router and path.
@@ -110,5 +110,4 @@ stellar contract invoke --id "CCMAPXWVZD4USEK..." --network testnet --source-acc
   - Finalize `deployments.testnet.json` updates as new components deploy (Aquarius, Arka, Factory).
   - Expand README with env vars and deployment steps.
   - Add basic CI for build and tests.
-
 

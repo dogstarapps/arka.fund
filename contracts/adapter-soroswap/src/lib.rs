@@ -101,6 +101,14 @@ mod test {
     use soroban_sdk::{testutils::Address as _, Env, Address, contract, contractimpl};
 
     #[contract]
+    struct DummyToken;
+    #[contractimpl]
+    impl DummyToken {
+        pub fn approve(_env: Env, _from: Address, _spender: Address, _amount: i128, _expiration: u32) {}
+        pub fn transfer(_env: Env, _from: Address, _to: Address, _amount: i128) {}
+    }
+
+    #[contract]
     struct DummyRouter;
     #[contractimpl]
     impl DummyRouter {
@@ -112,14 +120,14 @@ mod test {
     }
 
     #[test]
-    fn test_execute_placeholder() {
+    fn test_execute_smoke() {
         let env = Env::default();
         let id = env.register_contract(None, SoroSwapAdapter);
         let client = SoroSwapAdapterClient::new(&env, &id);
         let admin = Address::generate(&env);
         let router = env.register_contract(None, DummyRouter);
-        let token_a = Address::generate(&env);
-        let token_b = Address::generate(&env);
+        let token_a = env.register_contract(None, DummyToken);
+        let token_b = env.register_contract(None, DummyToken);
         let path = Vec::from_array(&env, [token_a, token_b]);
         client.init(&admin, &router, &path);
         let caller = Address::generate(&env);
@@ -128,4 +136,3 @@ mod test {
         assert!(out >= 21);
     }
 }
-

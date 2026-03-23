@@ -1,0 +1,32 @@
+[workspace]
+members = [
+    "arka",
+    "arka-factory",
+    "arka-registry",
+    "router",
+    "adapter-aquarius",
+    "adapter-soroswap",
+    "adapter-phoenix",
+    "adapter-comet",
+    "adapter-balanced",
+    "balanced-router-mock",
+    "adapter-blend",
+    "blend-router-mock",
+    "coverage-vault",
+    "coverage-fund",
+    "manager-tier",
+    "governance-token",
+    "test-token",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+version = "0.1.0"
+authors = ["Arka.fund Team"]
+
+[workspace.dependencies]
+soroban-sdk = { version = "23.0.0" }
+
+

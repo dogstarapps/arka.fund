@@ -1,0 +1,23 @@
+[package]
+name = "arka"
+description = "ArkaLogic: core Soroban contract for Arkafund"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+adapter-blend = { path = "../adapter-blend" }
+blend-router-mock = { path = "../blend-router-mock" }
+
+[features]
+default = []
+testutils = ["soroban-sdk/testutils"]
+
+

@@ -1,0 +1,18 @@
+{
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "run-proposal": "node --loader ts-node/esm proposeSnapshot.ts",
+    "propose-arka-set-fees": "node --loader ts-node/esm proposeArkaSetFees.ts",
+    "propose-factory-set-implementation": "node --loader ts-node/esm proposeFactorySetImplementation.ts",
+    "propose-factory-set-share-token-implementation": "node --loader ts-node/esm proposeFactorySetShareTokenImplementation.ts",
+    "propose-factory-migrate-arka": "node --loader ts-node/esm proposeFactoryMigrateArka.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^13.1.0"
+  }
+}

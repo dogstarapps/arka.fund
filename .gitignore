@@ -1,0 +1,46 @@
+# System / editor
+.DS_Store
+*.log
+
+# Environments
+.env
+.env.*
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds / caches
+dist/
+build/
+out/
+tmp/
+.cache/
+*.tsbuildinfo
+
+# Heavy assets (keep them out of this repo)
+# Media moved out of the contracts repo
+/arkafund-assets/
+
+/plan.md
+
+# Vendored dependencies (if not using submodules)
+vendor/
+
+# Rust build artifacts
+/contracts/target/
+**/target/
+artifacts/
+*.wasm
+*.tmp
+
+# Local generated proposal artifacts
+scripts/js/.codex-dist/
+
+# Submission and review artifacts that should stay local
+/DELIVERABLE_FORM.md
+/docs/DELIVERABLE_VERIFICATION_FORM_RESPONSE.md
+/docs/DEMO_VIDEO_SCRIPT.md

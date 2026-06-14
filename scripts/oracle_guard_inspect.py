@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+import ast
+import json
+import re
+import subprocess
+import sys
+import time
+
+
+def extract_json(raw: str) -> dict:
+    raw = raw.strip()
+    if not raw:
+        raise ValueError("empty output")
+
+    candidates = [raw]
+    lines = [line.strip() for line in raw.splitlines() if line.strip()]
+    if lines:
+        candidates.append(lines[-1])
+    for candidate in list(candidates):
+        if candidate.startswith('"') and candidate.endswith('"'):
+            candidates.append(candidate[1:-1])
+        if "{" in candidate and "}" in candidate:
+            inner = candidate[candidate.find("{"):candidate.rfind("}") + 1]
+            candidates.append(inner)
+            candidates.append(re.sub(r'([A-Za-z_][A-Za-z0-9_]*)\s*:', r'"\1":', inner))
+
+    for candidate in candidates:
+        for parser in (
+            lambda value: json.loads(value),
+            lambda value: ast.literal_eval(value),
+        ):
+            try:
+                parsed = parser(candidate)
+            except Exception:
+                continue
+            if isinstance(parsed, dict):
+                return parsed
+            if isinstance(parsed, str):
+                try:
+                    reparsed = json.loads(parsed)
+                except Exception:
+                    continue
+                if isinstance(reparsed, dict):
+                    return reparsed
+
+    raise ValueError(f"could not parse json from output: {raw}")
+
+
+def main() -> int:
+    if len(sys.argv) != 6:
+        raise SystemExit(
+            "usage: oracle_guard_inspect.py <contract_id> <source_account> <rpc_url> <network_passphrase> <asset_id>"
+        )
+
+    contract_id, source_account, rpc_url, network_passphrase, asset_id = sys.argv[1:]
+    attempts = 10
+    last_output = ""
+
+    for _ in range(attempts):
+        proc = subprocess.run(
+            [
+                "stellar",
+                "contract",
+                "invoke",
+                "--id",
+                contract_id,
+                "--source-account",
+                source_account,
+                "--rpc-url",
+                rpc_url,
+                "--network-passphrase",
+                network_passphrase,
+                "--send=default",
+                "--",
+                "inspect_stellar",
+                "--asset",
+                asset_id,
+            ],
+            capture_output=True,
+            text=True,
+        )
+        combined = "\n".join(part for part in (proc.stdout.strip(), proc.stderr.strip()) if part).strip()
+        last_output = combined
+        if proc.returncode == 0:
+            try:
+                inspection = extract_json(combined)
+            except ValueError:
+                time.sleep(4)
+                continue
+            print(json.dumps(inspection))
+            return 0
+        time.sleep(4)
+
+    print(last_output or "oracle guard inspection produced no output", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

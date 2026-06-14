@@ -1,0 +1,23 @@
+[package]
+name = "governance-executor"
+description = "Queued governance executor with separate timelock semantics"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+governance-token = { path = "../governance-token", features = ["testutils"] }
+coverage-fund = { path = "../coverage-fund", features = ["testutils"] }
+arka = { path = "../arka", features = ["testutils"] }
+arka-factory = { path = "../arka-factory", features = ["testutils"] }
+
+[features]
+default = []
+testutils = ["soroban-sdk/testutils"]

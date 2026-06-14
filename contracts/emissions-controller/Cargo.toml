@@ -1,0 +1,23 @@
+[package]
+name = "emissions-controller"
+description = "Governed ARKA emissions and treasury distribution controller"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+arka-token = { path = "../arka-token", features = ["testutils"] }
+arka-vesting = { path = "../arka-vesting", features = ["testutils"] }
+governance-executor = { path = "../governance-executor", features = ["testutils"] }
+locked-arka = { path = "../locked-arka", features = ["testutils"] }
+
+[features]
+default = []
+testutils = ["soroban-sdk/testutils"]

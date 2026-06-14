@@ -27,7 +27,7 @@
   - Tx: init `023a095f2415c4fcc2da8b7588c8539348481a168b8b97136cc121aa8070de91`, set_path `0d21e28bd9571a12a9cf2fbb9f7c91bb56a9dbfa9a3283f2daa4c91837ad68b3`
 - **Aquarius**:
   - `aquariusRouter`: `CBCFTQSPDBAIZ6R6PJQKSQWKNKWH2QIV3I4J72SHWBIK3ADRRAM5A6GD`
-  - `adapterAquarius`: `CANPOLXWOTJHKDMIECWZ66IRWX2EEXMTIBF7FFA2WH5DAJVSUDL243BM`
+  - `adapterAquarius`: `CAXDNAIFLSVSF6QH6BJIXDV75LVSHTKHETC5QWQQIRKDMIUAB4J4U7QK`
   - Pool (ARKA1/ARKA2):
     - Index: `9ac7a9cde23ac2ada11105eeaa42e43c2ea8332ca0aa8f41f58d7160274d718e`
     - ID: `CB35RQL35KRDX5QELZWWK6ANR6SB76OYDUUFOHX37SYFESUNE6O3EOGE`
@@ -110,4 +110,3 @@ stellar contract invoke --id "CCMAPXWVZD4USEK..." --network testnet --source-acc
   - Finalize `deployments.testnet.json` updates as new components deploy (Aquarius, Arka, Factory).
   - Expand README with env vars and deployment steps.
   - Add basic CI for build and tests.
-

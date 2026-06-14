@@ -2,6 +2,14 @@
 
 This file describes the user-facing surface aligned with the current validated contract set.
 
+For the current economic product UI, selector/dropdown policy and validation gaps, see `../arkafund-dapp/docs/PRODUCT_ECONOMIC_UI_REQUIREMENTS_2026-06-02.md`.
+
+## Global Input Policy
+
+User-facing product and manager flows must not ask users to type contract IDs, issuers, router IDs, adapter IDs or market IDs when the selected value already exists or must exist in the registry/catalog. Those values must be chosen through dropdowns, searchable selects, card selectors or typeaheads backed by the asset registry, Arka registry, venue model, oracle feed registry or configured market catalog.
+
+Manual contract/XDR/hash input is allowed only in Advanced Console/operator surfaces such as Contracts and Migrations. Public and manager flows should post canonical IDs internally while showing asset symbols, names, venue labels, manager labels and provenance to the user.
+
 ## Current User Flows
 
 ### Arkas
@@ -33,7 +41,6 @@ The current validated rebalance surface covers:
 
 - SoroSwap
 - Aquarius
-- Balanced
 
 These flows are reflected in the Arka detail view and use the contract-layer adapters and router wiring exposed by this repository.
 

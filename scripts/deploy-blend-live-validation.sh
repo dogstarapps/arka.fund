@@ -17,10 +17,11 @@ BLEND_MIN_HEALTH_FACTOR="${BLEND_MIN_HEALTH_FACTOR:-12500000}"
 ARKA_WASM_PATH="${ARKA_WASM_PATH:-$ROOT_DIR/artifacts/arka.live.optimized.wasm}"
 ADAPTER_WASM_PATH="${ADAPTER_WASM_PATH:-$ROOT_DIR/artifacts/adapter-blend.live.optimized.wasm}"
 OUT_JSON="${OUT_JSON:-$ROOT_DIR/tmp/blend-live-validation.json}"
+JS_DIR="$ROOT_DIR/scripts/js"
 
 mkdir -p "$(dirname "$OUT_JSON")"
 
-if [[ ! -f "$ARKA_WASM_PATH" || ! -f "$ADAPTER_WASM_PATH" ]]; then
+if [[ ! -f "$ARKA_WASM_PATH" || ! -f "$ADAPTER_WASM_PATH" || ! -f "$JS_DIR/configureCreditMarket.ts" ]]; then
   echo "ERROR: missing wasm artifacts. Build arka and adapter-blend first." >&2
   exit 1
 fi
@@ -114,21 +115,25 @@ stellar contract invoke \
   --fail_close_actions true >/dev/null
 
 echo "7) Configure credit market registry"
-stellar contract invoke \
-  --id "$ARKA_ID" \
-  --source-account "$ADMIN_SECRET" \
-  --rpc-url "$RPC_URL" \
-  --network-passphrase "$NETWORK_PASSPHRASE" \
-  --send=yes -- configure_credit_market \
-  --caller "$ADMIN_ADDR" \
-  --protocol '["Blend"]' \
-  --market_id 0 \
-  --adapter "$ADAPTER_ID" \
-  --allow_supply true \
-  --allow_borrow true \
-  --allow_repay true \
-  --allow_withdraw true \
-  --enabled true >/dev/null
+(
+  cd "$JS_DIR"
+  ARKA_CONTRACT_ID="$ARKA_ID" \
+  ADMIN_SECRET="$ADMIN_SECRET" \
+  CALLER_ADDRESS="$ADMIN_ADDR" \
+  ADAPTER_CONTRACT_ID="$ADAPTER_ID" \
+  RPC_URL="$RPC_URL" \
+  NETWORK_PASSPHRASE="$NETWORK_PASSPHRASE" \
+  CREDIT_PROTOCOL="Blend" \
+  MARKET_ID="0" \
+  ALLOW_SUPPLY="true" \
+  ALLOW_BORROW="true" \
+  ALLOW_REPAY="true" \
+  ALLOW_WITHDRAW="true" \
+  ENABLED="true" \
+  TS_NODE_TRANSPILE_ONLY=1 \
+  TS_NODE_COMPILER_OPTIONS='{"module":"nodenext","moduleResolution":"nodenext","allowImportingTsExtensions":true}' \
+    node --loader ts-node/esm configureCreditMarket.ts >/dev/null
+)
 
 echo "8) Execute Blend live validation"
 ARKA_ID="$ARKA_ID" \

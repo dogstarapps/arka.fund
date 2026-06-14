@@ -1,6 +1,6 @@
 [package]
 name = "adapter-balanced"
-description = "Adapter for Balanced AMM"
+description = "Canonical Balanced AMM adapter with generic supported-pool routing"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
@@ -17,6 +17,4 @@ soroban-sdk = { workspace = true, features = ["testutils"] }
 [features]
 default = []
 testutils = ["soroban-sdk/testutils"]
-
-
 

@@ -5,6 +5,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 DEPLOY_JSON="$ROOT_DIR/deployments.${NETWORK:-testnet}.json"
+REBALANCE_JSON="${REBALANCE_JSON:-$ROOT_DIR/tmp/rebalance-live-validation.json}"
 NETWORK_NAME="${NETWORK:-testnet}"
 HOLDER_ALIAS="${HOLDER_ALIAS:-arka-holder}"
 
@@ -13,12 +14,23 @@ if [[ ! -f "$DEPLOY_JSON" ]]; then
 fi
 
 read_json() { jq -r "$1" "$DEPLOY_JSON"; }
+read_optional_json() {
+  local file_path="$1"
+  local query="$2"
+  [[ -f "$file_path" ]] || return 0
+  jq -er "$query // empty" "$file_path" 2>/dev/null || true
+}
 
-ROUTER_ID=$(read_json '.contracts.soroswapRouter')
-FACTORY_ID=$(read_json '.contracts.soroswapFactory')
-TOKEN_A=$(read_json '.tokens.ARKA1')
-TOKEN_B=$(read_json '.tokens.ARKA2')
+ROUTER_ID="${ROUTER_ID_OVERRIDE:-$(read_optional_json "$REBALANCE_JSON" '.soroswapRouter')}"
+FACTORY_ID="${FACTORY_ID_OVERRIDE:-$(read_optional_json "$REBALANCE_JSON" '.soroswapFactory')}"
+TOKEN_A="${TOKEN_A_OVERRIDE:-$(read_optional_json "$REBALANCE_JSON" '.tokenIn')}"
+TOKEN_B="${TOKEN_B_OVERRIDE:-$(read_optional_json "$REBALANCE_JSON" '.tokenOut')}"
 HOLDER_PUB=$(stellar keys public-key "$HOLDER_ALIAS" | tr -d '\n')
+
+ROUTER_ID="${ROUTER_ID:-$(read_json '.contracts.soroswapRouter')}"
+FACTORY_ID="${FACTORY_ID:-$(read_json '.contracts.soroswapFactory')}"
+TOKEN_A="${TOKEN_A:-$(read_json '.tokens.ARKA1')}"
+TOKEN_B="${TOKEN_B:-$(read_json '.tokens.ARKA2')}"
 
 echo "🌐 Network: $NETWORK_NAME"
 echo "👤 Holder:  $HOLDER_ALIAS ($HOLDER_PUB)"
@@ -28,9 +40,9 @@ echo "🪙 Tokens:  ARKA1=$TOKEN_A  ARKA2=$TOKEN_B"
 
 echo "💼 Approving allowances to router..."
 stellar contract invoke --id "$TOKEN_A" --network "$NETWORK_NAME" --source-account "$HOLDER_ALIAS" --send yes -- approve \
-  --from "$HOLDER_PUB" --spender "$ROUTER_ID" --amount 10000000 --expiration_ledger 3000000 >/dev/null
+  --owner "$HOLDER_PUB" --spender "$ROUTER_ID" --amount 10000000 >/dev/null
 stellar contract invoke --id "$TOKEN_B" --network "$NETWORK_NAME" --source-account "$HOLDER_ALIAS" --send yes -- approve \
-  --from "$HOLDER_PUB" --spender "$ROUTER_ID" --amount 10000000 --expiration_ledger 3000000 >/dev/null
+  --owner "$HOLDER_PUB" --spender "$ROUTER_ID" --amount 10000000 >/dev/null
 
 echo "🏗️  Adding liquidity (may create pair if needed)..."
 DEADLINE=$(($(date +%s)+1800))
@@ -47,9 +59,5 @@ stellar contract invoke --id "$ROUTER_ID" --network "$NETWORK_NAME" --source-acc
   --to "$HOLDER_PUB" --deadline "$DEADLINE"
 
 echo "✅ SoroSwap E2E completed"
-
-
-
-
 
 

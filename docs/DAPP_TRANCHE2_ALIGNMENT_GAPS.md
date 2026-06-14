@@ -1,18 +1,25 @@
 # dApp Tranche 2 Alignment Status
 
+Historical correction, `2026-03-30`:
+- the earlier note that treated `Balanced` as part of the active Arka manager workflow is superseded
+- the current supported AMM surface is `Aquarius + SoroSwap`
+- `Blend` remains the active vault-owned credit workflow
+- the retired Balanced/Comet lane should not be used as a current support claim
+- the repository now records that status explicitly under `validations.balancedReadiness`, so the dApp can explain why the historical Balanced lane is blocked instead of failing opaquely
+
 This note captures the dApp-side closure state after the final Blend vault integration work.
 
 ## Closed items
 
-### 1. Balanced is part of the main Arka manager workflow
+### 1. Supported AMMs are part of the main Arka manager workflow
 
-The manager-facing Arka page exposes `Balanced` directly in the rebalance selector.
+The manager-facing Arka page exposes the currently supported AMM routes directly in the rebalance selector.
 
 Relevant UI:
 - `arkafund-dapp/src/app/arkas/[id]/page.tsx`
 
 Implementation note:
-- `Balanced` continues to use the `Arka.rebalance(...)` path through the configured adapter and pool id.
+- `Aquarius` and `SoroSwap` continue to run from the canonical Arka execution workflow.
 
 ### 2. Blend is now a vault-owned position in the main Arka workflow
 
@@ -45,7 +52,7 @@ Relevant UI:
 
 Implementation note:
 - the create page includes a protocol intent selector for the next post-create action
-- the success state tells the manager whether the next step is `Balanced`, `Blend`, or generic Tranche 2 setup
+- the success state tells the manager whether the next step is `Blend` or generic rebalance setup
 
 ### 4. Governance defaults align with the live closure environment
 
@@ -77,7 +84,7 @@ Future work is hardening, not alignment:
 ## Practical closure statement
 
 For Tranche 2 scope at the dApp level, the previously open alignment gaps are closed:
-1. `Balanced` is in the main Arka manager workflow
+1. `Aquarius` and `SoroSwap` are in the main Arka manager workflow
 2. `Blend` is in the main Arka manager workflow as a vault-owned position
 3. the create flow makes protocol timing explicit
 4. governance defaults align with the live environment

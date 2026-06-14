@@ -29,9 +29,7 @@ The current testnet validation matrix covers:
 - `contracts/manager-tier`
 - `contracts/adapter-aquarius`
 - `contracts/adapter-soroswap`
-- `contracts/adapter-balanced`
 - `contracts/adapter-blend`
-- `contracts/balanced-router-mock`
 - `contracts/blend-router-mock`
 
 ## Governance Model
@@ -48,10 +46,12 @@ The current testnet flow does not rely on a separate Timelock deployment.
 
 The following contracts remain in the workspace for future integration work, but they are not part of the current validated matrix:
 
-- `contracts/adapter-comet`
 - `contracts/adapter-phoenix`
 
-These adapters are kept for future protocol work and should not be treated as finished integrations.
+The following contracts remain in the repository only as retired historical harnesses and should not be treated as supported integrations:
+
+- `contracts/adapter-balanced`
+- `contracts/balanced-router-mock`
 
 ## Earlier Execution Notes
 

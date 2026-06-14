@@ -8,12 +8,15 @@ NETWORK_NAME="${NETWORK_NAME:-testnet}"
 MANAGER_IDENTITY="${MANAGER_IDENTITY:-arka-holder}"
 ADMIN_IDENTITY="${ADMIN_IDENTITY:-arka-admin}"
 AQUARIUS_ROUTER_ID="${AQUARIUS_ROUTER_ID:-CBCFTQSPDBAIZ6R6PJQKSQWKNKWH2QIV3I4J72SHWBIK3ADRRAM5A6GD}"
+SOROSWAP_ROUTER_ID="${SOROSWAP_ROUTER_ID:-CCJUD55AG6W5HAI5LRVNKAE5WDP5XGZBUDS5WNTIVDU7O264UZZE7BRD}"
+SOROSWAP_FACTORY_ID="${SOROSWAP_FACTORY_ID:-CDP3HMUH6SMS3S7NPGNDJLULCOXXEPSHY4JKUKMBNQMATHDHWXRRJTBY}"
 ARKA_WASM_PATH="${ARKA_WASM_PATH:-$ROOT_DIR/artifacts/arka.live.optimized.wasm}"
 TOKEN_WASM_PATH="${TOKEN_WASM_PATH:-$ROOT_DIR/artifacts/test-token.wasm}"
 MINT_AMOUNT="${MINT_AMOUNT:-20000000}"
 LIQUIDITY_AMOUNT="${LIQUIDITY_AMOUNT:-5000000}"
 SWAP_AMOUNT="${SWAP_AMOUNT:-100000}"
 OUT_JSON="${OUT_JSON:-$ROOT_DIR/tmp/rebalance-live-validation.json}"
+APPROVAL_EXPIRATION_LEDGER="${APPROVAL_EXPIRATION_LEDGER:-3000000}"
 
 mkdir -p "$(dirname "$OUT_JSON")"
 
@@ -60,6 +63,19 @@ admin_invoke() {
 
 trim_quotes() {
   tr -d '"'
+}
+
+approve_token() {
+  local token_id="$1"
+  local spender="$2"
+  local amount="$3"
+  invoke \
+    "$token_id" \
+    --send=yes -- approve \
+    --owner "$MANAGER_ADDR" \
+    --spender "$spender" \
+    --amount "$amount" \
+    --expiration_ledger "$APPROVAL_EXPIRATION_LEDGER" >/dev/null
 }
 
 parse_first_pool_key() {
@@ -168,12 +184,7 @@ if [[ -z "$POOL_INDEX" ]]; then
 fi
 
 for token in "$TOKEN_A" "$TOKEN_B"; do
-  invoke \
-    "$token" \
-    --send=yes -- approve \
-    --owner "$MANAGER_ADDR" \
-    --spender "$AQUARIUS_ROUTER_ID" \
-    --amount "$LIQUIDITY_AMOUNT" >/dev/null
+  approve_token "$token" "$AQUARIUS_ROUTER_ID" "$LIQUIDITY_AMOUNT"
 done
 
 invoke \
@@ -185,7 +196,25 @@ invoke \
   --user "$MANAGER_ADDR" \
   --pool_index "$POOL_INDEX" >/dev/null
 
-echo "7) Deploy and init Arka"
+echo "7) Create SoroSwap pair and add liquidity"
+for token in "$TOKEN_A" "$TOKEN_B"; do
+  approve_token "$token" "$SOROSWAP_ROUTER_ID" "$LIQUIDITY_AMOUNT"
+done
+
+SOROSWAP_DEADLINE="$(($(date +%s)+1800))"
+invoke \
+  "$SOROSWAP_ROUTER_ID" \
+  --send=yes -- add_liquidity \
+  --token_a "$TOKEN_A" \
+  --token_b "$TOKEN_B" \
+  --amount_a_desired "$LIQUIDITY_AMOUNT" \
+  --amount_b_desired "$LIQUIDITY_AMOUNT" \
+  --amount_a_min 1 \
+  --amount_b_min 1 \
+  --to "$MANAGER_ADDR" \
+  --deadline "$SOROSWAP_DEADLINE" >/dev/null
+
+echo "8) Deploy and init Arka"
 ARKA_ID="$(deploy_contract "$ARKA_WASM_PATH")"
 WHITELIST_JSON="$(jq -cn --arg a "$TOKEN_A" --arg b "$TOKEN_B" '[$a, $b]')"
 admin_invoke \
@@ -204,7 +233,8 @@ invoke \
   --send=yes -- approve \
   --owner "$MANAGER_ADDR" \
   --spender "$ARKA_ID" \
-  --amount "$MINT_AMOUNT" >/dev/null
+  --amount "$MINT_AMOUNT" \
+  --expiration_ledger "$APPROVAL_EXPIRATION_LEDGER" >/dev/null
 
 BEFORE_OUT_BALANCE="$(
   invoke "$ARKA_ID" -- liquid_balance --asset "$TOKEN_B" | tail -n1 | trim_quotes
@@ -213,13 +243,8 @@ BEFORE_IN_BALANCE="$(
   invoke "$ARKA_ID" -- liquid_balance --asset "$TOKEN_A" | tail -n1 | trim_quotes
 )"
 
-echo "8) Execute Aquarius wallet swap + deposit-to-Arka flow"
-invoke \
-  "$TOKEN_A" \
-  --send=yes -- approve \
-  --owner "$MANAGER_ADDR" \
-  --spender "$AQUARIUS_ROUTER_ID" \
-  --amount "$SWAP_AMOUNT" >/dev/null
+echo "9) Execute Aquarius wallet swap + deposit-to-Arka flow"
+approve_token "$TOKEN_A" "$AQUARIUS_ROUTER_ID" "$SWAP_AMOUNT"
 
 WALLET_OUT_BEFORE="$(
   invoke "$TOKEN_B" -- balance --owner "$MANAGER_ADDR" | tail -n1 | trim_quotes
@@ -270,6 +295,9 @@ cat >"$OUT_JSON" <<JSON
   "manager": "$MANAGER_ADDR",
   "protocol": "AQUARIUS",
   "router": "$AQUARIUS_ROUTER_ID",
+  "aquariusRouter": "$AQUARIUS_ROUTER_ID",
+  "soroswapRouter": "$SOROSWAP_ROUTER_ID",
+  "soroswapFactory": "$SOROSWAP_FACTORY_ID",
   "tokenIn": "$TOKEN_A",
   "tokenOut": "$TOKEN_B",
   "poolIndex": "$POOL_INDEX",

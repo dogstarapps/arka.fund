@@ -20,6 +20,8 @@ out/
 tmp/
 .cache/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
 
 # Heavy assets (keep them out of this repo)
 # Media moved out of the contracts repo

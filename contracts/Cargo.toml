@@ -1,21 +1,30 @@
 [workspace]
 members = [
+    "arka-vesting",
+    "arka-token",
     "arka",
     "arka-factory",
     "arka-registry",
+    "emissions-controller",
+    "oracle-guard",
     "router",
+    "venue-registry",
     "adapter-aquarius",
     "adapter-soroswap",
     "adapter-phoenix",
-    "adapter-comet",
     "adapter-balanced",
-    "balanced-router-mock",
     "adapter-blend",
     "blend-router-mock",
     "coverage-vault",
     "coverage-fund",
+    "claims-manager",
+    "governance-executor",
+    "locked-arka",
     "manager-tier",
     "governance-token",
+    "share-token",
+    "test-oracle",
+    "test-profit-adapter",
     "test-token",
 ]
 resolver = "2"
@@ -28,5 +37,3 @@ authors = ["Arka.fund Team"]
 
 [workspace.dependencies]
 soroban-sdk = { version = "23.0.0" }
-
-

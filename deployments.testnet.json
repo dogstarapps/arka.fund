@@ -2,37 +2,40 @@
   "network": "testnet",
   "rpcUrl": "https://soroban-testnet.stellar.org",
   "contracts": {
-    "arka": "CCMA27FK5QULMDIOLYZ7ASSDX7TBRIZUORWSBMRIFLENPBLI73C7ZBJH",
+    "arka": "CA5KVVH4WBL2EQE5TEQWMX5T7KN4B2A2KSICUDC6IEK5IWJ22ML7DFDA",
     "arkaFactory": "CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW",
-    "router": "CAARCDANGZNLDR7CF5MRUA32VUBD6KAZMTNTVJKA5ISQHHKYMP7YFTTI",
+    "router": "CB273QHT7GISJF4EW434UY3K6IWTOINAKN6B7NZPAVRBYSERZ2QFBVAQ",
     "votes": "CAK7WU2MESB2R3WT4JZL2J5UA7M5N3S74EANRNUR377IB5LYDJ6GV6ZW",
     "governor": "CAWWUTAT5H5V4WHRA5NJK7GXSS7XWWJXH7UCXMRVQ77KBLVI45NGDUXG",
-    "soroswapRouter": "CCMAPXWVZD4USEKDWRYS7DA4Y3D7E2SDMGBFJUCEXTC7VN6CUBGWPFUS",
-    "soroswapFactory": "CDJTMBYKNUGINFQALHDMPLZYNGUV42GPN4B7QOYTWHRC4EE5IYJM6AES",
+    "soroswapRouter": "CCJUD55AG6W5HAI5LRVNKAE5WDP5XGZBUDS5WNTIVDU7O264UZZE7BRD",
+    "soroswapFactory": "CDP3HMUH6SMS3S7NPGNDJLULCOXXEPSHY4JKUKMBNQMATHDHWXRRJTBY",
     "soroswapPair_ARKA1_ARKA2": "CC3ZGW5C4DHWCW7DCSQVMR2KHSVIPCITEF7UPJQEXYT5WC4LUQWINTJO",
     "aquariusRouter": "CBCFTQSPDBAIZ6R6PJQKSQWKNKWH2QIV3I4J72SHWBIK3ADRRAM5A6GD",
-    "adapterAquarius": "CANPOLXWOTJHKDMIECWZ66IRWX2EEXMTIBF7FFA2WH5DAJVSUDL243BM",
-    "adapterSoroswap": "CC7WUM6K2DOFCLE3DSKF4GV5JARIFWBQZY3DYAWUVYEOYMQIDXWD56JE",
-    "arkaRegistry": "CCNHBAJXHRL374AP74KOBY772JMVVNNMB42QNGBOY5BN6DZAR6VY65IK",
+    "adapterAquarius": "CDEWNICQBSXNRBC7FKO5KZX7YID4KLF7OA3GXAGZ3QEGUJTD733L3ZMV",
+    "adapterPhoenix": "CCCDYVAMNJUCCBIPBIWDHFJCBWOAP5DMO57BUD6JG6S5UTHDARGDFVFO",
+    "adapterSoroswap": "CAYJYQRBFCMKUP2W3MQKRC5WARH6FH66AVXBUR6GB3FTGU4EQX5JPXFU",
+    "arkaRegistry": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
     "coverageVault": "CCLEUWT6NSMIP2QFGHRIERDM453X24GC56ZNZH7VVEDVQ5JRNNRFB5BL",
     "coverageTestToken": "CA33YVWPBWG6A7JPMMUEUUELUB3UPATI64K62RZFPGYCBJD5GFACOWGK",
     "coverageFund": "CCX5QACCFXC3VNMKUHBUZ2NGD2HNU6W47G3E3LBGPAK2DWX63FERA3MO",
-    "balancedRouterMock": "CAHF53IIWUVKFOJ4H7OHIB667NEU7MTC3YUHSIZWETFXXPAI6DS75HQK",
-    "adapterBalanced": "CDYF5QMFETJPMJZVLO7ZRL2KA4B4Y7F24Z33HH62NJL3GEQQXXLCCRLC",
     "blendRouterMock": "CDRXF7OXAQ3CUF33QO7ZQV2VFHE22SEQPYP4JL7MJJJMUOZCFAXMUKGV",
     "adapterBlend": "CB256AHTJYHUX2KW4LEV2JYA4BDXHA622RBEAECCZEXNORTQ2GTZN2EN",
     "managerTier": "CDQVWIBJDX3K3XS4OLL4HFFSG2KKQGOZU7TIFCLMXFDCJDRDOQLB6FGR",
-    "cometPool": "CA5UTUUPHYL5K22UBRUVC37EARZUGYOSGK3IKIXG2JLCC5ZZLI4BDWDM",
-    "blendPool": "CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF"
+    "blendPool": "CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF",
+    "oracleGuard": "CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ"
   },
   "tokens": {
-    "ARKA1": "CDJ7G22ETJ6PRUM5GDPUXYEY3JL6MDY35WMJYWSGX7U6DV5VMQEKH3PG",
-    "ARKA2": "CCCLTACEMF33GJRJ2JXRQYXDBRLRZNK5GVPA2FVHLOE5TPP6NM7UIYV7"
+    "ARKA1": "CAAIY7IRSBFZ6XGRVYMXMSZDJQSRB5HC6HV7MEGCGMSKP67MVC3Q32LL",
+    "ARKA2": "CBZ6ISRQ6QU4OJZTA54MRSFWVVEUR45Z62Q3YHCHK7E62XOY7RLSRI75"
   },
   "txs": {
     "adapterSoroswap": {
       "init": "023a095f2415c4fcc2da8b7588c8539348481a168b8b97136cc121aa8070de91",
       "set_path": "0d21e28bd9571a12a9cf2fbb9f7c91bb56a9dbfa9a3283f2daa4c91837ad68b3"
+    },
+    "adapterPhoenix": {
+      "deploy": "9af6030391c87e8196651e56cdcd6b21a5b66577d45e0d2f0912fb7676965098",
+      "init": "2a6927c750e5be2ef9fb01d41555466522abb8af55d05d2e7e309a55796e4ab3"
     },
     "governedPolicy": {
       "set_governor": "33d3d501f2a4e38dce4d08bf296657fba4c70a8a078cc31f5232f5a27fa79f63",
@@ -63,12 +66,6 @@
       "claim": "fba092fc747e01ad167a94104e58ec8c73747b25a285183679b15065bb41e944",
       "unstake": "d0e72a6425ecc090a68de3c88e03c4d6c5c17824a92d134b2b15602759ba4229"
     },
-    "adapterBalanced": {
-      "deploy_router_mock": "c36947e7926bf82cf83fd8102f295e74c0b5c1d212f4c53a8c24ecbc35cc09a4",
-      "deploy_adapter": "49f0a0e3269eb3ef67ab252b151a0a1ca5f903e4e0f44b6686aede649d73c2c3",
-      "init": "95fa6d11fe69650fd3b97b81d3e1599fbe174539686a78ef78e717e95804a7f9",
-      "execute_ok": "c53e4838cd8bd746b3b859e312fe9e175eb6a3d242ce9f7c2ece1c235210bf70"
-    },
     "adapterBlend": {
       "deploy_router_mock": "ee0a1203cdf157fcbbe025fffc21444e5c532bc4390d4f85d7682f2e7699af5a",
       "deploy_adapter": "9d60cc2a0f3dbd9f1f536a7d393435081e45e115ea273b6dfa431941d1508c17",
@@ -97,5 +94,891 @@
     "voteDelay": 0,
     "votePeriod": 720,
     "gracePeriod": 17280
+  },
+  "validations": {
+    "governanceHandoff": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "adminIdentity": "arka-admin",
+      "holderIdentity": "arka-holder",
+      "contracts": {
+        "governor": "CDCA57KK24PZ7CWGSPPSVZMOF6HJXCDHZWV5USWBVANYAR6OCAXL777F",
+        "governanceExecutor": "CBBGX752SGBIOZZMG7DHGG37YFLVP4W7KGIO2UWFNBKFNXEMYESUYCDY",
+        "arkaToken": "CBPF7F3PNQ567JKZAKIJIGGSP3CLBA7VPK7IJAHI2FPBR7KGAWQGOYMU",
+        "lockedArka": "CAUE46HQDGXCP5RUFN4CEU7KOSOWG2UGJIXZRNAPXZFYBC55PH4NGZAC"
+      },
+      "proposal": {
+        "proposalId": 0,
+        "proposalTxHash": "50789af147b1aece90b58f252df57150c6ab55677c3914d0996058344c6dff3c",
+        "operationIdHex": "d8c0d87bd112ab28a2db3960bfe159da6b8a8fe04f2c9dba617c0391b02e6923"
+      },
+      "results": {
+        "currentVotes": 220,
+        "liquidBalance": 0,
+        "lockedBalance": 220
+      }
+    },
+    "oracleGuard": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "adminIdentity": "arka-admin",
+      "contracts": {
+        "oracleGuard": "CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ",
+        "primaryOracle": "CCRUZ7ZG5B7HJKSSSIBC6JXM5FVZBNVEH65RAEMK6IRZE36O4DNG2NDL",
+        "secondaryOracle": "CCHP44WO44DPD4G2IZLNDWCHF2Z5ORVM7PDY7XQDX3SQTD6GZTYEUNKC",
+        "validationAsset": "CBIUUIWHRWS6RD44NLTH2AMGUXF6TCW2XF6FM4G27LYUOMDFTMJA3KXM"
+      },
+      "results": {
+        "secondarySelection": {
+          "deviation_bps": 1000,
+          "diverged": true,
+          "price": "10000000",
+          "primary_price": "11000000",
+          "primary_timestamp": 1774717133,
+          "primary_usable": true,
+          "secondary_configured": true,
+          "secondary_price": "10000000",
+          "secondary_timestamp": 1774717148,
+          "secondary_usable": true,
+          "selected_source": 2,
+          "timestamp": 1774717148
+        },
+        "staleFallback": {
+          "deviation_bps": 0,
+          "diverged": false,
+          "price": "10000000",
+          "primary_price": "10000000",
+          "primary_timestamp": 1774716973,
+          "primary_usable": false,
+          "secondary_configured": true,
+          "secondary_price": "10000000",
+          "secondary_timestamp": 1774717148,
+          "secondary_usable": true,
+          "selected_source": 2,
+          "timestamp": 1774717148
+        },
+        "failClosed": {
+          "deviation_bps": 1000,
+          "diverged": true,
+          "price": "0",
+          "primary_price": "11000000",
+          "primary_timestamp": 1774717133,
+          "primary_usable": true,
+          "secondary_configured": true,
+          "secondary_price": "10000000",
+          "secondary_timestamp": 1774717148,
+          "secondary_usable": true,
+          "selected_source": 0,
+          "timestamp": 1774717148
+        }
+      }
+    },
+    "feeEngine": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "identities": {
+        "admin": "arka-admin",
+        "holder": "arka-holder",
+        "treasury": "dogstar"
+      },
+      "contracts": {
+        "arka": "CC5TAIONKSJL3BQB42UTYKYNFO7Z3BOXBSHOBIJYN346WYU3NHARCD6P",
+        "token": "CAQTJLFGTHNI3VUQW4OOYGV6YRJKAQSSXUHTCFPHP5A6X6OLBK72I2XI",
+        "router": "CCNOPNTOPFYA3TQSIA56FWAUZORPZYTO2XJDON4GPMAWH65ERW5PTMMI",
+        "profitAdapter": "CCGPL76Y23J2NIRZLLRDNLDVVHJQXQ5RPNDIKNHLG4U535X7DNSZUCIZ"
+      },
+      "results": {
+        "preview": {
+          "high_water_mark_after": "1000000000",
+          "high_water_mark_before": "1000000000",
+          "management_fee_shares": "856",
+          "management_fee_value": "856",
+          "manager_fee_shares": "642",
+          "nav": "1000000000",
+          "performance_fee_shares": "0",
+          "performance_fee_value": "0",
+          "protocol_fee_shares": "214",
+          "share_price_after": "999999144",
+          "share_price_before": "1000000000",
+          "timestamp": 1774718546,
+          "total_shares_after": "1000000856",
+          "total_shares_before": "1000000000"
+        },
+        "settlement": {
+          "high_water_mark_after": "1000000000",
+          "high_water_mark_before": "1000000000",
+          "management_fee_shares": "951",
+          "management_fee_value": "951",
+          "manager_fee_shares": "714",
+          "nav": "1000000000",
+          "performance_fee_shares": "0",
+          "performance_fee_value": "0",
+          "protocol_fee_shares": "237",
+          "share_price_after": "999999049",
+          "share_price_before": "1000000000",
+          "timestamp": 1774718549,
+          "total_shares_after": "1000000951",
+          "total_shares_before": "1000000000"
+        },
+        "feeStateAfterProfit": {
+          "cumulative_management_shares": "1268",
+          "cumulative_manager_shares": "7519637",
+          "cumulative_performance_shares": "15037370",
+          "cumulative_protocol_shares": "7519001",
+          "high_water_mark": "1063998905",
+          "last_settlement_ts": 1774718559
+        },
+        "managerSharesAfterManagement": "714",
+        "treasurySharesAfterManagement": "237",
+        "managerSharesAfterProfit": "7519637",
+        "treasurySharesAfterProfit": "7519001",
+        "userSharesBeforeRedeem": "1000000000",
+        "userSharesAfterRedeem": "0",
+        "managerSharesFinal": "7519999",
+        "treasurySharesFinal": "7519121",
+        "navAfterProfit": "1080000000",
+        "navFinal": "16001600",
+        "holderBalanceFinal": "1563998400"
+      }
+    },
+    "coverageEconomics": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "identities": {
+        "admin": "arka-admin",
+        "staker": "arka-holder",
+        "treasury": "dogstar",
+        "coveredVault": "marcos",
+        "payout": "arka-holder"
+      },
+      "contracts": {
+        "reserveToken": "CCP2QJYCVBIFFLW6NLEUWZHPTN2NV4I6DDH2OVCGMRFJDIUYWQ32RLG4",
+        "bootstrapToken": "CCHFRAFSQMCJAX56K5VJKEDH3F4ALVLHISUNB2RYKHSGV5LOXRRKIZTY",
+        "coverageVault": "CC2T3KOREH53DT5BWHAVEQA6RND6G6R3PBYS5BEZZLNOYLO4EYP75YAS",
+        "coverageFund": "CBARYR5MWGURIUFQLA2DFS6RO4O5VF55XZ2RO3HO4UKJHCKXAAHLFTSP",
+        "claimsManager": "CBBTR7VED6ZZTK3Z2ZVOWUFSP574UQGO4C2JK6YUUBSH4FPJ2GB4VF5P"
+      },
+      "results": {
+        "premiumReceipt": {
+          "premium_amount": "240",
+          "reported_covered_nav": "8000",
+          "reserve_ratio_after_bps": "945",
+          "reserve_ratio_before_bps": "750",
+          "reserve_reward_amount": "84",
+          "retained_amount": "156",
+          "treasury_amount": "0"
+        },
+        "rewardClaim": {
+          "bootstrap_reward": "300",
+          "reserve_reward": "84"
+        },
+        "fundMetricsAfterPremium": {
+          "boot_outstanding": "0",
+          "bootstrap_token": "CCHFRAFSQMCJAX56K5VJKEDH3F4ALVLHISUNB2RYKHSGV5LOXRRKIZTY",
+          "claims_from_retained": "0",
+          "claims_from_staked": "0",
+          "claims_manager": "CBBTR7VED6ZZTK3Z2ZVOWUFSP574UQGO4C2JK6YUUBSH4FPJ2GB4VF5P",
+          "premiums_to_treas": "0",
+          "reserve_capital": "756",
+          "reserve_outstanding": "0",
+          "reserve_ratio_bps": "945",
+          "reserve_retain_bps": 6000,
+          "reserve_target_bps": 2500,
+          "reserve_token": "CCP2QJYCVBIFFLW6NLEUWZHPTN2NV4I6DDH2OVCGMRFJDIUYWQ32RLG4",
+          "retained_reserve": "156",
+          "solvency_gap": "7244",
+          "stake_epoch": 0,
+          "total_covered_nav": "8000",
+          "total_premiums": "240",
+          "total_retained_prem": "156",
+          "total_shares": "600",
+          "total_staked": "600",
+          "treasury": "GAJOUXLJLBPNY5YZZNAJLLZCIJ4XWZBSJQK47KKA2L4QYF3M4RE5UQWM",
+          "treasury_share_bps": 500,
+          "utilization_bps": "105820"
+        },
+        "premiumsPaidByVault": 240,
+        "holderReserveAfterClaim": 84,
+        "holderBootstrapAfterClaim": 300
+      }
+    },
+    "claimsCircuit": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "identities": {
+        "admin": "arka-admin",
+        "staker": "arka-holder",
+        "treasury": "dogstar",
+        "coveredVault": "marcos",
+        "payout": "arka-holder"
+      },
+      "contracts": {
+        "reserveToken": "CCP2QJYCVBIFFLW6NLEUWZHPTN2NV4I6DDH2OVCGMRFJDIUYWQ32RLG4",
+        "bootstrapToken": "CCHFRAFSQMCJAX56K5VJKEDH3F4ALVLHISUNB2RYKHSGV5LOXRRKIZTY",
+        "coverageVault": "CC2T3KOREH53DT5BWHAVEQA6RND6G6R3PBYS5BEZZLNOYLO4EYP75YAS",
+        "coverageFund": "CBARYR5MWGURIUFQLA2DFS6RO4O5VF55XZ2RO3HO4UKJHCKXAAHLFTSP",
+        "claimsManager": "CBBTR7VED6ZZTK3Z2ZVOWUFSP574UQGO4C2JK6YUUBSH4FPJ2GB4VF5P"
+      },
+      "results": {
+        "rejectedIncidentId": 1,
+        "rejectedIncident": {
+          "approved_at": 0,
+          "approved_payout": "0",
+          "covered_nav": "8000",
+          "created_at": 1774721087,
+          "executed_at": 0,
+          "fund_payout": "0",
+          "fund_reserve_cap": "756",
+          "id": 1,
+          "kind": 4,
+          "meta_hash": "0101010101010101010101010101010101010101010101010101010101010101",
+          "mgr_payout": "0",
+          "mgr_vault_bal": "200",
+          "reason_code": 11,
+          "recipient": "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT",
+          "reported_loss": "300",
+          "status": 4,
+          "treasury_payout": "0",
+          "triggered_by": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+          "vault": "GCWMZ2JNKYQSK3H5J667XYJUK4XGIBLM3AGDXO724ERZZ73R4XZGUOXW"
+        },
+        "approvedIncidentId": 2,
+        "approvedPlan": {
+          "approved_payout": "1000",
+          "fund_payout": "756",
+          "mgr_payout": "200",
+          "recipient": "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT",
+          "treasury_payout": "44"
+        },
+        "executedIncident": {
+          "approved_at": 1774721127,
+          "approved_payout": "1000",
+          "covered_nav": "8000",
+          "created_at": 1774721112,
+          "executed_at": 1774721137,
+          "fund_payout": "756",
+          "fund_reserve_cap": "756",
+          "id": 2,
+          "kind": 3,
+          "meta_hash": "0202020202020202020202020202020202020202020202020202020202020202",
+          "mgr_payout": "200",
+          "mgr_vault_bal": "200",
+          "reason_code": 12,
+          "recipient": "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT",
+          "reported_loss": "1000",
+          "status": 3,
+          "treasury_payout": "44",
+          "triggered_by": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+          "vault": "GCWMZ2JNKYQSK3H5J667XYJUK4XGIBLM3AGDXO724ERZZ73R4XZGUOXW"
+        },
+        "fundMetricsAfterExecution": {
+          "boot_outstanding": "0",
+          "bootstrap_token": "CCHFRAFSQMCJAX56K5VJKEDH3F4ALVLHISUNB2RYKHSGV5LOXRRKIZTY",
+          "claims_from_retained": "156",
+          "claims_from_staked": "600",
+          "claims_manager": "CBBTR7VED6ZZTK3Z2ZVOWUFSP574UQGO4C2JK6YUUBSH4FPJ2GB4VF5P",
+          "premiums_to_treas": "0",
+          "reserve_capital": "0",
+          "reserve_outstanding": "0",
+          "reserve_ratio_bps": "0",
+          "reserve_retain_bps": 6000,
+          "reserve_target_bps": 2500,
+          "reserve_token": "CCP2QJYCVBIFFLW6NLEUWZHPTN2NV4I6DDH2OVCGMRFJDIUYWQ32RLG4",
+          "retained_reserve": "0",
+          "solvency_gap": "8000",
+          "stake_epoch": 1,
+          "total_covered_nav": "8000",
+          "total_premiums": "240",
+          "total_retained_prem": "156",
+          "total_shares": "0",
+          "total_staked": "0",
+          "treasury": "GAJOUXLJLBPNY5YZZNAJLLZCIJ4XWZBSJQK47KKA2L4QYF3M4RE5UQWM",
+          "treasury_share_bps": 500,
+          "utilization_bps": "80000000"
+        },
+        "managerVaultBalanceFinal": 0,
+        "fundClaimCapacityFinal": 0,
+        "holderReserveFinal": 1084,
+        "treasuryReserveFinal": 456,
+        "holderBootstrapFinal": 300
+      }
+    },
+    "tokenomics": {
+      "validatedAt": "2026-03-28",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "identities": {
+        "admin": "arka-admin",
+        "team": "arka-holder",
+        "treasury": "dogstar",
+        "ecosystem": "marcos"
+      },
+      "contracts": {
+        "arkaToken": "CALQK6EXWMS6DTLEXH2VMUYOQTKLF2VU7YL6W2MFDFVPJKMCTAA2MLAF",
+        "lockedArka": "CB2WWHAJYF7WPQMBCAEUBK7TWGTYMWRMFD36NOX5VCTRWF6TKXALV5M7",
+        "governanceExecutor": "CD7P5BWQWUIARXATJ3ANVB5ONRQFQLBRFA4RCIGNTEOFYITIJCNNKXU3",
+        "arkaVesting": "CCXLFWBZOEZSV4G6YGJKBZ3EH24KH6FRODYOFOE2UHP4KVYA5HNFZC6J",
+        "emissionsController": "CCOJLJIJFOUGK5YJKY4ISI3U3SOUNRHMDYUST67MQCHBRTOVLUBWGAZ4"
+      },
+      "results": {
+        "grant": {
+          "beneficiary": "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT",
+          "canceled_at": 1774727808,
+          "cliff_time": 1774727738,
+          "end_time": 1774727758,
+          "refund_recipient": "GAJOUXLJLBPNY5YZZNAJLLZCIJ4XWZBSJQK47KKA2L4QYF3M4RE5UQWM",
+          "released_amount": "3000",
+          "revocable": true,
+          "start_time": 1774727733,
+          "total_amount": "3000"
+        },
+        "stream": {
+          "canceled_at": 1774727808,
+          "end_time": 1774727753,
+          "recipient": "GCWMZ2JNKYQSK3H5J667XYJUK4XGIBLM3AGDXO724ERZZ73R4XZGUOXW",
+          "refund_recipient": "GAJOUXLJLBPNY5YZZNAJLLZCIJ4XWZBSJQK47KKA2L4QYF3M4RE5UQWM",
+          "released_amount": "2400",
+          "start_time": 1774727733,
+          "total_amount": "2400"
+        },
+        "teamClaimedInitial": 3000,
+        "ecosystemReleasedInitial": 2400,
+        "teamClaimedFinal": 0,
+        "ecosystemReleasedFinal": 0,
+        "teamBalanceFinal": 3000,
+        "ecosystemBalanceFinal": 2400,
+        "treasuryBalanceFinal": 4600,
+        "teamVestedFinal": 3000,
+        "lockedBalanceFinal": 1000,
+        "teamVotesFinal": 1000,
+        "teamLiquidAfterLock": 2000
+      }
+    },
+    "releaseGate": {
+      "validatedAt": "2026-03-29",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "status": "passed",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/release-gate.json",
+      "validatedModules": [
+        "coverageClaims",
+        "feeEngine",
+        "governanceFoundation",
+        "oracleSafety",
+        "tokenomicsFoundation"
+      ],
+      "steps": [
+        {
+          "step_id": "contracts_build",
+          "status": "passed",
+          "durationSeconds": 6.929
+        },
+        {
+          "step_id": "contracts_registry_tests",
+          "status": "passed",
+          "durationSeconds": 0.485
+        },
+        {
+          "step_id": "contracts_core_tests",
+          "status": "passed",
+          "durationSeconds": 6.798
+        },
+        {
+          "step_id": "contracts_arka_tests",
+          "status": "passed",
+          "durationSeconds": 4.564
+        },
+        {
+          "step_id": "canonical_registry_promote",
+          "status": "passed",
+          "durationSeconds": 0.109
+        },
+        {
+          "step_id": "canonical_registry_verify",
+          "status": "passed",
+          "durationSeconds": 33.926
+        },
+        {
+          "step_id": "indexer_event_surface",
+          "status": "passed",
+          "durationSeconds": 133.518
+        },
+        {
+          "step_id": "create_live_validation",
+          "status": "passed",
+          "durationSeconds": 16.57
+        },
+        {
+          "step_id": "deposit_redeem_live_validation",
+          "status": "passed",
+          "durationSeconds": 56.807
+        },
+        {
+          "step_id": "sdk_unit",
+          "status": "passed",
+          "durationSeconds": 2.416
+        },
+        {
+          "step_id": "sdk_integration",
+          "status": "passed",
+          "durationSeconds": 219.075
+        },
+        {
+          "step_id": "sdk_e2e",
+          "status": "passed",
+          "durationSeconds": 212.96
+        },
+        {
+          "step_id": "catalog_unit",
+          "status": "passed",
+          "durationSeconds": 3.505
+        },
+        {
+          "step_id": "catalog_integration",
+          "status": "passed",
+          "durationSeconds": 2.658
+        },
+        {
+          "step_id": "catalog_e2e",
+          "status": "passed",
+          "durationSeconds": 197.773
+        },
+        {
+          "step_id": "dapp_build",
+          "status": "passed",
+          "durationSeconds": 45.192
+        },
+        {
+          "step_id": "dapp_unit",
+          "status": "passed",
+          "durationSeconds": 3.167
+        },
+        {
+          "step_id": "dapp_integration",
+          "status": "passed",
+          "durationSeconds": 3.76
+        },
+        {
+          "step_id": "dapp_playwright",
+          "status": "passed",
+          "durationSeconds": 44.943
+        },
+        {
+          "step_id": "dapp_design_audit",
+          "status": "passed",
+          "durationSeconds": 54.65
+        },
+        {
+          "step_id": "offchain_public_stack",
+          "status": "passed",
+          "durationSeconds": 28.391
+        },
+        {
+          "step_id": "graphql_backend_parity",
+          "status": "passed",
+          "durationSeconds": 9.142
+        },
+        {
+          "step_id": "subquery_backend_parity",
+          "status": "passed",
+          "durationSeconds": 6.327
+        }
+      ]
+    },
+    "offchainPublicStack": {
+      "validatedAt": "2026-03-29",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+      "registrySource": "contracts.arkaRegistry",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/offchain-testnet-stack.json",
+      "catalogHealth": {
+        "healthy": true,
+        "degraded": false,
+        "evaluatedAt": "2026-03-29T14:05:39.536Z",
+        "snapshotAgeSeconds": 3,
+        "lastSyncedAt": "2026-03-29T14:05:36.253Z",
+        "indexedArkas": 18,
+        "failedArkas": 0,
+        "consecutiveFailures": 0,
+        "activeAlerts": []
+      },
+      "dappHealth": {
+        "app": "ok",
+        "catalog": {
+          "configured": true,
+          "baseUrl": "http://catalog-api:3100",
+          "reachable": true,
+          "healthy": true,
+          "degraded": false,
+          "statusCode": 200,
+          "evaluatedAt": "2026-03-29T14:05:39.678Z",
+          "error": null
+        }
+      },
+      "fixture": null
+    },
+    "canonicalRegistryMigration": {
+      "validatedAt": "2026-03-29T09:37:03Z",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "factoryId": "CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW",
+      "sourceRegistryId": "CCNHBAJXHRL374AP74KOBY772JMVVNNMB42QNGBOY5BN6DZAR6VY65IK",
+      "sourceRegistryReachable": false,
+      "targetRegistryId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+      "deployedNewRegistry": true,
+      "copiedCuratedManagers": 0,
+      "copiedDelistedArkas": 0,
+      "totalArkas": 18,
+      "activeArkas": 18,
+      "totalManagers": 2,
+      "validation": {
+        "count": 18,
+        "activeArkas": [
+          "CA2RY4G7TCZNBY7JFECC7M3G44CM2ZYVLVTWRMWUYSEXE2OAIJ7PRRVK",
+          "CAF3S6HA643UEUGTRIBUCH46PG22IMQUHUOLDTZF2XKEJ4Y7L4C5ZQF3",
+          "CAISJVY3AAEBJCKYHURXKKVZMV2SQYY7LVFF5JHFL6Q3R3ATIBBGEQ77",
+          "CASWQ4GPCOHGH3M3YMU7CYAJH2ID5WWDLZNQ27BS3JEIYFOSXFKLXHZ5",
+          "CAVPHQSIVQY26GCYZLH2P4BRKQJFPPUGPK2USKO352WVBJDJ6DZDIH5Z",
+          "CAWLKVIQ5A4TGFMI7EPMDK2A73OU7JSFXUE3VTNCF63AT5WTTIKQU2B3",
+          "CBIHXQANZBHQVBIOXNIEKYVSVVPVPDREH26Q4ZKLDXCUUI7RRCPLHUDK",
+          "CBLHANLTZPLMBQ7IOSPHZ7O2E2BSVBPGMGND25VOCPWNZYYUBDNWHCYI",
+          "CBR5CGW5VVALF2ANFTBWCDNSQR6SKOYDDN6U62MFMJ2WCIJUUQ254UKT",
+          "CBWNZUY7COMXKWKTFJVFCHODOFEX4HHC3GYNYSYUO5BJJAUBRJN6V6FM",
+          "CCJPCDAOK2OLGHR7R2TRL4RRSDQF4CD6XVQU4REBEM4QEVH3C73473PV",
+          "CCMA27FK5QULMDIOLYZ7ASSDX7TBRIZUORWSBMRIFLENPBLI73C7ZBJH",
+          "CCWX7SUYXDL2AMTQG2P7HJCVGVKI6ZULQUNGSODA4DY3XDKBIL4XZSF5",
+          "CD4CIPA23ZZKUV2QFLCBIR5AGAINCLJ35WNUTENRSSYFXQWAPWGSQR7U",
+          "CD5BDA44XZC3PSYLZ6MVME726TWYNPJQBPFN4FIMBQHUTXASA4M3WGUG",
+          "CDMODCEOK6UMNF3S2TMU5TZC2GMNBXJTS56E7ILJSNSD5WXWYY2ZQNRA",
+          "CDUNOXORFWU4N62RCMROG3BYJLT4QJAGBSNV4VMBAGX46JPNVZ3UYKBJ",
+          "CDYXDC4G66QE7OG4DXYCPVN37WX4IFGZIAI4DXUMKP4KCKRRIL2UWZV7"
+        ],
+        "activeManagers": [
+          "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+          "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT"
+        ],
+        "curatedManagers": [],
+        "delistedArkas": []
+      }
+    },
+    "graphqlBackendParity": {
+      "validatedAt": "2026-03-29T14:06:00.429Z",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+      "status": "passed",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/graphql-backend-parity.json",
+      "digests": {
+        "native": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55",
+        "graphql": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+      },
+      "differences": []
+    },
+    "indexerEventSurface": {
+      "status": "passed",
+      "validatedAt": "2026-03-29T13:50:59.388Z",
+      "registryId": "CCVB6HMGFZ6CZ2E6ANLV4HDUJCJDO6PKNMSKXWLR5X6P74KJM7OP5PJS",
+      "arkaId": "CD2U4V2AQ3MY26GASOZLPQC6SG7UACE4ATEPCLH6XMRTFZHWHIIRJ5KY",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/indexer-event-surface-live-validation.json"
+    },
+    "subqueryBackendParity": {
+      "validatedAt": "2026-03-29T14:06:06.816Z",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+      "status": "passed",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/subquery-backend-parity.json",
+      "digests": {
+        "native": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55",
+        "graphql": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+      },
+      "differences": []
+    },
+    "balancedReadiness": {
+      "validatedAt": "2026-03-30",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/balanced-readiness-validation.json",
+      "adapterBalanced": "CDYF5QMFETJPMJZVLO7ZRL2KA4B4Y7F24Z33HH62NJL3GEQQXXLCCRLC",
+      "poolId": 1,
+      "supportStatus": "blocked",
+      "readyForDappExecution": false,
+      "laneMode": "canonical_pending",
+      "blockingReasons": [
+        "historical Balanced/Comet lane is retired; canonical Balanced/SODAX execution is not admitted on this testnet deployment"
+      ],
+      "observedRouter": "CA5UTUUPHYL5K22UBRUVC37EARZUGYOSGK3IKIXG2JLCC5ZZLI4BDWDM",
+      "expectedRouter": null,
+      "poolSupported": false,
+      "pairConfigured": true
+    },
+    "balancedOfficialSurface": {
+      "validatedAt": "2026-04-07",
+      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/balanced-official-surface.json",
+      "officialSources": {
+        "app": "https://app.balanced.network",
+        "bundle": "https://app.balanced.network/assets/index-ZEFFd3Oo.js",
+        "stellarPage": "https://balanced.network/stellar/",
+        "swapDocs": "https://balanced.network/",
+        "tradeBlog": "https://blog.balanced.network/trade-cross-chain/",
+        "q3Blog": "https://blog.balanced.network/q3-2025/"
+      },
+      "topology": "intent_based",
+      "swapModel": "sodax_intents",
+      "liquidityModel": "legacy_exchange_only",
+      "publicRouterContractId": null,
+      "supportsPublicStellarTestnet": false,
+      "canonicalRouterCutoverPossible": false,
+      "intentAdapter": {
+        "quoteProvider": "sodax",
+        "quoteVisibleInApp": true,
+        "quoteComparableForArka": false,
+        "publicQuoteEndpoint": "sdk:@sodax/sdk::swaps.getQuote",
+        "statusSurface": "recent_activity",
+        "publicStatusEndpoint": "sdk:@sodax/sdk::swaps.getStatus",
+        "publicReceiptEndpoint": "sdk:@sodax/sdk::swaps.getStatus",
+        "cancellationWindowSeconds": 300
+      },
+      "stellarMainnetAddresses": {
+        "connection": "CDFQDDPUPAM3XPGORHDOEFRNLMKOH3N3X6XTXNLSXJQXIU3RVCM3OPEP",
+        "assetManager": "CCGF33A4CO6D3BXFEKPXVCFCZBK76I3AQOZK6KIKRPAWAZR3632WHCJ3",
+        "xTokenManager": null,
+        "rateLimit": "CB6G3ULISTTBPXUN3BI6ADHQGWJEN7BPQINHL45TCB6TDFM5QWU24HAY"
+      },
+      "findings": [
+        "Official Stellar swaps are powered by SODAX Intents rather than a published Soroban router.",
+        "Balanced now relies on the SODAX backend/smart-contract stack for this surface.",
+        "The official trade/liquidity fallback now points users to a legacy exchange flow instead of a current public AMM router.",
+        "The official app bundle exposes Stellar mainnet configuration only; no public Stellar testnet config was found.",
+        "No public Balanced Stellar router contract id was found in the official docs or official app bundle.",
+        "A public machine-consumable quote surface is available through the SODAX SDK for Stellar.",
+        "A public machine-consumable status surface is available through the SODAX SDK for Stellar."
+      ]
+    },
+    "swapGuardrails": {
+      "validatedAt": "2026-04-10",
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "identities": {
+        "admin": "arka-admin",
+        "manager": "arka-admin"
+      },
+      "contracts": {
+        "arka": "CAFFRGNN7LKSUR72S4IPY2VFWUA4NHHFXG3ML76NZ3QF6CCDMLCGL6E4",
+        "token": "CAJM6KYMVVJP7M52EHMD3C2ZGRVLPBHIXVZVLZ3ZWV3H5XGLT3TNMHMI",
+        "router": "CATAWZKWIVEU4EGMJZGJPAKU4U573VWXBQDKRASGPD4X7ZQTQJMFGD2P",
+        "profitAdapter": "CARRLFETRPWSCYPJ2ON53Y5FY37NVCE6NIKRYTJ6CQUKITKALUEVSY5S",
+        "swapOracle": "CAF2AUFJQDSCRAVXZRDSRH6QHENYHPXDHDX2BJRFQF5COYR7R672M6FE"
+      },
+      "results": {
+        "successfulRebalanceOut": "100000",
+        "policySnapshot": {
+          "enabled": true,
+          "max_oracle_age_seconds": 120,
+          "max_price_impact_bps": 50,
+          "max_slippage_bps": 10000,
+          "max_trade_size_bps": 5000,
+          "max_twap_deviation_bps": 10000,
+          "oracle_checks_enabled": true
+        },
+        "blockedDisallowedAdapter": true,
+        "blockedPriceImpact": true,
+        "disallowedAdapterErrorCode": 24,
+        "priceImpactErrorCode": 29
+      }
+    },
+    "ammTestnetRedeploy": {
+      "deployedAt": "2026-05-26T11:39:11Z",
+      "manager": "GCZ57QGTW5HKXI7KAS5XXIV3FQM5P4PJQ2BRIE6QC6TWHQ6RWQBR3CWT",
+      "arka": "CA5KVVH4WBL2EQE5TEQWMX5T7KN4B2A2KSICUDC6IEK5IWJ22ML7DFDA",
+      "router": "CB273QHT7GISJF4EW434UY3K6IWTOINAKN6B7NZPAVRBYSERZ2QFBVAQ",
+      "adapterSoroswap": "CAYJYQRBFCMKUP2W3MQKRC5WARH6FH66AVXBUR6GB3FTGU4EQX5JPXFU",
+      "adapterAquarius": "CDEWNICQBSXNRBC7FKO5KZX7YID4KLF7OA3GXAGZ3QEGUJTD733L3ZMV",
+      "soroswapPoolId": 1,
+      "aquariusPoolId": 1,
+      "aquariusPoolIndex": "9ac7a9cde23ac2ada11105eeaa42e43c2ea8332ca0aa8f41f58d7160274d718e",
+      "adaptersRedeployedAt": "2026-05-26T11:51:13Z",
+      "aquariusAdapterRedeployedAt": "2026-05-26T11:56:48Z"
+    }
+  },
+  "validatedModules": {
+    "governanceFoundation": {
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "validatedAt": "2026-03-28",
+      "sourceValidations": [
+        "governanceHandoff"
+      ],
+      "contracts": {
+        "governor": "CDCA57KK24PZ7CWGSPPSVZMOF6HJXCDHZWV5USWBVANYAR6OCAXL777F",
+        "governanceExecutor": "CBBGX752SGBIOZZMG7DHGG37YFLVP4W7KGIO2UWFNBKFNXEMYESUYCDY",
+        "arkaToken": "CBPF7F3PNQ567JKZAKIJIGGSP3CLBA7VPK7IJAHI2FPBR7KGAWQGOYMU",
+        "lockedArka": "CAUE46HQDGXCP5RUFN4CEU7KOSOWG2UGJIXZRNAPXZFYBC55PH4NGZAC"
+      },
+      "identities": {
+        "admin": "arka-admin",
+        "holder": "arka-holder"
+      },
+      "checks": {
+        "holderVotes": 220,
+        "holderLiquidBalance": 0,
+        "holderLockedBalance": 220
+      },
+      "provenance": {
+        "governor": "validations.governanceHandoff.contracts.governor",
+        "governanceExecutor": "validations.governanceHandoff.contracts.governanceExecutor",
+        "arkaToken": "validations.governanceHandoff.contracts.arkaToken",
+        "lockedArka": "validations.governanceHandoff.contracts.lockedArka"
+      }
+    },
+    "oracleSafety": {
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "validatedAt": "2026-03-28",
+      "sourceValidations": [
+        "oracleGuard"
+      ],
+      "contracts": {
+        "oracleGuard": "CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ",
+        "primaryOracle": "CCRUZ7ZG5B7HJKSSSIBC6JXM5FVZBNVEH65RAEMK6IRZE36O4DNG2NDL",
+        "secondaryOracle": "CCHP44WO44DPD4G2IZLNDWCHF2Z5ORVM7PDY7XQDX3SQTD6GZTYEUNKC",
+        "validationAsset": "CBIUUIWHRWS6RD44NLTH2AMGUXF6TCW2XF6FM4G27LYUOMDFTMJA3KXM"
+      },
+      "identities": {
+        "admin": "arka-admin"
+      },
+      "checks": {
+        "validationAsset": "CBIUUIWHRWS6RD44NLTH2AMGUXF6TCW2XF6FM4G27LYUOMDFTMJA3KXM",
+        "selectedSourceUnderDivergence": 2
+      },
+      "provenance": {
+        "oracleGuard": "validations.oracleGuard.contracts.oracleGuard",
+        "primaryOracle": "validations.oracleGuard.contracts.primaryOracle",
+        "secondaryOracle": "validations.oracleGuard.contracts.secondaryOracle",
+        "validationAsset": "validations.oracleGuard.contracts.validationAsset"
+      }
+    },
+    "feeEngine": {
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "validatedAt": "2026-03-28",
+      "sourceValidations": [
+        "feeEngine"
+      ],
+      "contracts": {
+        "arka": "CC5TAIONKSJL3BQB42UTYKYNFO7Z3BOXBSHOBIJYN346WYU3NHARCD6P",
+        "token": "CAQTJLFGTHNI3VUQW4OOYGV6YRJKAQSSXUHTCFPHP5A6X6OLBK72I2XI",
+        "router": "CCNOPNTOPFYA3TQSIA56FWAUZORPZYTO2XJDON4GPMAWH65ERW5PTMMI",
+        "profitAdapter": "CCGPL76Y23J2NIRZLLRDNLDVVHJQXQ5RPNDIKNHLG4U535X7DNSZUCIZ"
+      },
+      "identities": {
+        "admin": "arka-admin",
+        "holder": "arka-holder",
+        "treasury": "dogstar"
+      },
+      "checks": {
+        "protocolTreasuryShares": "7519001",
+        "managerSharesAfterProfit": "7519637",
+        "holderBalanceFinal": "1563998400"
+      },
+      "provenance": {
+        "arka": "validations.feeEngine.contracts.arka",
+        "token": "validations.feeEngine.contracts.token",
+        "router": "validations.feeEngine.contracts.router",
+        "profitAdapter": "validations.feeEngine.contracts.profitAdapter"
+      }
+    },
+    "coverageClaims": {
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "validatedAt": "2026-03-28",
+      "sourceValidations": [
+        "coverageEconomics",
+        "claimsCircuit"
+      ],
+      "contracts": {
+        "reserveToken": "CCP2QJYCVBIFFLW6NLEUWZHPTN2NV4I6DDH2OVCGMRFJDIUYWQ32RLG4",
+        "bootstrapToken": "CCHFRAFSQMCJAX56K5VJKEDH3F4ALVLHISUNB2RYKHSGV5LOXRRKIZTY",
+        "coverageVault": "CC2T3KOREH53DT5BWHAVEQA6RND6G6R3PBYS5BEZZLNOYLO4EYP75YAS",
+        "coverageFund": "CBARYR5MWGURIUFQLA2DFS6RO4O5VF55XZ2RO3HO4UKJHCKXAAHLFTSP",
+        "claimsManager": "CBBTR7VED6ZZTK3Z2ZVOWUFSP574UQGO4C2JK6YUUBSH4FPJ2GB4VF5P"
+      },
+      "identities": {
+        "admin": "arka-admin",
+        "staker": "arka-holder",
+        "treasury": "dogstar",
+        "coveredVault": "marcos",
+        "payout": "arka-holder"
+      },
+      "checks": {
+        "approvedIncidentId": 2,
+        "approvedPayout": "1000",
+        "holderReserveFinal": 1084,
+        "treasuryReserveFinal": 456,
+        "fundClaimCapacityFinal": 0
+      },
+      "provenance": {
+        "coverageVault": "validations.claimsCircuit.contracts.coverageVault",
+        "coverageFund": "validations.claimsCircuit.contracts.coverageFund",
+        "claimsManager": "validations.claimsCircuit.contracts.claimsManager",
+        "reserveToken": "validations.claimsCircuit.contracts.reserveToken",
+        "bootstrapToken": "validations.claimsCircuit.contracts.bootstrapToken"
+      }
+    },
+    "tokenomicsFoundation": {
+      "network": "testnet",
+      "rpcUrl": "https://soroban-testnet.stellar.org",
+      "validatedAt": "2026-03-28",
+      "sourceValidations": [
+        "tokenomics"
+      ],
+      "contracts": {
+        "arkaToken": "CALQK6EXWMS6DTLEXH2VMUYOQTKLF2VU7YL6W2MFDFVPJKMCTAA2MLAF",
+        "lockedArka": "CB2WWHAJYF7WPQMBCAEUBK7TWGTYMWRMFD36NOX5VCTRWF6TKXALV5M7",
+        "governanceExecutor": "CD7P5BWQWUIARXATJ3ANVB5ONRQFQLBRFA4RCIGNTEOFYITIJCNNKXU3",
+        "arkaVesting": "CCXLFWBZOEZSV4G6YGJKBZ3EH24KH6FRODYOFOE2UHP4KVYA5HNFZC6J",
+        "emissionsController": "CCOJLJIJFOUGK5YJKY4ISI3U3SOUNRHMDYUST67MQCHBRTOVLUBWGAZ4"
+      },
+      "identities": {
+        "admin": "arka-admin",
+        "team": "arka-holder",
+        "treasury": "dogstar",
+        "ecosystem": "marcos"
+      },
+      "checks": {
+        "teamVotesFinal": 1000,
+        "teamLiquidAfterLock": 2000,
+        "teamVestedFinal": 3000,
+        "ecosystemReleasedInitial": 2400
+      },
+      "provenance": {
+        "arkaToken": "validations.tokenomics.contracts.arkaToken",
+        "lockedArka": "validations.tokenomics.contracts.lockedArka",
+        "governanceExecutor": "validations.tokenomics.contracts.governanceExecutor",
+        "arkaVesting": "validations.tokenomics.contracts.arkaVesting",
+        "emissionsController": "validations.tokenomics.contracts.emissionsController"
+      }
+    }
+  },
+  "legacyTxs": {
+    "adapterBalanced": {
+      "deploy_router_mock": "c36947e7926bf82cf83fd8102f295e74c0b5c1d212f4c53a8c24ecbc35cc09a4",
+      "deploy_adapter": "49f0a0e3269eb3ef67ab252b151a0a1ca5f903e4e0f44b6686aede649d73c2c3",
+      "init": "95fa6d11fe69650fd3b97b81d3e1599fbe174539686a78ef78e717e95804a7f9",
+      "execute_ok": "c53e4838cd8bd746b3b859e312fe9e175eb6a3d242ce9f7c2ece1c235210bf70"
+    }
+  },
+  "legacyContracts": {
+    "arkaRegistry": "CCNHBAJXHRL374AP74KOBY772JMVVNNMB42QNGBOY5BN6DZAR6VY65IK",
+    "adapterAquarius": "CANPOLXWOTJHKDMIECWZ66IRWX2EEXMTIBF7FFA2WH5DAJVSUDL243BM",
+    "balancedRouterMock": "CAHF53IIWUVKFOJ4H7OHIB667NEU7MTC3YUHSIZWETFXXPAI6DS75HQK",
+    "adapterBalanced": "CDYF5QMFETJPMJZVLO7ZRL2KA4B4Y7F24Z33HH62NJL3GEQQXXLCCRLC",
+    "cometPool": "CA5UTUUPHYL5K22UBRUVC37EARZUGYOSGK3IKIXG2JLCC5ZZLI4BDWDM"
   }
 }

@@ -15,9 +15,12 @@ soroban-sdk = { workspace = true }
 soroban-sdk = { workspace = true, features = ["testutils"] }
 adapter-blend = { path = "../adapter-blend" }
 blend-router-mock = { path = "../blend-router-mock" }
+oracle-guard = { path = "../oracle-guard" }
+router = { path = "../router" }
+test-token = { path = "../test-token", features = ["testutils"] }
+test-profit-adapter = { path = "../test-profit-adapter", features = ["testutils"] }
+venue-registry = { path = "../venue-registry", features = ["testutils"] }
 
 [features]
 default = []
 testutils = ["soroban-sdk/testutils"]
-
-

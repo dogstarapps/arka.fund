@@ -9,3 +9,10 @@ soroban-sdk = { workspace = true }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[features]
+default = []
+testutils = ["soroban-sdk/testutils"]

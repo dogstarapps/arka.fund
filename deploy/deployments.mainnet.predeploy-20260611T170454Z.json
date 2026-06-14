@@ -1,0 +1,603 @@
+{
+  "network": "mainnet",
+  "status": "predeploy_ready",
+  "createdAt": "2026-06-10T12:05:32Z",
+  "updatedAt": "2026-06-10T18:25:00Z",
+  "rpcUrl": "https://mainnet.sorobanrpc.com",
+  "networkPassphrase": "Public Global Stellar Network ; September 2015",
+  "admin": {
+    "secretEnvVar": "ARKA_MAINNET_ADMIN_SK",
+    "publicKey": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "bootstrapRole": "time_bounded_admin",
+    "bootstrapExpiryUnix": 1812629132,
+    "bootstrapExpiryIso": "2027-06-10T12:05:32Z",
+    "plannedBootstrapWindowDays": 365,
+    "handoffTarget": "dao_governor"
+  },
+  "launchPolicy": {
+    "creationMode": "paid_permissionless",
+    "creationFee": {
+      "token": "USDC",
+      "tokenContract": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "amount": "100000000",
+      "decimals": 7,
+      "displayAmount": "10.00 USDC",
+      "status": "required_before_public_creation"
+    },
+    "protocolTreasury": {
+      "address": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "mode": "bootstrap_treasury_until_dao_treasury_handoff"
+    },
+    "freeCreation": {
+      "enabled": false,
+      "requiresRegistryV2OrEventIndexer": true,
+      "notes": "Free permissionless creation is deferred until discovery no longer depends on monolithic global registry vectors."
+    },
+    "listingPolicyDocument": "docs/ARKA_LISTING_AND_DISCOVERY_POLICY_2026-06-10.md",
+    "securityReadinessDocument": "docs/MAINNET_DEPLOY_SECURITY_READINESS_2026-06-10.md"
+  },
+  "contracts": {},
+  "wasmHashes": {},
+  "assets": {
+    "displayCurrency": "USD",
+    "pricingDenomination": "USDC",
+    "admittedSymbols": [
+      "USDC",
+      "XLM",
+      "EURC",
+      "AQUA",
+      "XTAR",
+      "BLND",
+      "SHX",
+      "XRF",
+      "VELO",
+      "YBX"
+    ],
+    "contractIds": {
+      "USDC": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "XLM": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+      "EURC": "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
+      "AQUA": "CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK",
+      "XTAR": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
+      "BLND": "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY",
+      "SHX": "CCKCKCPHYVXQD4NECBFJTFSCU2AMSJGCNG4O6K4JVRE2BLPR7WNDBQIQ",
+      "XRF": "CBLLEW7HD2RWATVSMLAGWM4G3WCHSHDJ25ALP4DI6LULV5TU35N2CIZA",
+      "VELO": "CAESLMGW5LYTIEJI7FJHK6SFSWRELLNVX5Q4WR4UZEALMTRWQDBKDPAG",
+      "YBX": "CBRP2VD3CZLEQIQZ4JMBXGA5AC2U6JE26YU5CCIOICIZCVWPGBO2QRUB"
+    },
+    "tokens": [
+      {
+        "symbol": "USDC",
+        "assetCode": "USDC",
+        "issuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+        "contractId": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, Circle issuer"
+      },
+      {
+        "symbol": "XLM",
+        "assetCode": "XLM",
+        "issuer": null,
+        "contractId": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+        "verified": true,
+        "provenance": "native Stellar asset contract id"
+      },
+      {
+        "symbol": "EURC",
+        "assetCode": "EURC",
+        "issuer": "GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
+        "contractId": "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, Circle issuer"
+      },
+      {
+        "symbol": "AQUA",
+        "assetCode": "AQUA",
+        "issuer": "GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA",
+        "contractId": "CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, aqua.network TOML"
+      },
+      {
+        "symbol": "XTAR",
+        "assetCode": "XTAR",
+        "issuer": "GAORYJ3KBDGIM7FFSKVUJHJ5NEFWIRDIAGGBJBJS7TY6ECZS53257IG4",
+        "contractId": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, dogstarcoin.com TOML"
+      },
+      {
+        "symbol": "BLND",
+        "assetCode": "BLND",
+        "issuer": "GDJEHTBE6ZHUXSWFI642DCGLUOECLHPF3KSXHPXTSTJ7E3JF6MQ5EZYY",
+        "contractId": "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY",
+        "verified": true,
+        "provenance": "Blend v1 mainnet deployment docs"
+      },
+      {
+        "symbol": "SHX",
+        "assetCode": "SHX",
+        "issuer": "GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH",
+        "contractId": "CCKCKCPHYVXQD4NECBFJTFSCU2AMSJGCNG4O6K4JVRE2BLPR7WNDBQIQ",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, stronghold.co TOML"
+      },
+      {
+        "symbol": "XRF",
+        "assetCode": "XRF",
+        "issuer": "GCHI6I3X62ND5XUMWINNNKXS2HPYZWKFQBZZYBSMHJ4MIP2XJXSZTXRF",
+        "contractId": "CBLLEW7HD2RWATVSMLAGWM4G3WCHSHDJ25ALP4DI6LULV5TU35N2CIZA",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, reflector.network TOML"
+      },
+      {
+        "symbol": "VELO",
+        "assetCode": "VELO",
+        "issuer": "GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M",
+        "contractId": "CAESLMGW5LYTIEJI7FJHK6SFSWRELLNVX5Q4WR4UZEALMTRWQDBKDPAG",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, launch allowlist source"
+      },
+      {
+        "symbol": "YBX",
+        "assetCode": "YBX",
+        "issuer": "GBUYYBXWCLT2MOSSHRFCKMEDFOVSCAXNIEW424GLN666OEXHAAWBDYMX",
+        "contractId": "CBRP2VD3CZLEQIQZ4JMBXGA5AC2U6JE26YU5CCIOICIZCVWPGBO2QRUB",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, YieldBlox launch allowlist source"
+      }
+    ]
+  },
+  "oracle": {
+    "oracleGuard": "postdeploy:contracts.oracleGuard",
+    "primaryProvider": "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+    "secondaryProvider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+    "fiatProvider": "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+    "providerSource": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+    "defaultPolicy": {
+      "mode": "dual_provider_fail_closed",
+      "maxAgeSeconds": 900,
+      "maxDivergenceBps": 300
+    },
+    "assetPolicies": {
+      "USDC": {
+        "mode": "dual_provider_fail_closed",
+        "base": "USDC",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 150
+      },
+      "XLM": {
+        "mode": "dual_provider_fail_closed",
+        "base": "XLM",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 300
+      },
+      "EURC": {
+        "mode": "fiat_provider",
+        "base": "EUR",
+        "quote": "USD",
+        "maxAgeSeconds": 3600,
+        "maxDivergenceBps": 150
+      },
+      "AQUA": {
+        "mode": "dual_provider_fail_closed",
+        "base": "AQUA",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "XTAR": {
+        "mode": "single_provider_exception",
+        "base": "XTAR",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 0
+      },
+      "BLND": {
+        "mode": "dual_provider_fail_closed",
+        "base": "BLND",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "SHX": {
+        "mode": "dual_provider_fail_closed",
+        "base": "SHX",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "XRF": {
+        "mode": "dual_provider_fail_closed",
+        "base": "XRF",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "VELO": {
+        "mode": "dual_provider_fail_closed",
+        "base": "VELO",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "YBX": {
+        "mode": "single_provider_exception",
+        "base": "YBX",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 0
+      }
+    }
+  },
+  "externalContracts": {
+    "soroswap": {
+      "factory": "CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2",
+      "router": "CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH",
+      "source": "https://raw.githubusercontent.com/soroswap/core/main/public/mainnet.contracts.json"
+    },
+    "aquarius": {
+      "router": "CBQDHNBFBZYE4MKPWBSJOPIYLW4SFSXAXUTSXJN76GNKYVYPCKWC6QUK",
+      "source": "https://docs.aqua.network/developers/aquarius-soroban-functions.md"
+    },
+    "blend": {
+      "poolFactory": "CCZD6ESMOGMPWH2KRO4O7RGTAPGTUPFWFQBELQSS7ZUK63V3TZWETGAG",
+      "fixedXlmUsdcPool": "CDVQVKOY2YSXS2IC7KN6MNASSHPAO7UN2UR2ON4OI2SKMFJNVAMDX6DP",
+      "yieldBloxPool": "CBP7NO6F7FRDHSOFQBT2L2UWYIZ2PU76JKVRYAQTG3KZSQLYAOKIF2WB",
+      "source": "https://docs-v1.blend.capital/mainnet-deployments.md"
+    },
+    "phoenix": {
+      "source": "https://stats.phoenix-hub.io/api/pools"
+    },
+    "balancedSodax": {
+      "source": "https://docs.sodax.com/developers/deployments/mainnet.md",
+      "sdkSource": "https://docs.sodax.com/developers/packages/foundation/sdk/functional-modules/swaps.md"
+    }
+  },
+  "executionVenues": {
+    "soroswap": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": false,
+      "router": "CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH",
+      "factory": "CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2",
+      "candidatePaths": [
+        {
+          "poolId": 1,
+          "label": "XLM/USDC",
+          "path": [
+            "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+            "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+          ]
+        },
+        {
+          "poolId": 2,
+          "label": "USDC/XLM",
+          "path": [
+            "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+            "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+          ]
+        }
+      ],
+      "status": "configured_candidates_require_mainnet_canary_before_auto"
+    },
+    "aquarius": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": false,
+      "router": "CBQDHNBFBZYE4MKPWBSJOPIYLW4SFSXAXUTSXJN76GNKYVYPCKWC6QUK",
+      "poolRoutes": [],
+      "status": "pool_index_discovery_required_before_auto"
+    },
+    "phoenix": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": false,
+      "poolRoutes": [
+        {
+          "poolId": 1,
+          "label": "XLM/USDC",
+          "pool": "CBHCRSVX3ZZ7EGTSYMKPEFGZNWRVCSESQR3UABET4MIW52N4EVU6BIZX",
+          "tokenIn": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+          "tokenOut": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+          "maxSpreadBps": 100,
+          "maxAllowedFeeBps": 50
+        },
+        {
+          "poolId": 2,
+          "label": "USDC/XLM",
+          "pool": "CBHCRSVX3ZZ7EGTSYMKPEFGZNWRVCSESQR3UABET4MIW52N4EVU6BIZX",
+          "tokenIn": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+          "tokenOut": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+          "maxSpreadBps": 100,
+          "maxAllowedFeeBps": 50
+        }
+      ],
+      "status": "routes_configurable_but_disabled_until_canary"
+    },
+    "blend": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": false,
+      "markets": [
+        {
+          "marketId": 1,
+          "label": "Fixed XLM-USDC",
+          "pool": "CDVQVKOY2YSXS2IC7KN6MNASSHPAO7UN2UR2ON4OI2SKMFJNVAMDX6DP",
+          "adapterInstance": "adapterBlendFixedXlmUsdc"
+        },
+        {
+          "marketId": 2,
+          "label": "YieldBlox",
+          "pool": "CBP7NO6F7FRDHSOFQBT2L2UWYIZ2PU76JKVRYAQTG3KZSQLYAOKIF2WB",
+          "adapterInstance": "adapterBlendYieldBlox"
+        }
+      ],
+      "status": "markets_planned_but_credit_actions_disabled_until_canary"
+    },
+    "balancedSodax": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": false,
+      "mode": "intent_sdk_server_side",
+      "serverDriver": {
+        "quote": true,
+        "status": true,
+        "receipt": true,
+        "refund": true,
+        "expiry": true,
+        "walletBacked": true,
+        "productionCanary": false
+      },
+      "status": "not_a_public_amm_router; keep blocked in AUTO until production canary and operations evidence pass"
+    }
+  },
+  "deploymentPlan": {
+    "buildCommand": "BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh",
+    "deployScript": "scripts/deploy-mainnet-contracts.sh",
+    "configureScript": "scripts/configure-mainnet-contracts.sh",
+    "contracts": [
+      {
+        "name": "arka",
+        "artifact": "artifacts/arka.wasm",
+        "role": "vault_implementation_template",
+        "deploy": false,
+        "deferredReason": "Factory deploys Arka instances from uploaded wasm hash.",
+        "sha256": "b0aa69914405a5374fe160d0ae7f5b6cb31925209ed688c1340a9b9e4398745d"
+      },
+      {
+        "name": "shareToken",
+        "artifact": "artifacts/share-token.wasm",
+        "role": "share_token_implementation_template",
+        "deploy": false,
+        "deferredReason": "Factory deploys per-Arka share tokens from uploaded wasm hash.",
+        "sha256": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89"
+      },
+      {
+        "name": "arkaFactory",
+        "artifact": "artifacts/arka-factory.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608"
+      },
+      {
+        "name": "arkaRegistry",
+        "artifact": "artifacts/arka-registry.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881"
+      },
+      {
+        "name": "router",
+        "artifact": "artifacts/router.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872"
+      },
+      {
+        "name": "venueRegistry",
+        "artifact": "artifacts/venue-registry.wasm",
+        "role": "global_execution_policy_registry",
+        "deploy": true,
+        "sha256": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e"
+      },
+      {
+        "name": "adapterAquarius",
+        "artifact": "artifacts/adapter-aquarius.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "9ff31b1fb5a0fe16ffcfc28158710c7fe8cb2c31532b45985f1e808b990c78dd"
+      },
+      {
+        "name": "adapterBalanced",
+        "artifact": "artifacts/adapter-balanced.wasm",
+        "role": "artifact_only",
+        "deploy": false,
+        "deferredReason": "Balanced/SODAX uses intents SDK server-side, not this AMM-router adapter.",
+        "sha256": "ae0608787861cca04b3563c0f0532111284ae3eba080762dd87a48893afe2d60"
+      },
+      {
+        "name": "adapterBlend",
+        "artifact": "artifacts/adapter-blend.wasm",
+        "role": "artifact_only",
+        "deploy": false,
+        "deferredReason": "Blend needs one adapter instance per pool; deploy named instances below.",
+        "sha256": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e"
+      },
+      {
+        "name": "adapterBlendFixedXlmUsdc",
+        "artifact": "artifacts/adapter-blend.wasm",
+        "role": "adapter_instance",
+        "deploy": true,
+        "sha256": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e"
+      },
+      {
+        "name": "adapterBlendYieldBlox",
+        "artifact": "artifacts/adapter-blend.wasm",
+        "role": "adapter_instance",
+        "deploy": true,
+        "sha256": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e"
+      },
+      {
+        "name": "adapterPhoenix",
+        "artifact": "artifacts/adapter-phoenix.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f"
+      },
+      {
+        "name": "adapterSoroswap",
+        "artifact": "artifacts/adapter-soroswap.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920"
+      },
+      {
+        "name": "oracleGuard",
+        "artifact": "artifacts/oracle-guard.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "f1c2178e470a57d99f1fe78aed8f234c338b41d800d578ac34fb779d279bfa46"
+      },
+      {
+        "name": "coverageVault",
+        "artifact": "artifacts/coverage-vault.wasm",
+        "role": "manager_vault_template",
+        "deploy": false,
+        "deferredReason": "Coverage vaults are per-manager instances, not a global singleton.",
+        "sha256": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf"
+      },
+      {
+        "name": "coverageFund",
+        "artifact": "artifacts/coverage-fund.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664"
+      },
+      {
+        "name": "claimsManager",
+        "artifact": "artifacts/claims-manager.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "1ab5e135d3cfd6f15a13b0939c2c10cab1cea4243c78a9e19ec8a50c27043ef0"
+      },
+      {
+        "name": "managerTier",
+        "artifact": "artifacts/manager-tier.wasm",
+        "role": "singleton",
+        "deploy": true,
+        "sha256": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188"
+      },
+      {
+        "name": "arkaToken",
+        "artifact": "artifacts/arka-token.wasm",
+        "role": "tokenomics_singleton",
+        "deploy": true,
+        "sha256": "19f62f37e57ba77c24e674428f1a232433c263f8076b55b5c88fa3642a471572"
+      },
+      {
+        "name": "lockedArka",
+        "artifact": "artifacts/locked-arka.wasm",
+        "role": "tokenomics_singleton",
+        "deploy": true,
+        "sha256": "2eb96f7b10a9c586163851769666ec14f63291712cdbca47d36c2251a579189a"
+      },
+      {
+        "name": "governanceToken",
+        "artifact": "artifacts/governance-token.wasm",
+        "role": "tokenomics_singleton",
+        "deploy": true,
+        "sha256": "2a581acfd0bc2a2cbd0abc56d9f9bd254260b368340478d611922f4f03ae270c"
+      },
+      {
+        "name": "governanceExecutor",
+        "artifact": "artifacts/governance-executor.wasm",
+        "role": "dao_handoff_singleton",
+        "deploy": true,
+        "sha256": "868a26642dddbc9e8d676749b9ed27acfc4dd6b396b57686a84131882b65fb90"
+      },
+      {
+        "name": "arkaVesting",
+        "artifact": "artifacts/arka-vesting.wasm",
+        "role": "tokenomics_singleton",
+        "deploy": true,
+        "sha256": "65b5f4a19eed8f6a6a3c802b4e06bcefbe8182d9687acc820faca8734637e4d9"
+      },
+      {
+        "name": "emissionsController",
+        "artifact": "artifacts/emissions-controller.wasm",
+        "role": "tokenomics_singleton",
+        "deploy": true,
+        "sha256": "0fb09df4f7c8725a7b76219d72f775e04dd07bc4a79b77309bf552cd11b80812"
+      }
+    ]
+  },
+  "initializationPlan": {
+    "singletons": [
+      "arkaRegistry.init_admin(admin)",
+      "router.init_upgrade_authority(admin, governor=admin, expires_at)",
+      "venueRegistry.init(admin, governor=admin, expires_at)",
+      "venueRegistry.set_guardian(admin)",
+      "oracleGuard.init(admin)",
+      "managerTier.init(admin, 100, 1000, 10000)",
+      "coverageFund.init(admin, reserve_token=USDC, bootstrap_token=XTAR)",
+      "claimsManager.init(admin, reserve_token=USDC, treasury=protocolTreasury)",
+      "governanceExecutor.init(admin, min_delay=86400, grace_period=604800)",
+      "arkaToken.init(admin, name='Arka Fund', symbol='ARKA', decimals=7, max_supply=1000000000000000)",
+      "lockedArka.init(admin, token=arkaToken, min_lock_ledgers=120960, max_lock_ledgers=6307200, name='Locked Arka', symbol='lARKA')",
+      "governanceToken.init(admin)",
+      "arkaVesting.init(admin, token=arkaToken)",
+      "emissionsController.init(admin, token=arkaToken)"
+    ],
+    "factory": [
+      "arkaFactory.set_governor(admin)",
+      "arkaFactory.set_bootstrap_admin(caller=admin, admin=admin, expires_at)",
+      "arkaFactory.set_implementation_controlled(caller=admin, impl_wasm_hash=uploaded arka.wasm)",
+      "arkaFactory.set_share_impl_controlled(caller=admin, impl_wasm_hash=uploaded share-token.wasm)",
+      "arkaFactory.set_registry(arkaRegistry)",
+      "arkaFactory.set_protocol_treasury(protocolTreasury)",
+      "arkaFactory.set_creation_fee(USDC, 100000000)",
+      "arkaFactory.set_default_venue_registry(venueRegistry)",
+      "arkaFactory.set_default_swap_oracle(oracleGuard)",
+      "arkaFactory.set_default_allowed_venues(adapters=SoroSwap,Aquarius,Phoenix)",
+      "arkaFactory.set_default_swap_risk_policy(enabled=true, oracle_checks=true, max_slippage_bps=300, max_trade_size_bps=2500)"
+    ],
+    "venues": [
+      "adapterAquarius.init(admin, externalContracts.aquarius.router)",
+      "adapterSoroswap.init(admin, externalContracts.soroswap.router, default XLM/USDC path)",
+      "adapterSoroswap.set_path_for_pool for candidate Soroswap paths",
+      "adapterPhoenix.init(admin)",
+      "adapterPhoenix.set_pool_route for Phoenix XLM/USDC and USDC/XLM",
+      "adapterBlendFixedXlmUsdc.init(admin, externalContracts.blend.fixedXlmUsdcPool)",
+      "adapterBlendYieldBlox.init(admin, externalContracts.blend.yieldBloxPool)",
+      "venueRegistry.set_venue_status(SoroSwap,Aquarius,Phoenix=AUTO; Blend pools=MANUAL)",
+      "adapterBalanced intentionally not deployed/configured for AUTO"
+    ],
+    "oracle": [
+      "oracleGuard.configure every asset policy before public deposits",
+      "Arka swap risk policy must point to OracleGuard before advertised execution"
+    ],
+    "postDeployGates": [
+      "Run storage lifecycle strict dry-run against deployments.mainnet.json",
+      "Run contract smoke tests on canary Arka with small capital",
+      "Run venue canaries before enabling AUTO on any protocol",
+      "Only enable public creation after creation fee and registry writer are confirmed"
+    ]
+  },
+  "governance": {
+    "bootstrapAdminCanUpgrade": true,
+    "daoGovernor": "deferred_until_dao_bootstrap",
+    "tokenomicsActivation": "not_active_until_governance_and_distribution_transactions_are_executed",
+    "upgradePolicy": "bootstrap_admin_until_expiry_then_governor_dao"
+  },
+  "validations": {
+    "adminSecretEnvPresent": true,
+    "adminAccountFunded": true,
+    "adminXlmBalanceCheckedAt": "2026-06-10T12:05:32Z",
+    "adminXlmBalance": "2001.0000000",
+    "stellarCliRequiredVersion": "26.1.0",
+    "stellarCliValidatedVersion": "26.1.0",
+    "artifactBuild": true,
+    "contractsDeployed": false,
+    "contractsConfigured": false,
+    "storageLifecycleDryRun": false,
+    "releaseGate": false
+  }
+}

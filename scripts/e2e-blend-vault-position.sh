@@ -3,12 +3,13 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DEPLOY_JSON="${DEPLOY_JSON:-$ROOT_DIR/deployments.testnet.json}"
+BLEND_VALIDATION_JSON="${BLEND_VALIDATION_JSON:-$ROOT_DIR/tmp/blend-live-validation.json}"
 NETWORK_PASSPHRASE="${NETWORK_PASSPHRASE:-Test SDF Network ; September 2015}"
 RPC_URL="${RPC_URL:-https://soroban-testnet.stellar.org}"
 MANAGER_IDENTITY="${MANAGER_IDENTITY:-arka-admin}"
 
-ARKA_ID="${ARKA_ID:-$(jq -r '.contracts.arka // empty' "$DEPLOY_JSON")}"
-ADAPTER_ID="${ADAPTER_ID:-$(jq -r '.contracts.adapterBlend // empty' "$DEPLOY_JSON")}"
+ARKA_ID="${ARKA_ID:-$(jq -er '.arka // empty' "$BLEND_VALIDATION_JSON" 2>/dev/null || true)}"
+ADAPTER_ID="${ADAPTER_ID:-$(jq -er '.adapterBlend // empty' "$BLEND_VALIDATION_JSON" 2>/dev/null || true)}"
 MARKET_ID="${MARKET_ID:-0}"
 AMOUNT="${AMOUNT:-1000000}"
 SECOND_ASSET_ID="${SECOND_ASSET_ID:-}"
@@ -17,6 +18,9 @@ BORROW_AMOUNT="${BORROW_AMOUNT:-100000}"
 REPAY_AMOUNT="${REPAY_AMOUNT:-50000}"
 WITHDRAW_AMOUNT="${WITHDRAW_AMOUNT:-50000}"
 MANAGER_ADDR="${MANAGER_ADDR:-$(stellar keys address "$MANAGER_IDENTITY")}"
+
+ARKA_ID="${ARKA_ID:-$(jq -r '.contracts.arka // empty' "$DEPLOY_JSON")}"
+ADAPTER_ID="${ADAPTER_ID:-$(jq -r '.contracts.adapterBlend // empty' "$DEPLOY_JSON")}"
 
 if [[ -z "$ARKA_ID" || -z "$ADAPTER_ID" ]]; then
   echo "ERROR: ARKA_ID and ADAPTER_ID are required." >&2
@@ -35,6 +39,8 @@ if [[ -z "${ASSET_ID:-}" ]]; then
   MARKET_ASSET="$(printf '%s' "$MARKET_ASSET_RAW" | tr -d '"')"
   if [[ -n "$MARKET_ASSET" && "$MARKET_ASSET" != "null" ]]; then
     ASSET_ID="$MARKET_ASSET"
+  elif [[ -f "$BLEND_VALIDATION_JSON" ]]; then
+    ASSET_ID="$(jq -er '.asset // empty' "$BLEND_VALIDATION_JSON" 2>/dev/null || true)"
   else
     ASSET_ID="$(jq -r '.tokens.ARKA1 // empty' "$DEPLOY_JSON")"
   fi

@@ -5,11 +5,15 @@
     "typescript": "^5.9.2"
   },
   "scripts": {
+    "get-governor-proposal": "node --loader ts-node/esm getGovernorProposal.ts",
     "run-proposal": "node --loader ts-node/esm proposeSnapshot.ts",
     "propose-arka-set-fees": "node --loader ts-node/esm proposeArkaSetFees.ts",
+    "propose-executor-schedule-token-power": "node --loader ts-node/esm proposeExecutorScheduleTokenPower.ts",
+    "schedule-executor-tokenomics": "node --loader ts-node/esm scheduleExecutorTokenomics.ts",
     "propose-factory-set-implementation": "node --loader ts-node/esm proposeFactorySetImplementation.ts",
     "propose-factory-set-share-token-implementation": "node --loader ts-node/esm proposeFactorySetShareTokenImplementation.ts",
-    "propose-factory-migrate-arka": "node --loader ts-node/esm proposeFactoryMigrateArka.ts"
+    "propose-factory-migrate-arka": "node --loader ts-node/esm proposeFactoryMigrateArka.ts",
+    "test": "TS_NODE_TRANSPILE_ONLY=1 TS_NODE_COMPILER_OPTIONS='{\"module\":\"nodenext\",\"moduleResolution\":\"nodenext\",\"allowImportingTsExtensions\":true}' node --loader ts-node/esm --test executorScheduleCommon.test.ts tokenomicsExecutorCommon.test.ts"
   },
   "type": "module",
   "dependencies": {

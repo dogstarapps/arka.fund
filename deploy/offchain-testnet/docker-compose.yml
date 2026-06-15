@@ -1,0 +1,50 @@
+services:
+  catalog-api:
+    build:
+      context: ../../services/catalog-api
+      dockerfile: Dockerfile
+    environment:
+      CATALOG_API_RPC_URL: ${CATALOG_API_RPC_URL}
+      CATALOG_API_NETWORK_PASSPHRASE: ${CATALOG_API_NETWORK_PASSPHRASE}
+      CATALOG_API_REGISTRY_CONTRACT_ID: ${CATALOG_API_REGISTRY_CONTRACT_ID}
+      CATALOG_API_HOST: 0.0.0.0
+      CATALOG_API_PORT: 3100
+      CATALOG_API_SYNC_TOKEN: ${CATALOG_API_SYNC_TOKEN}
+      CATALOG_API_DATA_FILE: /app/var/catalog-snapshot.json
+      CATALOG_API_HISTORY_FILE: /app/var/catalog-history.json
+      CATALOG_API_MONITORING_FILE: /app/var/catalog-monitoring.json
+    ports:
+      - "${CATALOG_API_PUBLIC_PORT:-33100}:3100"
+    volumes:
+      - catalog_api_var:/app/var
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3100/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  dapp:
+    build:
+      context: ../../../arkafund-dapp
+      dockerfile: Dockerfile
+    environment:
+      CATALOG_API_BASE_URL: http://catalog-api:3100
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      NEXT_PUBLIC_TESTNET: "true"
+      NEXT_PUBLIC_RPC_URL: ${CATALOG_API_RPC_URL}
+    ports:
+      - "${DAPP_PUBLIC_PORT:-33000}:3000"
+    depends_on:
+      catalog-api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  catalog_api_var:

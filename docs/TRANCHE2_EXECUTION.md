@@ -1,5 +1,11 @@
 # Tranche 2 Execution Plan (Post-Approval of Tranche 1)
 
+Historical correction, `2026-03-30`:
+- this document preserves the original tranche chronology and evidence trail
+- the later `Balanced` lane recorded here was coupled to `Comet` on testnet and has been retired from the active Arkafund support surface
+- the current supported live integrations are `Aquarius`, `SoroSwap`, and `Blend`
+- historical references to the retired lane remain in this log for traceability only and should not be read as current support claims
+
 This document is the execution baseline for Tranche 2, assuming Tranche 1 has already been approved.
 
 ## Scope Baseline

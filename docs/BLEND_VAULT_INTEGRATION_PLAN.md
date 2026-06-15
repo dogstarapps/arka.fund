@@ -15,7 +15,6 @@ Desired model:
 
 Under that model:
 - `SoroSwap` and `Aquarius` can work as spot rebalance venues if proceeds are returned to the vault
-- `Balanced` is already closer to the target because it enters through `Arka.rebalance(...)`
 - `Blend` now meets the Tranche 2 baseline because it executes as a vault-owned position and is reflected in vault NAV
 
 ## Current State

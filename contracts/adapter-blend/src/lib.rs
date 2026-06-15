@@ -1,12 +1,18 @@
 #![no_std]
-use soroban_sdk::{contract, contracterror, contractimpl, contracttype, panic_with_error, Address, Env, IntoVal, Symbol, Val, vec};
+use soroban_sdk::{
+    contract, contracterror, contractimpl, contracttype, panic_with_error, symbol_short, vec,
+    Address, BytesN, Env, IntoVal, Symbol, Val,
+};
 
 #[derive(Clone)]
 #[contracttype]
 pub enum DataKey {
     Admin,
+    Governor,
+    BootstrapAdminExpiresAt,
     Router,
     AssetByMarket(u128),
+    LastWasmHash,
 }
 
 #[derive(Clone)]
@@ -28,7 +34,11 @@ pub enum Error {
     AmountZero = 4,
     InvalidOut = 5,
     UnsupportedAction = 6,
+    Unauthorized = 7,
+    InvalidBootstrapAdmin = 8,
 }
+
+const MAX_BOOTSTRAP_ADMIN_SECONDS: u64 = 365 * 24 * 60 * 60;
 
 #[derive(Clone)]
 #[contracttype]
@@ -43,6 +53,66 @@ pub struct BlendAdapter;
 
 #[contractimpl]
 impl BlendAdapter {
+    fn bootstrap_admin_expired(env: &Env) -> bool {
+        let Some(expires_at) = env
+            .storage()
+            .instance()
+            .get::<DataKey, u64>(&DataKey::BootstrapAdminExpiresAt)
+        else {
+            return false;
+        };
+        env.ledger().timestamp() > expires_at
+    }
+
+    fn bootstrap_admin_active_internal(env: &Env) -> bool {
+        let Some(expires_at) = env
+            .storage()
+            .instance()
+            .get::<DataKey, u64>(&DataKey::BootstrapAdminExpiresAt)
+        else {
+            return false;
+        };
+        env.ledger().timestamp() <= expires_at
+    }
+
+    fn require_future_bootstrap_expiry(env: &Env, expires_at: u64) {
+        let now = env.ledger().timestamp();
+        if expires_at <= now || expires_at.saturating_sub(now) > MAX_BOOTSTRAP_ADMIN_SECONDS {
+            panic_with_error!(env, Error::InvalidBootstrapAdmin);
+        }
+    }
+
+    fn require_admin_or_governor_auth(env: &Env, caller: &Address) {
+        let store = env.storage().instance();
+        if let Some(admin) = store.get::<DataKey, Address>(&DataKey::Admin) {
+            if *caller == admin && !Self::bootstrap_admin_expired(env) {
+                caller.require_auth();
+                return;
+            }
+        }
+        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+            if *caller == governor {
+                caller.require_auth();
+                return;
+            }
+        }
+        panic_with_error!(env, Error::Unauthorized);
+    }
+
+    fn require_governor_auth(env: &Env, caller: &Address) {
+        let Some(governor) = env
+            .storage()
+            .instance()
+            .get::<DataKey, Address>(&DataKey::Governor)
+        else {
+            panic_with_error!(env, Error::Unauthorized);
+        };
+        if *caller != governor {
+            panic_with_error!(env, Error::Unauthorized);
+        }
+        caller.require_auth();
+    }
+
     fn execute_internal(
         env: Env,
         caller: Address,
@@ -62,7 +132,9 @@ impl BlendAdapter {
             None => panic_with_error!(&env, Error::NotInitialized),
         };
 
-        if let Some(asset) = asset_override.or_else(|| store.get::<DataKey, Address>(&DataKey::AssetByMarket(market_id))) {
+        if let Some(asset) = asset_override
+            .or_else(|| store.get::<DataKey, Address>(&DataKey::AssetByMarket(market_id)))
+        {
             let request_type: u32 = match action {
                 Action::Lend => 2,
                 Action::Withdraw => 3,
@@ -118,17 +190,55 @@ impl BlendAdapter {
         store.set(&DataKey::Router, &router);
     }
 
-    pub fn set_router(env: Env, caller: Address, router: Address) {
-        let store = env.storage().instance();
-        let admin: Address = match store.get(&DataKey::Admin) {
-            Some(a) => a,
-            None => panic_with_error!(&env, Error::NotInitialized),
-        };
-        if caller != admin {
-            panic_with_error!(&env, Error::OnlyAdmin);
+    pub fn set_admin(env: Env, caller: Address, admin: Address) {
+        Self::require_admin_or_governor_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::Admin, &admin);
+    }
+
+    pub fn set_governor(env: Env, caller: Address, governor: Option<Address>) {
+        Self::require_admin_or_governor_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::Governor, &governor);
+    }
+
+    pub fn set_bootstrap_admin_expiry(env: Env, caller: Address, expires_at: u64) {
+        Self::require_admin_or_governor_auth(&env, &caller);
+        Self::require_future_bootstrap_expiry(&env, expires_at);
+        if let Some(current_expires_at) = env
+            .storage()
+            .instance()
+            .get::<DataKey, u64>(&DataKey::BootstrapAdminExpiresAt)
+        {
+            assert!(
+                expires_at <= current_expires_at,
+                "bootstrap_admin_expiry_locked"
+            );
         }
-        caller.require_auth();
-        store.set(&DataKey::Router, &router);
+        env.storage()
+            .instance()
+            .set(&DataKey::BootstrapAdminExpiresAt, &expires_at);
+    }
+
+    pub fn clear_bootstrap_admin_expiry(env: Env, caller: Address) {
+        Self::require_governor_auth(&env, &caller);
+        let expired_at: u64 = 0;
+        env.storage()
+            .instance()
+            .set(&DataKey::BootstrapAdminExpiresAt, &expired_at);
+    }
+
+    pub fn bootstrap_admin_expires_at(env: Env) -> Option<u64> {
+        env.storage()
+            .instance()
+            .get::<DataKey, u64>(&DataKey::BootstrapAdminExpiresAt)
+    }
+
+    pub fn bootstrap_admin_active(env: Env) -> bool {
+        Self::bootstrap_admin_active_internal(&env)
+    }
+
+    pub fn set_router(env: Env, caller: Address, router: Address) {
+        Self::require_admin_or_governor_auth(&env, &caller);
+        env.storage().instance().set(&DataKey::Router, &router);
     }
 
     pub fn router(env: Env) -> Address {
@@ -139,23 +249,42 @@ impl BlendAdapter {
     }
 
     pub fn set_market_asset(env: Env, caller: Address, market_id: u128, asset: Address) {
-        let store = env.storage().instance();
-        let admin: Address = match store.get(&DataKey::Admin) {
-            Some(a) => a,
-            None => panic_with_error!(&env, Error::NotInitialized),
-        };
-        if caller != admin {
-            panic_with_error!(&env, Error::OnlyAdmin);
-        }
-        caller.require_auth();
-        store.set(&DataKey::AssetByMarket(market_id), &asset);
+        Self::require_admin_or_governor_auth(&env, &caller);
+        env.storage()
+            .instance()
+            .set(&DataKey::AssetByMarket(market_id), &asset);
     }
 
     pub fn market_asset(env: Env, market_id: u128) -> Option<Address> {
-        env.storage().instance().get(&DataKey::AssetByMarket(market_id))
+        env.storage()
+            .instance()
+            .get(&DataKey::AssetByMarket(market_id))
     }
 
-    pub fn execute(env: Env, caller: Address, action: Action, market_id: u128, amount: i128, receiver: Address) -> i128 {
+    pub fn upgrade(env: Env, caller: Address, new_wasm_hash: BytesN<32>) {
+        Self::require_admin_or_governor_auth(&env, &caller);
+        env.storage()
+            .instance()
+            .set(&DataKey::LastWasmHash, &new_wasm_hash);
+        env.events()
+            .publish((symbol_short!("upgrade"),), new_wasm_hash.clone());
+        env.deployer().update_current_contract_wasm(new_wasm_hash);
+    }
+
+    pub fn last_wasm_hash(env: Env) -> Option<BytesN<32>> {
+        env.storage()
+            .instance()
+            .get::<DataKey, BytesN<32>>(&DataKey::LastWasmHash)
+    }
+
+    pub fn execute(
+        env: Env,
+        caller: Address,
+        action: Action,
+        market_id: u128,
+        amount: i128,
+        receiver: Address,
+    ) -> i128 {
         Self::execute_internal(env, caller, action, market_id, amount, None, receiver)
     }
 
@@ -168,20 +297,35 @@ impl BlendAdapter {
         amount: i128,
         receiver: Address,
     ) -> i128 {
-        Self::execute_internal(env, caller, action, market_id, amount, Some(asset), receiver)
+        Self::execute_internal(
+            env,
+            caller,
+            action,
+            market_id,
+            amount,
+            Some(asset),
+            receiver,
+        )
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Address, Env, contract, contractimpl};
+    use soroban_sdk::{contract, contractimpl, testutils::Address as _, Address, Env};
 
     #[contract]
     struct DummyBlendRouter;
     #[contractimpl]
     impl DummyBlendRouter {
-        pub fn execute_action(_env: Env, _caller: Address, action: u32, _market_id: u128, amount: i128, _receiver: Address) -> i128 {
+        pub fn execute_action(
+            _env: Env,
+            _caller: Address,
+            action: u32,
+            _market_id: u128,
+            amount: i128,
+            _receiver: Address,
+        ) -> i128 {
             match action {
                 0 => amount,
                 1 => (amount * 95) / 100,
@@ -196,7 +340,14 @@ mod test {
     struct DummySubmitRouter;
     #[contractimpl]
     impl DummySubmitRouter {
-        pub fn submit(_env: Env, _from: Address, _spender: Address, _to: Address, _requests: soroban_sdk::Vec<Request>) {}
+        pub fn submit(
+            _env: Env,
+            _from: Address,
+            _spender: Address,
+            _to: Address,
+            _requests: soroban_sdk::Vec<Request>,
+        ) {
+        }
     }
 
     #[test]

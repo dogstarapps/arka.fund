@@ -13,10 +13,10 @@ soroban-sdk = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+coverage-vault = { path = "../coverage-vault" }
 
 [features]
 default = []
 testutils = ["soroban-sdk/testutils"]
-
 
 

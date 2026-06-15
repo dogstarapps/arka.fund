@@ -1,0 +1,20 @@
+[package]
+name = "oracle-guard"
+description = "Oracle guard and provider abstraction compatible with SEP-40 lastprice"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+test-oracle = { path = "../test-oracle", features = ["testutils"] }
+
+[features]
+default = []
+testutils = ["soroban-sdk/testutils"]

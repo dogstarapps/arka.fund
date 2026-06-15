@@ -6,7 +6,7 @@ Public product links:
 
 - App: https://app.arka.fund/
 - Landing: https://arka.fund/
-- Demo video: https://arka.fund/arka-tranche-3-demo-openai-voice.mp4
+- Demo video: https://arka.fund/arka-tranche-3-demo.mp4
 
 ## Current Status
 

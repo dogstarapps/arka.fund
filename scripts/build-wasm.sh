@@ -5,9 +5,16 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CONTRACTS_DIR="$ROOT_DIR/contracts"
 ARTIFACTS_DIR="$ROOT_DIR/artifacts"
 WASM_RUSTFLAGS="${WASM_RUSTFLAGS:--C target-feature=-reference-types}"
+STELLAR_CLI_VERSION="${STELLAR_CLI_VERSION:-26.1.0}"
 
 echo "🔧 Ensuring wasm32-unknown-unknown target is installed..."
 rustup target add wasm32-unknown-unknown >/dev/null 2>&1 || true
+
+if ! command -v stellar >/dev/null 2>&1 || ! stellar --version | head -n 1 | grep -q "stellar $STELLAR_CLI_VERSION"; then
+  echo "🔧 Installing Stellar CLI $STELLAR_CLI_VERSION for WASM optimization..."
+  cargo install stellar-cli --version "$STELLAR_CLI_VERSION" --locked --force
+fi
+stellar --version
 
 mkdir -p "$ARTIFACTS_DIR"
 

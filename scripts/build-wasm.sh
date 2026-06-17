@@ -6,17 +6,30 @@ CONTRACTS_DIR="$ROOT_DIR/contracts"
 ARTIFACTS_DIR="$ROOT_DIR/artifacts"
 WASM_RUSTFLAGS="${WASM_RUSTFLAGS:--C target-feature=-reference-types}"
 STELLAR_CLI_VERSION="${STELLAR_CLI_VERSION:-26.1.0}"
+STELLAR_CLI_LINUX_SHA256="e18d5a7629102e1ccc07241acbcbebfc05b1c02476ce7d3204ba2d7418be5c0c"
 
 echo "🔧 Ensuring wasm32-unknown-unknown target is installed..."
 rustup target add wasm32-unknown-unknown >/dev/null 2>&1 || true
 
 if ! command -v stellar >/dev/null 2>&1 || ! stellar --version | head -n 1 | grep -q "stellar $STELLAR_CLI_VERSION"; then
   echo "🔧 Installing Stellar CLI $STELLAR_CLI_VERSION for WASM optimization..."
-  if [[ "${GITHUB_ACTIONS:-}" == "true" ]] && command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get update
-    sudo apt-get install -y pkg-config libdbus-1-dev libudev-dev
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]] && [[ "$(uname -s)" == "Linux" ]] && [[ "$(uname -m)" == "x86_64" ]]; then
+    STELLAR_CLI_ARCHIVE="stellar-cli-${STELLAR_CLI_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+    STELLAR_CLI_URL="https://github.com/stellar/stellar-cli/releases/download/v${STELLAR_CLI_VERSION}/${STELLAR_CLI_ARCHIVE}"
+    STELLAR_CLI_TMP="$(mktemp -d)"
+    curl -fsSL "$STELLAR_CLI_URL" -o "$STELLAR_CLI_TMP/$STELLAR_CLI_ARCHIVE"
+    echo "${STELLAR_CLI_LINUX_SHA256}  ${STELLAR_CLI_TMP}/${STELLAR_CLI_ARCHIVE}" | sha256sum -c -
+    tar -xzf "$STELLAR_CLI_TMP/$STELLAR_CLI_ARCHIVE" -C "$STELLAR_CLI_TMP"
+    mkdir -p "$HOME/.cargo/bin"
+    install -m 0755 "$STELLAR_CLI_TMP/stellar" "$HOME/.cargo/bin/stellar"
+    rm -rf "$STELLAR_CLI_TMP"
+  else
+    if [[ "${GITHUB_ACTIONS:-}" == "true" ]] && command -v apt-get >/dev/null 2>&1; then
+      sudo apt-get update
+      sudo apt-get install -y pkg-config libdbus-1-dev libudev-dev
+    fi
+    cargo install stellar-cli --version "$STELLAR_CLI_VERSION" --locked --force
   fi
-  cargo install stellar-cli --version "$STELLAR_CLI_VERSION" --locked --force
 fi
 stellar --version
 

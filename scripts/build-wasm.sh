@@ -14,7 +14,7 @@ if ! command -v stellar >/dev/null 2>&1 || ! stellar --version | head -n 1 | gre
   echo "🔧 Installing Stellar CLI $STELLAR_CLI_VERSION for WASM optimization..."
   if [[ "${GITHUB_ACTIONS:-}" == "true" ]] && command -v apt-get >/dev/null 2>&1; then
     sudo apt-get update
-    sudo apt-get install -y pkg-config libdbus-1-dev
+    sudo apt-get install -y pkg-config libdbus-1-dev libudev-dev
   fi
   cargo install stellar-cli --version "$STELLAR_CLI_VERSION" --locked --force
 fi

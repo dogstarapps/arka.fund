@@ -12,6 +12,10 @@ rustup target add wasm32-unknown-unknown >/dev/null 2>&1 || true
 
 if ! command -v stellar >/dev/null 2>&1 || ! stellar --version | head -n 1 | grep -q "stellar $STELLAR_CLI_VERSION"; then
   echo "🔧 Installing Stellar CLI $STELLAR_CLI_VERSION for WASM optimization..."
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]] && command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get update
+    sudo apt-get install -y pkg-config libdbus-1-dev
+  fi
   cargo install stellar-cli --version "$STELLAR_CLI_VERSION" --locked --force
 fi
 stellar --version

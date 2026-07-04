@@ -6,11 +6,11 @@ This is the current operational task list for bringing Arka to a clean mainnet r
 
 ## Ground Truth
 
-- Contracts repo: local changes exist on `dev`; they are not yet committed, pushed, or upgraded on mainnet.
-- dApp repo: local changes exist on `dev`; TypeScript, unit, integration and full Playwright E2E gates have passed locally in the latest wallet/create/routing closure cycle.
+- Contracts repo: release-gate changes were committed and pushed to `dev` at `ce32021`; a follow-up manifest/docs commit records the 2026-07-04 selective mainnet upgrade evidence.
+- dApp repo: release-gate changes were committed and pushed to `dev` at `12de3f1`; TypeScript, unit, integration and full Playwright E2E gates have passed locally in the latest wallet/create/routing closure cycle.
 - Latest full dApp E2E run on 2026-07-04: `367` passed in `9.6m`.
 - Vercel production must still not be redeployed from an uncommitted local state. Commit/push, CI, environment review and production smoke/E2E are required first.
-- The new mainnet WASM set can be considered for upload/upgrade only after the contract and dApp changes are committed, CI is green, and the mainnet upgrade/canary runbook is followed.
+- The changed mainnet WASM set was uploaded/activated selectively on 2026-07-04 for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`. Post-upgrade mainnet canaries are still required before broad public-capital claims.
 - Figma/pixel-perfect parity is no longer a release blocker. Layout must still be usable, readable and non-overlapping.
 - Phoenix was not removed. Phoenix has mainnet contract and canary evidence.
 - Balanced/SODAX was not removed. It is supported through the server-side SODAX intent driver, not through the legacy Balanced AMM-router adapter.
@@ -31,7 +31,7 @@ This is the current operational task list for bringing Arka to a clean mainnet r
 
 ### 1. Contract release closure
 
-Status: local gate closed; pending commit/push and mainnet upload/upgrade.
+Status: committed/pushed and selectively upgraded on mainnet; pending post-upgrade canaries.
 
 - Keep the refactor that moved duplicated test blocks into `src/test.rs` files.
 - Keep the canonical `credit_*` API and the legacy `blend_*` compatibility surface blocked from direct frontend usage.
@@ -40,8 +40,8 @@ Status: local gate closed; pending commit/push and mainnet upload/upgrade.
 - Keep the internal audit REVIEW closure: SoroSwap/Phoenix adapter `execute` paths now require caller auth, `adapter-phoenix` is included in the active adapter audit set, and the remaining unauthenticated mutations are explicitly reviewed/accepted in the audit report.
 - Release WASM and local artifact hashes were regenerated after the current contract changes on 2026-07-03.
 - Current mainnet WASM rollback backups were fetched and documented on 2026-07-04.
-- Commit and push the contract repo.
-- Upgrade or deploy the final WASM on mainnet only after the final contract release gate is green.
+- Contract repo release gate commit pushed: `ce32021`.
+- Selective mainnet upload/upgrade completed on 2026-07-04 and recorded in `deployments.mainnet.json`.
 
 Acceptance evidence:
 
@@ -51,7 +51,7 @@ Acceptance evidence:
 - Release WASM build.
 - Updated `deployments.mainnet.json` local artifact hashes.
 - `docs/MAINNET_WASM_ROLLBACK_2026-07-04.md` and a copied off-repo backup of the current mainnet WASM set.
-- Mainnet upload/upgrade txs before claiming the new WASM is live.
+- Mainnet upload/upgrade txs recorded in `validations.mainnetSelectiveUpgrade`.
 
 ### 2. Frontend wallet and create-flow closure
 
@@ -148,18 +148,14 @@ Acceptance evidence:
 
 ### 8. Final publication sequence
 
-Status: local gates are green; publication sequence is pending commit/CI/mainnet upgrade/canary/Vercel.
+Status: local gates and selective mainnet upgrade are complete; publication sequence is pending post-upgrade canary, Vercel and production E2E.
 
-1. Finish final documentation alignment and secret scan.
-2. Commit and push both repos without sensitive files.
-3. Wait for CI to pass.
-4. Re-run or confirm all contract tests and gates on the committed state.
-5. Re-run or confirm dApp TypeScript, unit, integration and full E2E on the committed state.
-6. Upgrade/deploy mainnet contracts if required.
-7. Run post-upgrade mainnet canaries.
-8. Deploy Vercel production.
-9. Run production E2E and smoke tests.
-10. Update docs with final txs, hashes and production URLs.
+1. Commit and push the post-upgrade manifest/docs evidence.
+2. Run post-upgrade mainnet canaries.
+3. Sync dApp mainnet config if the manifest output consumed by Vercel changed.
+4. Deploy Vercel production.
+5. Run production E2E and smoke tests.
+6. Update docs with final canary txs and production URLs.
 
 ## Explicitly Not Release Blockers
 

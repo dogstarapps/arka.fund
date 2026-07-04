@@ -18,7 +18,7 @@ This document records the current mainnet facts verified against `deployments.ma
 Interpretation:
 
 - The manifest is a real deployed/configured mainnet manifest, not a predeploy placeholder.
-- The product release still has publication blockers tracked in `docs/MAINNET_RELEASE_TASKS_2026-07-03.md`: commit/CI, mainnet upgrade/canary if adopting the local WASM set, Vercel production deploy and production smoke/E2E.
+- The product release still has publication blockers tracked in `docs/MAINNET_RELEASE_TASKS_2026-07-03.md`: post-upgrade mainnet canaries, Vercel production deploy and production smoke/E2E.
 - Do not describe the product as clean for broad public capital until the dApp E2E, wallet/create flow and post-fix publication checks are green.
 
 ## RPC Contract Verification
@@ -84,9 +84,6 @@ On 2026-07-03, these manifest canary transactions were checked through Horizon a
 
 These are not contradictions in mainnet deployment, but they do block a clean product publication claim:
 
-- local contract/dApp diffs are not committed and pushed;
-- CI has not yet validated the pushed state;
-- the changed local WASM set has not been uploaded/upgraded on mainnet;
 - post-upgrade mainnet canaries are pending;
 - post-fix Vercel deployment and production E2E are pending.
 
@@ -94,3 +91,10 @@ Local quality evidence now available:
 
 - full dApp Playwright E2E passed on 2026-07-04 with `367` tests in `9.6m`;
 - wallet/create/routing/contract mutation paths are covered locally, including wallet-backed Create Arka and live testnet Aquarius, SoroSwap and best-execution rebalance flows.
+- contracts CI passed on GitHub for release-gate commit `ce32021`.
+
+Mainnet upgrade evidence now available:
+
+- selective upload/upgrade completed on 2026-07-04 for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`;
+- `arkaFactory`, `adapterPhoenix` and `adapterSoroswap` on-chain WASM hashes match the planned hashes in `deployments.mainnet.json`;
+- `arkaFactory.get_share_token_implementation` returns the new `shareToken` implementation hash.

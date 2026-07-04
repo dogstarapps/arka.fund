@@ -6,9 +6,10 @@ This document records the current final blockers before treating Arka as clean f
 
 ## Current State
 
-- Contracts build and test locally, but the current local contract changes are not committed, pushed or upgraded on mainnet.
+- Contracts build and test locally; the release-gate commit was pushed to `dev` at `ce32021`.
 - Release WASM has been rebuilt after the current contract diff; rerun it only if contract code changes again.
 - Current mainnet WASM binaries for the five changed release-candidate artifacts were backed up locally under `tmp/mainnet-wasm-backups/2026-07-04-current`; rollback procedure is documented in `docs/MAINNET_WASM_ROLLBACK_2026-07-04.md`.
+- The changed release-candidate artifacts were uploaded/activated selectively on mainnet on 2026-07-04 and recorded in `deployments.mainnet.json` under `validations.mainnetSelectiveUpgrade`.
 - dApp TypeScript, unit tests, integration tests and full Playwright E2E have passed locally in the current wallet/create-flow cycle.
 - Latest full dApp E2E run on 2026-07-04: `367` passed in `9.6m`.
 - Vercel production should still not be redeployed from an uncommitted local state. Commit/push, CI, environment review and production smoke/E2E are required first.
@@ -28,7 +29,7 @@ The cross-repository release task list is tracked in `docs/MAINNET_RELEASE_TASKS
 
 ### 1. Harden legacy Blend entrypoints
 
-Status: resolved locally; pending commit/push and mainnet upgrade.
+Status: resolved locally, committed/pushed and included in the 2026-07-04 selective mainnet upgrade where relevant.
 
 Why it matters:
 
@@ -58,7 +59,7 @@ Acceptance evidence:
 
 ### 2. Resolve share-token upgrade posture
 
-Status: resolved locally; release WASM built and local artifact hashes refreshed; pending mainnet upload/upgrade decision.
+Status: adopted for future factory-created share tokens; mainnet upload and factory share implementation update completed on 2026-07-04.
 
 Why it matters:
 
@@ -81,12 +82,12 @@ Acceptance evidence now available:
 
 Still required before mainnet claims:
 
-- Mainnet upload/upgrade transaction if the new share-token implementation is adopted.
+- Post-upgrade Create Arka canary proving a newly created Arka receives the updated share-token implementation path.
 - Mainnet manifest/runbook explicitly states how share-token implementation changes are handled.
 
 ### 2b. Close internal security audit REVIEW findings
 
-Status: resolved locally; release WASM built and local artifact hashes refreshed; pending commit/push and mainnet upload/upgrade.
+Status: resolved locally, committed/pushed and selectively upgraded on mainnet for the changed adapter/factory artifacts.
 
 Original review findings:
 
@@ -120,7 +121,7 @@ Release candidate evidence:
 - `BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh` passed on 2026-07-03 with Stellar CLI `26.1.0`.
 - Local `deploymentPlan.contracts[].sha256` hashes were refreshed for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`.
 - The corresponding `uploadedArtifacts` entries were cleared so the next mainnet deploy/upgrade script must upload the changed WASM instead of reusing prior ledger hashes.
-- `wasmHashes` still represent the currently deployed mainnet hashes until upload/upgrade transactions are executed.
+- `wasmHashes` now record the 2026-07-04 selective mainnet upgrade hashes for the changed artifacts.
 - Current mainnet WASM rollback backups were fetched and SHA-256 verified for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`.
 
 ### 3. Remove raw BPS/base-unit display from public and manager UI
@@ -174,17 +175,16 @@ Acceptance evidence:
 
 ### 5. Mainnet upgrade/deploy and dApp cutover
 
-Status: open.
+Status: mainnet selective upgrade completed; dApp production cutover pending.
 
 Why it matters:
 
-- Local green tests do not mean mainnet has the new WASM or config.
-- Mainnet needs explicit deployment or `upgrade` transactions, updated manifest, and a dApp redeploy pointed at the final mainnet config.
+- Local green tests and mainnet upgrade do not by themselves mean the public product is fully published.
+- Mainnet now has the changed factory/adapter WASM set and factory implementation hashes. The dApp still needs production cutover and production smoke/E2E.
 
 Acceptance evidence:
 
-- `deployments.mainnet.json` updated with final contract IDs and WASM hashes.
-- Mainnet deployment or upgrade tx hashes recorded.
+- `deployments.mainnet.json` updated with final contract IDs, WASM hashes and selective upgrade tx hashes.
 - Vercel production environment points to mainnet.
 - `app.arka.fund` serves the intended production build.
 

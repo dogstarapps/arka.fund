@@ -2,7 +2,7 @@
   "network": "mainnet",
   "status": "mainnet_manual_release_ready",
   "createdAt": "2026-06-10T12:05:32Z",
-  "updatedAt": "2026-07-03T19:37:26Z",
+  "updatedAt": "2026-07-04T18:09:47Z",
   "rpcUrl": "https://mainnet.sorobanrpc.com",
   "networkPassphrase": "Public Global Stellar Network ; September 2015",
   "admin": {
@@ -58,9 +58,9 @@
     "emissionsController": "CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF"
   },
   "wasmHashes": {
-    "arka": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b",
-    "shareToken": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89",
-    "arkaFactory": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608",
+    "arka": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+    "shareToken": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+    "arkaFactory": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
     "arkaRegistry": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
     "router": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
     "venueRegistry": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
@@ -69,8 +69,8 @@
     "adapterBlend": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
     "adapterBlendFixedXlmUsdc": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
     "adapterBlendYieldBlox": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
-    "adapterPhoenix": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f",
-    "adapterSoroswap": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920",
+    "adapterPhoenix": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+    "adapterSoroswap": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
     "oracleGuard": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
     "coverageVault": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf",
     "coverageFund": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
@@ -737,8 +737,8 @@
   "validations": {
     "adminSecretEnvPresent": true,
     "adminAccountFunded": true,
-    "adminXlmBalanceCheckedAt": "2026-06-10T12:05:32Z",
-    "adminXlmBalance": "2001.0000000",
+    "adminXlmBalanceCheckedAt": "2026-07-04T18:02:00Z",
+    "adminXlmBalance": "1212.0225724",
     "stellarCliRequiredVersion": "26.1.0",
     "stellarCliValidatedVersion": "26.1.0",
     "artifactBuild": true,
@@ -1378,6 +1378,53 @@
         "blockingReason": null,
         "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
       }
+    },
+    "mainnetSelectiveUpgrade": {
+      "validatedAt": "2026-07-04T18:09:47Z",
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "mode": "selective_upload_upgrade",
+      "uploads": {
+        "arka": {
+          "artifact": "artifacts/arka.wasm",
+          "wasmHash": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+          "tx": "1ae60c3e6669c506fbbe7c30170be179661aad16631fa323bfd4db1b4fa0eef9"
+        },
+        "shareToken": {
+          "artifact": "artifacts/share-token.wasm",
+          "wasmHash": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+          "tx": "0f912c3e462605d0d5f3697cf17fc096faba3d29e52554de46aadee9da57fbcc"
+        },
+        "arkaFactory": {
+          "artifact": "artifacts/arka-factory.wasm",
+          "wasmHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+          "tx": "2c7056917f39c1e6b0c7245be084eadfd2e3aaabd07fd2545db8525599407252"
+        },
+        "adapterPhoenix": {
+          "artifact": "artifacts/adapter-phoenix.wasm",
+          "wasmHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+          "tx": "e2929ef02fa76707f9fc9d68d3ddd94db1ec912c3145458132eaeec2323478c2"
+        },
+        "adapterSoroswap": {
+          "artifact": "artifacts/adapter-soroswap.wasm",
+          "wasmHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
+          "tx": "0e9b2a386619fb9ad0e4f5572af42b5c41a7d8ac753f94902e062f462299df58"
+        }
+      },
+      "activationTxs": {
+        "arkaFactoryUpgrade": "4107fb04822e9fa8e964de3eebdaa1d40a7fffdf5eec7348fc0df02ca76aa7f8",
+        "arkaFactorySetArkaImplementation": "f3e81ec1b02900fc5610364ffc9f35ba2926b3f7a553db5afedc6cd962124749",
+        "arkaFactorySetShareImplementation": "418f6799b39dcaba9b9ad0e950155e2d7c9225335d61cafcee2fdb7e950ad69e",
+        "adapterPhoenixUpgrade": "6b73065de7028e46e0af6db553a570dd6be81d40c8eec862928c5c1517abfd5a",
+        "adapterSoroswapUpgrade": "a655126db725dbfb6904425e0739e5ec294d51fc533d83b089c526f71f2d5361"
+      },
+      "verifiedOnchain": {
+        "arkaFactoryHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+        "arkaFactoryShareTokenImplementation": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+        "adapterPhoenixHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+        "adapterSoroswapHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
+      }
     }
   },
   "uploadedArtifacts": {
@@ -1397,7 +1444,12 @@
     "artifacts/manager-tier.wasm": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188",
     "artifacts/oracle-guard.wasm": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
     "artifacts/router.wasm": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
-    "artifacts/venue-registry.wasm": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e"
+    "artifacts/venue-registry.wasm": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
+    "artifacts/arka.wasm": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+    "artifacts/share-token.wasm": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+    "artifacts/arka-factory.wasm": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+    "artifacts/adapter-phoenix.wasm": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+    "artifacts/adapter-soroswap.wasm": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
   },
   "evidence": {
     "manifest": "/Users/marcosoliva/Development/dogstar/arkafund/deployments.mainnet.json",

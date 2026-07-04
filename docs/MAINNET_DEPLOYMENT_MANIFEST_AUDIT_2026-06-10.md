@@ -2,15 +2,17 @@
 
 Date: 2026-06-10
 
+Current status note, 2026-07-03: this document started as a predeploy audit. The manifest has since moved to deployed/configured mainnet state. For current facts verified against Stellar mainnet RPC and Horizon, use `docs/MAINNET_REALITY_CHECK_2026-07-03.md`.
+
 This audit checks whether `deployments.mainnet.json` contains the information needed to deploy and operate Arka on Stellar mainnet.
 
 ## Verdict
 
-`deployments.mainnet.json` is now **predeploy-ready**.
+`deployments.mainnet.json` was **predeploy-ready** on 2026-06-10 and is now a deployed/configured mainnet manifest.
 
-That means the manifest has enough information to start the mainnet deployment transaction sequence: production artefacts, local WASM SHA-256 hashes, real Stellar asset contract IDs, external venue addresses, OracleGuard policy inputs, bootstrap admin expiry, creation fee, and initialization plan.
+As of 2026-07-03, deployed singleton/adapter contract IDs in the manifest have been checked against `https://mainnet.sorobanrpc.com`; every `deploy=true` contract returns the WASM hash recorded in the manifest.
 
-It does **not** mean public capital should open immediately. After deployment, the manifest must move through `deployed_unconfigured` and `configured_pending_postdeploy_gates`, then pass storage lifecycle dry-run, contract smoke tests, venue canaries and release gate before public deposits/AUTO execution.
+It does **not** mean broad public capital should open immediately. The remaining product blockers are dApp E2E, wallet/create-flow verification, UI copy/data cleanup, commit/CI, post-fix Vercel deployment, and production E2E.
 
 ## Current manifest status
 
@@ -87,7 +89,7 @@ Mainnet router and factory are publicly documented by SoroSwap:
 
 Source: https://raw.githubusercontent.com/soroswap/core/main/public/mainnet.contracts.json
 
-Initial candidate paths are XLM/USDC and USDC/XLM. The adapter is registered in the global venue registry; production canary evidence is still required before raising public limits.
+Initial candidate paths are XLM/USDC and USDC/XLM. The adapter is deployed and the USDC/XLM mainnet canary has passed. The manifest still records `autoEnabled=false`; do not describe SoroSwap as AUTO until venue governance enables it.
 
 ### Aquarius
 
@@ -99,7 +101,7 @@ Aquarius pools are identified by `pool_index` (`BytesN<32>`) derived from ordere
 
 Source: https://docs.aqua.network/developers/aquarius-soroban-functions.md
 
-Pool routes are intentionally empty until pool-index discovery/canary is done.
+The manifest records the USDC/XLM pool route and the Aquarius mainnet canary has passed. The manifest still records `autoEnabled=false`; do not describe Aquarius as AUTO until venue governance enables it.
 
 ### Phoenix
 
@@ -107,7 +109,7 @@ Phoenix exposes a public pool dashboard/API with mainnet pool data:
 
 - API: https://stats.phoenix-hub.io/api/pools
 
-The manifest includes an explicit allowlist for the XLM/USDC pool in both directions. The adapter is registered in the global venue registry; production canary evidence is still required before raising public limits.
+The manifest includes an explicit allowlist for the XLM/USDC pool in both directions. The Phoenix adapter is deployed and the USDC/XLM mainnet canary has passed. The manifest still records `autoEnabled=false`; do not describe Phoenix as AUTO until venue governance enables it.
 
 ### Blend
 
@@ -131,7 +133,7 @@ SODAX documents an intent/solver SDK rather than a simple public Stellar AMM rou
 - SDK methods include quote, submit, status, post-execution and cancel/expiry flows.
 - Mainnet deployments are documented at https://docs.sodax.com/developers/deployments/mainnet.md
 
-Balanced/SODAX is not handled by the AMM adapter registry. Its production readiness is proven through the server-side driver: quote, submit, status, receipt/fill, refund/cancel, expiry and wallet-backed signing end to end.
+Balanced/SODAX is not handled by the AMM adapter registry. Its production readiness is proven through the server-side driver: quote, build, relay, submit, status, receipt/fill, refund/cancel, expiry and wallet-backed signing end to end. The mainnet canary recorded in `deployments.mainnet.json` is successful.
 
 ## Oracle evidence
 
@@ -162,13 +164,13 @@ Launch asset SAC IDs in the manifest:
 
 ## Postdeploy gates
 
-After deployment and configuration, do not open public capital until:
+For broad public capital, do not proceed until:
 
 - `scripts/storage_lifecycle_extend.py --dry-run --strict` passes against mainnet manifest.
 - A canary Arka is created with a small deposit.
 - Arka share-token mint/burn is verified through deposit/redeem.
 - OracleGuard returns live prices for admitted launch assets or blocks them fail-closed.
-- Venue canaries pass before enabling each protocol in AUTO.
+- Venue canaries pass before enabling each AMM protocol in AUTO. Phoenix, SoroSwap and Aquarius have canary evidence; their manifest state remains `autoEnabled=false`.
 - Frontend mainnet config points to the new deployed contracts.
 - Vercel production is redeployed with the mainnet contract config.
 

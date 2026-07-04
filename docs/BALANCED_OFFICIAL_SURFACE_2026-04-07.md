@@ -2,6 +2,8 @@
 
 Date: 2026-04-07
 
+Current status note, 2026-07-03: the mainnet manifest now records Balanced/SODAX as a server-side intent-driver venue with successful production canary evidence. This document remains useful for explaining why Balanced is not modeled as a public Soroban AMM router. For current release state, see `docs/MAINNET_REALITY_CHECK_2026-07-03.md`.
+
 This report captures the official public Stellar surface that Balanced exposes today, and explains why Arka.fund should not keep assuming a public Soroban router cutover exists.
 
 ## Official findings
@@ -23,11 +25,11 @@ This report captures the official public Stellar surface that Balanced exposes t
 
 - `Balanced` can remain a first-class protocol target.
 - The old `router cutover` assumption is no longer sufficient as the source of truth.
-- There is now enough public evidence to model `Balanced/SODAX` as an `intent venue with public SDK-backed quote/status`, but not enough to treat it as a machine-comparable venue inside `AUTO` while execution still runs through Arka's adapter lane.
+- There is now enough mainnet evidence to model `Balanced/SODAX` as an intent venue through Arka's server-side SODAX driver.
 - Until Balanced publishes a public Soroban execution interface that Arka can call directly, our support state should stay honest:
   - protocol is tracked and surfaced in product
-  - planner admission is gated
-  - execution stays blocked unless a canonical public execution path is verified
+  - the public product must not imply a Soroban AMM router exists
+  - execution evidence is the SODAX intent lifecycle, not the retired Balanced/Comet adapter lane
 
 ## Repository implementation
 

@@ -16,11 +16,14 @@ The current mainnet release state is recorded in `deployments.mainnet.json`:
 
 - Network: Stellar mainnet
 - RPC: `https://mainnet.sorobanrpc.com`
-- Release status: `mainnet_manual_release_ready`
+- Manifest status: `mainnet_manual_release_ready`
 - Mainnet release gate: passed on 2026-06-13
+- Mainnet RPC reality check: deployed contract WASM hashes match the manifest as of 2026-07-03
 - Bootstrap admin: time-bounded operational admin, scheduled to expire on 2027-06-10
 - Governance handoff target: DAO governor
 - Creation mode: paid permissionless creation, with public creation fee configured as `10.00 USDC`
+
+Current mainnet facts are tracked in `docs/MAINNET_REALITY_CHECK_2026-07-03.md`. Open product/release items and user-reported incidents for the final quality pass are tracked in `docs/MAINNET_RELEASE_TASKS_2026-07-03.md` and `docs/MAINNET_OPEN_ITEMS_AND_INCIDENTS_2026-07-03.md`.
 
 Do not commit private keys, wallet secrets, API keys, Vercel tokens, or local operator files. Deployment scripts read secrets from the local operator environment only.
 
@@ -71,11 +74,11 @@ Launch canaries validate the USDC/XLM route across the active swap venues. Addit
 
 | Venue | Mainnet state | Notes |
 | --- | --- | --- |
-| Phoenix | Mainnet canary passed | USDC/XLM route validated through Phoenix pool route configuration. |
-| SoroSwap | Mainnet canary passed | USDC/XLM route validated through the public SoroSwap router. |
-| Aquarius | Mainnet canary passed | USDC/XLM route validated through the configured pool index. |
-| Blend | Mainnet canary passed for supply/withdraw | Fixed XLM-USDC market supports supply and withdraw at launch; borrow and repay remain disabled until further risk validation. |
-| Balanced/SODAX | Ready through server-side intent driver | Public SODAX SDK flow validates quote, build, relay, submit, status, receipt, expiry, and refund surfaces. |
+| Phoenix | Mainnet canary passed; `autoEnabled=false` in manifest | USDC/XLM route validated through Phoenix pool route configuration. Do not present it as AUTO unless venue governance enables it. |
+| SoroSwap | Mainnet canary passed; `autoEnabled=false` in manifest | USDC/XLM route validated through the public SoroSwap router. Do not present it as AUTO unless venue governance enables it. |
+| Aquarius | Mainnet canary passed; `autoEnabled=false` in manifest | USDC/XLM route validated through the configured pool index. Do not present it as AUTO unless venue governance enables it. |
+| Blend | Mainnet canary passed for supply/withdraw; `autoEnabled=false` | Fixed XLM-USDC market supports supply and withdraw at launch; borrow and repay remain disabled until further risk validation. |
+| Balanced/SODAX | `autoEnabled=true` through server-side intent driver | Public SODAX SDK flow validates quote, build, relay, submit, status, receipt, expiry, and refund surfaces. |
 
 Balanced/SODAX is intent-based. It is not modeled as a public Soroban AMM router adapter.
 

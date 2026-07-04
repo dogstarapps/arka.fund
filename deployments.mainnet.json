@@ -2,7 +2,7 @@
   "network": "mainnet",
   "status": "mainnet_manual_release_ready",
   "createdAt": "2026-06-10T12:05:32Z",
-  "updatedAt": "2026-06-13T06:10:10Z",
+  "updatedAt": "2026-07-03T19:37:26Z",
   "rpcUrl": "https://mainnet.sorobanrpc.com",
   "networkPassphrase": "Public Global Stellar Network ; September 2015",
   "admin": {
@@ -507,7 +507,7 @@
         "role": "vault_implementation_template",
         "deploy": false,
         "deferredReason": "Factory deploys Arka instances from uploaded wasm hash.",
-        "sha256": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b"
+        "sha256": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8"
       },
       {
         "name": "shareToken",
@@ -515,14 +515,14 @@
         "role": "share_token_implementation_template",
         "deploy": false,
         "deferredReason": "Factory deploys per-Arka share tokens from uploaded wasm hash.",
-        "sha256": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89"
+        "sha256": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192"
       },
       {
         "name": "arkaFactory",
         "artifact": "artifacts/arka-factory.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608"
+        "sha256": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579"
       },
       {
         "name": "arkaRegistry",
@@ -587,14 +587,14 @@
         "artifact": "artifacts/adapter-phoenix.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f"
+        "sha256": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e"
       },
       {
         "name": "adapterSoroswap",
         "artifact": "artifacts/adapter-soroswap.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920"
+        "sha256": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
       },
       {
         "name": "oracleGuard",
@@ -1384,13 +1384,9 @@
     "artifacts/adapter-aquarius.wasm": "9ff31b1fb5a0fe16ffcfc28158710c7fe8cb2c31532b45985f1e808b990c78dd",
     "artifacts/adapter-balanced.wasm": "ae0608787861cca04b3563c0f0532111284ae3eba080762dd87a48893afe2d60",
     "artifacts/adapter-blend.wasm": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
-    "artifacts/adapter-phoenix.wasm": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f",
-    "artifacts/adapter-soroswap.wasm": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920",
-    "artifacts/arka-factory.wasm": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608",
     "artifacts/arka-registry.wasm": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
     "artifacts/arka-token.wasm": "19f62f37e57ba77c24e674428f1a232433c263f8076b55b5c88fa3642a471572",
     "artifacts/arka-vesting.wasm": "65b5f4a19eed8f6a6a3c802b4e06bcefbe8182d9687acc820faca8734637e4d9",
-    "artifacts/arka.wasm": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b",
     "artifacts/claims-manager.wasm": "1ab5e135d3cfd6f15a13b0939c2c10cab1cea4243c78a9e19ec8a50c27043ef0",
     "artifacts/coverage-fund.wasm": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
     "artifacts/coverage-vault.wasm": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf",
@@ -1401,7 +1397,6 @@
     "artifacts/manager-tier.wasm": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188",
     "artifacts/oracle-guard.wasm": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
     "artifacts/router.wasm": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
-    "artifacts/share-token.wasm": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89",
     "artifacts/venue-registry.wasm": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e"
   },
   "evidence": {

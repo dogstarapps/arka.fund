@@ -4,6 +4,8 @@ Date: 2026-06-10
 
 This document records the current on-chain economics and the security controls that protect depositor capital. It separates what is already implemented from the policy choices that still need to be fixed before mainnet.
 
+Current status note, 2026-07-03: mainnet deployment facts are now anchored in `deployments.mainnet.json` and verified in `docs/MAINNET_REALITY_CHECK_2026-07-03.md`. The active mainnet manifest sets a `10.00 USDC` Arka creation fee, uses bootstrap admin `GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD`, expires that bootstrap window on `2027-06-10T12:05:32Z`, records successful Phoenix/SoroSwap/Aquarius USDC-XLM canaries with `autoEnabled=false`, records Blend supply/withdraw canaries with borrow/repay disabled, and admits Balanced/SODAX as a server-side intent venue with `autoEnabled=true`.
+
 ## 1. Executive answer
 
 ### How much does it cost to open an Arka?
@@ -15,6 +17,12 @@ Current behavior:
 - If `ProtocolTreasury`, `CreationFeeToken` and `CreationFeeAmount` are configured and `CreationFeeAmount > 0`, the factory charges the manager at creation time.
 - If any of those fields is missing, or the amount is zero, opening an Arka costs no protocol creation fee.
 - The user still pays normal Stellar/Soroban network fees and storage/rent costs.
+
+Current mainnet manifest:
+
+- `CreationFeeToken` is USDC.
+- `CreationFeeAmount` is `10.00 USDC`.
+- Public product copy must show the human token amount before signing; it must not show raw base units.
 
 Recommendation for launch:
 
@@ -326,8 +334,8 @@ The manager cannot safely use arbitrary protocols if the Arka is configured with
 Mainnet requirement:
 
 - `set_allowed_venues(...)` must be executed for each Arka or factory-created default flow must guarantee it.
-- Phoenix should not be admitted until real pool routes are configured.
-- Balanced/SODAX should remain blocked for AUTO unless the canonical intent route has production-grade quote/status/receipt/refund/expiry evidence.
+- Phoenix, SoroSwap and Aquarius have successful mainnet USDC-XLM canaries, but the current manifest keeps them `autoEnabled=false`; they should only become AUTO venues after governance explicitly enables the venue policy for the intended route set.
+- Balanced/SODAX has mainnet evidence through the SODAX server-side intent lifecycle and is `autoEnabled=true` in the current manifest. This is not the retired Balanced/Comet AMM-router lane and must remain behind its health/status/receipt/refund/expiry gate.
 
 ### 4.5 Blend lending/borrowing controls
 

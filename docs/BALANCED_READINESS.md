@@ -1,5 +1,7 @@
 # Balanced Readiness
 
+Current status note, 2026-07-03: this file describes the older testnet adapter-readiness path. Mainnet Balanced/SODAX readiness is now tracked in `deployments.mainnet.json -> executionVenues.balancedSodax` and `validations.balancedReadiness`, with production canary evidence through the SODAX intent driver. Do not use this testnet adapter note as the current mainnet support state.
+
 `Balanced` is being reopened deliberately, not by relabeling the old `Comet`-coupled lane.
 
 The source `adapter-balanced` contract is now generic again:

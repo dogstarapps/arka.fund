@@ -14,25 +14,34 @@ struct DummyToken;
 
 #[contractimpl]
 impl DummyToken {
-    pub fn transfer_from(_env: Env, spender: Address, _from: Address, _to: Address, _amount: i128) {
-        spender.require_auth();
+    fn read_balance(env: &Env, owner: &Address) -> i128 {
+        let key = (symbol_short!("bal"), owner.clone());
+        env.storage().instance().get(&key).unwrap_or(0)
     }
-    pub fn transfer(_env: Env, from: Address, _to: Address, _amount: i128) {
+
+    fn write_balance(env: &Env, owner: &Address, amount: i128) {
+        let key = (symbol_short!("bal"), owner.clone());
+        env.storage().instance().set(&key, &amount);
+    }
+
+    pub fn transfer_from(env: Env, spender: Address, from: Address, to: Address, amount: i128) {
+        spender.require_auth();
+        Self::write_balance(&env, &from, Self::read_balance(&env, &from) - amount);
+        Self::write_balance(&env, &to, Self::read_balance(&env, &to) + amount);
+    }
+    pub fn transfer(env: Env, from: Address, to: Address, amount: i128) {
         from.require_auth();
+        Self::write_balance(&env, &from, Self::read_balance(&env, &from) - amount);
+        Self::write_balance(&env, &to, Self::read_balance(&env, &to) + amount);
     }
     pub fn mint(env: Env, to: Address, amount: i128) {
-        let key = (symbol_short!("bal"), to);
-        let prev: i128 = env.storage().instance().get(&key).unwrap_or(0);
-        env.storage().instance().set(&key, &(prev + amount));
+        Self::write_balance(&env, &to, Self::read_balance(&env, &to) + amount);
     }
     pub fn burn(env: Env, from: Address, amount: i128) {
-        let key = (symbol_short!("bal"), from);
-        let prev: i128 = env.storage().instance().get(&key).unwrap_or(0);
-        env.storage().instance().set(&key, &(prev - amount));
+        Self::write_balance(&env, &from, Self::read_balance(&env, &from) - amount);
     }
     pub fn balance(env: Env, owner: Address) -> i128 {
-        let key = (symbol_short!("bal"), owner);
-        env.storage().instance().get(&key).unwrap_or(0)
+        Self::read_balance(&env, &owner)
     }
 }
 
@@ -782,6 +791,56 @@ fn test_blend_position_updates_nav_and_liquidity() {
     assert_eq!(position.debt_amount, 100);
     assert_eq!(client.liquid_balance(&denom_id), 800);
     assert_eq!(client.nav(), 1_000);
+}
+
+#[test]
+fn test_blend_withdraw_uses_actual_token_delta_when_pool_rounds_down() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let token = DummyTokenClient::new(&env, &denom_id);
+    let user = Address::generate(&env);
+    let arka_id = client.address.clone();
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    router.set_withdraw_haircut(&denom_id, &2);
+
+    let out = client.credit_withdraw(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    assert_eq!(out, 398);
+    assert_eq!(client.liquid_balance(&denom_id), 998);
+    assert_eq!(token.balance(&arka_id), 998);
+    assert_eq!(client.nav(), 998);
+    assert!(client.blend_position(&0u128, &denom_id).is_none());
+}
+
+#[test]
+fn test_blend_borrow_uses_actual_token_delta_without_understating_debt() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let token = DummyTokenClient::new(&env, &denom_id);
+    let user = Address::generate(&env);
+    let arka_id = client.address.clone();
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    router.set_borrow_haircut(&denom_id, &2);
+
+    let out = client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &100);
+
+    let position = client.blend_position(&0u128, &denom_id).unwrap();
+    assert_eq!(out, 98);
+    assert_eq!(position.collateral_amount, 400);
+    assert_eq!(position.debt_amount, 100);
+    assert_eq!(client.liquid_balance(&denom_id), 698);
+    assert_eq!(token.balance(&arka_id), 698);
+    assert_eq!(client.nav(), 998);
 }
 
 #[test]

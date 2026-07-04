@@ -10,7 +10,7 @@ This is the current operational task list for bringing Arka to a clean mainnet r
 - dApp repo: release-gate changes were committed and pushed to `dev` at `12de3f1`; TypeScript, unit, integration and full Playwright E2E gates have passed locally in the latest wallet/create/routing closure cycle.
 - Latest full dApp E2E run on 2026-07-04: `367` passed in `9.6m`.
 - Vercel production must still not be redeployed from an uncommitted local state. Commit/push, CI, environment review and production smoke/E2E are required first.
-- The changed mainnet WASM set was uploaded/activated selectively on 2026-07-04 for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`. Post-upgrade mainnet canaries are still required before broad public-capital claims.
+- The changed mainnet WASM set was uploaded/activated selectively on 2026-07-04 for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`. A follow-up Arka accounting patch was also uploaded/activated after the Blend canary exposed receive-side rounding drift. Post-upgrade contract canaries have passed for Create Arka, deposit/redeem, Phoenix routing, venue kill-switch and post-fix Blend supply/withdraw accounting. Indexer/catalog reflection, Vercel production deploy and production smoke/E2E are still required before broad public-capital claims.
 - Figma/pixel-perfect parity is no longer a release blocker. Layout must still be usable, readable and non-overlapping.
 - Phoenix was not removed. Phoenix has mainnet contract and canary evidence.
 - Balanced/SODAX was not removed. It is supported through the server-side SODAX intent driver, not through the legacy Balanced AMM-router adapter.
@@ -23,7 +23,7 @@ This is the current operational task list for bringing Arka to a clean mainnet r
 | Phoenix | Mainnet canary passed for USDC/XLM; adapter and pool routes are present in the manifest. | Decide whether to move from allowed/manual-only to AUTO in the governed venue registry and factory defaults. |
 | SoroSwap | Mainnet canary passed for USDC/XLM. | Same AUTO/governance decision as Phoenix. |
 | Aquarius | Mainnet canary passed for USDC/XLM. | Same AUTO/governance decision as Phoenix. |
-| Blend | Mainnet canary passed for fixed XLM-USDC supply/withdraw. Borrow/repay remain disabled. | Keep credit actions governed through `credit_*`; validate any future borrow/repay enablement separately. |
+| Blend | Mainnet canary passed for fixed XLM-USDC supply/withdraw. A post-fix canary confirms Arka credits actual token deltas when the pool rounds down a withdraw. Borrow/repay remain disabled. | Keep credit actions governed through `credit_*`; validate any future borrow/repay enablement separately. |
 | Balanced/SODAX | Mainnet canary passed through SODAX intent driver: quote, build, relay, submit, status, receipt, expiry and refund surfaces are represented. | Keep it as intent-driver execution. Do not describe it as a Soroban AMM router adapter. |
 | Comet / legacy Balanced lane | Retired. | Keep out of user-facing product claims. |
 
@@ -31,7 +31,7 @@ This is the current operational task list for bringing Arka to a clean mainnet r
 
 ### 1. Contract release closure
 
-Status: committed/pushed and selectively upgraded on mainnet; pending post-upgrade canaries.
+Status: committed/pushed and selectively upgraded on mainnet; post-upgrade Create Arka/deposit/redeem, Phoenix routing, Phoenix kill-switch and post-fix Blend accounting canaries passed. Indexer/catalog/frontend reflection remains.
 
 - Keep the refactor that moved duplicated test blocks into `src/test.rs` files.
 - Keep the canonical `credit_*` API and the legacy `blend_*` compatibility surface blocked from direct frontend usage.
@@ -42,6 +42,8 @@ Status: committed/pushed and selectively upgraded on mainnet; pending post-upgra
 - Current mainnet WASM rollback backups were fetched and documented on 2026-07-04.
 - Contract repo release gate commit pushed: `ce32021`.
 - Selective mainnet upload/upgrade completed on 2026-07-04 and recorded in `deployments.mainnet.json`.
+- Follow-up Arka accounting patch uploaded/activated on 2026-07-04. Current Arka WASM hash: `75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701`.
+- Fresh Blend accounting canary Arka: `CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7`.
 
 Acceptance evidence:
 
@@ -52,6 +54,7 @@ Acceptance evidence:
 - Updated `deployments.mainnet.json` local artifact hashes.
 - `docs/MAINNET_WASM_ROLLBACK_2026-07-04.md` and a copied off-repo backup of the current mainnet WASM set.
 - Mainnet upload/upgrade txs recorded in `validations.mainnetSelectiveUpgrade`.
+- Arka accounting patch and fresh Blend canary recorded in `validations.mainnetArkaAccountingPatch`.
 
 ### 2. Frontend wallet and create-flow closure
 
@@ -148,10 +151,10 @@ Acceptance evidence:
 
 ### 8. Final publication sequence
 
-Status: local gates and selective mainnet upgrade are complete; publication sequence is pending post-upgrade canary, Vercel and production E2E.
+Status: local gates, selective mainnet upgrade and post-upgrade contract canaries are complete; publication sequence is pending indexer/catalog/frontend reflection, Vercel and production E2E.
 
-1. Commit and push the post-upgrade manifest/docs evidence.
-2. Run post-upgrade mainnet canaries.
+1. Commit and push the post-upgrade manifest/docs evidence, including the Arka accounting patch.
+2. Verify indexer/catalog/frontend reflection against the post-upgrade mainnet canary state.
 3. Sync dApp mainnet config if the manifest output consumed by Vercel changed.
 4. Deploy Vercel production.
 5. Run production E2E and smoke tests.

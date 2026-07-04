@@ -18,7 +18,7 @@ This document records the current mainnet facts verified against `deployments.ma
 Interpretation:
 
 - The manifest is a real deployed/configured mainnet manifest, not a predeploy placeholder.
-- The product release still has publication blockers tracked in `docs/MAINNET_RELEASE_TASKS_2026-07-03.md`: post-upgrade mainnet canaries, Vercel production deploy and production smoke/E2E.
+- The product release still has publication blockers tracked in `docs/MAINNET_RELEASE_TASKS_2026-07-03.md`: indexer/catalog/frontend reflection, Vercel production deploy and production smoke/E2E.
 - Do not describe the product as clean for broad public capital until the dApp E2E, wallet/create flow and post-fix publication checks are green.
 
 ## RPC Contract Verification
@@ -69,6 +69,35 @@ On 2026-07-03, these manifest canary transactions were checked through Horizon a
 | Blend withdraw canary | `e834ff98dc057c0b1407248190b60e7666edb54924adeede90f89e48e9a33ebc` | 62994351 |
 | Balanced/SODAX canary | `a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc` | 62995595 |
 
+## 2026-07-04 Selective Upgrade and Accounting Patch
+
+The 2026-07-04 release gate uploaded and activated the changed `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap` WASM artifacts. A follow-up Arka-only patch was then applied after a Blend canary found receive-side rounding drift.
+
+Current Arka implementation hash:
+
+- `75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701`
+
+Post-upgrade contract canaries now recorded in `deployments.mainnet.json`:
+
+| Flow | Transaction / evidence |
+| --- | --- |
+| Factory Create Arka | `60b47c66391d212a536da594e37cf69280ee62e7703739cc186d019ebf9b9194` |
+| USDC deposit | `8e13e1ae846cf41c0b7f90086b1929dadca35c8d3cd81e04eb147b47922f6b27` |
+| Partial redeem | `ae2cf79b693cfd4fa650674195cbbea92751d1a92ca8b9ac53463708ee932646` |
+| Phoenix route after adapter upgrade | `e2d5b9052dcc8dca40938af630907d601d2cc79c8467c8abd16c90479b59e3b3` |
+| Phoenix kill-switch disable | `c4535f90c270278cc9f0e287d053f30d729cab841c796101303e6bf4cb377271` |
+| Phoenix kill-switch re-enable | `6141e400079f081467f614be0bb19c92e7f663400251bdbff270a54dc1af0e58` |
+| Arka accounting patch upload | `90a20d220d7b330f12864af2a7efd93479aa4d918a1c8f305b22680d37361f3b` |
+| Factory Arka implementation update | `083378cc16626e3281e321173d59ca71eb58bfca3b4ce9e1026d1aecad786e63` |
+| Fresh Blend supply canary | `b93e5bbcf68f6b04687d88cacacca468c590e856d00a4010e4eef5a532f5fecf` |
+| Fresh Blend withdraw canary | `5f74df2ce454d01d8ca2c9b44dee7f79be46f8ca65655b936ba580087bb953ff` |
+
+Blend accounting result:
+
+- Fresh post-fix Arka: `CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7`.
+- Withdraw requested `100000` USDC base units and received `99998`.
+- Internal Arka accounting and actual token balance both ended at `999998`, so the patch handles pool rounding correctly.
+
 ## Protocol State
 
 | Protocol | Mainnet fact | Product interpretation |
@@ -84,7 +113,7 @@ On 2026-07-03, these manifest canary transactions were checked through Horizon a
 
 These are not contradictions in mainnet deployment, but they do block a clean product publication claim:
 
-- post-upgrade mainnet canaries are pending;
+- post-upgrade contract canaries have passed, but indexer/catalog/frontend reflection is still pending;
 - post-fix Vercel deployment and production E2E are pending.
 
 Local quality evidence now available:
@@ -96,5 +125,8 @@ Local quality evidence now available:
 Mainnet upgrade evidence now available:
 
 - selective upload/upgrade completed on 2026-07-04 for `arka`, `shareToken`, `arkaFactory`, `adapterPhoenix` and `adapterSoroswap`;
+- follow-up Arka accounting patch completed on 2026-07-04 and recorded under `validations.mainnetArkaAccountingPatch`;
 - `arkaFactory`, `adapterPhoenix` and `adapterSoroswap` on-chain WASM hashes match the planned hashes in `deployments.mainnet.json`;
 - `arkaFactory.get_share_token_implementation` returns the new `shareToken` implementation hash.
+- a newly created mainnet Arka `CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE` deployed share token `CC2RE6UATO45JGZ4NCV4YHBWBDYHAOSGHEKFPYTV4R4KH5XLUBTNM2BD`, whose WASM hash matches the new `shareToken` implementation; deposit/redeem, Phoenix routing and kill-switch canary txs are recorded in `deployments.mainnet.json`.
+- a fresh post-fix mainnet Arka `CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7` validates Blend supply/withdraw accounting against actual SAC token balances.

@@ -13,7 +13,7 @@ This document records the current final blockers before treating Arka as clean f
 - dApp TypeScript, unit tests, integration tests and full Playwright E2E have passed locally in the current wallet/create-flow cycle.
 - Latest full dApp E2E run on 2026-07-04: `367` passed in `9.6m`.
 - Vercel production should still not be redeployed from an uncommitted local state. Commit/push, CI, environment review and production smoke/E2E are required first.
-- The new mainnet WASM set should not be activated as a normal release until the contract and dApp changes are committed, CI is green, and the mainnet upgrade/canary runbook is followed.
+- The new mainnet WASM set was activated selectively after commit/push, green contract CI and release-gate validation. Post-upgrade contract canaries have passed for Create Arka, deposit/redeem, Phoenix routing, venue kill-switch and the post-fix Blend supply/withdraw accounting path. Indexer/catalog reflection, Vercel production deploy and production smoke/E2E still remain.
 - The frontend credit/lending path uses the canonical `credit_*` API.
 - Legacy `blend_*` public entrypoints remain in the ABI for compatibility, but the dApp must not call them directly.
 - The current Arka contract implementation centralizes the credit write logic behind private helpers, so canonical `credit_*` and compatibility `blend_*` paths do not maintain separate business logic.
@@ -80,10 +80,16 @@ Acceptance evidence now available:
 - `cargo test -p share-token`
 - `cargo test -p arka-factory`
 
-Still required before mainnet claims:
+Post-upgrade evidence now available:
 
-- Post-upgrade Create Arka canary proving a newly created Arka receives the updated share-token implementation path.
+- Create/deposit/redeem canary on newly created Arka `CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE`.
+- Share token `CC2RE6UATO45JGZ4NCV4YHBWBDYHAOSGHEKFPYTV4R4KH5XLUBTNM2BD` reports WASM hash `63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192`.
+- Mainnet txs: creation fee approval `c879fc9a8090bfab99ae4caa6702fd4140c5d42b981881865893f24395a60179`, create/init `60b47c66391d212a536da594e37cf69280ee62e7703739cc186d019ebf9b9194`, deposit `8e13e1ae846cf41c0b7f90086b1929dadca35c8d3cd81e04eb147b47922f6b27`, redeem `ae2cf79b693cfd4fa650674195cbbea92751d1a92ca8b9ac53463708ee932646`.
+
+Still required before broad public-capital claims:
+
 - Mainnet manifest/runbook explicitly states how share-token implementation changes are handled.
+- Verify indexer/catalog/frontend reflection against the post-upgrade mainnet state.
 
 ### 2b. Close internal security audit REVIEW findings
 
@@ -157,9 +163,36 @@ Acceptance evidence:
 - Unit tests for percentage rendering of fee policy, swap risk policy and coverage lock values.
 - E2E coverage for Create Arka, Governance/DAO composer, Arka detail swap/rebalance, Dashboard/Discover/Assets and Contracts operator surfaces. Local evidence: full `npm run test:e2e` passed on 2026-07-04 with `367` tests.
 
+### 3b. Fix Blend receive-side accounting drift
+
+Status: fixed locally, uploaded/activated on mainnet and canaried on a fresh Arka on 2026-07-04.
+
+Why it matters:
+
+- A mainnet Blend withdraw can return slightly fewer token base units than the requested amount because of pool share rounding.
+- The previous Arka implementation credited the requested amount for receive-side Blend actions, which could leave internal Arka accounting above the actual token balance.
+- The observed canary drift was `2` USDC base units after a `0.01 USDC` withdraw request.
+
+Resolution:
+
+- `credit_withdraw` and `credit_borrow` now measure the Arka token balance before and after the router call and credit the actual positive token delta.
+- Borrow debt records the requested borrow amount, not the possibly lower delivered token delta, so debt cannot be understated.
+- The Blend router mock now supports withdraw/borrow haircuts, and Arka unit tests cover both rounding-down withdraw and borrow delivery deltas.
+
+Mainnet evidence:
+
+- New Arka WASM hash uploaded: `75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701`.
+- Upload tx: `90a20d220d7b330f12864af2a7efd93479aa4d918a1c8f305b22680d37361f3b`.
+- Factory implementation update tx: `083378cc16626e3281e321173d59ca71eb58bfca3b4ce9e1026d1aecad786e63`.
+- Existing canary Arka upgrade tx: `7755642dd4ded9a675ae05059d9493e23a310bcb400b1b343dae38dd7330936a`.
+- Fresh post-fix canary Arka: `CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7`.
+- Fresh canary withdraw requested `100000` USDC base units and received `99998`; internal accounting and actual token balance both ended at `999998`.
+- Evidence file: `tmp/mainnet-post-fix-blend-canary-2026-07-04.json`.
+- Post-fix local gates passed: full contracts `cargo test`, postdeploy manifest validation, mainnet release gate, strict API surface gate, strict internal security audit, dApp release-gate tests and dApp production build.
+
 ### 4. Commit and publish the final code state
 
-Status: open.
+Status: partial. Create Arka, share-token deployment, USDC deposit/redeem, Phoenix routing, Phoenix venue kill-switch and post-fix Blend accounting passed on 2026-07-04. Indexer/catalog reflection, Vercel production deploy and production smoke/E2E remain open.
 
 Why it matters:
 
@@ -190,18 +223,18 @@ Acceptance evidence:
 
 ### 6. Post-upgrade mainnet canary
 
-Status: open.
+Status: contract canaries passed; product reflection gates remain open.
 
 Required canaries:
 
-- Create Arka.
-- Deposit.
-- Redeem.
-- Route execution with allowed venue.
-- Venue kill-switch disables and re-enables a protocol.
-- Credit/Blend path under the governed `credit_*` route.
-- Direct legacy `blend_*` call is rejected when it violates governed market/action/adapter policy.
-- Indexer/catalog/frontend reflects the resulting Arka and balances correctly.
+- Done: Create Arka.
+- Done: deposit.
+- Done: redeem.
+- Done: route execution with allowed venue after the adapter upgrade.
+- Done: venue kill-switch disables and re-enables a protocol after the adapter upgrade.
+- Done: Credit/Blend supply/withdraw path under the governed `credit_*` route, including post-fix token-delta accounting on a fresh Arka.
+- Covered by local/unit/security gates: direct legacy `blend_*` calls are rejected when they violate governed market/action/adapter policy.
+- Remaining: indexer/catalog/frontend reflects the resulting Arka and balances correctly.
 
 ### 7. Soroban deprecation warnings
 

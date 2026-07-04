@@ -13,6 +13,8 @@ pub enum DataKey {
     Oracle,
     Reserve(Address),
     ReserveAssets,
+    WithdrawHaircut(Address),
+    BorrowHaircut(Address),
 }
 
 #[derive(Clone)]
@@ -139,6 +141,10 @@ impl BlendRouterMock {
             .set(&DataKey::Debt(owner.clone(), asset.clone()), &amount);
     }
 
+    fn read_haircut(env: &Env, key: DataKey) -> i128 {
+        env.storage().instance().get(&key).unwrap_or(0)
+    }
+
     fn read_reserve(env: &Env, asset: &Address) -> Reserve {
         env.storage()
             .instance()
@@ -175,6 +181,18 @@ impl BlendRouterMock {
 
     pub fn set_oracle(env: Env, oracle: Address) {
         env.storage().instance().set(&DataKey::Oracle, &oracle);
+    }
+
+    pub fn set_withdraw_haircut(env: Env, asset: Address, amount: i128) {
+        env.storage()
+            .instance()
+            .set(&DataKey::WithdrawHaircut(asset), &amount);
+    }
+
+    pub fn set_borrow_haircut(env: Env, asset: Address, amount: i128) {
+        env.storage()
+            .instance()
+            .set(&DataKey::BorrowHaircut(asset), &amount);
     }
 
     pub fn set_reserve(
@@ -273,31 +291,43 @@ impl BlendRouterMock {
                     if collateral < req.amount {
                         panic_with_error!(&env, Error::InsufficientCollateral);
                     }
+                    let haircut =
+                        Self::read_haircut(&env, DataKey::WithdrawHaircut(req.address.clone()));
+                    let transfer_amount = req.amount - haircut;
+                    if transfer_amount <= 0 {
+                        panic_with_error!(&env, Error::AmountZero);
+                    }
                     Self::write_collateral(&env, &from, &req.address, collateral - req.amount);
-                    Self::authorize_transfer(&env, &req.address, &router, &to, req.amount);
+                    Self::authorize_transfer(&env, &req.address, &router, &to, transfer_amount);
                     let args = vec![
                         &env,
                         router.clone().into_val(&env),
                         to.clone().into_val(&env),
-                        req.amount.into_val(&env),
+                        transfer_amount.into_val(&env),
                     ];
                     let _ =
                         env.invoke_contract::<()>(&req.address, &symbol_short!("transfer"), args);
-                    last_out = req.amount;
+                    last_out = transfer_amount;
                 }
                 4 => {
                     let next = Self::read_debt(&env, &from, &req.address) + req.amount;
                     Self::write_debt(&env, &from, &req.address, next);
-                    Self::authorize_transfer(&env, &req.address, &router, &to, req.amount);
+                    let haircut =
+                        Self::read_haircut(&env, DataKey::BorrowHaircut(req.address.clone()));
+                    let transfer_amount = req.amount - haircut;
+                    if transfer_amount <= 0 {
+                        panic_with_error!(&env, Error::AmountZero);
+                    }
+                    Self::authorize_transfer(&env, &req.address, &router, &to, transfer_amount);
                     let args = vec![
                         &env,
                         router.clone().into_val(&env),
                         to.clone().into_val(&env),
-                        req.amount.into_val(&env),
+                        transfer_amount.into_val(&env),
                     ];
                     let _ =
                         env.invoke_contract::<()>(&req.address, &symbol_short!("transfer"), args);
-                    last_out = req.amount;
+                    last_out = transfer_amount;
                 }
                 5 => {
                     let debt = Self::read_debt(&env, &from, &req.address);

@@ -693,6 +693,11 @@ impl ArkaContract {
         })
     }
 
+    fn token_balance(env: &Env, token: &Address, owner: &Address) -> i128 {
+        let args = vec![env, owner.clone().into_val(env)];
+        env.invoke_contract::<i128>(token, &Symbol::new(env, "balance"), args)
+    }
+
     fn total_shares_internal(env: &Env) -> i128 {
         env.storage()
             .instance()
@@ -1867,8 +1872,20 @@ impl ArkaContract {
                 sub_invocations: vec![env],
             }));
         }
+        let balance_before = if matches!(action, BlendAction::Withdraw | BlendAction::Borrow) {
+            Some(Self::token_balance(env, asset, &self_addr))
+        } else {
+            None
+        };
         env.authorize_as_current_contract(auths);
         let _: Val = env.invoke_contract(&router, &Symbol::new(env, "submit"), router_args);
+        if let Some(before) = balance_before {
+            let after = Self::token_balance(env, asset, &self_addr);
+            if after <= before {
+                panic_with_error!(env, Error::InsufficientLiquidity);
+            }
+            return after - before;
+        }
         amount
     }
 
@@ -2580,7 +2597,7 @@ impl ArkaContract {
         if position.asset != effective_asset {
             panic_with_error!(env, Error::InvalidBlendPosition);
         }
-        position.debt_amount += out;
+        position.debt_amount += amount;
         Self::write_blend_adapter(env, market_id, adapter);
         Self::add_liquid_balance(env, &effective_asset, out);
         Self::write_blend_position(env, &position);

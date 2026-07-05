@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev, main ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build-contracts:
@@ -24,10 +25,22 @@ jobs:
             ~/.cargo/git
             contracts/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/**/Cargo.lock') }}
+      - name: Run contract tests
+        run: |
+          cd contracts
+          cargo test --workspace
+      - name: Validate contract API surface
+        run: python3 scripts/contract_api_surface_gate.py --strict
+      - name: Run release script tests
+        run: python3 -m unittest discover -s scripts/tests
+      - name: Run internal security audit
+        run: python3 scripts/internal_security_audit.py --strict
+      - name: Validate mainnet manifest
+        run: python3 scripts/validate_mainnet_manifest.py --manifest deployments.mainnet.json --phase postdeploy
+      - name: Run mainnet release gate
+        run: python3 scripts/mainnet_release_gate.py --manifest deployments.mainnet.json
       - name: Build WASM
         run: |
-          cd scripts
-          bash build-wasm.sh
-
+          BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh
 
 

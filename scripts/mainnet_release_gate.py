@@ -401,8 +401,16 @@ def update_manifest(manifest_path: Path, manifest: dict[str, Any], report_path: 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=Path("deployments.mainnet.json"))
-    parser.add_argument("--create-evidence", type=Path, default=Path("tmp/mainnet-canary-create-deposit-redeem.json"))
-    parser.add_argument("--routing-evidence", type=Path, default=Path("tmp/mainnet-routing-canary.json"))
+    parser.add_argument(
+        "--create-evidence",
+        type=Path,
+        default=Path("deployments/evidence/mainnet-canary-create-deposit-redeem.json"),
+    )
+    parser.add_argument(
+        "--routing-evidence",
+        type=Path,
+        default=Path("deployments/evidence/mainnet-routing-canary.json"),
+    )
     parser.add_argument("--report", type=Path, default=Path("tmp/mainnet-release-gate.json"))
     parser.add_argument("--update-manifest", action="store_true")
     return parser.parse_args()

@@ -31,6 +31,9 @@ jobs:
           cargo test --workspace
       - name: Validate contract API surface
         run: python3 scripts/contract_api_surface_gate.py --strict
+      - name: Build WASM
+        run: |
+          BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh
       - name: Run release script tests
         run: python3 -m unittest discover -s scripts/tests
       - name: Run internal security audit
@@ -39,8 +42,4 @@ jobs:
         run: python3 scripts/validate_mainnet_manifest.py --manifest deployments.mainnet.json --phase postdeploy
       - name: Run mainnet release gate
         run: python3 scripts/mainnet_release_gate.py --manifest deployments.mainnet.json
-      - name: Build WASM
-        run: |
-          BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh
-
 

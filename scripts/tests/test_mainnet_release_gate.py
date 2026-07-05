@@ -18,10 +18,10 @@ class MainnetReleaseGateTests(unittest.TestCase):
         return json.loads((ROOT / "deployments.mainnet.json").read_text())
 
     def load_create_evidence(self):
-        return json.loads((ROOT / "tmp" / "mainnet-canary-create-deposit-redeem.json").read_text())
+        return json.loads((ROOT / "deployments" / "evidence" / "mainnet-canary-create-deposit-redeem.json").read_text())
 
     def load_routing_evidence(self):
-        return json.loads((ROOT / "tmp" / "mainnet-routing-canary.json").read_text())
+        return json.loads((ROOT / "deployments" / "evidence" / "mainnet-routing-canary.json").read_text())
 
     def test_current_manifest_accepts_balanced_auto_with_production_canary(self):
         manifest = self.load_manifest()

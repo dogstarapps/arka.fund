@@ -1,0 +1,61 @@
+{
+  "network": "mainnet",
+  "validatedAt": "2026-06-12",
+  "status": "passed",
+  "scope": "factory create, arka registration, deposit, redeem, final seeded capital",
+  "admin": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+  "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+  "shareToken": "CA2XV4QZQVHJO6ORQ4EV74TJ2QHHVQY6IZMNH4SQTXLPMHHIHTMAWVIU",
+  "denomination": {
+    "symbol": "USDC",
+    "contractId": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+    "issuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+    "decimals": 7
+  },
+  "configuredContracts": {
+    "factory": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+    "router": "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D",
+    "venueRegistry": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+    "swapOracle": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6"
+  },
+  "policyChecks": {
+    "whitelist": [
+      "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+    ],
+    "swapRiskPolicy": {
+      "enabled": true,
+      "oracleChecksEnabled": true,
+      "maxOracleAgeSeconds": 60,
+      "maxPriceImpactBps": 300,
+      "maxSlippageBps": 300,
+      "maxTradeSizeBps": 2500,
+      "maxTwapDeviationBps": 350
+    }
+  },
+  "transactions": {
+    "creationFeeApproval": "4c20f30153d9d9d3fad59d0e6003753ad9b4591e94bbee061131f98403e1041a",
+    "createAndInit": "a192129691c11c19558fe304dbceb21d4b900873fe2c18cfb101e2abfc7798e4",
+    "depositRoundTripApproval": "f237c63280bdfe115a98df9b38bdd26669fdc2a730e86446d7b34d595d90cd6c",
+    "depositRoundTrip": "01974eb4f6b9094ce922abf32acc52234fcdc823c146430fc96628cb995a6dcf",
+    "redeemRoundTrip": "3578d26c7bde9a85352311b4318ccf9302734b000eb398ffc0ebd0b47195273c",
+    "finalSeedApproval": "85bdc2f82d1f0d5f5e84d29b49310c08ff9384ebc63cd1a0c712ecd8f5c57fe0",
+    "finalSeedDeposit": "f1ad5618c0c296b69455d592651f84d315bcf272f477b9203d2e01553fec7fa0"
+  },
+  "finalState": {
+    "registryByManager": [
+      "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M"
+    ],
+    "navBaseUnits": "10000000",
+    "sharesOfAdmin": "10000000",
+    "liquidUsdcBaseUnits": "10000000",
+    "adminExternalUsdcBalance": "49.0000000",
+    "adminExternalXlmBalance": "1372.8767303"
+  },
+  "releaseGateImpact": {
+    "canaryCreateDepositRedeem": true,
+    "routingCanary": false,
+    "venueCanaries": false,
+    "releaseGateShouldRemainFalse": true
+  }
+}

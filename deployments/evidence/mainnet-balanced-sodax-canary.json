@@ -1,0 +1,90 @@
+{
+  "network": "mainnet",
+  "validatedAt": "2026-06-12T14:34:00Z",
+  "venue": "BALANCED",
+  "mode": "sodax_intent_wallet_backed_mainnet_canary",
+  "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+  "tokenIn": "XLM",
+  "tokenOut": "USDC",
+  "amountInBase": "1000000",
+  "quotedAmountBase": "193095",
+  "minOutputAmountBase": "154476",
+  "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+  "stellar": {
+    "submitted": true,
+    "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+    "explorer": "https://stellar.expert/explorer/public/tx/a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc"
+  },
+  "quote": {
+    "ok": true,
+    "provider": "sodax_sdk"
+  },
+  "build": {
+    "ok": true,
+    "provider": "sodax_sdk",
+    "intentHash": "0xe8e4fb6825cdcebf2ba4df916c7470912c2ec2665a8822a332ed2dcb84308a1a",
+    "expiresAt": "2026-06-12T11:32:24.000Z",
+    "refundMode": "cancel_intent"
+  },
+  "relay": {
+    "ok": true,
+    "success": true,
+    "relayChainId": "27",
+    "message": "Transaction registered",
+    "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+    "canonicalIntentPacket": {
+      "srcChainId": "27",
+      "srcTxHash": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+      "srcAddress": "00000012000000018c5dec1c13bc3d86e5229f7a88a2c855ff236083b2af290a8bc160663bf6f563",
+      "status": "executed",
+      "dstChainId": "146",
+      "connectionSequence": "7216",
+      "dstAddress": "60c5681bd1db4e50735c4ca3386005a4ba4937c0",
+      "dstTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+    },
+    "packets": [
+      {
+        "srcChainId": "27",
+        "srcTxHash": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+        "srcAddress": "00000012000000018c5dec1c13bc3d86e5229f7a88a2c855ff236083b2af290a8bc160663bf6f563",
+        "status": "executed",
+        "dstChainId": "146",
+        "connectionSequence": "7216",
+        "dstAddress": "60c5681bd1db4e50735c4ca3386005a4ba4937c0",
+        "dstTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+      }
+    ]
+  },
+  "submit": {
+    "ok": true,
+    "answer": "OK",
+    "solverIntentHash": "0xa024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc"
+  },
+  "status": {
+    "ok": true,
+    "intentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+    "statusCode": 3,
+    "statusLabel": "SOLVED",
+    "terminal": true,
+    "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b"
+  },
+  "receipt": {
+    "ok": true,
+    "receiptState": "settled",
+    "intentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+    "statusLabel": "SOLVED",
+    "terminal": true,
+    "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+    "confirmationTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+    "refundMode": "none"
+  },
+  "refund": {
+    "required": false,
+    "mode": "none",
+    "reason": "Intent settled; no refund path required for this canary."
+  },
+  "passed": true,
+  "statusSummary": "settled",
+  "blockingReason": null,
+  "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+}

@@ -1,0 +1,113 @@
+{
+  "network": "mainnet",
+  "validatedAt": "2026-06-12",
+  "status": "passed_manual_execution",
+  "admin": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+  "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+  "oracleGuard": {
+    "contract": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+    "wasmHash": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
+    "uploadTx": "e56e90e244266e2db30e9553162906fee05c35df4853301c9467d986fed341c7",
+    "upgradeTx": "cd4a1155f7a5fbb15b8b6b3b800995cdff9dc7e1e5e90bd68369752deb459aa5",
+    "configTxs": {
+      "usdcPolicy": "86e9ddd599bd7131d9b75389e6674ec2c8148278fda700302d371039e9353d81",
+      "usdcProviderAsset": "2c71b2f349e8bffeb6aa5238094041be3f6a726cfebe6f9793d598ed8b2b1507",
+      "xlmPolicy": "e0e23941b7e7de0427ccb9c24bb762955f48e6106218f92ef3992f18029cb267",
+      "xlmProviderAsset": "480f3b3316586294cff4839b89d44db4b03ad80c85ae15ca1ef6bcc2f73e021e"
+    },
+    "providerAssetOverrides": {
+      "USDC": {
+        "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "providerAsset": {
+          "Other": "USDC"
+        }
+      },
+      "XLM": {
+        "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "providerAsset": {
+          "Other": "XLM"
+        }
+      }
+    }
+  },
+  "factoryPolicyUpdate": {
+    "tx": "6db2b755d743e5960c90d91ccd752b0f8305f0a554992b9ec561fb8d5039df03",
+    "maxOracleAgeSeconds": 900
+  },
+  "canaryPolicyUpdate": {
+    "tx": "f5eec67d83cc45577cd50d96943bf7a78abe436115a3faf7151fae0af4ad4d1d",
+    "swapRiskPolicy": {
+      "enabled": true,
+      "oracleChecksEnabled": true,
+      "maxOracleAgeSeconds": 900,
+      "maxPriceImpactBps": 300,
+      "maxSlippageBps": 300,
+      "maxTradeSizeBps": 2500,
+      "maxTwapDeviationBps": 350
+    }
+  },
+  "venueCanaries": {
+    "phoenix": {
+      "status": "passed",
+      "tx": "476e4ae93a552540d95f9ec72f9c5a8f174215ed94af32e7ceeffb49bd9c6d65",
+      "adapter": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+      "poolId": 2,
+      "amountIn": "500000",
+      "minOut": "2521321",
+      "amountOut": "2578379"
+    },
+    "soroswap": {
+      "status": "passed",
+      "tx": "f63143010d65e357cff1642c537c9ac69f75f5f0d081fcf124fbe6bd50e3d418",
+      "adapter": "CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI",
+      "poolId": 2,
+      "amountIn": "500000",
+      "minOut": "2521321",
+      "amountOut": "2587225"
+    },
+    "aquarius": {
+      "status": "passed",
+      "routeConfigTx": "3c90226165692bb4feb066368e97357367654a342d7ffe9a25c64c28680be1d9",
+      "tx": "88e042fb4988943830f639f6cb66485d89efed77ed298b1260e81c287b0d9e0a",
+      "adapter": "CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ",
+      "poolId": 2,
+      "poolIndex": "b2e02fcfca6c96f8ad5cbd84e7784a777b36d9c96a2459402c4f458462aab7f0",
+      "amountIn": "500000",
+      "minOut": "2523000",
+      "amountOut": "2598872"
+    }
+  },
+  "killSwitchCanary": {
+    "venue": "phoenix",
+    "disableTx": "cd859817ae5f6028a7c609d84087eb7831c5871cdbfcbca1acb639b2a104e14c",
+    "blockedSimulation": {
+      "status": "passed",
+      "expectedError": "SwapVenueNotAllowed",
+      "contractErrorCode": 24
+    },
+    "reenableTx": "3940548d2ffb297a8d6c3ea1ca53f5e6e63ad790502eef93bec9a66347422aa8",
+    "finalStatus": "manual_only"
+  },
+  "finalState": {
+    "liquidUsdcBaseUnits": "8500000",
+    "liquidXlmStroops": "7764476",
+    "sharesOfAdmin": "10000000",
+    "venues": {
+      "soroswap": {
+        "status": 1,
+        "isAllowed": true,
+        "isAutoAllowed": false
+      },
+      "aquarius": {
+        "status": 1,
+        "isAllowed": true,
+        "isAutoAllowed": false
+      },
+      "phoenix": {
+        "status": 1,
+        "isAllowed": true,
+        "isAutoAllowed": false
+      }
+    }
+  }
+}

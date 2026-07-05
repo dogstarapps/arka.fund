@@ -492,7 +492,7 @@
         "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
         "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
         "status": "settled",
-        "evidence": "tmp/mainnet-balanced-sodax-canary.json"
+        "evidence": "deployments/evidence/mainnet-balanced-sodax-canary.json"
       }
     }
   },

@@ -102,7 +102,13 @@ def manifest_contract_entries(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     return entries if isinstance(entries, list) else []
 
 
-def validate_common(manifest: dict[str, Any], errors: list[str], *, check_env: bool) -> None:
+def validate_common(
+    manifest: dict[str, Any],
+    errors: list[str],
+    *,
+    check_env: bool,
+    verify_local_artifacts: bool,
+) -> None:
     if manifest.get("network") != "mainnet":
         add(errors, "network", "must be mainnet")
     if manifest.get("networkPassphrase") != "Public Global Stellar Network ; September 2015":
@@ -186,14 +192,16 @@ def validate_common(manifest: dict[str, Any], errors: list[str], *, check_env: b
         artifacts.add(artifact_name)
         if artifact_name.startswith(FORBIDDEN_MAINNET_ARTIFACT_PREFIXES) or artifact_name in FORBIDDEN_MAINNET_ARTIFACTS:
             add(errors, f"{path}.artifact", "test/mock/retired artifact cannot be in mainnet plan")
+        expected_sha = entry.get("sha256")
+        if not hash_value(expected_sha):
+            add(errors, f"{path}.sha256", "missing local artifact sha256")
+        if not verify_local_artifacts:
+            continue
         artifact_path = ROOT_DIR / str(artifact)
         if not artifact_path.is_file():
             add(errors, f"{path}.artifact", f"artifact not found: {artifact}")
             continue
-        expected_sha = entry.get("sha256")
-        if not hash_value(expected_sha):
-            add(errors, f"{path}.sha256", "missing local artifact sha256")
-        elif sha256(artifact_path).lower() != str(expected_sha).lower():
+        if hash_value(expected_sha) and sha256(artifact_path).lower() != str(expected_sha).lower():
             add(errors, f"{path}.sha256", "does not match current artifact")
         if entry.get("deploy") is False and not present(entry.get("deferredReason")):
             add(errors, f"{path}.deferredReason", "artifact-only contracts must state why deployment is deferred")
@@ -248,7 +256,7 @@ def validate_common(manifest: dict[str, Any], errors: list[str], *, check_env: b
 
 def validate_predeploy(manifest: dict[str, Any], *, check_env: bool) -> list[str]:
     errors: list[str] = []
-    validate_common(manifest, errors, check_env=check_env)
+    validate_common(manifest, errors, check_env=check_env, verify_local_artifacts=True)
     if manifest.get("status") not in {"predeploy_ready", "predeploy"}:
         add(errors, "status", "must be predeploy_ready or predeploy before deployment")
     init_plan = manifest.get("initializationPlan", {})
@@ -260,7 +268,7 @@ def validate_predeploy(manifest: dict[str, Any], *, check_env: bool) -> list[str
 
 def validate_postdeploy(manifest: dict[str, Any], *, check_env: bool) -> list[str]:
     errors: list[str] = []
-    validate_common(manifest, errors, check_env=check_env)
+    validate_common(manifest, errors, check_env=check_env, verify_local_artifacts=False)
     contracts = manifest.get("contracts", {})
     wasm_hashes = manifest.get("wasmHashes", {})
     for entry in manifest_contract_entries(manifest):

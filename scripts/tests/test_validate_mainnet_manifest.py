@@ -37,6 +37,12 @@ class MainnetManifestValidationTests(unittest.TestCase):
         errors = validator.validate_predeploy(manifest, check_env=False)
         self.assertTrue(any("deploymentPlan.contracts[0].sha256" in error for error in errors))
 
+    def test_postdeploy_uses_deployed_wasm_hashes_not_local_rebuild_bytes(self):
+        manifest = self.load_manifest()
+        manifest["deploymentPlan"]["contracts"][0]["sha256"] = "0" * 64
+        errors = validator.validate_postdeploy(manifest, check_env=False)
+        self.assertFalse(any("deploymentPlan.contracts[0].sha256" in error for error in errors))
+
     def test_postdeploy_requires_deployed_contract_ids(self):
         manifest = self.load_manifest()
         manifest["contracts"].pop("arkaFactory", None)

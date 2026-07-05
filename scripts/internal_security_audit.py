@@ -35,8 +35,23 @@ AUDIT_SCOPE: dict[str, dict[str, str]] = {
     "manager-tier": {"tier": "medium", "area": "manager permissions"},
 }
 
-ACTIVE_ADAPTERS = ("adapter-aquarius", "adapter-soroswap", "adapter-blend")
+ACTIVE_ADAPTERS = ("adapter-aquarius", "adapter-soroswap", "adapter-phoenix", "adapter-blend")
 ALLOW_UNAUTH_MUTATIONS = {"init"}
+ALLOW_REVIEWED_UNAUTH_MUTATIONS = {
+    ("arka", "settle_fees"): (
+        "Permissionless deterministic fee settlement. It only applies already-configured "
+        "fee policy and updates fee state/high-water marks; requiring manager auth would "
+        "break keeper/indexer settlement."
+    ),
+    ("arka-token", "allowance"): (
+        "Read-through compatibility getter. It may migrate legacy instance storage to "
+        "persistent storage and bump TTL, but it does not grant allowance or move tokens."
+    ),
+    ("arka-token", "balance"): (
+        "Read-through compatibility getter. It may migrate legacy instance storage to "
+        "persistent storage and bump TTL, but it does not mint, burn or transfer tokens."
+    ),
+}
 AUTH_PATTERNS = (
     ".require_auth(",
     ".require_auth();",
@@ -133,9 +148,33 @@ def load_workspace_members(path: Path = WORKSPACE_MANIFEST) -> list[str]:
 
 
 def normalise_source(source: str) -> str:
-    if "#[cfg(test)]" in source:
-        source = source.split("#[cfg(test)]", 1)[0]
-    return source
+    while True:
+        match = re.search(r"(?m)^[ \t]*#\[cfg\(test\)\][ \t]*\n", source)
+        if match is None:
+            return source
+
+        item_start = match.end()
+        while item_start < len(source) and source[item_start] in " \t\r\n":
+            item_start += 1
+
+        if source.startswith("mod ", item_start):
+            semicolon = source.find(";", item_start)
+            brace = source.find("{", item_start)
+            if semicolon != -1 and (brace == -1 or semicolon < brace):
+                source = source[:match.start()] + source[semicolon + 1:]
+                continue
+            if brace != -1:
+                close = find_matching_brace(source, brace)
+                source = source[:match.start()] + source[close + 1:]
+                continue
+
+        if source.startswith("use ", item_start):
+            semicolon = source.find(";", item_start)
+            if semicolon != -1:
+                source = source[:match.start()] + source[semicolon + 1:]
+                continue
+
+        source = source[:match.start()] + source[match.end():]
 
 
 def skip_quoted(text: str, index: int, quote: str) -> int:
@@ -369,6 +408,8 @@ def build_findings(contracts: list[ContractAudit]) -> list[Finding]:
         for fn in contract.functions:
             if fn.name in ALLOW_UNAUTH_MUTATIONS:
                 continue
+            if (contract.crate, fn.name) in ALLOW_REVIEWED_UNAUTH_MUTATIONS:
+                continue
             if (fn.mutates_storage or fn.invokes_external) and not fn.requires_auth and contract.tier in {"critical", "high"}:
                 findings.append(
                     Finding(
@@ -415,15 +456,20 @@ def generate_report(
         "reviewFindings": sum(1 for finding in findings if finding.severity == "review"),
         "missingSources": missing_sources,
     }
+    reviewed_exceptions = [
+        {"crate": crate, "function": function, "reason": reason}
+        for (crate, function), reason in sorted(ALLOW_REVIEWED_UNAUTH_MUTATIONS.items())
+    ]
     return {
         "generatedAt": iso_now(),
         "rootDir": str(ROOT_DIR),
         "contractsDir": str(contracts_dir),
-        "activePublicSurface": ["Aquarius", "SoroSwap", "Blend"],
+        "activePublicSurface": ["Aquarius", "SoroSwap", "Phoenix", "Blend", "Balanced/SODAX"],
         "auditedScope": AUDIT_SCOPE,
         "summary": summary,
         "contracts": [contract.to_dict() for contract in audits],
         "findings": [finding.to_dict() for finding in findings],
+        "reviewedUnauthenticatedMutations": reviewed_exceptions,
     }
 
 
@@ -460,12 +506,22 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- **{finding['severity'].upper()}** `{finding['crate']}::{finding['function']}` "
                 f"(line {finding['line']}): {finding['title']}. {finding['detail']}"
             )
+    lines.extend(["", "## Reviewed Unauthenticated Mutations", ""])
+    reviewed = report.get("reviewedUnauthenticatedMutations", [])
+    if not reviewed:
+        lines.append("- None.")
+    else:
+        for item in reviewed:
+            lines.append(f"- `{item['crate']}::{item['function']}`: {item['reason']}")
     lines.extend(["", "## Active Surface Check", ""])
     lines.append(
-        "- The active public support surface expected by this audit is `Aquarius`, `SoroSwap`, and `Blend`."
+        "- The active mainnet support surface reflected by the release manifest is `SoroSwap`, `Aquarius`, `Phoenix`, `Blend`, and `Balanced/SODAX`."
     )
     lines.append(
-        "- `Balanced`, `Comet`, and `Phoenix` remain outside the active validation matrix until reopened through a dedicated product block."
+        "- `SoroSwap`, `Aquarius`, and `Phoenix` are AMM swap venues with mainnet canary evidence; `Blend` is a governed credit venue; `Balanced/SODAX` is an intent-driver venue, not the legacy AMM-router adapter."
+    )
+    lines.append(
+        "- `Comet` and the historical Balanced AMM-router lane remain outside the active product surface."
     )
     return "\n".join(lines) + "\n"
 

@@ -1,4 +1,6 @@
-# Arkafund Deployment Guide (Testnet)
+# Arkafund Deployment Guide (Historical Testnet)
+
+Current status note, 2026-07-03: this is a historical testnet deployment guide. Current mainnet deployment facts are in `deployments.mainnet.json` and `docs/MAINNET_REALITY_CHECK_2026-07-03.md`. Do not use this file to describe the current mainnet protocol surface.
 
 This guide documents the current testnet deployment flow for the contract repository.
 
@@ -123,7 +125,7 @@ bash scripts/run-release-gate.sh
 - The off-chain `catalog-api + dapp` stack is live-validated on testnet through `deploy-offchain-testnet-stack.sh` and recorded under `validations.offchainPublicStack`.
 - That off-chain validation now uses the canonical migrated `contracts.arkaRegistry` and indexes the 18 historical Arkas recorded from the canonical factory-backed backfill.
 - `services/catalog-api` now includes explicit legacy Arka compatibility by reading legacy instance storage when the modern `nav()` ABI is absent.
-- The earlier Balanced-via-Comet validation lane has been retired from the active support surface. Historical IDs remain under `legacyContracts`, but the current public AMM surface is Aquarius + SoroSwap.
+- The earlier Balanced-via-Comet validation lane has been retired from the active support surface. Historical IDs remain under `legacyContracts`. At the time of this historical testnet guide, the public AMM surface was Aquarius + SoroSwap; the current mainnet manifest separately records SoroSwap, Aquarius and Phoenix canaries with `autoEnabled=false`, plus Balanced/SODAX as a server-side intent venue with `autoEnabled=true`.
 - `deploy-balanced-readiness-validation.sh` now audits the live Balanced lane directly on testnet and records its current support status under `validations.balancedReadiness`.
 - The source `adapter-balanced` contract has been decoupled from Comet and reintroduced into the active workspace/build matrix, but the deployed testnet lane remains blocked until that canonical contract is redeployed against a non-Comet Balanced router.
 - `deploy-indexer-event-surface-live-validation.sh` validates the canonical registry discovery events and the Arka configuration event surface directly through Soroban RPC on testnet and records the result under `validations.indexerEventSurface`.

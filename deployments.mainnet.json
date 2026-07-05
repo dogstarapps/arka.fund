@@ -2,7 +2,7 @@
   "network": "mainnet",
   "status": "mainnet_manual_release_ready",
   "createdAt": "2026-06-10T12:05:32Z",
-  "updatedAt": "2026-06-13T06:10:10Z",
+  "updatedAt": "2026-07-04T19:45:00Z",
   "rpcUrl": "https://mainnet.sorobanrpc.com",
   "networkPassphrase": "Public Global Stellar Network ; September 2015",
   "admin": {
@@ -58,9 +58,9 @@
     "emissionsController": "CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF"
   },
   "wasmHashes": {
-    "arka": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b",
-    "shareToken": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89",
-    "arkaFactory": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608",
+    "arka": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+    "shareToken": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+    "arkaFactory": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
     "arkaRegistry": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
     "router": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
     "venueRegistry": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
@@ -69,8 +69,8 @@
     "adapterBlend": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
     "adapterBlendFixedXlmUsdc": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
     "adapterBlendYieldBlox": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
-    "adapterPhoenix": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f",
-    "adapterSoroswap": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920",
+    "adapterPhoenix": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+    "adapterSoroswap": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
     "oracleGuard": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
     "coverageVault": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf",
     "coverageFund": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
@@ -507,7 +507,7 @@
         "role": "vault_implementation_template",
         "deploy": false,
         "deferredReason": "Factory deploys Arka instances from uploaded wasm hash.",
-        "sha256": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b"
+        "sha256": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701"
       },
       {
         "name": "shareToken",
@@ -515,14 +515,14 @@
         "role": "share_token_implementation_template",
         "deploy": false,
         "deferredReason": "Factory deploys per-Arka share tokens from uploaded wasm hash.",
-        "sha256": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89"
+        "sha256": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192"
       },
       {
         "name": "arkaFactory",
         "artifact": "artifacts/arka-factory.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608"
+        "sha256": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579"
       },
       {
         "name": "arkaRegistry",
@@ -587,14 +587,14 @@
         "artifact": "artifacts/adapter-phoenix.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f"
+        "sha256": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e"
       },
       {
         "name": "adapterSoroswap",
         "artifact": "artifacts/adapter-soroswap.wasm",
         "role": "singleton",
         "deploy": true,
-        "sha256": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920"
+        "sha256": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
       },
       {
         "name": "oracleGuard",
@@ -737,8 +737,8 @@
   "validations": {
     "adminSecretEnvPresent": true,
     "adminAccountFunded": true,
-    "adminXlmBalanceCheckedAt": "2026-06-10T12:05:32Z",
-    "adminXlmBalance": "2001.0000000",
+    "adminXlmBalanceCheckedAt": "2026-07-04T18:02:00Z",
+    "adminXlmBalance": "1212.0225724",
     "stellarCliRequiredVersion": "26.1.0",
     "stellarCliValidatedVersion": "26.1.0",
     "artifactBuild": true,
@@ -1378,19 +1378,210 @@
         "blockingReason": null,
         "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
       }
+    },
+    "mainnetSelectiveUpgrade": {
+      "validatedAt": "2026-07-04T18:09:47Z",
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "mode": "selective_upload_upgrade",
+      "uploads": {
+        "arka": {
+          "artifact": "artifacts/arka.wasm",
+          "wasmHash": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+          "tx": "1ae60c3e6669c506fbbe7c30170be179661aad16631fa323bfd4db1b4fa0eef9"
+        },
+        "shareToken": {
+          "artifact": "artifacts/share-token.wasm",
+          "wasmHash": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+          "tx": "0f912c3e462605d0d5f3697cf17fc096faba3d29e52554de46aadee9da57fbcc"
+        },
+        "arkaFactory": {
+          "artifact": "artifacts/arka-factory.wasm",
+          "wasmHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+          "tx": "2c7056917f39c1e6b0c7245be084eadfd2e3aaabd07fd2545db8525599407252"
+        },
+        "adapterPhoenix": {
+          "artifact": "artifacts/adapter-phoenix.wasm",
+          "wasmHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+          "tx": "e2929ef02fa76707f9fc9d68d3ddd94db1ec912c3145458132eaeec2323478c2"
+        },
+        "adapterSoroswap": {
+          "artifact": "artifacts/adapter-soroswap.wasm",
+          "wasmHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
+          "tx": "0e9b2a386619fb9ad0e4f5572af42b5c41a7d8ac753f94902e062f462299df58"
+        }
+      },
+      "activationTxs": {
+        "arkaFactoryUpgrade": "4107fb04822e9fa8e964de3eebdaa1d40a7fffdf5eec7348fc0df02ca76aa7f8",
+        "arkaFactorySetArkaImplementation": "f3e81ec1b02900fc5610364ffc9f35ba2926b3f7a553db5afedc6cd962124749",
+        "arkaFactorySetShareImplementation": "418f6799b39dcaba9b9ad0e950155e2d7c9225335d61cafcee2fdb7e950ad69e",
+        "adapterPhoenixUpgrade": "6b73065de7028e46e0af6db553a570dd6be81d40c8eec862928c5c1517abfd5a",
+        "adapterSoroswapUpgrade": "a655126db725dbfb6904425e0739e5ec294d51fc533d83b089c526f71f2d5361"
+      },
+      "verifiedOnchain": {
+        "arkaFactoryHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+        "arkaFactoryShareTokenImplementation": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+        "adapterPhoenixHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+        "adapterSoroswapHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
+      }
+    },
+    "mainnetPostUpgradeCanary": {
+      "validatedAt": "2026-07-04T19:45:00Z",
+      "network": "mainnet",
+      "status": "passed_contract_canaries_indexer_pending",
+      "scope": "post-upgrade create/deposit/redeem, Phoenix route, venue kill-switch, and post-fix Blend supply/withdraw accounting canaries",
+      "remaining": [
+        "indexer/catalog/frontend reflection check",
+        "Vercel production deploy and production smoke/E2E"
+      ],
+      "creationFeeApprovalTx": "c879fc9a8090bfab99ae4caa6702fd4140c5d42b981881865893f24395a60179",
+      "createAndInitTx": "60b47c66391d212a536da594e37cf69280ee62e7703739cc186d019ebf9b9194",
+      "depositApprovalTx": "4275f69fa10a39becf0d501a315972a2c5e3e15f0f892e5a87bdac02c6d3bd74",
+      "depositTx": "8e13e1ae846cf41c0b7f90086b1929dadca35c8d3cd81e04eb147b47922f6b27",
+      "redeemTx": "ae2cf79b693cfd4fa650674195cbbea92751d1a92ca8b9ac53463708ee932646",
+      "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+      "shareToken": "CC2RE6UATO45JGZ4NCV4YHBWBDYHAOSGHEKFPYTV4R4KH5XLUBTNM2BD",
+      "shareTokenHash": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+      "denomination": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "managerArkasBefore": [
+        "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M"
+      ],
+      "managerArkasAfter": [
+        "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE"
+      ],
+      "finalState": {
+        "sharesOfAdmin": "500000",
+        "shareTokenBalance": "500000",
+        "liquidUsdcBaseUnits": "500000",
+        "navBaseUnits": "500000"
+      },
+      "evidence": "tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
+      "completed": [
+        "post-upgrade factory create and share-token deployment",
+        "post-upgrade USDC deposit and partial redeem",
+        "post-upgrade Phoenix route execution",
+        "post-upgrade Phoenix venue kill-switch disable/re-enable",
+        "post-fix Blend fixed XLM-USDC supply/withdraw accounting canary on fresh Arka"
+      ],
+      "routingCanary": {
+        "evidence": "tmp/mainnet-post-upgrade-routing-canary-2026-07-04.json",
+        "network": "mainnet",
+        "validatedAt": "2026-07-04",
+        "status": "passed",
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "venue": "phoenix",
+        "adapter": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+        "tx": "e2d5b9052dcc8dca40938af630907d601d2cc79c8467c8abd16c90479b59e3b3",
+        "assetIn": "USDC",
+        "assetOut": "XLM",
+        "amountIn": "100000",
+        "minOut": "465000",
+        "amountOut": "471084",
+        "finalState": {
+          "liquidUsdcBaseUnits": "400000",
+          "liquidXlmStroops": "471084"
+        }
+      },
+      "killSwitchCanary": {
+        "evidence": "tmp/mainnet-post-upgrade-kill-switch-canary-2026-07-04.json",
+        "network": "mainnet",
+        "validatedAt": "2026-07-04",
+        "status": "passed",
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "venue": "phoenix",
+        "adapter": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+        "disableTx": "c4535f90c270278cc9f0e287d053f30d729cab841c796101303e6bf4cb377271",
+        "blockedSimulation": {
+          "status": "passed",
+          "expectedError": "SwapVenueNotAllowed"
+        },
+        "reenableTx": "6141e400079f081467f614be0bb19c92e7f663400251bdbff270a54dc1af0e58",
+        "finalAllowed": true,
+        "finalStatus": "manual_only"
+      },
+      "blendAccountingCanary": {
+        "evidence": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+        "status": "passed",
+        "arka": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+        "shareToken": "CCP3T3PF2Q3RDHJRRSFW7UHSEHFJOEXIQM7NJ4PEXRWSPEP4G62VIJUO",
+        "txs": {
+          "approveCreationFee": "a32b47a1417c045191f0a569c036f218ef5640a1573b9209f8630dda96c2b5c1",
+          "createAndInit": "bd0f9c1cf8d2c562f121e9a339835cbd610f4724422e4bd95c37cb4d849e1374",
+          "approveDeposit": "7812eda408e510e89eb84b759ebe80f373c5b0b762426271cc67dc2f416de383",
+          "deposit": "92b7a35057b9894c522ab6dc1355be1fd1cfcb779e800d95f517a9bb3af8adca",
+          "configureBlendMarket": "3780ce9475fcb1a394780215e56b6d3c99e279ed0429e6c8fe0155d90d824d43",
+          "disableBlendExternalDiagnostics": "031c931952776708edb0fe07e7660a23455fe8cabd88a0faf1bdcd03bf4abb3f",
+          "creditSupply": "b93e5bbcf68f6b04687d88cacacca468c590e856d00a4010e4eef5a532f5fecf",
+          "creditWithdraw": "5f74df2ce454d01d8ca2c9b44dee7f79be46f8ca65655b936ba580087bb953ff"
+        },
+        "accounting": {
+          "internalBefore": "1000000",
+          "actualBefore": "1000000",
+          "internalAfterSupply": "900000",
+          "actualAfterSupply": "900000",
+          "internalAfterWithdraw": "999998",
+          "actualAfterWithdraw": "999998",
+          "matchesAfterWithdraw": true
+        }
+      }
+    },
+    "mainnetArkaAccountingPatch": {
+      "validatedAt": "2026-07-04T19:45:00Z",
+      "network": "mainnet",
+      "status": "passed",
+      "reason": "Blend withdraw can return fewer token base units than requested because of pool share rounding; Arka now credits actual token balance delta for receive actions.",
+      "previousArkaWasmHash": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+      "arkaWasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+      "upload": {
+        "artifact": "artifacts/arka.wasm",
+        "wasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+        "tx": "90a20d220d7b330f12864af2a7efd93479aa4d918a1c8f305b22680d37361f3b"
+      },
+      "factoryImplementationUpdate": {
+        "contract": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+        "tx": "083378cc16626e3281e321173d59ca71eb58bfca3b4ce9e1026d1aecad786e63"
+      },
+      "upgradedExistingCanary": {
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "tx": "7755642dd4ded9a675ae05059d9493e23a310bcb400b1b343dae38dd7330936a",
+        "lastWasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701"
+      },
+      "freshBlendCanary": {
+        "evidence": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+        "arka": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+        "shareToken": "CCP3T3PF2Q3RDHJRRSFW7UHSEHFJOEXIQM7NJ4PEXRWSPEP4G62VIJUO",
+        "txs": {
+          "approveCreationFee": "a32b47a1417c045191f0a569c036f218ef5640a1573b9209f8630dda96c2b5c1",
+          "createAndInit": "bd0f9c1cf8d2c562f121e9a339835cbd610f4724422e4bd95c37cb4d849e1374",
+          "approveDeposit": "7812eda408e510e89eb84b759ebe80f373c5b0b762426271cc67dc2f416de383",
+          "deposit": "92b7a35057b9894c522ab6dc1355be1fd1cfcb779e800d95f517a9bb3af8adca",
+          "configureBlendMarket": "3780ce9475fcb1a394780215e56b6d3c99e279ed0429e6c8fe0155d90d824d43",
+          "disableBlendExternalDiagnostics": "031c931952776708edb0fe07e7660a23455fe8cabd88a0faf1bdcd03bf4abb3f",
+          "creditSupply": "b93e5bbcf68f6b04687d88cacacca468c590e856d00a4010e4eef5a532f5fecf",
+          "creditWithdraw": "5f74df2ce454d01d8ca2c9b44dee7f79be46f8ca65655b936ba580087bb953ff"
+        },
+        "accounting": {
+          "internalBefore": "1000000",
+          "actualBefore": "1000000",
+          "internalAfterSupply": "900000",
+          "actualAfterSupply": "900000",
+          "internalAfterWithdraw": "999998",
+          "actualAfterWithdraw": "999998",
+          "matchesAfterWithdraw": true
+        },
+        "creditWithdrawActualBaseUnits": "99998"
+      }
     }
   },
   "uploadedArtifacts": {
     "artifacts/adapter-aquarius.wasm": "9ff31b1fb5a0fe16ffcfc28158710c7fe8cb2c31532b45985f1e808b990c78dd",
     "artifacts/adapter-balanced.wasm": "ae0608787861cca04b3563c0f0532111284ae3eba080762dd87a48893afe2d60",
     "artifacts/adapter-blend.wasm": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
-    "artifacts/adapter-phoenix.wasm": "006a2161fc23ac23be06e3865b70ad7b0f7af511e156b2d7974c0b0720d9958f",
-    "artifacts/adapter-soroswap.wasm": "e18e011e907392ed12a46bb4cc2d13b32e42a5a5debcd21f33999d795a467920",
-    "artifacts/arka-factory.wasm": "444a7b05af7a6ff2aa04543a028f474459633249de7430063b1ad5b15f6a2608",
     "artifacts/arka-registry.wasm": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
     "artifacts/arka-token.wasm": "19f62f37e57ba77c24e674428f1a232433c263f8076b55b5c88fa3642a471572",
     "artifacts/arka-vesting.wasm": "65b5f4a19eed8f6a6a3c802b4e06bcefbe8182d9687acc820faca8734637e4d9",
-    "artifacts/arka.wasm": "0891be5a00c8b3a9c171d167fd9dd97564e830f1681b98dc0846d245aef36c2b",
     "artifacts/claims-manager.wasm": "1ab5e135d3cfd6f15a13b0939c2c10cab1cea4243c78a9e19ec8a50c27043ef0",
     "artifacts/coverage-fund.wasm": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
     "artifacts/coverage-vault.wasm": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf",
@@ -1401,13 +1592,22 @@
     "artifacts/manager-tier.wasm": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188",
     "artifacts/oracle-guard.wasm": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
     "artifacts/router.wasm": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
-    "artifacts/share-token.wasm": "09896cbf3c01d41adb5a06e989abe7e579c13b5e1b46d6a2badae929e442bd89",
-    "artifacts/venue-registry.wasm": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e"
+    "artifacts/venue-registry.wasm": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
+    "artifacts/arka.wasm": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+    "artifacts/share-token.wasm": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+    "artifacts/arka-factory.wasm": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+    "artifacts/adapter-phoenix.wasm": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+    "artifacts/adapter-soroswap.wasm": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
   },
   "evidence": {
     "manifest": "/Users/marcosoliva/Development/dogstar/arkafund/deployments.mainnet.json",
     "createDepositRedeem": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-canary-create-deposit-redeem.json",
-    "routingCanary": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-routing-canary.json"
+    "routingCanary": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-routing-canary.json",
+    "postUpgradeCreate": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-post-upgrade-create-canary-2026-07-04.json",
+    "postUpgradeCreateDepositRedeem": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
+    "postFixBlendAccounting": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+    "postUpgradeRouting": "tmp/mainnet-post-upgrade-routing-canary-2026-07-04.json",
+    "postUpgradeKillSwitch": "tmp/mainnet-post-upgrade-kill-switch-canary-2026-07-04.json"
   },
   "validatedModules": {
     "balancedExecution": {
@@ -1443,5 +1643,8 @@
       },
       "status": "ready"
     }
+  },
+  "artifactShas": {
+    "artifacts/arka.wasm": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701"
   }
 }

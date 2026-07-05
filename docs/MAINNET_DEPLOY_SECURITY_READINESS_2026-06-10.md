@@ -2,13 +2,15 @@
 
 Date: 2026-06-10
 
+Current status note, 2026-07-03: mainnet contracts are deployed/configured and their WASM hashes have been verified against mainnet RPC. Use `docs/MAINNET_REALITY_CHECK_2026-07-03.md` for current deployment facts and `docs/MAINNET_RELEASE_TASKS_2026-07-03.md` for remaining product blockers.
+
 This note captures the security/runtime items that must be checked before the mainnet deployment. It separates contract-enforced controls from product/planner controls.
 
 ## Executive status
 
 Arka has a real security foundation for a guarded mainnet launch, but not for a fully open, uncapped manager launch.
 
-Mainnet deploy can proceed only if the launch is configured as:
+The mainnet deployment has proceeded. Public product expansion should remain guarded unless the launch is configured as:
 
 - curated/known managers at first;
 - non-empty asset and venue allowlists, inherited from factory defaults for newly created Arkas;
@@ -77,12 +79,12 @@ Required:
 - If all execution goes through the internal Arka router, `allowed_adapters` still must be non-empty.
 - Do not leave both lists empty on mainnet launch, even though the global registry is now fail-closed for unregistered venues.
 
-Recommended initial AUTO venues:
+Current launch venue interpretation:
 
-- SoroSwap only if the mainnet router/pools are verified.
-- Aquarius only if mainnet router/pools are verified.
-- Phoenix after the configured pool route is live and canaried.
-- Balanced/SODAX is not part of the AMM adapter registry; readiness is controlled through the server-side intent driver.
+- SoroSwap, Aquarius and Phoenix have mainnet canary evidence for USDC/XLM, but `deployments.mainnet.json` currently records `autoEnabled=false` for each AMM venue.
+- Blend has supply/withdraw canary evidence for the fixed XLM-USDC market; borrow/repay remain disabled.
+- Balanced/SODAX is not part of the AMM adapter registry; the manifest records `autoEnabled=true` for the server-side SODAX intent driver after production canary evidence.
+- If the frontend advertises automatic AMM routing, the governed venue registry and factory defaults must first be updated to AUTO and re-canaried.
 
 ## Swap risk policy for launch
 
@@ -146,9 +148,9 @@ Limitation:
 
 Mainnet requirement:
 
-- Create/update `deployments.mainnet.json`.
-- Run strict dry-run against the mainnet manifest.
-- Execute live extension immediately after deploy.
+- Keep `deployments.mainnet.json` updated with the deployed contract IDs and hashes.
+- Run strict dry-run against the mainnet manifest after every contract/config change.
+- Execute live extension immediately after deploy/upgrade when required.
 - Schedule recurring lifecycle extension and alerting.
 - Keep restore runbook available for archived persistent entries.
 

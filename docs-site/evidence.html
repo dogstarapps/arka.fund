@@ -30,8 +30,8 @@
         <article>
           <p class="eyebrow">Indexer latency</p>
           <h2>NAV overview endpoint</h2>
-          <p class="metric">97.33 ms</p>
-          <p>Average latency across 20 HTTPS requests to <a href="https://app.arka.fund/api/nav">/api/nav</a> on 2026-07-10. p50: 99.12 ms. p95: 115.70 ms. This read-only endpoint is sourced from the persistent catalog and cached for 30 seconds. The release CI repeats the public check and fails when the average exceeds 200 ms.</p>
+          <p class="metric">63.06 ms</p>
+          <p>Average latency across 20 HTTPS requests to <a href="https://app.arka.fund/api/nav">/api/nav</a> on 2026-07-10 from a GitHub-hosted CI runner. p50: 42.44 ms. p95: 149.29 ms. This read-only endpoint is sourced from the persistent catalog and cached for 30 seconds. The release CI repeats the public check and fails when the average exceeds 200 ms.</p>
           <pre><code>curl -s -o /dev/null -w '%{time_total}\n' \
   https://app.arka.fund/api/nav</code></pre>
           <a class="inline-link" href="https://github.com/dogstarapps/arka.fund/actions/workflows/ci.yml?query=branch%3Amain">Open latency checks in CI</a>

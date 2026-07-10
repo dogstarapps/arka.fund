@@ -8,7 +8,8 @@ import statistics
 import time
 from dataclasses import dataclass
 from typing import Sequence
-from urllib.request import urlopen
+from http.client import HTTPSConnection
+from urllib.parse import SplitResult, urlsplit
 
 
 DEFAULT_ENDPOINT = "https://catalog.arka.fund/v1/dashboard/overview"
@@ -43,24 +44,40 @@ def summarize(values_ms: Sequence[float]) -> LatencySummary:
     )
 
 
+def parse_https_endpoint(endpoint: str) -> tuple[str, int, str]:
+    parsed: SplitResult = urlsplit(endpoint)
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise ValueError("endpoint must be an absolute HTTPS URL")
+    target = parsed.path or "/"
+    if parsed.query:
+        target = f"{target}?{parsed.query}"
+    return parsed.hostname, parsed.port or 443, target
+
+
 def measure(endpoint: str, samples: int, timeout_seconds: float) -> list[float]:
     if samples < 1:
         raise ValueError("samples must be at least 1")
+    host, port, target = parse_https_endpoint(endpoint)
+    connection = HTTPSConnection(host, port, timeout=timeout_seconds)
+    try:
+        connection.request("GET", target, headers={"Connection": "keep-alive"})
+        warm_up = connection.getresponse()
+        if warm_up.status != 200:
+            raise RuntimeError(f"warm-up request returned HTTP {warm_up.status}")
+        warm_up.read()
 
-    with urlopen(endpoint, timeout=timeout_seconds) as response:
-        if response.status != 200:
-            raise RuntimeError(f"warm-up request returned HTTP {response.status}")
-        response.read()
-
-    values_ms: list[float] = []
-    for index in range(samples):
-        started = time.perf_counter()
-        with urlopen(endpoint, timeout=timeout_seconds) as response:
+        values_ms: list[float] = []
+        for index in range(samples):
+            started = time.perf_counter()
+            connection.request("GET", target, headers={"Connection": "keep-alive"})
+            response = connection.getresponse()
             if response.status != 200:
                 raise RuntimeError(f"sample {index + 1} returned HTTP {response.status}")
             response.read()
-        values_ms.append((time.perf_counter() - started) * 1000)
-    return values_ms
+            values_ms.append((time.perf_counter() - started) * 1000)
+        return values_ms
+    finally:
+        connection.close()
 
 
 def parse_args() -> argparse.Namespace:

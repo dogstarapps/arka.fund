@@ -28,6 +28,17 @@ class CatalogLatencyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             latency.percentile([10.0], 1.1)
 
+    def test_parse_https_endpoint_keeps_path_and_query(self):
+        host, port, target = latency.parse_https_endpoint("https://catalog.arka.fund:8443/v1/nav?window=1w")
+
+        self.assertEqual(host, "catalog.arka.fund")
+        self.assertEqual(port, 8443)
+        self.assertEqual(target, "/v1/nav?window=1w")
+
+    def test_parse_https_endpoint_rejects_non_https_urls(self):
+        with self.assertRaises(ValueError):
+            latency.parse_https_endpoint("http://catalog.arka.fund/v1/nav")
+
 
 if __name__ == "__main__":
     unittest.main()

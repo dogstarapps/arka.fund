@@ -1,0 +1,62 @@
+import type { ArkafundSdkConfig } from "../core/config.js";
+
+export const STELLAR_MAINNET_PASSPHRASE = "Public Global Stellar Network ; September 2015";
+export const STELLAR_MAINNET_RPC_URL = "https://mainnet.sorobanrpc.com";
+
+export interface ArkafundContractAddresses {
+  arkaFactory: string;
+  arkaRegistry: string;
+  router: string;
+  venueRegistry: string;
+  adapterAquarius: string;
+  adapterBlendFixedXlmUsdc: string;
+  adapterBlendYieldBlox: string;
+  adapterPhoenix: string;
+  adapterSoroswap: string;
+  oracleGuard: string;
+  coverageFund: string;
+  claimsManager: string;
+  managerTier: string;
+  arkaToken: string;
+  lockedArka: string;
+  governanceToken: string;
+  governanceExecutor: string;
+  arkaVesting: string;
+  emissionsController: string;
+}
+
+/**
+ * Contract IDs from the public mainnet deployment manifest. Update this file
+ * only through the release process that updates deployments.mainnet.json.
+ */
+export const ARKAFUND_MAINNET_CONTRACTS: Readonly<ArkafundContractAddresses> = {
+  arkaFactory: "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+  arkaRegistry: "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY",
+  router: "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D",
+  venueRegistry: "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+  adapterAquarius: "CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ",
+  adapterBlendFixedXlmUsdc: "CBTRFXTMNZ477YG2RTDSUFICQXURNGV6RLEVDOU3XUTXEQERIZHAWBZP",
+  adapterBlendYieldBlox: "CB2HKKC3Z4H2R4YST2Z2WAE4MHSYFDVMRKDZQX3BTX7O55DJNBNN6VWT",
+  adapterPhoenix: "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+  adapterSoroswap: "CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI",
+  oracleGuard: "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+  coverageFund: "CDVPSKOQT5PJABQZYYL3TLYDPF7OE2P2Q7LRL47F5JFUO4BV5HK6BFXA",
+  claimsManager: "CBECEBUEIWLNNTZPNYIWO2YM2IO4HIMAXGOIZRR47OA2CUVJOMKMNLZY",
+  managerTier: "CDJ7MR4GDXVXILTMYLAQWEU7DMRKPXNRUONBZ7F7ORMVBA72MAQLUPSD",
+  arkaToken: "CDXCWYQZCLKS5EP4UFZLXVMNVMXPT33P3PDLGLFYA2FQQW6SZKKH5B5S",
+  lockedArka: "CAXJQAKJTEICXP3WBHP3YTJ24ZIJXTN5RFXX7OG7VNLE2P42UYOVE3WF",
+  governanceToken: "CCIAK7PL4EAIEPSYAAFE6BJOMLE27SOWTBFV6VUDGJEMMAT3D42U5CGH",
+  governanceExecutor: "CCTJRPZP7WDJZAPMJVCKUX6TOOZKKSTEVQ66YP6KZ5N6TCHRXLKTNEAS",
+  arkaVesting: "CBP5XCBCKV3QM3CRVTJP7TF3DXPB5NBAZ2NMVKACNT2TVQQI4RJGMN3X",
+  emissionsController: "CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF",
+};
+
+export function createMainnetConfig(
+  overrides: Omit<ArkafundSdkConfig, "rpcUrl" | "networkPassphrase"> = {},
+): ArkafundSdkConfig {
+  return {
+    rpcUrl: STELLAR_MAINNET_RPC_URL,
+    networkPassphrase: STELLAR_MAINNET_PASSPHRASE,
+    ...overrides,
+  };
+}

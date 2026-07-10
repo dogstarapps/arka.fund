@@ -4,6 +4,7 @@ import { createCatalogApp } from "./app.js";
 import {
   CompositeMonitoringNotifier,
   NoopMonitoringNotifier,
+  PagerDutyMonitoringNotifier,
   WebhookMonitoringNotifier,
   type MonitoringNotifier,
 } from "./notifier.js";
@@ -78,24 +79,41 @@ function loadMonitoringThresholds(): MonitoringThresholds {
 }
 
 function loadNotifier(): MonitoringNotifier {
+  const notifiers: MonitoringNotifier[] = [];
   const webhookUrl = process.env.CATALOG_API_ALERT_WEBHOOK_URL;
-  if (!webhookUrl) {
-    return new NoopMonitoringNotifier();
+  if (webhookUrl) {
+    const secret = required("CATALOG_API_ALERT_WEBHOOK_SECRET");
+    const timeoutMs = Number.parseInt(
+      process.env.CATALOG_API_ALERT_WEBHOOK_TIMEOUT_MS ?? "5000",
+      10,
+    );
+    notifiers.push(
+      new WebhookMonitoringNotifier({
+        url: webhookUrl,
+        secret,
+        timeoutMs,
+      }),
+    );
   }
 
-  const secret = required("CATALOG_API_ALERT_WEBHOOK_SECRET");
-  const timeoutMs = Number.parseInt(
-    process.env.CATALOG_API_ALERT_WEBHOOK_TIMEOUT_MS ?? "5000",
-    10,
-  );
+  const pagerDutyRoutingKey = process.env.CATALOG_API_PAGERDUTY_ROUTING_KEY;
+  if (pagerDutyRoutingKey) {
+    notifiers.push(
+      new PagerDutyMonitoringNotifier({
+        routingKey: pagerDutyRoutingKey,
+        source: process.env.CATALOG_API_PAGERDUTY_SOURCE ?? "catalog.arka.fund",
+        eventsUrl: process.env.CATALOG_API_PAGERDUTY_EVENTS_URL,
+        timeoutMs: Number.parseInt(
+          process.env.CATALOG_API_PAGERDUTY_TIMEOUT_MS ?? "5000",
+          10,
+        ),
+      }),
+    );
+  }
 
-  return new CompositeMonitoringNotifier([
-    new WebhookMonitoringNotifier({
-      url: webhookUrl,
-      secret,
-      timeoutMs,
-    }),
-  ]);
+  return notifiers.length === 0
+    ? new NoopMonitoringNotifier()
+    : new CompositeMonitoringNotifier(notifiers);
 }
 
 function required(name: string): string {

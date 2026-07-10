@@ -1,6 +1,6 @@
 {
   "name": "@arkafund/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Public TypeScript SDK for Arkafund on-chain integrations",
   "type": "module",
   "exports": {
@@ -8,22 +8,23 @@
   },
   "types": "./dist/src/index.d.ts",
   "files": [
-    "dist",
+    "dist/src",
     "README.md"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "regen:bindings": "bash ./scripts/generate-bindings.sh",
+    "verify:mainnet-preset": "node ./scripts/verify-mainnet-preset.mjs",
     "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
     "test:integration": "bash ./scripts/integration-local.sh",
     "test:integration:live": "npm run build && node --test dist/tests/integration/*.test.js",
     "test:e2e": "bash ./scripts/e2e-local.sh"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^14.1.1",
+    "@stellar/stellar-sdk": "^16.0.1",
     "buffer": "6.0.3"
   },
   "devDependencies": {

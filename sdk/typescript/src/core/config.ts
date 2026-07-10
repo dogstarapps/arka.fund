@@ -1,6 +1,7 @@
 import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
+  MethodOptions,
 } from "@stellar/stellar-sdk/contract";
 
 export interface ArkafundSdkConfig {
@@ -9,12 +10,12 @@ export interface ArkafundSdkConfig {
   publicKey?: string;
   signTransaction?: ContractClientOptions["signTransaction"];
   allowHttp?: boolean;
-  fee?: number;
+  fee?: string | number;
   timeoutInSeconds?: number;
 }
 
 export interface ArkafundCallOptions {
-  fee?: number;
+  fee?: string | number;
   timeoutInSeconds?: number;
   simulate?: boolean;
 }
@@ -39,9 +40,10 @@ export function mergeCallOptions(
   config: ArkafundSdkConfig,
   overrides?: ArkafundCallOptions,
   simulate = true,
-): ArkafundCallOptions {
+): MethodOptions {
+  const fee = overrides?.fee ?? config.fee;
   return {
-    fee: overrides?.fee ?? config.fee,
+    fee: fee === undefined ? undefined : String(fee),
     timeoutInSeconds: overrides?.timeoutInSeconds ?? config.timeoutInSeconds,
     simulate: overrides?.simulate ?? simulate,
   };

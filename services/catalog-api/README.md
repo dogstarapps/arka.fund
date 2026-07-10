@@ -12,7 +12,7 @@ This service builds and serves the indexed catalog required for discovery and le
 - asset snapshots, asset time series, and contract activity over a single API surface
 - dashboard KPI and portfolio composition endpoints built on the same indexed state
 - HTTP API for metrics, dashboard, Arkas, assets, managers, history, activity, health, and monitoring
-- signed webhook delivery for alert transitions
+- signed webhook and PagerDuty Events API v2 delivery for alert transitions
 - reproducible local end-to-end validation against a local Soroban network
 
 ## Runtime
@@ -43,6 +43,14 @@ Runtime monitoring is configured with environment variables:
 - `CATALOG_API_ALERT_WEBHOOK_URL`
 - `CATALOG_API_ALERT_WEBHOOK_SECRET`
 - `CATALOG_API_ALERT_WEBHOOK_TIMEOUT_MS`
+- `CATALOG_API_PAGERDUTY_ROUTING_KEY`
+- `CATALOG_API_PAGERDUTY_SOURCE` (defaults to `catalog.arka.fund`)
+- `CATALOG_API_PAGERDUTY_EVENTS_URL` (defaults to the EU Events API v2 endpoint)
+- `CATALOG_API_PAGERDUTY_TIMEOUT_MS`
+
+When `CATALOG_API_PAGERDUTY_ROUTING_KEY` is configured, each alert transition is
+sent as an Events API v2 event. A stable deduplication key per alert type ensures
+that recovery resolves the same PagerDuty incident that the alert opened.
 
 Runtime activity indexing is configured with:
 

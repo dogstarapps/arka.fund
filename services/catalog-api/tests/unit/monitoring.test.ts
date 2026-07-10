@@ -6,6 +6,8 @@ import {
   buildSnapshot,
   createEmptyMonitoringArchive,
   defaultMonitoringThresholds,
+  pagerDutyDedupKey,
+  PagerDutyMonitoringNotifier,
   reconcileMonitoringAlerts,
   signPayload,
   WebhookMonitoringNotifier,
@@ -123,6 +125,92 @@ test("WebhookMonitoringNotifier signs and posts monitoring payloads", async () =
     JSON.parse(body).transitions[0].kind,
     "sync_failed",
   );
+});
+
+test("PagerDutyMonitoringNotifier triggers and resolves stable monitoring incidents", async () => {
+  const requests: Array<{ url: string; init: RequestInit | undefined }> = [];
+  const notifier = new PagerDutyMonitoringNotifier({
+    routingKey: "routing-key",
+    source: "catalog.arka.fund",
+    eventsUrl: "https://events.example.test/v2/enqueue",
+    fetchImpl: async (url, init) => {
+      requests.push({ url: String(url), init });
+      return new Response(null, { status: 202 });
+    },
+  });
+  const status = monitoringStatusFixture();
+  const event = buildMonitoringNotificationEvent(
+    [
+      {
+        kind: "sync_failed",
+        action: "triggered",
+        alert: {
+          kind: "sync_failed",
+          severity: "critical",
+          message: "Last sync failed",
+          active: true,
+          firstTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastResolvedAt: null,
+        },
+      },
+      {
+        kind: "sync_failed",
+        action: "resolved",
+        alert: {
+          kind: "sync_failed",
+          severity: "critical",
+          message: "Last sync recovered",
+          active: false,
+          firstTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastResolvedAt: "2026-03-27T10:05:00.000Z",
+        },
+      },
+    ],
+    status,
+    "2026-03-27T12:00:00.000Z",
+  );
+
+  await notifier.notify(event);
+
+  assert.equal(requests.length, 2);
+  assert.equal(requests[0]?.url, "https://events.example.test/v2/enqueue");
+  const trigger = JSON.parse(String(requests[0]?.init?.body));
+  const resolve = JSON.parse(String(requests[1]?.init?.body));
+  assert.equal(trigger.routing_key, "routing-key");
+  assert.equal(trigger.event_action, "trigger");
+  assert.equal(trigger.payload.severity, "critical");
+  assert.equal(resolve.event_action, "resolve");
+  assert.equal(trigger.dedup_key, pagerDutyDedupKey("sync_failed"));
+  assert.equal(resolve.dedup_key, trigger.dedup_key);
+});
+
+test("PagerDutyMonitoringNotifier surfaces rejected event deliveries", async () => {
+  const notifier = new PagerDutyMonitoringNotifier({
+    routingKey: "routing-key",
+    fetchImpl: async () => new Response(null, { status: 429 }),
+  });
+  const event = buildMonitoringNotificationEvent(
+    [
+      {
+        kind: "sync_slow",
+        action: "triggered",
+        alert: {
+          kind: "sync_slow",
+          severity: "warning",
+          message: "Sync was slow",
+          active: true,
+          firstTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastTriggeredAt: "2026-03-27T10:00:00.000Z",
+          lastResolvedAt: null,
+        },
+      },
+    ],
+    monitoringStatusFixture(),
+  );
+
+  await assert.rejects(notifier.notify(event), /status 429/);
 });
 
 function monitoringStatusFixture(): MonitoringStatus {

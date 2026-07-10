@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Arkafund developer documentation for Stellar and Soroban." />
+    <title>Arkafund Developer Docs</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://arka.fund/" aria-label="Arkafund home">
+        <img src="https://arka.fund/logo-arkafund.png" alt="Arkafund" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="#sdk">SDK</a>
+        <a href="#mainnet">Mainnet</a>
+        <a href="#indexer">Indexer API</a>
+        <a href="./evidence.html">Evidence</a>
+        <a class="app-link" href="https://app.arka.fund/">Open app</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">Developer documentation</p>
+        <h1>Build on Arkafund</h1>
+        <p class="lead">
+          Public TypeScript tools, verified Stellar mainnet contracts and a live catalog API for
+          integrating Arkafund vaults, discovery and venue controls.
+        </p>
+        <div class="intro-actions">
+          <a class="button primary" href="https://www.npmjs.com/package/@arkafund/sdk">View SDK on npm</a>
+          <a class="button secondary" href="./evidence.html">View operational evidence</a>
+        </div>
+      </section>
+
+      <section class="content-section" id="sdk">
+        <div class="section-heading">
+          <p class="eyebrow">TypeScript SDK</p>
+          <h2>Wallet-signed contract integration</h2>
+        </div>
+        <div class="two-column">
+          <div>
+            <p>
+              <code>@arkafund/sdk</code> wraps generated Soroban bindings with stable modules for
+              the factory, vault, registry, router, oracle guard and venue registry. State-changing
+              calls are built and signed by the integrator's wallet; the SDK never contains a private key.
+            </p>
+            <pre><code>npm install @arkafund/sdk</code></pre>
+          </div>
+          <dl class="facts">
+            <div><dt>Current release</dt><dd>0.2.0</dd></div>
+            <div><dt>Runtime</dt><dd>Node.js 22+</dd></div>
+            <div><dt>Network</dt><dd>Stellar mainnet</dd></div>
+          </dl>
+        </div>
+        <pre><code>import {
+  ARKAFUND_MAINNET_CONTRACTS,
+  ArkafundSdk,
+  createMainnetConfig,
+} from "@arkafund/sdk";
+
+const sdk = new ArkafundSdk(createMainnetConfig());
+const factory = sdk.factory(ARKAFUND_MAINNET_CONTRACTS.arkaFactory);
+const venues = sdk.venueRegistry(ARKAFUND_MAINNET_CONTRACTS.venueRegistry);</code></pre>
+        <div class="module-grid" aria-label="SDK modules">
+          <article><h3>Factory</h3><p>Atomic Arka creation, creation fee and default risk-policy reads.</p></article>
+          <article><h3>Vault</h3><p>NAV, fee, manager, whitelist, deposit and redemption calls.</p></article>
+          <article><h3>Router</h3><p>Signed route execution with explicit per-hop minimum output.</p></article>
+          <article><h3>Venues</h3><p>Venue status, AUTO eligibility and authorized emergency disabling.</p></article>
+          <article><h3>Registry</h3><p>Discovery pagination, curation and delisting state.</p></article>
+          <article><h3>Oracle guard</h3><p>Asset policy inspection and governed price-policy changes.</p></article>
+        </div>
+      </section>
+
+      <section class="content-section" id="mainnet">
+        <div class="section-heading">
+          <p class="eyebrow">Mainnet</p>
+          <h2>Published and traceable contracts</h2>
+        </div>
+        <p>
+          Arkafund's public mainnet manifest lists the contract IDs and SHA-256 WASM hashes used
+          by the current release. The SDK exports the same contract identifiers through
+          <code>ARKAFUND_MAINNET_CONTRACTS</code>.
+        </p>
+        <div class="link-list">
+          <a href="https://github.com/dogstarapps/arka.fund/blob/main/deployments.mainnet.json">Open the deployment manifest</a>
+          <a href="https://stellar.expert/explorer/public/contract/CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK">View Arka Factory on Stellar Expert</a>
+          <a href="https://stellar.expert/explorer/public/contract/CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D">View Router on Stellar Expert</a>
+          <a href="https://stellar.expert/explorer/public/contract/CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN">View Venue Registry on Stellar Expert</a>
+        </div>
+      </section>
+
+      <section class="content-section" id="indexer">
+        <div class="section-heading">
+          <p class="eyebrow">Catalog API</p>
+          <h2>Live indexer and NAV data</h2>
+        </div>
+        <p>
+          The catalog service continuously indexes public Arkafund mainnet state and exposes
+          health, aggregate metrics and application data. It is a persistent production service;
+          its public endpoints are suitable for monitoring and integrations.
+        </p>
+        <div class="endpoint-grid">
+          <a href="https://catalog.arka.fund/health"><strong>GET</strong><span>/health</span><small>Service health and synchronization state</small></a>
+          <a href="https://catalog.arka.fund/v1/metrics"><strong>GET</strong><span>/v1/metrics</span><small>Aggregate NAV and catalog metrics</small></a>
+          <a href="https://catalog.arka.fund/v1/monitoring/status"><strong>GET</strong><span>/v1/monitoring/status</span><small>Public monitoring state and active alerts</small></a>
+          <a href="https://catalog.arka.fund/v1/dashboard/overview"><strong>GET</strong><span>/v1/dashboard/overview</span><small>Dashboard data for product integrations</small></a>
+        </div>
+      </section>
+
+      <section class="content-section final-section">
+        <div>
+          <p class="eyebrow">Operational evidence</p>
+          <h2>Reproducible release checks</h2>
+          <p>Latency, monitoring and contract verification evidence is published with the validation method and live endpoints.</p>
+        </div>
+        <a class="button primary" href="./evidence.html">Open evidence</a>
+      </section>
+    </main>
+
+    <footer>
+      <span>Arkafund on Stellar</span>
+      <a href="https://app.arka.fund/">Application</a>
+      <a href="https://arka.fund/">arkafund.com</a>
+      <a href="https://github.com/dogstarapps/arka.fund">Source</a>
+    </footer>
+  </body>
+</html>

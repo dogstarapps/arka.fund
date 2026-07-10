@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 
 import {
   ensureBps,
+  ensureNonEmptyBytes,
   ensurePositiveInt,
   ensureSorobanAddress,
+  ensureUint128,
 } from "../../src/index.js";
 
 test("ensurePositiveInt normalizes numbers, strings, and bigint", () => {
@@ -22,6 +24,12 @@ test("ensureBps enforces basis point boundaries", () => {
   assert.equal(ensureBps(0, "bps"), 0);
   assert.equal(ensureBps(10_000, "bps"), 10_000);
   assert.throws(() => ensureBps(10_001, "bps"), /between 0 and 10000/);
+});
+
+test("wide integer and byte helpers enforce Soroban argument bounds", () => {
+  assert.equal(ensureUint128((1n << 128n) - 1n, "poolId"), (1n << 128n) - 1n);
+  assert.throws(() => ensureUint128(1n << 128n, "poolId"), /unsigned 128-bit/);
+  assert.throws(() => ensureNonEmptyBytes(new Uint8Array(), "salt"), /must not be empty/);
 });
 
 test("ensureSorobanAddress validates strkey-shaped account and contract ids", () => {

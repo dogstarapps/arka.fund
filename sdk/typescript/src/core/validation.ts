@@ -1,5 +1,8 @@
 export type IntLike = bigint | number | string;
 
+const MAX_I128 = (1n << 127n) - 1n;
+const MAX_U128 = (1n << 128n) - 1n;
+
 export function ensureNonEmptyString(value: string, field: string): string {
   if (value.trim().length === 0) {
     throw new Error(`${field} is required`);
@@ -45,6 +48,37 @@ export function ensureNonNegativeInt(value: IntLike, field: string): bigint {
     throw new Error(`${field} must not be negative`);
   }
   return normalized;
+}
+
+export function ensurePositiveInt128(value: IntLike, field: string): bigint {
+  const normalized = ensurePositiveInt(value, field);
+  if (normalized > MAX_I128) {
+    throw new Error(`${field} exceeds the signed 128-bit range`);
+  }
+  return normalized;
+}
+
+export function ensureNonNegativeInt128(value: IntLike, field: string): bigint {
+  const normalized = ensureNonNegativeInt(value, field);
+  if (normalized > MAX_I128) {
+    throw new Error(`${field} exceeds the signed 128-bit range`);
+  }
+  return normalized;
+}
+
+export function ensureUint128(value: IntLike, field: string): bigint {
+  const normalized = ensureNonNegativeInt(value, field);
+  if (normalized > MAX_U128) {
+    throw new Error(`${field} exceeds the unsigned 128-bit range`);
+  }
+  return normalized;
+}
+
+export function ensureNonEmptyBytes(value: Uint8Array, field: string): Uint8Array {
+  if (value.length === 0) {
+    throw new Error(`${field} must not be empty`);
+  }
+  return value;
 }
 
 export function ensureUint32(value: number, field: string): number {

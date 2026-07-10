@@ -23,6 +23,14 @@ Interpretation:
 
 ## RPC Contract Verification
 
+### 2026-07-10 Revalidation
+
+Using Stellar CLI `26.1.0` against `https://mainnet.sorobanrpc.com`, the current
+WASM hash for every one of the 19 contracts in `deployments.mainnet.json` was
+read again and matched the manifest. The corresponding public Stellar Expert
+contract pages also returned successfully. This confirms that the manifest
+continues to describe the deployed mainnet contract set.
+
 On 2026-07-03, each `deploymentPlan.contracts[]` entry with `deploy=true` was checked with:
 
 ```bash

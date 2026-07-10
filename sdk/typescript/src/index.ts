@@ -3,11 +3,18 @@ export * from "./core/extensions.js";
 export * from "./core/rpc.js";
 export * from "./core/signing.js";
 export * from "./core/validation.js";
+export * from "./modules/factory.js";
 export * from "./modules/oracleGuard.js";
 export * from "./modules/registry.js";
+export * from "./modules/router.js";
+export * from "./modules/venueRegistry.js";
+export * from "./networks/mainnet.js";
 export * from "./modules/vault.js";
 export * from "./sdk.js";
 
 export * as arkaContract from "./generated/arka.js";
+export * as arkaFactoryContract from "./generated/arka-factory.js";
 export * as arkaRegistryContract from "./generated/arka-registry.js";
 export * as oracleGuardContract from "./generated/oracle-guard.js";
+export * as routerContract from "./generated/router.js";
+export * as venueRegistryContract from "./generated/venue-registry.js";

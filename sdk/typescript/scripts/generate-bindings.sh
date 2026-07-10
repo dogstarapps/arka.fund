@@ -9,8 +9,11 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 
 CONTRACTS=(
   "arka:arka.wasm"
+  "arka-factory:arka-factory.wasm"
   "arka-registry:arka-registry.wasm"
   "oracle-guard:oracle-guard.wasm"
+  "router:router.wasm"
+  "venue-registry:venue-registry.wasm"
 )
 
 mkdir -p "$ROOT_DIR/src/generated"

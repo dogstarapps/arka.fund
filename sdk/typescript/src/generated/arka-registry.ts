@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { Address } from '@stellar/stellar-sdk';
+import { Address } from "@stellar/stellar-sdk";
 import {
   AssembledTransaction,
   Client as ContractClient,
@@ -7,7 +7,7 @@ import {
   MethodOptions,
   Result,
   Spec as ContractSpec,
-} from '@stellar/stellar-sdk/contract';
+} from "@stellar/stellar-sdk/contract";
 import type {
   u32,
   i32,
@@ -18,14 +18,14 @@ import type {
   u256,
   i256,
   Option,
-  Typepoint,
+  Timepoint,
   Duration,
-} from '@stellar/stellar-sdk/contract';
-export * from '@stellar/stellar-sdk'
-export * as contract from '@stellar/stellar-sdk/contract'
-export * as rpc from '@stellar/stellar-sdk/rpc'
+} from "@stellar/stellar-sdk/contract";
+export * from "@stellar/stellar-sdk";
+export * as contract from "@stellar/stellar-sdk/contract";
+export * as rpc from "@stellar/stellar-sdk/rpc";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   //@ts-ignore Buffer exists
   window.Buffer = window.Buffer || Buffer;
 }
@@ -33,268 +33,113 @@ if (typeof window !== 'undefined') {
 
 
 
-export type DataKey = {tag: "All", values: void} | {tag: "ByManager", values: readonly [string]} | {tag: "CuratedManager", values: readonly [string]} | {tag: "Delisted", values: readonly [string]} | {tag: "Registrar", values: readonly [string]} | {tag: "Admin", values: void};
+export type DataKey = {tag: "All", values: void} | {tag: "ByManager", values: readonly [string]} | {tag: "CuratedManager", values: readonly [string]} | {tag: "Delisted", values: readonly [string]} | {tag: "Registrar", values: readonly [string]} | {tag: "Admin", values: void} | {tag: "Governor", values: void} | {tag: "BootstrapAdminExpiresAt", values: void} | {tag: "LastWasmHash", values: void};
 
 export interface Client {
   /**
    * Construct and simulate a count transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  count: (options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  count: (options?: MethodOptions) => Promise<AssembledTransaction<u32>>
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<u32>>
+  /**
+   * Construct and simulate a upgrade transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  upgrade: ({caller, new_wasm_hash}: {caller: string, new_wasm_hash: Buffer}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a register transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  register: ({caller, manager, arka}: {caller: string, manager: string, arka: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  register: ({caller, manager, arka}: {caller: string, manager: string, arka: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a get_arkas transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  get_arkas: ({offset, limit}: {offset: u32, limit: u32}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  get_arkas: ({offset, limit}: {offset: u32, limit: u32}, options?: MethodOptions) => Promise<AssembledTransaction<Array<string>>>
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<Array<string>>>
+  /**
+   * Construct and simulate a set_admin transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  set_admin: ({caller, admin}: {caller: string, admin: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a init_admin transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  init_admin: ({admin}: {admin: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  init_admin: ({admin}: {admin: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a is_delisted transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  is_delisted: ({arka}: {arka: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<boolean>>
+  is_delisted: ({arka}: {arka: string}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
   /**
    * Construct and simulate a is_registrar transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  is_registrar: ({registrar}: {registrar: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<boolean>>
+  is_registrar: ({registrar}: {registrar: string}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
   /**
    * Construct and simulate a set_delisted transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  set_delisted: ({caller, arka, delisted}: {caller: string, arka: string, delisted: boolean}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  set_delisted: ({caller, arka, delisted}: {caller: string, arka: string, delisted: boolean}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  /**
+   * Construct and simulate a set_governor transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  set_governor: ({caller, governor}: {caller: string, governor: Option<string>}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a set_registrar transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  set_registrar: ({caller, registrar, allowed}: {caller: string, registrar: string, allowed: boolean}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  set_registrar: ({caller, registrar, allowed}: {caller: string, registrar: string, allowed: boolean}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  /**
+   * Construct and simulate a last_wasm_hash transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  last_wasm_hash: (options?: MethodOptions) => Promise<AssembledTransaction<Option<Buffer>>>
 
   /**
    * Construct and simulate a register_admin transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  register_admin: ({caller, manager, arka}: {caller: string, manager: string, arka: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  register_admin: ({caller, manager, arka}: {caller: string, manager: string, arka: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a count_by_manager transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  count_by_manager: ({manager}: {manager: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<u32>>
+  count_by_manager: ({manager}: {manager: string}, options?: MethodOptions) => Promise<AssembledTransaction<u32>>
 
   /**
    * Construct and simulate a is_manager_curated transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  is_manager_curated: ({manager}: {manager: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<boolean>>
+  is_manager_curated: ({manager}: {manager: string}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
   /**
    * Construct and simulate a set_manager_curated transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  set_manager_curated: ({caller, manager, curated}: {caller: string, manager: string, curated: boolean}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
-
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
-
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  set_manager_curated: ({caller, manager, curated}: {caller: string, manager: string, curated: boolean}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
    * Construct and simulate a get_arkas_by_manager transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  get_arkas_by_manager: ({manager, offset, limit}: {manager: string, offset: u32, limit: u32}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  get_arkas_by_manager: ({manager, offset, limit}: {manager: string, offset: u32, limit: u32}, options?: MethodOptions) => Promise<AssembledTransaction<Array<string>>>
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
+  /**
+   * Construct and simulate a bootstrap_admin_active transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  bootstrap_admin_active: (options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<Array<string>>>
+  /**
+   * Construct and simulate a bootstrap_admin_expires_at transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  bootstrap_admin_expires_at: (options?: MethodOptions) => Promise<AssembledTransaction<Option<u64>>>
+
+  /**
+   * Construct and simulate a set_bootstrap_admin_expiry transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  set_bootstrap_admin_expiry: ({caller, expires_at}: {caller: string, expires_at: u64}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
+
+  /**
+   * Construct and simulate a clear_bootstrap_admin_expiry transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  clear_bootstrap_admin_expiry: ({caller}: {caller: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
 }
 export class Client extends ContractClient {
@@ -315,35 +160,51 @@ export class Client extends ContractClient {
   constructor(public readonly options: ContractClientOptions) {
     super(
       new ContractSpec([ "AAAAAAAAAAAAAAAFY291bnQAAAAAAAAAAAAAAQAAAAQ=",
+        "AAAAAAAAAAAAAAAHdXBncmFkZQAAAAACAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAADW5ld193YXNtX2hhc2gAAAAAAAPuAAAAIAAAAAA=",
         "AAAAAAAAAAAAAAAIcmVnaXN0ZXIAAAADAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAAB21hbmFnZXIAAAAAEwAAAAAAAAAEYXJrYQAAABMAAAAA",
         "AAAAAAAAAAAAAAAJZ2V0X2Fya2FzAAAAAAAAAgAAAAAAAAAGb2Zmc2V0AAAAAAAEAAAAAAAAAAVsaW1pdAAAAAAAAAQAAAABAAAD6gAAABM=",
-        "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAABgAAAAAAAAAAAAAAA0FsbAAAAAABAAAAAAAAAAlCeU1hbmFnZXIAAAAAAAABAAAAEwAAAAEAAAAAAAAADkN1cmF0ZWRNYW5hZ2VyAAAAAAABAAAAEwAAAAEAAAAAAAAACERlbGlzdGVkAAAAAQAAABMAAAABAAAAAAAAAAlSZWdpc3RyYXIAAAAAAAABAAAAEwAAAAAAAAAAAAAABUFkbWluAAAA",
+        "AAAAAAAAAAAAAAAJc2V0X2FkbWluAAAAAAAAAgAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAVhZG1pbgAAAAAAABMAAAAA",
+        "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAACQAAAAAAAAAAAAAAA0FsbAAAAAABAAAAAAAAAAlCeU1hbmFnZXIAAAAAAAABAAAAEwAAAAEAAAAAAAAADkN1cmF0ZWRNYW5hZ2VyAAAAAAABAAAAEwAAAAEAAAAAAAAACERlbGlzdGVkAAAAAQAAABMAAAABAAAAAAAAAAlSZWdpc3RyYXIAAAAAAAABAAAAEwAAAAAAAAAAAAAABUFkbWluAAAAAAAAAAAAAAAAAAAIR292ZXJub3IAAAAAAAAAAAAAABdCb290c3RyYXBBZG1pbkV4cGlyZXNBdAAAAAAAAAAAAAAAAAxMYXN0V2FzbUhhc2g=",
         "AAAAAAAAAAAAAAAKaW5pdF9hZG1pbgAAAAAAAQAAAAAAAAAFYWRtaW4AAAAAAAATAAAAAA==",
         "AAAAAAAAAAAAAAALaXNfZGVsaXN0ZWQAAAAAAQAAAAAAAAAEYXJrYQAAABMAAAABAAAAAQ==",
         "AAAAAAAAAAAAAAAMaXNfcmVnaXN0cmFyAAAAAQAAAAAAAAAJcmVnaXN0cmFyAAAAAAAAEwAAAAEAAAAB",
         "AAAAAAAAAAAAAAAMc2V0X2RlbGlzdGVkAAAAAwAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAARhcmthAAAAEwAAAAAAAAAIZGVsaXN0ZWQAAAABAAAAAA==",
+        "AAAAAAAAAAAAAAAMc2V0X2dvdmVybm9yAAAAAgAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAhnb3Zlcm5vcgAAA+gAAAATAAAAAA==",
         "AAAAAAAAAAAAAAANc2V0X3JlZ2lzdHJhcgAAAAAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAJcmVnaXN0cmFyAAAAAAAAEwAAAAAAAAAHYWxsb3dlZAAAAAABAAAAAA==",
+        "AAAAAAAAAAAAAAAObGFzdF93YXNtX2hhc2gAAAAAAAAAAAABAAAD6AAAA+4AAAAg",
         "AAAAAAAAAAAAAAAOcmVnaXN0ZXJfYWRtaW4AAAAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAHbWFuYWdlcgAAAAATAAAAAAAAAARhcmthAAAAEwAAAAA=",
         "AAAAAAAAAAAAAAAQY291bnRfYnlfbWFuYWdlcgAAAAEAAAAAAAAAB21hbmFnZXIAAAAAEwAAAAEAAAAE",
         "AAAAAAAAAAAAAAASaXNfbWFuYWdlcl9jdXJhdGVkAAAAAAABAAAAAAAAAAdtYW5hZ2VyAAAAABMAAAABAAAAAQ==",
         "AAAAAAAAAAAAAAATc2V0X21hbmFnZXJfY3VyYXRlZAAAAAADAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAAB21hbmFnZXIAAAAAEwAAAAAAAAAHY3VyYXRlZAAAAAABAAAAAA==",
-        "AAAAAAAAAAAAAAAUZ2V0X2Fya2FzX2J5X21hbmFnZXIAAAADAAAAAAAAAAdtYW5hZ2VyAAAAABMAAAAAAAAABm9mZnNldAAAAAAABAAAAAAAAAAFbGltaXQAAAAAAAAEAAAAAQAAA+oAAAAT" ]),
+        "AAAAAAAAAAAAAAAUZ2V0X2Fya2FzX2J5X21hbmFnZXIAAAADAAAAAAAAAAdtYW5hZ2VyAAAAABMAAAAAAAAABm9mZnNldAAAAAAABAAAAAAAAAAFbGltaXQAAAAAAAAEAAAAAQAAA+oAAAAT",
+        "AAAAAAAAAAAAAAAWYm9vdHN0cmFwX2FkbWluX2FjdGl2ZQAAAAAAAAAAAAEAAAAB",
+        "AAAAAAAAAAAAAAAaYm9vdHN0cmFwX2FkbWluX2V4cGlyZXNfYXQAAAAAAAAAAAABAAAD6AAAAAY=",
+        "AAAAAAAAAAAAAAAac2V0X2Jvb3RzdHJhcF9hZG1pbl9leHBpcnkAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAKZXhwaXJlc19hdAAAAAAABgAAAAA=",
+        "AAAAAAAAAAAAAAAcY2xlYXJfYm9vdHN0cmFwX2FkbWluX2V4cGlyeQAAAAEAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAA=" ]),
       options
     )
   }
   public readonly fromJSON = {
     count: this.txFromJSON<u32>,
+        upgrade: this.txFromJSON<null>,
         register: this.txFromJSON<null>,
         get_arkas: this.txFromJSON<Array<string>>,
+        set_admin: this.txFromJSON<null>,
         init_admin: this.txFromJSON<null>,
         is_delisted: this.txFromJSON<boolean>,
         is_registrar: this.txFromJSON<boolean>,
         set_delisted: this.txFromJSON<null>,
+        set_governor: this.txFromJSON<null>,
         set_registrar: this.txFromJSON<null>,
+        last_wasm_hash: this.txFromJSON<Option<Buffer>>,
         register_admin: this.txFromJSON<null>,
         count_by_manager: this.txFromJSON<u32>,
         is_manager_curated: this.txFromJSON<boolean>,
         set_manager_curated: this.txFromJSON<null>,
-        get_arkas_by_manager: this.txFromJSON<Array<string>>
+        get_arkas_by_manager: this.txFromJSON<Array<string>>,
+        bootstrap_admin_active: this.txFromJSON<boolean>,
+        bootstrap_admin_expires_at: this.txFromJSON<Option<u64>>,
+        set_bootstrap_admin_expiry: this.txFromJSON<null>,
+        clear_bootstrap_admin_expiry: this.txFromJSON<null>
   }
 }

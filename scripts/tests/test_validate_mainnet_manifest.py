@@ -1,6 +1,7 @@
 import copy
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -34,7 +35,17 @@ class MainnetManifestValidationTests(unittest.TestCase):
     def test_artifact_hash_mismatch_blocks_predeploy(self):
         manifest = self.load_manifest()
         manifest["deploymentPlan"]["contracts"][0]["sha256"] = "0" * 64
-        errors = validator.validate_predeploy(manifest, check_env=False)
+        original_root = validator.ROOT_DIR
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            temporary_root = Path(temporary_directory)
+            artifact = temporary_root / "artifacts" / "arka.wasm"
+            artifact.parent.mkdir(parents=True)
+            artifact.write_bytes(b"different wasm bytes")
+            validator.ROOT_DIR = temporary_root
+            try:
+                errors = validator.validate_predeploy(manifest, check_env=False)
+            finally:
+                validator.ROOT_DIR = original_root
         self.assertTrue(any("deploymentPlan.contracts[0].sha256" in error for error in errors))
 
     def test_postdeploy_uses_deployed_wasm_hashes_not_local_rebuild_bytes(self):

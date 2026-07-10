@@ -29,11 +29,12 @@
       <section class="content-section evidence-grid">
         <article>
           <p class="eyebrow">Indexer latency</p>
-          <h2>NAV metrics endpoint</h2>
-          <p class="metric">73.85 ms</p>
-          <p>Average latency across 50 HTTPS requests to <a href="https://catalog.arka.fund/v1/metrics">/v1/metrics</a> on 2026-07-10. p50: 78.23 ms. p95: 84.81 ms.</p>
+          <h2>NAV overview endpoint</h2>
+          <p class="metric">123.79 ms</p>
+          <p>Average latency across 50 HTTPS requests to <a href="https://catalog.arka.fund/v1/dashboard/overview">/v1/dashboard/overview</a> on 2026-07-10. p50: 145.18 ms. p95: 215.35 ms. The release CI repeats the public check and fails when the average exceeds 200 ms.</p>
           <pre><code>curl -s -o /dev/null -w '%{time_total}\n' \
-  https://catalog.arka.fund/v1/metrics</code></pre>
+  https://catalog.arka.fund/v1/dashboard/overview</code></pre>
+          <a class="inline-link" href="https://github.com/dogstarapps/arka.fund/actions/workflows/ci.yml?query=branch%3Amain">Open latency checks in CI</a>
         </article>
         <article>
           <p class="eyebrow">Monitoring</p>

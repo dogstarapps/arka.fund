@@ -1,6 +1,6 @@
 # Catalog API
 
-The catalog API lives at `/Users/marcosoliva/Development/dogstar/arkafund/services/catalog-api`.
+The catalog API source lives in `services/catalog-api` from the repository root.
 
 ## What it solves
 
@@ -171,7 +171,7 @@ That validation builds a native snapshot from the canonical testnet registry, mi
 Run locally:
 
 ```bash
-cd /Users/marcosoliva/Development/dogstar/arkafund/services/catalog-api
+cd services/catalog-api
 npm run test:unit
 npm run test:integration
 npm run test:e2e

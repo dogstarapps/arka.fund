@@ -22,7 +22,7 @@ This service builds and serves the indexed catalog required for discovery and le
 ## Commands
 
 ```bash
-cd /Users/marcosoliva/Development/dogstar/arkafund/services/catalog-api
+cd services/catalog-api
 npm ci
 npm run regen:bindings
 npm run test:unit
@@ -72,5 +72,5 @@ Notes:
 - `CATALOG_API_INGESTION_BACKEND=graphql` is now a fully supported backend for provider-backed ingestion.
 - `CATALOG_API_GRAPHQL_PROFILE=subquery` enables a SubQuery-compatible connection shape for open/self-hosted provider pilots.
 - The native backend includes legacy instance-storage fallbacks for historical Arkas that do not expose the current `nav()` ABI.
-- `bash /Users/marcosoliva/Development/dogstar/arkafund/scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records the result in `/Users/marcosoliva/Development/dogstar/arkafund/tmp/graphql-backend-parity.json`.
-- `bash /Users/marcosoliva/Development/dogstar/arkafund/scripts/deploy-subquery-backend-parity-validation.sh` validates parity on testnet for the SubQuery-compatible provider profile and records the result in `/Users/marcosoliva/Development/dogstar/arkafund/tmp/subquery-backend-parity.json`.
+- `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records the result in `tmp/graphql-backend-parity.json`.
+- `bash scripts/deploy-subquery-backend-parity-validation.sh` validates parity on testnet for the SubQuery-compatible provider profile and records the result in `tmp/subquery-backend-parity.json`.

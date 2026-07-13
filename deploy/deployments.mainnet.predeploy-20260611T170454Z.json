@@ -104,7 +104,7 @@
         "issuer": "GAORYJ3KBDGIM7FFSKVUJHJ5NEFWIRDIAGGBJBJS7TY6ECZS53257IG4",
         "contractId": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
         "verified": true,
-        "provenance": "stellar-cli asset contract id, dogstarcoin.com TOML"
+        "provenance": "issuer asset metadata TOML"
       },
       {
         "symbol": "BLND",

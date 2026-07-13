@@ -149,7 +149,7 @@
         "issuer": "GAORYJ3KBDGIM7FFSKVUJHJ5NEFWIRDIAGGBJBJS7TY6ECZS53257IG4",
         "contractId": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
         "verified": true,
-        "provenance": "stellar-cli asset contract id, dogstarcoin.com TOML"
+        "provenance": "issuer asset metadata TOML"
       },
       {
         "symbol": "BLND",
@@ -1220,7 +1220,7 @@
       "validatedAt": "2026-06-13T06:10:10Z",
       "status": "passed",
       "scope": "manual AMM venue launch; Balanced/SODAX AUTO requires production intent canary",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-release-gate.json",
+      "report": "tmp/mainnet-release-gate.json",
       "canaryArka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
       "canaryShareToken": "CA2XV4QZQVHJO6ORQ4EV74TJ2QHHVQY6IZMNH4SQTXLPMHHIHTMAWVIU",
       "manualVenues": [
@@ -1600,11 +1600,11 @@
     "artifacts/adapter-soroswap.wasm": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
   },
   "evidence": {
-    "manifest": "/Users/marcosoliva/Development/dogstar/arkafund/deployments.mainnet.json",
-    "createDepositRedeem": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-canary-create-deposit-redeem.json",
-    "routingCanary": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-routing-canary.json",
-    "postUpgradeCreate": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-post-upgrade-create-canary-2026-07-04.json",
-    "postUpgradeCreateDepositRedeem": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
+    "manifest": "deployments.mainnet.json",
+    "createDepositRedeem": "tmp/mainnet-canary-create-deposit-redeem.json",
+    "routingCanary": "tmp/mainnet-routing-canary.json",
+    "postUpgradeCreate": "tmp/mainnet-post-upgrade-create-canary-2026-07-04.json",
+    "postUpgradeCreateDepositRedeem": "tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
     "postFixBlendAccounting": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
     "postUpgradeRouting": "tmp/mainnet-post-upgrade-routing-canary-2026-07-04.json",
     "postUpgradeKillSwitch": "tmp/mainnet-post-upgrade-kill-switch-canary-2026-07-04.json"

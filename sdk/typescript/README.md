@@ -199,15 +199,15 @@ Extension IDs are unique inside a given SDK instance and are retrievable through
 Refresh the generated bindings after rebuilding contract WASM artifacts:
 
 ```bash
-bash /Users/marcosoliva/Development/dogstar/arkafund/scripts/build-wasm.sh
-cd /Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript
+bash scripts/build-wasm.sh
+cd sdk/typescript
 npm run regen:bindings
 ```
 
 ## Validation
 
 ```bash
-cd /Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript
+cd sdk/typescript
 npm run test:unit
 npm run test:e2e
 ```

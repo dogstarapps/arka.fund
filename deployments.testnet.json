@@ -182,7 +182,7 @@
       "identities": {
         "admin": "arka-admin",
         "holder": "arka-holder",
-        "treasury": "dogstar"
+        "treasury": "arka-treasury"
       },
       "contracts": {
         "arka": "CC5TAIONKSJL3BQB42UTYKYNFO7Z3BOXBSHOBIJYN346WYU3NHARCD6P",
@@ -251,8 +251,8 @@
       "identities": {
         "admin": "arka-admin",
         "staker": "arka-holder",
-        "treasury": "dogstar",
-        "coveredVault": "marcos",
+        "treasury": "arka-treasury",
+        "coveredVault": "arka-covered-vault",
         "payout": "arka-holder"
       },
       "contracts": {
@@ -313,8 +313,8 @@
       "identities": {
         "admin": "arka-admin",
         "staker": "arka-holder",
-        "treasury": "dogstar",
-        "coveredVault": "marcos",
+        "treasury": "arka-treasury",
+        "coveredVault": "arka-covered-vault",
         "payout": "arka-holder"
       },
       "contracts": {
@@ -415,8 +415,8 @@
       "identities": {
         "admin": "arka-admin",
         "team": "arka-holder",
-        "treasury": "dogstar",
-        "ecosystem": "marcos"
+        "treasury": "arka-treasury",
+        "ecosystem": "arka-ecosystem"
       },
       "contracts": {
         "arkaToken": "CALQK6EXWMS6DTLEXH2VMUYOQTKLF2VU7YL6W2MFDFVPJKMCTAA2MLAF",
@@ -464,7 +464,7 @@
       "network": "testnet",
       "rpcUrl": "https://soroban-testnet.stellar.org",
       "status": "passed",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/release-gate.json",
+      "report": "tmp/release-gate.json",
       "validatedModules": [
         "coverageClaims",
         "feeEngine",
@@ -596,7 +596,7 @@
       "rpcUrl": "https://soroban-testnet.stellar.org",
       "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
       "registrySource": "contracts.arkaRegistry",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/offchain-testnet-stack.json",
+      "report": "tmp/offchain-testnet-stack.json",
       "catalogHealth": {
         "healthy": true,
         "degraded": false,
@@ -673,7 +673,7 @@
       "rpcUrl": "https://soroban-testnet.stellar.org",
       "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
       "status": "passed",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/graphql-backend-parity.json",
+      "report": "tmp/graphql-backend-parity.json",
       "digests": {
         "native": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55",
         "graphql": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
@@ -685,7 +685,7 @@
       "validatedAt": "2026-03-29T13:50:59.388Z",
       "registryId": "CCVB6HMGFZ6CZ2E6ANLV4HDUJCJDO6PKNMSKXWLR5X6P74KJM7OP5PJS",
       "arkaId": "CD2U4V2AQ3MY26GASOZLPQC6SG7UACE4ATEPCLH6XMRTFZHWHIIRJ5KY",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/indexer-event-surface-live-validation.json"
+      "report": "tmp/indexer-event-surface-live-validation.json"
     },
     "subqueryBackendParity": {
       "validatedAt": "2026-03-29T14:06:06.816Z",
@@ -693,7 +693,7 @@
       "rpcUrl": "https://soroban-testnet.stellar.org",
       "registryContractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
       "status": "passed",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/subquery-backend-parity.json",
+      "report": "tmp/subquery-backend-parity.json",
       "digests": {
         "native": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55",
         "graphql": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
@@ -704,7 +704,7 @@
       "validatedAt": "2026-03-30",
       "network": "testnet",
       "rpcUrl": "https://soroban-testnet.stellar.org",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/balanced-readiness-validation.json",
+      "report": "tmp/balanced-readiness-validation.json",
       "adapterBalanced": "CDYF5QMFETJPMJZVLO7ZRL2KA4B4Y7F24Z33HH62NJL3GEQQXXLCCRLC",
       "poolId": 1,
       "supportStatus": "blocked",
@@ -720,7 +720,7 @@
     },
     "balancedOfficialSurface": {
       "validatedAt": "2026-04-07",
-      "report": "/Users/marcosoliva/Development/dogstar/arkafund/tmp/balanced-official-surface.json",
+      "report": "tmp/balanced-official-surface.json",
       "officialSources": {
         "app": "https://app.balanced.network",
         "bundle": "https://app.balanced.network/assets/index-ZEFFd3Oo.js",
@@ -880,7 +880,7 @@
       "identities": {
         "admin": "arka-admin",
         "holder": "arka-holder",
-        "treasury": "dogstar"
+        "treasury": "arka-treasury"
       },
       "checks": {
         "protocolTreasuryShares": "7519001",
@@ -912,8 +912,8 @@
       "identities": {
         "admin": "arka-admin",
         "staker": "arka-holder",
-        "treasury": "dogstar",
-        "coveredVault": "marcos",
+        "treasury": "arka-treasury",
+        "coveredVault": "arka-covered-vault",
         "payout": "arka-holder"
       },
       "checks": {
@@ -948,8 +948,8 @@
       "identities": {
         "admin": "arka-admin",
         "team": "arka-holder",
-        "treasury": "dogstar",
-        "ecosystem": "marcos"
+        "treasury": "arka-treasury",
+        "ecosystem": "arka-ecosystem"
       },
       "checks": {
         "teamVotesFinal": 1000,

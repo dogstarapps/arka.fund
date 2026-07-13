@@ -1,6 +1,6 @@
 # Developer SDK
 
-The public TypeScript SDK lives at `/Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript`.
+The public TypeScript SDK lives in `sdk/typescript` from the repository root.
 
 ## Supported surface
 
@@ -34,12 +34,12 @@ This keeps the supported contract surface stable while allowing partner-specific
 Bindings are generated from freshly built WASM artifacts, not hand-written:
 
 ```bash
-bash /Users/marcosoliva/Development/dogstar/arkafund/scripts/build-wasm.sh
-cd /Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript
+bash scripts/build-wasm.sh
+cd sdk/typescript
 npm run regen:bindings
 ```
 
-Generated sources are committed under `/Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript/src/generated`.
+Generated sources are committed under `sdk/typescript/src/generated`.
 
 ## Validation matrix
 
@@ -50,7 +50,7 @@ Generated sources are committed under `/Users/marcosoliva/Development/dogstar/ar
 Run locally:
 
 ```bash
-cd /Users/marcosoliva/Development/dogstar/arkafund/sdk/typescript
+cd sdk/typescript
 npm run test:unit
 npm run test:e2e
 ```

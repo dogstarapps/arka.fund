@@ -6,7 +6,7 @@ Date: 2026-03-29
 
 This audit compares the current frontend against:
 
-- the live Figma file at `dogstar-value`
+- the live Figma design source
 - the local exported design references in `arkafund-assets/screens`
 - the current screenshot capture set in `tmp/design-audit/current`
 

@@ -16,7 +16,22 @@ MINT_AMOUNT="${MINT_AMOUNT:-20000000}"
 LIQUIDITY_AMOUNT="${LIQUIDITY_AMOUNT:-5000000}"
 SWAP_AMOUNT="${SWAP_AMOUNT:-100000}"
 OUT_JSON="${OUT_JSON:-$ROOT_DIR/tmp/rebalance-live-validation.json}"
-APPROVAL_EXPIRATION_LEDGER="${APPROVAL_EXPIRATION_LEDGER:-3000000}"
+
+fetch_latest_ledger() {
+  curl -fsS \
+    -H 'content-type: application/json' \
+    -d '{"jsonrpc":"2.0","id":1,"method":"getLatestLedger"}' \
+    "$RPC_URL" |
+    python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["sequence"])'
+}
+
+CURRENT_LEDGER="${CURRENT_LEDGER:-$(fetch_latest_ledger)}"
+DEFAULT_APPROVAL_EXPIRATION_LEDGER="$((CURRENT_LEDGER + 500000))"
+APPROVAL_EXPIRATION_LEDGER="${APPROVAL_EXPIRATION_LEDGER:-$DEFAULT_APPROVAL_EXPIRATION_LEDGER}"
+if (( APPROVAL_EXPIRATION_LEDGER <= CURRENT_LEDGER )); then
+  echo "WARN: APPROVAL_EXPIRATION_LEDGER=$APPROVAL_EXPIRATION_LEDGER is not in the future; using $DEFAULT_APPROVAL_EXPIRATION_LEDGER" >&2
+  APPROVAL_EXPIRATION_LEDGER="$DEFAULT_APPROVAL_EXPIRATION_LEDGER"
+fi
 
 mkdir -p "$(dirname "$OUT_JSON")"
 
@@ -141,7 +156,7 @@ if [[ -z "$PAY_BALANCE" || "$PAY_BALANCE" == "0" || "$PAY_BALANCE" -lt "$PAY_AMO
     --from "$MANAGER_ADDR" \
     --spender "$AQUARIUS_ROUTER_ID" \
     --amount 10000000 \
-    --expiration_ledger 3000000 >/dev/null
+    --expiration_ledger "$APPROVAL_EXPIRATION_LEDGER" >/dev/null
   invoke \
     "$AQUARIUS_ROUTER_ID" \
     --send=yes -- swap \

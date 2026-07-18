@@ -68,9 +68,9 @@ Runtime activity indexing is configured with:
 
 Notes:
 
-- `CATALOG_API_INGESTION_BACKEND=native` is the live testnet path and reads the canonical `ArkaRegistry`.
+- `CATALOG_API_INGESTION_BACKEND=native` is the production Mainnet path and reads the canonical `ArkaRegistry` over Soroban RPC.
 - `CATALOG_API_INGESTION_BACKEND=graphql` is now a fully supported backend for provider-backed ingestion.
 - `CATALOG_API_GRAPHQL_PROFILE=subquery` enables a SubQuery-compatible connection shape for open/self-hosted provider pilots.
-- The native backend includes legacy instance-storage fallbacks for historical Arkas that do not expose the current `nav()` ABI.
-- `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records the result in `tmp/graphql-backend-parity.json`.
-- `bash scripts/deploy-subquery-backend-parity-validation.sh` validates parity on testnet for the SubQuery-compatible provider profile and records the result in `tmp/subquery-backend-parity.json`.
+- Historical test Arkas without the current `nav()` ABI are handled by an isolated legacy-storage compatibility reader.
+- `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records `tmp/graphql-backend-parity.json`.
+- `bash scripts/deploy-subquery-backend-parity-validation.sh` validates the SubQuery-compatible provider profile and records `tmp/subquery-backend-parity.json`.

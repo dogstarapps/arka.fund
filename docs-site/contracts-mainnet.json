@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18T19:09:57.709Z",
+  "network": "mainnet",
+  "status": "mainnet_manual_release_ready",
+  "manifestUpdatedAt": "2026-07-04T19:45:00Z",
+  "contracts": [
+    {
+      "name": "arkaFactory",
+      "contractId": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+      "wasmHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+      "explorer": "https://stellar.expert/explorer/public/contract/CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK"
+    },
+    {
+      "name": "arkaRegistry",
+      "contractId": "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY",
+      "wasmHash": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY"
+    },
+    {
+      "name": "router",
+      "contractId": "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D",
+      "wasmHash": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D"
+    },
+    {
+      "name": "venueRegistry",
+      "contractId": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+      "wasmHash": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
+      "explorer": "https://stellar.expert/explorer/public/contract/CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN"
+    },
+    {
+      "name": "adapterAquarius",
+      "contractId": "CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ",
+      "wasmHash": "9ff31b1fb5a0fe16ffcfc28158710c7fe8cb2c31532b45985f1e808b990c78dd",
+      "explorer": "https://stellar.expert/explorer/public/contract/CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ"
+    },
+    {
+      "name": "adapterBlendFixedXlmUsdc",
+      "contractId": "CBTRFXTMNZ477YG2RTDSUFICQXURNGV6RLEVDOU3XUTXEQERIZHAWBZP",
+      "wasmHash": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
+      "explorer": "https://stellar.expert/explorer/public/contract/CBTRFXTMNZ477YG2RTDSUFICQXURNGV6RLEVDOU3XUTXEQERIZHAWBZP"
+    },
+    {
+      "name": "adapterBlendYieldBlox",
+      "contractId": "CB2HKKC3Z4H2R4YST2Z2WAE4MHSYFDVMRKDZQX3BTX7O55DJNBNN6VWT",
+      "wasmHash": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
+      "explorer": "https://stellar.expert/explorer/public/contract/CB2HKKC3Z4H2R4YST2Z2WAE4MHSYFDVMRKDZQX3BTX7O55DJNBNN6VWT"
+    },
+    {
+      "name": "adapterPhoenix",
+      "contractId": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+      "wasmHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+      "explorer": "https://stellar.expert/explorer/public/contract/CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT"
+    },
+    {
+      "name": "adapterSoroswap",
+      "contractId": "CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI",
+      "wasmHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI"
+    },
+    {
+      "name": "oracleGuard",
+      "contractId": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+      "wasmHash": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
+      "explorer": "https://stellar.expert/explorer/public/contract/CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6"
+    },
+    {
+      "name": "coverageFund",
+      "contractId": "CDVPSKOQT5PJABQZYYL3TLYDPF7OE2P2Q7LRL47F5JFUO4BV5HK6BFXA",
+      "wasmHash": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
+      "explorer": "https://stellar.expert/explorer/public/contract/CDVPSKOQT5PJABQZYYL3TLYDPF7OE2P2Q7LRL47F5JFUO4BV5HK6BFXA"
+    },
+    {
+      "name": "claimsManager",
+      "contractId": "CBECEBUEIWLNNTZPNYIWO2YM2IO4HIMAXGOIZRR47OA2CUVJOMKMNLZY",
+      "wasmHash": "1ab5e135d3cfd6f15a13b0939c2c10cab1cea4243c78a9e19ec8a50c27043ef0",
+      "explorer": "https://stellar.expert/explorer/public/contract/CBECEBUEIWLNNTZPNYIWO2YM2IO4HIMAXGOIZRR47OA2CUVJOMKMNLZY"
+    },
+    {
+      "name": "managerTier",
+      "contractId": "CDJ7MR4GDXVXILTMYLAQWEU7DMRKPXNRUONBZ7F7ORMVBA72MAQLUPSD",
+      "wasmHash": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188",
+      "explorer": "https://stellar.expert/explorer/public/contract/CDJ7MR4GDXVXILTMYLAQWEU7DMRKPXNRUONBZ7F7ORMVBA72MAQLUPSD"
+    },
+    {
+      "name": "arkaToken",
+      "contractId": "CDXCWYQZCLKS5EP4UFZLXVMNVMXPT33P3PDLGLFYA2FQQW6SZKKH5B5S",
+      "wasmHash": "19f62f37e57ba77c24e674428f1a232433c263f8076b55b5c88fa3642a471572",
+      "explorer": "https://stellar.expert/explorer/public/contract/CDXCWYQZCLKS5EP4UFZLXVMNVMXPT33P3PDLGLFYA2FQQW6SZKKH5B5S"
+    },
+    {
+      "name": "lockedArka",
+      "contractId": "CAXJQAKJTEICXP3WBHP3YTJ24ZIJXTN5RFXX7OG7VNLE2P42UYOVE3WF",
+      "wasmHash": "2eb96f7b10a9c586163851769666ec14f63291712cdbca47d36c2251a579189a",
+      "explorer": "https://stellar.expert/explorer/public/contract/CAXJQAKJTEICXP3WBHP3YTJ24ZIJXTN5RFXX7OG7VNLE2P42UYOVE3WF"
+    },
+    {
+      "name": "governanceToken",
+      "contractId": "CCIAK7PL4EAIEPSYAAFE6BJOMLE27SOWTBFV6VUDGJEMMAT3D42U5CGH",
+      "wasmHash": "2a581acfd0bc2a2cbd0abc56d9f9bd254260b368340478d611922f4f03ae270c",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCIAK7PL4EAIEPSYAAFE6BJOMLE27SOWTBFV6VUDGJEMMAT3D42U5CGH"
+    },
+    {
+      "name": "governanceExecutor",
+      "contractId": "CCTJRPZP7WDJZAPMJVCKUX6TOOZKKSTEVQ66YP6KZ5N6TCHRXLKTNEAS",
+      "wasmHash": "868a26642dddbc9e8d676749b9ed27acfc4dd6b396b57686a84131882b65fb90",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCTJRPZP7WDJZAPMJVCKUX6TOOZKKSTEVQ66YP6KZ5N6TCHRXLKTNEAS"
+    },
+    {
+      "name": "arkaVesting",
+      "contractId": "CBP5XCBCKV3QM3CRVTJP7TF3DXPB5NBAZ2NMVKACNT2TVQQI4RJGMN3X",
+      "wasmHash": "65b5f4a19eed8f6a6a3c802b4e06bcefbe8182d9687acc820faca8734637e4d9",
+      "explorer": "https://stellar.expert/explorer/public/contract/CBP5XCBCKV3QM3CRVTJP7TF3DXPB5NBAZ2NMVKACNT2TVQQI4RJGMN3X"
+    },
+    {
+      "name": "emissionsController",
+      "contractId": "CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF",
+      "wasmHash": "0fb09df4f7c8725a7b76219d72f775e04dd07bc4a79b77309bf552cd11b80812",
+      "explorer": "https://stellar.expert/explorer/public/contract/CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF"
+    }
+  ]
+}

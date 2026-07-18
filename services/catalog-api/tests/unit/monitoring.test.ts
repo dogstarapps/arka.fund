@@ -129,13 +129,18 @@ test("WebhookMonitoringNotifier signs and posts monitoring payloads", async () =
 
 test("PagerDutyMonitoringNotifier triggers and resolves stable monitoring incidents", async () => {
   const requests: Array<{ url: string; init: RequestInit | undefined }> = [];
+  const receipts: Array<{ transition: string; dedupKey: string; httpStatus: number }> = [];
   const notifier = new PagerDutyMonitoringNotifier({
     routingKey: "routing-key",
     source: "catalog.arka.fund",
     eventsUrl: "https://events.example.test/v2/enqueue",
+    dedupPrefix: "arka-evidence:test-run",
+    onDelivery: (receipt) => {
+      receipts.push(receipt);
+    },
     fetchImpl: async (url, init) => {
       requests.push({ url: String(url), init });
-      return new Response(null, { status: 202 });
+      return Response.json({ status: "success", message: "Event processed" }, { status: 202 });
     },
   });
   const status = monitoringStatusFixture();
@@ -182,8 +187,19 @@ test("PagerDutyMonitoringNotifier triggers and resolves stable monitoring incide
   assert.equal(trigger.event_action, "trigger");
   assert.equal(trigger.payload.severity, "critical");
   assert.equal(resolve.event_action, "resolve");
-  assert.equal(trigger.dedup_key, pagerDutyDedupKey("sync_failed"));
+  assert.equal(trigger.dedup_key, pagerDutyDedupKey("sync_failed", "arka-evidence:test-run"));
   assert.equal(resolve.dedup_key, trigger.dedup_key);
+  assert.deepEqual(
+    receipts.map((receipt) => ({
+      transition: receipt.transition,
+      dedupKey: receipt.dedupKey,
+      httpStatus: receipt.httpStatus,
+    })),
+    [
+      { transition: "triggered", dedupKey: trigger.dedup_key, httpStatus: 202 },
+      { transition: "resolved", dedupKey: trigger.dedup_key, httpStatus: 202 },
+    ],
+  );
 });
 
 test("PagerDutyMonitoringNotifier surfaces rejected event deliveries", async () => {

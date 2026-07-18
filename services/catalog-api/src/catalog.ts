@@ -150,17 +150,19 @@ export function buildMetrics(
 export function listArkas(
   snapshot: CatalogSnapshot,
   query: ArkaQuery = {},
+  matchesSearch?: (entry: ArkaCatalogEntry, search: string) => boolean,
 ): Page<RankedArkaCatalogEntry> {
-  return rankAndPaginateArkas(filterArkas(snapshot.arkas, query), query);
+  return rankAndPaginateArkas(filterArkas(snapshot.arkas, query, matchesSearch), query);
 }
 
 export function listManagerArkas(
   snapshot: CatalogSnapshot,
   managerId: string,
   query: ArkaQuery = {},
+  matchesSearch?: (entry: ArkaCatalogEntry, search: string) => boolean,
 ): Page<RankedArkaCatalogEntry> {
   return rankAndPaginateArkas(
-    filterArkas(snapshot.arkas, query).filter((arka) => arka.manager === managerId),
+    filterArkas(snapshot.arkas, query, matchesSearch).filter((arka) => arka.manager === managerId),
     query,
   );
 }
@@ -169,9 +171,10 @@ export function listAssetArkas(
   snapshot: CatalogSnapshot,
   assetContract: string,
   query: ArkaQuery = {},
+  matchesSearch?: (entry: ArkaCatalogEntry, search: string) => boolean,
 ): Page<RankedArkaCatalogEntry> {
   return rankAndPaginateArkas(
-    filterArkas(snapshot.arkas, query).filter((arka) =>
+    filterArkas(snapshot.arkas, query, matchesSearch).filter((arka) =>
       arka.assets.some((asset) => asset.assetContract === assetContract),
     ),
     query,
@@ -208,10 +211,13 @@ export function listAssets(
 export function listManagers(
   snapshot: CatalogSnapshot,
   query: ManagerQuery = {},
+  matchesSearch?: (entry: ManagerCatalogEntry, search: string) => boolean,
 ): Page<RankedManagerCatalogEntry> {
   const filtered = snapshot.managers.filter((manager) => {
     if (query.search) {
-      return manager.manager.toLowerCase().includes(query.search.toLowerCase());
+      return matchesSearch
+        ? matchesSearch(manager, query.search)
+        : manager.manager.toLowerCase().includes(query.search.toLowerCase());
     }
     return true;
   });
@@ -409,7 +415,11 @@ export function getManagerHistory(
   return paginate(points, 0, query.limit ?? (points.length || 25));
 }
 
-function filterArkas(arkas: ArkaCatalogEntry[], query: ArkaQuery): ArkaCatalogEntry[] {
+function filterArkas(
+  arkas: ArkaCatalogEntry[],
+  query: ArkaQuery,
+  matchesSearch?: (entry: ArkaCatalogEntry, search: string) => boolean,
+): ArkaCatalogEntry[] {
   return arkas.filter((arka) => {
     if (query.curated !== undefined && arka.curated !== query.curated) {
       return false;
@@ -418,8 +428,10 @@ function filterArkas(arkas: ArkaCatalogEntry[], query: ArkaQuery): ArkaCatalogEn
       return false;
     }
     if (query.search) {
-      const haystack = `${arka.arkaId} ${arka.manager}`.toLowerCase();
-      if (!haystack.includes(query.search.toLowerCase())) {
+      const matches = matchesSearch
+        ? matchesSearch(arka, query.search)
+        : `${arka.arkaId} ${arka.manager}`.toLowerCase().includes(query.search.toLowerCase());
+      if (!matches) {
         return false;
       }
     }

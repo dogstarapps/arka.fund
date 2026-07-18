@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { StaticActivityReader } from "../../src/index.js";
+import { chunkContractIds, StaticActivityReader } from "../../src/index.js";
 import type { ArkaCatalogEntry } from "../../src/index.js";
 
 const arkas: ArkaCatalogEntry[] = [
@@ -72,4 +72,11 @@ test("StaticActivityReader filters, sorts, and limits activity results", async (
   assert.equal(page.total, 1);
   assert.equal(page.items[0]?.kind, "redeem");
   assert.equal(page.items[0]?.shares, "400");
+});
+
+test("chunkContractIds respects the Stellar RPC filter limit", () => {
+  assert.deepEqual(
+    chunkContractIds(["C1", "C2", "C3", "C4", "C5", "C6"]),
+    [["C1", "C2", "C3", "C4", "C5"], ["C6"]],
+  );
 });

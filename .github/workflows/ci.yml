@@ -59,3 +59,58 @@ jobs:
         run: python3 scripts/validate_mainnet_manifest.py --manifest deployments.mainnet.json --phase postdeploy
       - name: Run mainnet release gate
         run: python3 scripts/mainnet_release_gate.py --manifest deployments.mainnet.json
+
+  catalog-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/catalog-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: services/catalog-api/package-lock.json
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run test:integration
+
+  typescript-sdk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sdk/typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: sdk/typescript/package-lock.json
+      - run: npm ci
+      - run: npm run test:unit
+      - run: npm run test:consumer
+      - run: npm run docs:api
+      - run: npm run verify:mainnet-preset
+
+  release-evidence:
+    runs-on: ubuntu-latest
+    needs: [catalog-api, typescript-sdk]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            services/catalog-api/package-lock.json
+            sdk/typescript/package-lock.json
+      - name: Build catalog OpenAPI source
+        working-directory: services/catalog-api
+        run: npm ci && npm run build
+      - name: Generate SDK reference
+        working-directory: sdk/typescript
+        run: npm ci && npm run docs:api
+      - name: Verify public release material
+        run: node scripts/verify-docs-site.mjs

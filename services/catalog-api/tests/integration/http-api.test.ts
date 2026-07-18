@@ -4,8 +4,10 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { mkdtemp } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { Keypair } from "@stellar/stellar-sdk";
 import {
   buildSnapshot,
+  buildIdentityUpdateMessage,
   CatalogService,
   createCatalogApp,
   FileCatalogHistoryStore,
@@ -269,6 +271,83 @@ test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", asy
   }
 });
 
+test("HTTP API publishes a complete OpenAPI contract for every public GET route", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-api-openapi-"));
+  const service = new CatalogService(
+    new FileCatalogStore(join(directory, "snapshot.json")),
+    new FileCatalogHistoryStore(join(directory, "history.json")),
+    new StaticCatalogSyncRunner(async () => buildSnapshot([arkaOne], [], syncedAt)),
+  );
+  const app = createCatalogApp({ service, syncToken: "secret" });
+
+  try {
+    const response = await app.inject({ method: "GET", url: "/openapi.json" });
+    assert.equal(response.statusCode, 200);
+    assert.match(response.headers["cache-control"] ?? "", /max-age=300/);
+    assert.equal(response.headers["access-control-allow-origin"], "*");
+
+    const document = response.json();
+    assert.equal(document.openapi, "3.1.0");
+    assert.equal(document.servers[0].url, "https://catalog.arka.fund");
+
+    const documentedRoutes = new Set(
+      Object.entries(document.paths)
+        .filter(([, operations]) => Boolean((operations as { get?: unknown }).get))
+        .map(([path]) => path),
+    );
+    const publicGetRoutes = app
+      .printRoutes({ commonPrefix: false })
+      .split("\n")
+      .map((line) => line.trim().split(" ")[0])
+      .filter((path) => path?.startsWith("/") && path !== "/openapi.json")
+      .map((path) => path?.replace(/:([^/]+)/g, "{$1}"));
+
+    for (const path of publicGetRoutes) {
+      if (path === "/") continue;
+      assert.equal(documentedRoutes.has(path ?? ""), true, `missing OpenAPI path: ${path}`);
+    }
+
+    assert.ok(document.components.schemas.Arka);
+    assert.ok(document.components.schemas.MonitoringStatus);
+    assert.ok(document.components.schemas.NavResponse);
+    assert.equal(
+      document.paths["/api/nav"].get.servers[0].url,
+      "https://app.arka.fund",
+    );
+    assert.equal(
+      document.paths["/api/nav"].get.responses["200"].content["application/json"].schema.$ref,
+      "#/components/schemas/NavResponse",
+    );
+  } finally {
+    await app.close();
+  }
+});
+
+test("HTTP API exposes public GET responses to browser-based documentation", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-api-cors-"));
+  const store = new FileCatalogStore(join(directory, "snapshot.json"));
+  const history = new FileCatalogHistoryStore(join(directory, "history.json"));
+  const runner = new StaticCatalogSyncRunner(async () =>
+    buildSnapshot([arkaOne], [], syncedAt),
+  );
+  const service = new CatalogService(store, history, runner);
+  const app = createCatalogApp({ service, syncToken: "secret" });
+
+  try {
+    const publicResponse = await app.inject({ method: "GET", url: "/health" });
+    assert.equal(publicResponse.headers["access-control-allow-origin"], "*");
+
+    const protectedResponse = await app.inject({
+      method: "POST",
+      url: "/v1/sync",
+      headers: { "x-arkafund-sync-token": "secret" },
+    });
+    assert.equal(protectedResponse.headers["access-control-allow-origin"], undefined);
+  } finally {
+    await app.close();
+  }
+});
+
 test("HTTP API reconciles monitoring alerts and notifies transitions", async () => {
   const directory = await mkdtemp(join(tmpdir(), "catalog-api-monitoring-"));
   const webhook = await startWebhookSink();
@@ -446,6 +525,119 @@ test("HTTP API records failed sync runs and exposes critical monitoring status",
   }
 });
 
+test("HTTP API saves signed Arka and manager identity metadata", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-api-identity-"));
+  const managerKey = Keypair.random();
+  const otherKey = Keypair.random();
+  const manager = managerKey.publicKey();
+  const arkaId = "CIDENTITYARKA";
+  const identityArka = {
+    ...arkaOne,
+    arkaId,
+    manager,
+    curated: false,
+  };
+  const runner = new StaticCatalogSyncRunner(async () =>
+    buildSnapshot([identityArka], [], syncedAt),
+  );
+  const service = new CatalogService(
+    new FileCatalogStore(join(directory, "snapshot.json")),
+    new FileCatalogHistoryStore(join(directory, "history.json")),
+    runner,
+    {
+      now: () => new Date("2026-07-07T10:00:00.000Z"),
+    },
+  );
+  const app = createCatalogApp({ service });
+
+  try {
+    await app.inject({ method: "POST", url: "/v1/sync" });
+
+    const arkaRequest = signIdentityUpdate({
+      keypair: managerKey,
+      scope: "arka",
+      target: arkaId,
+      payload: {
+        displayName: "Stellar Growth Arka",
+        description: "Public test mandate.",
+        avatarUrl: null,
+        websiteUrl: "https://arka.fund/",
+        socialUrl: null,
+        nonce: "identity-test-1",
+        issuedAt: "2026-07-07T10:00:00.000Z",
+      },
+    });
+    const arkaResponse = await app.inject({
+      method: "PUT",
+      url: `/v1/arkas/${arkaId}/identity`,
+      payload: arkaRequest,
+    });
+    assert.equal(arkaResponse.statusCode, 200);
+    assert.equal(arkaResponse.json().displayName, "Stellar Growth Arka");
+
+    const managerRequest = signIdentityUpdate({
+      keypair: managerKey,
+      scope: "manager",
+      target: manager,
+      payload: {
+        displayName: "Stellar Growth Manager",
+        description: null,
+        avatarUrl: null,
+        websiteUrl: null,
+        socialUrl: null,
+        nonce: "identity-test-2",
+        issuedAt: "2026-07-07T10:00:00.000Z",
+      },
+    });
+    const managerResponse = await app.inject({
+      method: "PUT",
+      url: `/v1/managers/${manager}/identity`,
+      payload: managerRequest,
+    });
+    assert.equal(managerResponse.statusCode, 200);
+    assert.equal(managerResponse.json().displayName, "Stellar Growth Manager");
+
+    const detail = await app.inject({
+      method: "GET",
+      url: `/v1/arkas/${arkaId}`,
+    });
+    assert.equal(detail.statusCode, 200);
+    assert.equal(detail.json().identity.displayName, "Stellar Growth Arka");
+
+    const search = await app.inject({
+      method: "GET",
+      url: "/v1/arkas?search=Growth",
+    });
+    assert.equal(search.statusCode, 200);
+    assert.equal(search.json().total, 1);
+    assert.equal(search.json().items[0].identity.displayName, "Stellar Growth Arka");
+
+    const blockedRequest = signIdentityUpdate({
+      keypair: otherKey,
+      scope: "arka",
+      target: arkaId,
+      payload: {
+        displayName: "Wrong Manager",
+        description: null,
+        avatarUrl: null,
+        websiteUrl: null,
+        socialUrl: null,
+        nonce: "identity-test-3",
+        issuedAt: "2026-07-07T10:00:00.000Z",
+      },
+    });
+    const blocked = await app.inject({
+      method: "PUT",
+      url: `/v1/arkas/${arkaId}/identity`,
+      payload: blockedRequest,
+    });
+    assert.equal(blocked.statusCode, 403);
+    assert.equal(blocked.json().error, "not_manager");
+  } finally {
+    await app.close();
+  }
+});
+
 async function startWebhookSink(): Promise<{
   url: string;
   payloads: string[];
@@ -497,6 +689,35 @@ async function readBody(request: IncomingMessage): Promise<string> {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks).toString("utf8");
+}
+
+function signIdentityUpdate(input: {
+  keypair: Keypair;
+  scope: "arka" | "manager";
+  target: string;
+  payload: {
+    displayName?: string | null;
+    description?: string | null;
+    avatarUrl?: string | null;
+    websiteUrl?: string | null;
+    socialUrl?: string | null;
+    nonce: string;
+    issuedAt: string;
+  };
+}) {
+  const signer = input.keypair.publicKey();
+  const message = buildIdentityUpdateMessage({
+    scope: input.scope,
+    target: input.target,
+    signer,
+    payload: input.payload,
+  });
+  return {
+    signer,
+    message,
+    signature: input.keypair.sign(Buffer.from(message, "utf8")).toString("base64"),
+    payload: input.payload,
+  };
 }
 
 function scriptedClock(values: string[]): () => Date {

@@ -3,6 +3,7 @@ import { NoopActivityReader, type ActivityReader } from "./activity.js";
 import {
   findAsset,
   findArka,
+  findManager,
   getArkaAssetHistory,
   getArkaAssets,
   getArkaHistory,
@@ -11,6 +12,8 @@ import {
   listAssetArkas,
   listAssets,
   listHistoryRuns,
+  listArkas,
+  listManagers,
   listManagerArkas,
 } from "./catalog.js";
 import {
@@ -31,8 +34,19 @@ import {
   type MonitoringNotifier,
 } from "./notifier.js";
 import {
+  applyIdentityToArka,
+  applyIdentityToArkaPage,
+  applyIdentityToManager,
+  applyIdentityToManagerPage,
+  createArkaIdentityMatcher,
+  createManagerIdentityMatcher,
+  upsertArkaIdentityInArchive,
+  upsertManagerIdentityInArchive,
+} from "./identity.js";
+import {
   FileCatalogHistoryStore,
   FileCatalogStore,
+  InMemoryIdentityStore,
   InMemoryMonitoringStore,
 } from "./store.js";
 import type { CatalogSyncRunner } from "./runners.js";
@@ -56,6 +70,10 @@ import type {
   DashboardOverview,
   DashboardOverviewQuery,
   HistoryQuery,
+  IdentityArchive,
+  IdentityUpdateRequest,
+  ManagerCatalogEntry,
+  ManagerQuery,
   MonitoringAlertState,
   MonitoringArchive,
   MonitoringRunQuery,
@@ -63,6 +81,7 @@ import type {
   MonitoringThresholds,
   Page,
   RankedArkaCatalogEntry,
+  RankedManagerCatalogEntry,
   ManagerHistoryPoint,
   SyncRunRecord,
 } from "./types.js";
@@ -73,8 +92,14 @@ interface MonitoringStore {
   replaceAlerts(alerts: MonitoringAlertState[]): Promise<MonitoringArchive>;
 }
 
+interface IdentityStore {
+  read(): Promise<IdentityArchive>;
+  write(archive: IdentityArchive): Promise<void>;
+}
+
 export interface CatalogServiceOptions {
   monitoringStore?: MonitoringStore;
+  identityStore?: IdentityStore;
   monitoringThresholds?: MonitoringThresholds;
   notifier?: MonitoringNotifier;
   activityReader?: ActivityReader;
@@ -83,6 +108,7 @@ export interface CatalogServiceOptions {
 
 export class CatalogService {
   private readonly monitoringStore: MonitoringStore;
+  private readonly identityStore: IdentityStore;
   private readonly monitoringThresholds: MonitoringThresholds;
   private readonly notifier: MonitoringNotifier;
   private readonly activityReader: ActivityReader;
@@ -95,6 +121,7 @@ export class CatalogService {
     options: CatalogServiceOptions = {},
   ) {
     this.monitoringStore = options.monitoringStore ?? new InMemoryMonitoringStore();
+    this.identityStore = options.identityStore ?? new InMemoryIdentityStore();
     this.monitoringThresholds =
       options.monitoringThresholds ?? defaultMonitoringThresholds();
     this.notifier = options.notifier ?? new NoopMonitoringNotifier();
@@ -112,6 +139,10 @@ export class CatalogService {
 
   monitoring(): Promise<MonitoringArchive> {
     return this.monitoringStore.read();
+  }
+
+  identity(): Promise<IdentityArchive> {
+    return this.identityStore.read();
   }
 
   async sync(): Promise<CatalogSnapshot> {
@@ -181,6 +212,103 @@ export class CatalogService {
     return listAssets(snapshot, query);
   }
 
+  async arkas(query: ArkaQuery = {}): Promise<Page<RankedArkaCatalogEntry>> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    if (!snapshot) {
+      return emptyPage(query.limit);
+    }
+    return applyIdentityToArkaPage(
+      listArkas(snapshot, query, createArkaIdentityMatcher(identity)),
+      identity,
+    );
+  }
+
+  async arka(arkaId: string): Promise<ArkaCatalogEntry | null> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    if (!snapshot) {
+      return null;
+    }
+    const entry = findArka(snapshot, arkaId);
+    return entry ? applyIdentityToArka(entry, identity) : null;
+  }
+
+  async managers(query: ManagerQuery = {}): Promise<Page<RankedManagerCatalogEntry>> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    if (!snapshot) {
+      return emptyPage(query.limit);
+    }
+    return applyIdentityToManagerPage(
+      listManagers(snapshot, query, createManagerIdentityMatcher(identity)),
+      identity,
+    );
+  }
+
+  async manager(managerId: string): Promise<ManagerCatalogEntry | null> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    if (!snapshot) {
+      return null;
+    }
+    const entry = findManager(snapshot, managerId);
+    return entry ? applyIdentityToManager(entry, identity) : null;
+  }
+
+  async arkaIdentity(arkaId: string): Promise<ArkaCatalogEntry["identity"] | null> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    const entry = snapshot ? findArka(snapshot, arkaId) : null;
+    if (entry) {
+      return applyIdentityToArka(entry, identity).identity ?? null;
+    }
+    return identity.arkas[arkaId] ?? null;
+  }
+
+  async managerIdentity(
+    managerId: string,
+  ): Promise<ManagerCatalogEntry["identity"] | null> {
+    const [snapshot, identity] = await Promise.all([this.current(), this.identity()]);
+    const entry = snapshot ? findManager(snapshot, managerId) : null;
+    if (entry) {
+      return applyIdentityToManager(entry, identity).identity ?? null;
+    }
+    return identity.managers[managerId] ?? null;
+  }
+
+  async updateArkaIdentity(
+    arkaId: string,
+    request: IdentityUpdateRequest,
+  ): Promise<ArkaCatalogEntry["identity"]> {
+    const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
+    const entry = snapshot ? findArka(snapshot, arkaId) : null;
+    const manager = entry?.manager ?? request.signer;
+    const next = upsertArkaIdentityInArchive({
+      archive,
+      arkaId,
+      manager,
+      curated: entry?.curated ?? false,
+      pendingIndexation: !entry,
+      request,
+      now: this.now(),
+    });
+    await this.identityStore.write(next.archive);
+    return next.identity;
+  }
+
+  async updateManagerIdentity(
+    managerId: string,
+    request: IdentityUpdateRequest,
+  ): Promise<ManagerCatalogEntry["identity"]> {
+    const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
+    const entry = snapshot ? findManager(snapshot, managerId) : null;
+    const next = upsertManagerIdentityInArchive({
+      archive,
+      manager: managerId,
+      curated: (entry?.curatedArkaCount ?? 0) > 0,
+      request,
+      now: this.now(),
+    });
+    await this.identityStore.write(next.archive);
+    return next.identity;
+  }
+
   async asset(assetContract: string): Promise<AssetCatalogEntry | null> {
     const snapshot = await this.current();
     if (!snapshot) {
@@ -241,7 +369,11 @@ export class CatalogService {
     if (!snapshot) {
       return emptyPage(query.limit);
     }
-    return listManagerArkas(snapshot, managerId, query);
+    const identity = await this.identity();
+    return applyIdentityToArkaPage(
+      listManagerArkas(snapshot, managerId, query, createArkaIdentityMatcher(identity)),
+      identity,
+    );
   }
 
   async assetArkas(
@@ -252,7 +384,11 @@ export class CatalogService {
     if (!snapshot) {
       return emptyPage(query.limit);
     }
-    return listAssetArkas(snapshot, assetContract, query);
+    const identity = await this.identity();
+    return applyIdentityToArkaPage(
+      listAssetArkas(snapshot, assetContract, query, createArkaIdentityMatcher(identity)),
+      identity,
+    );
   }
 
   async activity(query: ActivityQuery = {}): Promise<Page<ActivityEntry>> {

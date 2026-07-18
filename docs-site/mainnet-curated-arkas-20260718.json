@@ -1,0 +1,47 @@
+{
+  "kind": "mainnet_curated_arkas_proof",
+  "requestedMeasure": "Launch of >=5 whitelisted Arkas",
+  "platformListingSemantics": "Arka.fund exposes platform-listed Arkas through the registry curated flag and the public curated=true endpoint.",
+  "verifiedAt": "2026-07-18T08:37:36Z",
+  "registryContractId": "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY",
+  "factoryContractId": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+  "publicEndpoints": {
+    "metrics": "https://catalog.arka.fund/v1/metrics",
+    "curatedArkas": "https://catalog.arka.fund/v1/arkas?curated=true&limit=20",
+    "health": "https://catalog.arka.fund/health",
+    "nav": "https://app.arka.fund/api/nav"
+  },
+  "metrics": {
+    "totalArkas": 6,
+    "indexedArkas": 6,
+    "failedArkas": 0,
+    "curatedArkas": 5,
+    "delistedArkas": 0
+  },
+  "curatedManager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+  "curationTransaction": "https://stellar.expert/explorer/public/tx/d5b7ef47dd669b0a8e7d162873dbf61ec0ae9aefe6d2a83f574ae5e587ca6a0a",
+  "curatedArkas": [
+    {
+      "arkaId": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+      "stellarExpert": "https://stellar.expert/explorer/public/contract/CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M"
+    },
+    {
+      "arkaId": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+      "stellarExpert": "https://stellar.expert/explorer/public/contract/CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7"
+    },
+    {
+      "arkaId": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+      "stellarExpert": "https://stellar.expert/explorer/public/contract/CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE"
+    },
+    {
+      "arkaId": "CBTTEZZCVK23B436XJRUSAIGXPGVNTZM6QAEIRCWBI3IJLHYOAC4DYJS",
+      "stellarExpert": "https://stellar.expert/explorer/public/contract/CBTTEZZCVK23B436XJRUSAIGXPGVNTZM6QAEIRCWBI3IJLHYOAC4DYJS",
+      "createTransaction": "https://stellar.expert/explorer/public/tx/c775eed066027d708253314fc7fdd3e09aeea976383e058ef9da2c5621a20bfd"
+    },
+    {
+      "arkaId": "CCPC2RFQQX3N7FWDZ5APGJANQ6ZTUGO4Q2U5NHCQREJP4KEAX7FS4UUN",
+      "stellarExpert": "https://stellar.expert/explorer/public/contract/CCPC2RFQQX3N7FWDZ5APGJANQ6ZTUGO4Q2U5NHCQREJP4KEAX7FS4UUN",
+      "createTransaction": "https://stellar.expert/explorer/public/tx/a1ce1daf96845c74211a47affc059dfc8e4eb10c4a3f7fa4f43b50f6992d2ac3"
+    }
+  ]
+}

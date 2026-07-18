@@ -7,6 +7,7 @@ import {
   buildSnapshot,
   FileCatalogHistoryStore,
   FileCatalogStore,
+  FileIdentityStore,
   FileMonitoringStore,
 } from "../../src/index.js";
 
@@ -101,4 +102,46 @@ test("FileMonitoringStore appends run history and persists alert state", async (
   );
   assert.equal(updated.alerts[0]?.kind, "sync_slow");
   assert.equal(updated.alerts[0]?.active, true);
+});
+
+test("FileIdentityStore persists Arka and manager public profile metadata", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-identity-"));
+  const store = new FileIdentityStore(join(directory, "identity.json"));
+  const archive = await store.read();
+
+  await store.write({
+    ...archive,
+    updatedAt: "2026-07-07T10:00:00.000Z",
+    arkas: {
+      CARKA: {
+        arkaId: "CARKA",
+        manager: "GMANAGER",
+        displayName: "Stellar Growth",
+        description: "Public mandate name.",
+        avatarUrl: null,
+        websiteUrl: "https://arka.fund/",
+        socialUrl: null,
+        trustState: "unverified",
+        updatedAt: "2026-07-07T10:00:00.000Z",
+        updatedBy: "GMANAGER",
+      },
+    },
+    managers: {
+      GMANAGER: {
+        manager: "GMANAGER",
+        displayName: "Arka Manager",
+        description: null,
+        avatarUrl: null,
+        websiteUrl: null,
+        socialUrl: null,
+        trustState: "unverified",
+        updatedAt: "2026-07-07T10:00:00.000Z",
+        updatedBy: "GMANAGER",
+      },
+    },
+  });
+
+  const loaded = await store.read();
+  assert.equal(loaded.arkas.CARKA?.displayName, "Stellar Growth");
+  assert.equal(loaded.managers.GMANAGER?.displayName, "Arka Manager");
 });

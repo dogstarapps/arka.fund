@@ -1,0 +1,19 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "tsconfig": "tsconfig.typedoc.json",
+  "entryPoints": ["typedoc.entry.ts"],
+  "out": "../../docs-site/sdk-reference",
+  "name": "Arkafund TypeScript SDK",
+  "includeVersion": true,
+  "disableSources": true,
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "cleanOutputDir": true,
+  "navigationLinks": {
+    "Integration guide": "https://arka.fund/docs/",
+    "Catalog API": "https://arka.fund/docs/api-reference.html",
+    "npm": "https://www.npmjs.com/package/@arkafund/sdk"
+  },
+  "customCss": "typedoc.css"
+}

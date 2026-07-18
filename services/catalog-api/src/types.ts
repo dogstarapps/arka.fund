@@ -82,6 +82,7 @@ export interface ArkaCatalogEntry {
   fees: FeeSummary;
   assets: ArkaAssetExposure[];
   economics?: CatalogEconomicMetrics;
+  identity?: ArkaIdentityMetadata | null;
   syncedAt: string;
 }
 
@@ -104,7 +105,55 @@ export interface ManagerCatalogEntry {
   curatedArkaCount: number;
   delistedArkaCount: number;
   totalNav: string;
+  identity?: ManagerIdentityMetadata | null;
   syncedAt: string;
+}
+
+export type IdentityTrustState = "unverified" | "curated" | "verified" | "official";
+
+export interface IdentityUpdatePayload {
+  displayName?: string | null;
+  description?: string | null;
+  avatarUrl?: string | null;
+  websiteUrl?: string | null;
+  socialUrl?: string | null;
+  nonce: string;
+  issuedAt: string;
+}
+
+export interface IdentityUpdateRequest {
+  signer: string;
+  message: string;
+  signature: string;
+  payload: IdentityUpdatePayload;
+}
+
+interface IdentityMetadataBase {
+  displayName: string | null;
+  description: string | null;
+  avatarUrl: string | null;
+  websiteUrl: string | null;
+  socialUrl: string | null;
+  trustState: IdentityTrustState;
+  updatedAt: string;
+  updatedBy: string;
+  pendingIndexation?: boolean;
+}
+
+export interface ArkaIdentityMetadata extends IdentityMetadataBase {
+  arkaId: string;
+  manager: string;
+}
+
+export interface ManagerIdentityMetadata extends IdentityMetadataBase {
+  manager: string;
+}
+
+export interface IdentityArchive {
+  schemaVersion: number;
+  updatedAt: string;
+  arkas: Record<string, ArkaIdentityMetadata>;
+  managers: Record<string, ManagerIdentityMetadata>;
 }
 
 export interface CatalogSyncFailure {

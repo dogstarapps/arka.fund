@@ -18,7 +18,8 @@
     "test:integration": "npm run build && node --test dist/tests/integration/http-api.test.js dist/tests/integration/graphql-runner.test.js dist/tests/integration/graphql-mirror.test.js",
     "test:integration:live": "npm run build && node --test dist/tests/integration/live-indexer.test.js",
     "test:e2e:live": "npm run build && node --test dist/tests/e2e/live-api.test.js",
-    "test:e2e": "bash ./scripts/e2e-local.sh && npm run build && node --test dist/tests/e2e/graphql-backend.test.js"
+    "test:e2e": "bash ./scripts/e2e-local.sh && npm run build && node --test dist/tests/e2e/graphql-backend.test.js",
+    "evidence:pagerduty": "npm run build && node ./scripts/pagerduty-simulation.mjs"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^14.1.1",

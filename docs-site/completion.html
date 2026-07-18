@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Arka.fund mainnet release evidence and reproducible acceptance checks." />
+    <title>Arka.fund Mainnet Release Evidence</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://arka.fund/" aria-label="Arka.fund home">
+        <img src="https://arka.fund/logo-arkafund.png" alt="Arka.fund" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html">Guides</a>
+        <a href="./api-reference.html">API Reference</a>
+        <a href="https://github.com/dogstarapps/arka.fund">Source</a>
+        <a class="app-link" href="https://app.arka.fund/">Open app</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro compact">
+        <p class="eyebrow">Mainnet release evidence</p>
+        <h1>Reproduce what works</h1>
+        <p class="lead">
+          Live services, immutable contract references and executable checks for
+          the Arka.fund data plane, monitoring, contracts, SDK and curated Arkas.
+        </p>
+        <div class="intro-actions">
+          <a class="button primary" href="./live-evidence.json">Open evidence snapshot</a>
+          <a class="button secondary" href="./api-reference.html">Run API requests</a>
+        </div>
+      </section>
+
+      <section class="content-section proof-video">
+        <div class="section-heading">
+          <p class="eyebrow">Operational walkthrough</p>
+          <h2>Watch the live checks run</h2>
+          <p>
+            API responses, monitoring and PagerDuty evidence, the executable SDK
+            example, five curated Arkas and deployed contract references.
+          </p>
+        </div>
+        <video controls preload="metadata" playsinline>
+          <source src="https://arka.fund/arka-mainnet-verifiable-proof.mp4" type="video/mp4" />
+          Your browser does not support HTML video. Open the
+          <a href="https://arka.fund/arka-mainnet-verifiable-proof.mp4">MP4 proof</a>.
+        </video>
+        <a class="inline-link" href="https://arka.fund/arka-mainnet-verifiable-proof.mp4">Open the MP4 directly</a>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <p class="eyebrow">Acceptance matrix</p>
+          <h2>Evidence by deliverable</h2>
+        </div>
+        <div class="table-wrap">
+          <table class="acceptance-table">
+            <thead><tr><th>Deliverable</th><th>Acceptance evidence</th><th>Reproduce</th></tr></thead>
+            <tbody>
+              <tr>
+                <td data-label="Deliverable"><strong>Indexer and NAV API</strong><br /><span class="status verified">Verified</span></td>
+                <td data-label="Acceptance evidence">Production health, six indexed Arkas, zero failed Arkas, exact NAV data and a 20-request latency gate below 200 ms.</td>
+                <td data-label="Reproduce"><a href="https://catalog.arka.fund/health">Health</a><br /><a href="https://app.arka.fund/api/nav">NAV</a><br /><a href="./live-evidence.json">Snapshot</a></td>
+              </tr>
+              <tr>
+                <td data-label="Deliverable"><strong>Monitoring and alerting</strong><br /><span class="status verified">Verified</span></td>
+                <td data-label="Acceptance evidence">Sync health, alert state and a controlled PagerDuty trigger-and-resolution cycle using one stable deduplication key.</td>
+                <td data-label="Reproduce"><a href="https://catalog.arka.fund/v1/monitoring/status">Status</a><br /><a href="./pagerduty-monitoring-cycle.json">Trigger and recovery record</a></td>
+              </tr>
+              <tr>
+                <td data-label="Deliverable"><strong>Mainnet contracts</strong><br /><span class="status verified">Verified</span></td>
+                <td data-label="Acceptance evidence">Nineteen deployed protocol contracts mapped to public IDs, WASM hashes and Stellar Expert.</td>
+                <td data-label="Reproduce"><a href="./contracts-mainnet.json">Contract matrix</a><br /><a href="https://github.com/dogstarapps/arka.fund/blob/main/deployments.mainnet.json">Manifest</a></td>
+              </tr>
+              <tr>
+                <td data-label="Deliverable"><strong>Public SDK and docs</strong><br /><span class="status verified">Verified</span></td>
+                <td data-label="Acceptance evidence">Typed catalog client, contract modules, mainnet preset, runnable example, human-readable formatters and clean-consumer tests.</td>
+                <td data-label="Reproduce"><a href="https://www.npmjs.com/package/@arkafund/sdk">npm</a><br /><a href="./index.html">Guides</a><br /><a href="./sdk-reference/index.html">SDK Reference</a><br /><a href="./api-reference.html">API Reference</a></td>
+              </tr>
+              <tr>
+                <td data-label="Deliverable"><strong>Five curated Arkas</strong><br /><span class="status verified">Verified listing</span></td>
+                <td data-label="Acceptance evidence">Five non-delisted mainnet Arkas are returned by the public curated listing and linked to their contracts.</td>
+                <td data-label="Reproduce"><a href="https://catalog.arka.fund/v1/arkas?curated=true&amp;delisted=false&amp;limit=20">Live list</a><br /><a href="./mainnet-curated-arkas-20260718.json">Contract proof</a></td>
+              </tr>
+              <tr>
+                <td data-label="Deliverable"><strong>Liquidity incentives</strong><br /><span class="status ready">Implementation ready</span></td>
+                <td data-label="Acceptance evidence">Emissions, locking, vesting, claims and governed distribution contracts are deployed. Economic activation is intentionally evidenced separately from software readiness.</td>
+                <td data-label="Reproduce"><a href="./contracts-mainnet.json">Deployed modules</a><br /><a href="https://github.com/dogstarapps/arka.fund">Source and tests</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">The curated-Arka proof establishes platform listing. It does not claim that the separate USD 100,000 production-TVL measure has been reached.</p>
+      </section>
+
+      <section class="content-section evidence-grid">
+        <article>
+          <p class="eyebrow">Data plane</p>
+          <h2>Live and inspectable</h2>
+          <p>Use the interactive API reference to execute health, NAV, discovery, history, activity and monitoring requests against mainnet.</p>
+          <a class="inline-link" href="./api-reference.html">Run API requests</a>
+        </article>
+        <article>
+          <p class="eyebrow">Developer platform</p>
+          <h2>Install and verify</h2>
+          <pre><code>npm install @arkafund/sdk
+npm run example:mainnet</code></pre>
+          <a class="inline-link" href="./index.html#sdk">Open integration guide</a>
+        </article>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <p class="eyebrow">Reproduction</p>
+          <h2>Independent checks</h2>
+        </div>
+        <pre><code>curl -s https://catalog.arka.fund/health
+curl -s https://app.arka.fund/api/nav
+curl -s "https://catalog.arka.fund/v1/arkas?curated=true&amp;delisted=false&amp;limit=20"
+curl -s https://catalog.arka.fund/v1/monitoring/status
+npm view @arkafund/sdk version</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <span>Arka.fund on Stellar mainnet</span>
+      <a href="./openapi.json">OpenAPI JSON</a>
+      <a href="./live-evidence.json">Evidence JSON</a>
+      <a href="https://arka.fund/">arka.fund</a>
+    </footer>
+  </body>
+</html>

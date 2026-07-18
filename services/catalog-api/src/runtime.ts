@@ -16,6 +16,10 @@ export function createCatalogSyncRunnerFromEnv(
       rpcUrl: required(env, "CATALOG_API_RPC_URL"),
       networkPassphrase: required(env, "CATALOG_API_NETWORK_PASSPHRASE"),
       registryContractId: required(env, "CATALOG_API_REGISTRY_CONTRACT_ID"),
+      pageSize: optionalInteger(env.CATALOG_API_REGISTRY_PAGE_SIZE),
+      readConcurrency: optionalInteger(env.CATALOG_API_READ_CONCURRENCY),
+      retryAttempts: optionalInteger(env.CATALOG_API_RPC_RETRY_ATTEMPTS),
+      retryDelayMs: optionalInteger(env.CATALOG_API_RPC_RETRY_DELAY_MS),
       allowHttp: (env.CATALOG_API_RPC_URL ?? "").startsWith("http://"),
     });
   }
@@ -56,6 +60,8 @@ export function createActivityReaderFromEnv(
     lookbackLedgers: optionalInteger(env.CATALOG_API_ACTIVITY_LOOKBACK_LEDGERS) ?? 10_000,
     pageSize: optionalInteger(env.CATALOG_API_ACTIVITY_PAGE_SIZE) ?? 100,
     maxPages: optionalInteger(env.CATALOG_API_ACTIVITY_MAX_PAGES) ?? 10,
+    retryAttempts: optionalInteger(env.CATALOG_API_RPC_RETRY_ATTEMPTS),
+    retryDelayMs: optionalInteger(env.CATALOG_API_RPC_RETRY_DELAY_MS),
   });
 }
 

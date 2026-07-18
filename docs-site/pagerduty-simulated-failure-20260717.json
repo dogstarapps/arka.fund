@@ -1,0 +1,18 @@
+{
+  "kind": "pagerduty_simulated_failure",
+  "service": "catalog.arka.fund production monitoring",
+  "dedupKey": "arka-reviewer-simulated-failure-20260717T215021Z",
+  "trigger": {
+    "submittedAt": "2026-07-17T21:50:22.573Z",
+    "httpStatus": 202,
+    "pagerDutyMessage": "Event processed",
+    "pagerDutyStatus": "success"
+  },
+  "resolve": {
+    "submittedAt": "2026-07-17T21:50:26.163Z",
+    "httpStatus": 202,
+    "pagerDutyMessage": "Event processed",
+    "pagerDutyStatus": "success"
+  },
+  "liveMonitoringStatus": "https://catalog.arka.fund/v1/monitoring/status"
+}

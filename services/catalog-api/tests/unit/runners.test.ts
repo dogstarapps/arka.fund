@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import {
   decodeLegacyInstanceStorage,
   isMissingContractFunction,
+  isTransientRpcError,
   legacyStorageKeyName,
+  retryTransientRpc,
+  transientRpcRetryDelayMs,
 } from "../../src/runners.js";
 
 test("isMissingContractFunction matches missing share_token diagnostics", () => {
@@ -28,6 +31,57 @@ test("isMissingContractFunction does not swallow unrelated failures", () => {
 
   assert.equal(isMissingContractFunction(error, "share_token"), false);
   assert.equal(isMissingContractFunction(error, "manager"), false);
+});
+
+test("isTransientRpcError identifies retryable RPC failures", () => {
+  assert.equal(isTransientRpcError(new Error("Request failed with status code 429")), true);
+  assert.equal(isTransientRpcError(new Error("Too Many Requests")), true);
+  assert.equal(isTransientRpcError(new Error("connect ECONNRESET")), true);
+  assert.equal(isTransientRpcError(new Error("Transaction simulation failed")), false);
+});
+
+test("retryTransientRpc retries transient failures before succeeding", async () => {
+  let calls = 0;
+  const value = await retryTransientRpc(
+    async () => {
+      calls += 1;
+      if (calls < 3) {
+        throw new Error("Request failed with status code 429");
+      }
+      return "ok";
+    },
+    { attempts: 4, baseDelayMs: 1 },
+  );
+
+  assert.equal(value, "ok");
+  assert.equal(calls, 3);
+});
+
+test("retryTransientRpc does not retry permanent failures", async () => {
+  let calls = 0;
+  await assert.rejects(
+    retryTransientRpc(
+      async () => {
+        calls += 1;
+        throw new Error("Transaction simulation failed");
+      },
+      { attempts: 4, baseDelayMs: 1 },
+    ),
+    /Transaction simulation failed/,
+  );
+
+  assert.equal(calls, 1);
+});
+
+test("transientRpcRetryDelayMs honors RPC retry_after metadata", () => {
+  const error = {
+    response: {
+      data: { retry_after: 30 },
+    },
+  };
+
+  assert.equal(transientRpcRetryDelayMs(error, 2, 250), 30000);
+  assert.equal(transientRpcRetryDelayMs(new Error("Too Many Requests"), 2, 250), 500);
 });
 
 test("legacyStorageKeyName extracts enum tag from native storage key", () => {

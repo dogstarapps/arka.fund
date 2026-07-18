@@ -22,7 +22,18 @@ export interface PagerDutyMonitoringNotifierOptions {
   source?: string;
   eventsUrl?: string;
   timeoutMs?: number;
+  dedupPrefix?: string;
+  onDelivery?: (receipt: PagerDutyDeliveryReceipt) => void | Promise<void>;
   fetchImpl?: typeof fetch;
+}
+
+export interface PagerDutyDeliveryReceipt {
+  transition: AlertTransition["action"];
+  alertKind: AlertTransition["kind"];
+  dedupKey: string;
+  submittedAt: string;
+  httpStatus: number;
+  response: unknown;
 }
 
 export class CompositeMonitoringNotifier implements MonitoringNotifier {
@@ -86,13 +97,17 @@ export class PagerDutyMonitoringNotifier implements MonitoringNotifier {
 
   async notify(event: MonitoringNotificationEvent): Promise<void> {
     for (const transition of event.transitions) {
+      const dedupKey = pagerDutyDedupKey(
+        transition.kind,
+        this.options.dedupPrefix,
+      );
       const response = await this.fetchImpl(this.eventsUrl, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           routing_key: this.options.routingKey,
           event_action: transition.action === "triggered" ? "trigger" : "resolve",
-          dedup_key: pagerDutyDedupKey(transition.kind),
+          dedup_key: dedupKey,
           payload: {
             summary: `Arka catalog ${transition.action}: ${transition.alert.message}`,
             source: this.source,
@@ -116,6 +131,15 @@ export class PagerDutyMonitoringNotifier implements MonitoringNotifier {
           `PagerDuty event delivery failed with status ${response.status}`,
         );
       }
+      const responseBody = await readResponseBody(response);
+      await this.options.onDelivery?.({
+        transition: transition.action,
+        alertKind: transition.kind,
+        dedupKey,
+        submittedAt: event.sentAt,
+        httpStatus: response.status,
+        response: responseBody,
+      });
     }
   }
 }
@@ -144,12 +168,25 @@ export function signPayload(secret: string, payload: string): string {
   return createHmac("sha256", secret).update(payload).digest("hex");
 }
 
-export function pagerDutyDedupKey(kind: AlertTransition["kind"]): string {
-  return `arka-catalog:${kind}`;
+export function pagerDutyDedupKey(
+  kind: AlertTransition["kind"],
+  prefix = "arka-catalog",
+): string {
+  return `${prefix}:${kind}`;
 }
 
 function pagerDutySeverity(
   severity: MonitoringNotificationEvent["status"]["activeAlerts"][number]["severity"],
 ): "warning" | "critical" {
   return severity === "critical" ? "critical" : "warning";
+}
+
+async function readResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }

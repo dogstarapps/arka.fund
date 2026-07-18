@@ -333,3 +333,91 @@ Acceptance evidence:
 - Integration test for XLM-only wallet showing a USDC-specific blocked reason.
 - Integration test for USDC-without-allowance showing approval-specific blocked reason.
 - Wallet-backed create canary after the fix.
+
+### INC-2026-07-09-002: Freighter / Blockaid flags app.arka.fund and deposit transaction as unsafe
+
+Status: open external reputation/security-provider incident; no code bypass should be added.
+
+Reported by:
+
+- Jordi Viladiu
+
+Reported at:
+
+- 2026-07-09 07:59 Europe/Madrid
+
+User-reported screenshots:
+
+- Freighter connection request for `app.arka.fund` shows `This site was flagged as malicious`.
+- Freighter transaction review shows `Do not proceed` with Blockaid reason: `A request for the user to deposit money into a scam investment system.`
+
+Assessment:
+
+- The user should not be asked to bypass this warning.
+- The warning may be a false positive triggered by a new domain and a vault deposit transaction that Blockaid classifies generically as an investment deposit.
+- It must still be treated as a launch blocker for public testing until Freighter/Blockaid reputation is cleared or the cause is identified.
+
+Required actions:
+
+- Prepare a false-positive/review request for Blockaid/Freighter with:
+  - public domain: `https://app.arka.fund`;
+  - landing domain: `https://arka.fund`;
+  - public contract repository;
+  - mainnet deployment manifest;
+  - transaction hashes for create/deposit/redeem and venue kill-switch canaries;
+  - non-custodial flow explanation: users sign directly, Arka does not server-sign or custody funds.
+- Review wallet metadata/domain presentation so the wallet sees the canonical brand and domain.
+- Re-test connection and deposit in Freighter after provider-side review.
+
+Acceptance evidence:
+
+- Screenshot or tester confirmation that Freighter no longer shows the malicious-site banner for `app.arka.fund`.
+- A small deposit canary reviewed in Freighter without the Blockaid scam-investment warning, or documented provider confirmation that the warning is a known false positive.
+
+### INC-2026-07-09-003: Deposit UI blocked allowed assets when wallet balance read as zero
+
+Status: local code fix implemented; deployment and wallet-backed production canary pending.
+
+Reported by:
+
+- Jordi Viladiu
+
+Reported at:
+
+- 2026-07-09 23:05 Europe/Madrid
+
+User-reported message:
+
+```text
+vull depositar algun asset al ARKA que vaig crear, però no em deixa
+XLM sembla estar locked
+```
+
+Assessment:
+
+- The deposit page listed vault-allowed assets but disabled the asset cards and `<select>` options when the auxiliary wallet-balance read returned `0`.
+- For XLM and other SAC assets, a temporary or failed RPC balance read can incorrectly appear as `0`, making a valid asset look locked.
+- Balance display is useful, but it must not be the source of truth for whether an allowed asset can be selected.
+
+Implemented local fix:
+
+- Allowed deposit assets remain selectable even if the displayed wallet balance is `0.0000000`.
+- The deposit action still validates a positive amount.
+- If a positive known balance exists and the amount exceeds it, the UI blocks early.
+- Otherwise the wallet/RPC transaction preparation remains the authoritative check for balance, allowance and contract acceptance.
+
+Local verification:
+
+- `npx vitest run tests/integration/arka-detail-page.test.tsx --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000`
+  - `19` tests passed.
+- `npm run build`
+  - Next production build passed.
+
+Required follow-up:
+
+- Deploy the dApp fix to Vercel only after the current release gate is acceptable.
+- Run a wallet-backed mainnet/production smoke:
+  - open the Arka Jordi created;
+  - select XLM from the deposit workspace;
+  - attempt a tiny deposit;
+  - confirm either successful deposit or a precise wallet/RPC error that does not present XLM as locked.

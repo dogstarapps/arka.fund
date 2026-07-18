@@ -1,6 +1,6 @@
 # Catalog API
 
-The catalog API source lives in `services/catalog-api` from the repository root.
+The catalog API implementation lives at `services/catalog-api` and the production service is available at `https://catalog.arka.fund`.
 
 ## What it solves
 
@@ -21,6 +21,7 @@ This service provides the first indexed data surface needed by discovery and lea
 ## Endpoints
 
 - `GET /health`
+- `GET /openapi.json`
 - `POST /v1/sync`
 - `GET /v1/metrics`
 - `GET /v1/dashboard/overview`
@@ -157,7 +158,7 @@ Activity ingestion is configured independently:
 - `CATALOG_API_ACTIVITY_PAGE_SIZE`
 - `CATALOG_API_ACTIVITY_MAX_PAGES`
 
-The native backend now includes compatibility for historical Arkas that do not expose the modern `nav()` ABI by reading legacy instance storage directly from testnet.
+The native backend includes an isolated compatibility reader for historical test Arkas that do not expose the modern `nav()` ABI. Production Mainnet indexing uses the current contract interface.
 
 Provider portability is now protected by a parity validation path:
 

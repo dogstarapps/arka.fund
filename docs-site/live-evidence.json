@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-18T19:09:57.709Z",
+  "network": "Stellar mainnet",
+  "endpoints": {
+    "health": "https://catalog.arka.fund/health",
+    "metrics": "https://catalog.arka.fund/v1/metrics",
+    "monitoring": "https://catalog.arka.fund/v1/monitoring/status",
+    "curatedArkas": "https://catalog.arka.fund/v1/arkas?curated=true&delisted=false&limit=20",
+    "nav": "https://app.arka.fund/api/nav"
+  },
+  "indexer": {
+    "healthy": true,
+    "degraded": false,
+    "indexedArkas": 6,
+    "failedArkas": 0,
+    "lastSyncedAt": "2026-07-18T19:08:34.551Z"
+  },
+  "nav": {
+    "totalArkas": 6,
+    "totalManagers": 2,
+    "totalNav": "68135558",
+    "monitoring": {
+      "healthy": true,
+      "degraded": false,
+      "snapshotAgeSeconds": 81,
+      "consecutiveFailures": 0,
+      "activeAlertCount": 0,
+      "lastRunStatus": "success"
+    }
+  },
+  "catalog": {
+    "totalArkas": 6,
+    "indexedArkas": 6,
+    "failedArkas": 0,
+    "totalManagers": 2,
+    "curatedArkas": 5,
+    "delistedArkas": 0,
+    "totalAssets": 7,
+    "totalNav": "68135558",
+    "syncedAt": "2026-07-18T19:08:34.551Z"
+  },
+  "curatedArkas": {
+    "total": 5,
+    "contracts": [
+      {
+        "arkaId": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "manager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "curated": true,
+        "delisted": false,
+        "nav": "16264476",
+        "explorer": "https://stellar.expert/explorer/public/contract/CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M"
+      },
+      {
+        "arkaId": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+        "manager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "curated": true,
+        "delisted": false,
+        "nav": "999998",
+        "explorer": "https://stellar.expert/explorer/public/contract/CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7"
+      },
+      {
+        "arkaId": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "manager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "curated": true,
+        "delisted": false,
+        "nav": "871084",
+        "explorer": "https://stellar.expert/explorer/public/contract/CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE"
+      },
+      {
+        "arkaId": "CBTTEZZCVK23B436XJRUSAIGXPGVNTZM6QAEIRCWBI3IJLHYOAC4DYJS",
+        "manager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "curated": true,
+        "delisted": false,
+        "nav": "0",
+        "explorer": "https://stellar.expert/explorer/public/contract/CBTTEZZCVK23B436XJRUSAIGXPGVNTZM6QAEIRCWBI3IJLHYOAC4DYJS"
+      },
+      {
+        "arkaId": "CCPC2RFQQX3N7FWDZ5APGJANQ6ZTUGO4Q2U5NHCQREJP4KEAX7FS4UUN",
+        "manager": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "curated": true,
+        "delisted": false,
+        "nav": "0",
+        "explorer": "https://stellar.expert/explorer/public/contract/CCPC2RFQQX3N7FWDZ5APGJANQ6ZTUGO4Q2U5NHCQREJP4KEAX7FS4UUN"
+      }
+    ]
+  },
+  "latency": {
+    "samples": 20,
+    "targetAverageMs": 200,
+    "averageMs": 70.88,
+    "p50Ms": 42.94,
+    "p95Ms": 61.2,
+    "minMs": 37.19,
+    "maxMs": 557.8,
+    "measuredAt": "2026-07-18T19:09:57.708Z"
+  }
+}

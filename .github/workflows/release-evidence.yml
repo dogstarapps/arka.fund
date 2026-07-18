@@ -1,0 +1,53 @@
+name: Mainnet Release Evidence
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            services/catalog-api/package-lock.json
+            sdk/typescript/package-lock.json
+      - name: Build Catalog API
+        working-directory: services/catalog-api
+        run: npm ci && npm run build
+      - name: Build SDK and reference
+        working-directory: sdk/typescript
+        run: |
+          npm ci
+          npm run test:unit
+          npm run test:consumer
+          npm run docs:api
+          npm run example:mainnet
+      - name: Measure live Mainnet services
+        run: node scripts/build-completion-evidence.mjs
+      - name: Verify generated release material
+        run: node scripts/verify-docs-site.mjs
+      - name: Verify public proof video
+        run: |
+          headers="$(curl --fail --silent --show-error --head https://arka.fund/arka-mainnet-verifiable-proof.mp4)"
+          grep -qi '^content-type: video/mp4' <<<"$headers"
+          grep -qi '^accept-ranges: bytes' <<<"$headers"
+      - name: Upload reproducible evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: arkafund-mainnet-evidence
+          path: |
+            docs-site/openapi.json
+            docs-site/contracts-mainnet.json
+            docs-site/live-evidence.json
+            docs-site/pagerduty-monitoring-cycle.json
+          if-no-files-found: error
+          retention-days: 90

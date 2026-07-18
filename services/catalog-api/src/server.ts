@@ -13,6 +13,7 @@ import { CatalogService } from "./service.js";
 import {
   FileCatalogHistoryStore,
   FileCatalogStore,
+  FileIdentityStore,
   FileMonitoringStore,
 } from "./store.js";
 import type { MonitoringThresholds } from "./types.js";
@@ -22,6 +23,8 @@ async function main(): Promise<void> {
   const historyFile = process.env.CATALOG_API_HISTORY_FILE ?? "./var/catalog-history.json";
   const monitoringFile =
     process.env.CATALOG_API_MONITORING_FILE ?? "./var/catalog-monitoring.json";
+  const identityFile =
+    process.env.CATALOG_API_IDENTITY_FILE ?? "./var/catalog-identity.json";
   const host = process.env.CATALOG_API_HOST ?? "127.0.0.1";
   const port = Number.parseInt(process.env.CATALOG_API_PORT ?? "3100", 10);
   const syncToken = process.env.CATALOG_API_SYNC_TOKEN;
@@ -37,6 +40,7 @@ async function main(): Promise<void> {
   await mkdir(dirname(dataFile), { recursive: true });
   await mkdir(dirname(historyFile), { recursive: true });
   await mkdir(dirname(monitoringFile), { recursive: true });
+  await mkdir(dirname(identityFile), { recursive: true });
 
   const runner = createCatalogSyncRunnerFromEnv(process.env);
   const service = new CatalogService(
@@ -48,6 +52,7 @@ async function main(): Promise<void> {
         monitoringFile,
         monitoringRetentionRuns,
       ),
+      identityStore: new FileIdentityStore(identityFile),
       monitoringThresholds: loadMonitoringThresholds(),
       notifier: loadNotifier(),
       activityReader: createActivityReaderFromEnv(process.env),

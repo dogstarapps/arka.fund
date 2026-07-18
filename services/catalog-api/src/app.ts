@@ -1,13 +1,14 @@
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
 import {
   findArka,
   findAsset,
   findManager,
-  listArkas,
   listAssets,
-  listManagers,
 } from "./catalog.js";
+import { IdentityUpdateError } from "./identity.js";
+import { CATALOG_OPENAPI_DOCUMENT } from "./openapi/document.js";
 import { CatalogService } from "./service.js";
+import type { IdentityUpdateRequest } from "./types.js";
 
 export interface CatalogAppOptions {
   service: CatalogService;
@@ -16,6 +17,18 @@ export interface CatalogAppOptions {
 
 export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   const app = Fastify({ logger: false });
+
+  app.addHook("onSend", async (request, reply, payload) => {
+    if (request.method === "GET") {
+      reply.header("access-control-allow-origin", "*");
+    }
+    return payload;
+  });
+
+  app.get("/openapi.json", async (_request, reply) => {
+    reply.header("cache-control", "public, max-age=300");
+    return CATALOG_OPENAPI_DOCUMENT;
+  });
 
   app.get("/health", async (_request, reply) => {
     const [snapshot, status] = await Promise.all([
@@ -141,13 +154,8 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   });
 
   app.get("/v1/arkas", async (request, reply) => {
-    const snapshot = await options.service.current();
-    if (!snapshot) {
-      reply.code(503);
-      return { error: "snapshot_unavailable" };
-    }
     const query = request.query as RequestQuery;
-    return listArkas(snapshot, {
+    return options.service.arkas({
       sort: parseArkaSort(query.sort),
       order: parseOrder(query.order),
       curated: parseOptionalBoolean(query.curated),
@@ -159,18 +167,35 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   });
 
   app.get("/v1/arkas/:id", async (request, reply) => {
-    const snapshot = await options.service.current();
-    if (!snapshot) {
-      reply.code(503);
-      return { error: "snapshot_unavailable" };
-    }
     const params = request.params as RequestParams;
-    const entry = findArka(snapshot, params.id);
+    const entry = await options.service.arka(params.id);
     if (!entry) {
       reply.code(404);
       return { error: "not_found" };
     }
     return entry;
+  });
+
+  app.get("/v1/arkas/:id/identity", async (request, reply) => {
+    const params = request.params as RequestParams;
+    const identity = await options.service.arkaIdentity(params.id);
+    if (!identity) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+    return identity;
+  });
+
+  app.put("/v1/arkas/:id/identity", async (request, reply) => {
+    const params = request.params as RequestParams;
+    try {
+      return await options.service.updateArkaIdentity(
+        params.id,
+        request.body as IdentityUpdateRequest,
+      );
+    } catch (error) {
+      return identityError(reply, error);
+    }
   });
 
   app.get("/v1/arkas/:id/history", async (request) => {
@@ -327,13 +352,8 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   });
 
   app.get("/v1/managers", async (request, reply) => {
-    const snapshot = await options.service.current();
-    if (!snapshot) {
-      reply.code(503);
-      return { error: "snapshot_unavailable" };
-    }
     const query = request.query as RequestQuery;
-    return listManagers(snapshot, {
+    return options.service.managers({
       sort: parseManagerSort(query.sort),
       order: parseOrder(query.order),
       search: parseOptionalString(query.search),
@@ -343,18 +363,35 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   });
 
   app.get("/v1/managers/:id", async (request, reply) => {
-    const snapshot = await options.service.current();
-    if (!snapshot) {
-      reply.code(503);
-      return { error: "snapshot_unavailable" };
-    }
     const params = request.params as RequestParams;
-    const entry = findManager(snapshot, params.id);
+    const entry = await options.service.manager(params.id);
     if (!entry) {
       reply.code(404);
       return { error: "not_found" };
     }
     return entry;
+  });
+
+  app.get("/v1/managers/:id/identity", async (request, reply) => {
+    const params = request.params as RequestParams;
+    const identity = await options.service.managerIdentity(params.id);
+    if (!identity) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+    return identity;
+  });
+
+  app.put("/v1/managers/:id/identity", async (request, reply) => {
+    const params = request.params as RequestParams;
+    try {
+      return await options.service.updateManagerIdentity(
+        params.id,
+        request.body as IdentityUpdateRequest,
+      );
+    } catch (error) {
+      return identityError(reply, error);
+    }
   });
 
   app.get("/v1/managers/:id/history", async (request) => {
@@ -397,6 +434,15 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
 
 type RequestQuery = Record<string, string | undefined>;
 type RequestParams = Record<string, string>;
+
+function identityError(reply: FastifyReply, error: unknown): { error: string; message: string } {
+  if (error instanceof IdentityUpdateError) {
+    reply.code(error.statusCode);
+    return { error: error.code, message: error.message };
+  }
+  reply.code(500);
+  return { error: "identity_update_failed", message: "Identity profile could not be saved." };
+}
 
 function parseMonitoringRunStatus(value?: string): "success" | "failure" | undefined {
   if (value === "success" || value === "failure") {

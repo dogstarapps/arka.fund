@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "pagerduty_monitoring_e2e",
+  "runId": "arka-completion-20260718170331",
+  "generatedAt": "2026-07-18T17:03:31.884Z",
+  "scenario": {
+    "failure": "One of two Arkas returns a controlled RPC timeout during sync.",
+    "recovery": "The following sync indexes both Arkas successfully."
+  },
+  "trigger": {
+    "failedArkas": 1,
+    "monitoring": {
+      "healthy": true,
+      "degraded": true,
+      "evaluatedAt": "2026-07-18T17:03:31.788Z",
+      "snapshotAgeSeconds": 0,
+      "consecutiveFailures": 0,
+      "lastRun": {
+        "runId": "f2e530df-0c48-498c-9cc8-6183f5e7f407",
+        "startedAt": "2026-07-18T17:03:31.390Z",
+        "finishedAt": "2026-07-18T17:03:31.392Z",
+        "durationMs": 2,
+        "status": "success",
+        "indexedArkas": 1,
+        "failedArkas": 1,
+        "totalArkas": 2,
+        "totalNav": "10000000",
+        "errorMessage": null
+      },
+      "activeAlerts": [
+        {
+          "kind": "partial_sync_failures",
+          "severity": "warning",
+          "message": "Sync failure ratio 0.50 exceeded threshold"
+        }
+      ],
+      "thresholds": {
+        "maxSnapshotAgeSeconds": 300,
+        "maxSyncDurationMs": 60000,
+        "maxFailureRatio": 0.25,
+        "maxConsecutiveFailures": 2
+      }
+    },
+    "pagerDuty": {
+      "transition": "triggered",
+      "alertKind": "partial_sync_failures",
+      "dedupKey": "arka-completion-20260718170331:partial_sync_failures",
+      "submittedAt": "2026-07-18T17:03:31.396Z",
+      "httpStatus": 202,
+      "response": {
+        "message": "Event processed",
+        "status": "success",
+        "dedup_key": "arka-completion-20260718170331:partial_sync_failures"
+      }
+    }
+  },
+  "recovery": {
+    "failedArkas": 0,
+    "monitoring": {
+      "healthy": true,
+      "degraded": false,
+      "evaluatedAt": "2026-07-18T17:03:31.884Z",
+      "snapshotAgeSeconds": 0,
+      "consecutiveFailures": 0,
+      "lastRun": {
+        "runId": "097441df-d683-4d67-aa9b-8dc912bbb2fb",
+        "startedAt": "2026-07-18T17:03:31.788Z",
+        "finishedAt": "2026-07-18T17:03:31.799Z",
+        "durationMs": 11,
+        "status": "success",
+        "indexedArkas": 2,
+        "failedArkas": 0,
+        "totalArkas": 2,
+        "totalNav": "20000000",
+        "errorMessage": null
+      },
+      "activeAlerts": [],
+      "thresholds": {
+        "maxSnapshotAgeSeconds": 300,
+        "maxSyncDurationMs": 60000,
+        "maxFailureRatio": 0.25,
+        "maxConsecutiveFailures": 2
+      }
+    },
+    "pagerDuty": {
+      "transition": "resolved",
+      "alertKind": "partial_sync_failures",
+      "dedupKey": "arka-completion-20260718170331:partial_sync_failures",
+      "submittedAt": "2026-07-18T17:03:31.800Z",
+      "httpStatus": 202,
+      "response": {
+        "message": "Event processed",
+        "status": "success",
+        "dedup_key": "arka-completion-20260718170331:partial_sync_failures"
+      }
+    }
+  },
+  "alertHistory": [
+    {
+      "kind": "partial_sync_failures",
+      "severity": "warning",
+      "message": "Sync failure ratio 0.50 exceeded threshold",
+      "active": false,
+      "firstTriggeredAt": "2026-07-18T17:03:31.395Z",
+      "lastTriggeredAt": "2026-07-18T17:03:31.395Z",
+      "lastResolvedAt": "2026-07-18T17:03:31.800Z"
+    }
+  ]
+}

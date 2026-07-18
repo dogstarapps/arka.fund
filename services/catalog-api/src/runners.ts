@@ -1,4 +1,5 @@
 import { buildSnapshot, cloneSnapshot } from "./catalog.js";
+import { setTimeout as delay } from "node:timers/promises";
 import {
   createClientOptions,
   expectSimulationResult,
@@ -41,6 +42,9 @@ export class StaticCatalogSyncRunner implements CatalogSyncRunner {
 export interface OnChainCatalogSyncRunnerOptions extends NetworkConfig {
   registryContractId: string;
   pageSize?: number;
+  readConcurrency?: number;
+  retryAttempts?: number;
+  retryDelayMs?: number;
 }
 
 export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
@@ -59,21 +63,23 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
   async run(): Promise<CatalogSnapshot> {
     const syncedAt = new Date().toISOString();
     const arkaIds = await this.listAllArkas();
-    const results = await Promise.allSettled(
-      arkaIds.map((arkaId) => this.readArka(arkaId, syncedAt)),
+    const results = await mapWithConcurrency(
+      arkaIds,
+      normalizedPositiveInteger(this.options.readConcurrency, 1),
+      async (arkaId) => this.readArka(arkaId, syncedAt),
     );
 
     const arkas: ArkaCatalogEntry[] = [];
     const failures: CatalogSyncFailure[] = [];
     for (let index = 0; index < results.length; index += 1) {
       const result = results[index];
-      if (result.status === "fulfilled") {
+      if (result.ok) {
         arkas.push(result.value);
         continue;
       }
       failures.push({
         arkaId: arkaIds[index],
-        message: errorMessage(result.reason),
+        message: errorMessage(result.error),
         syncedAt,
       });
     }
@@ -87,9 +93,11 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     let offset = 0;
 
     while (true) {
-      const assembled = await this.registryClient.get_arkas(
-        { offset, limit: pageSize },
-        mergeCallOptions(undefined, true),
+      const assembled = await this.rpcRead(() =>
+        this.registryClient.get_arkas(
+          { offset, limit: pageSize },
+          mergeCallOptions(undefined, true),
+        ),
       );
       const page = expectSimulationResult(assembled, "get_arkas");
       if (page.length === 0) {
@@ -113,26 +121,26 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       return legacyStatePromise;
     };
 
-    const [manager, nav, denomination, fees, whitelist] = await Promise.all([
-      this.readManager(vaultClient, readLegacyState),
-      this.readNav(vaultClient, readLegacyState),
-      this.readDenomination(vaultClient, readLegacyState),
-      this.readFees(vaultClient, readLegacyState),
-      this.readWhitelist(vaultClient, readLegacyState),
-    ]);
+    const manager = await this.readManager(vaultClient, readLegacyState);
+    const nav = await this.readNav(vaultClient, readLegacyState);
+    const denomination = await this.readDenomination(vaultClient, readLegacyState);
+    const fees = await this.readFees(vaultClient, readLegacyState);
+    const whitelist = await this.readWhitelist(vaultClient, readLegacyState);
     const shareToken = await this.readOptionalShareToken(vaultClient);
     const blendMarkets = await this.readOptionalBlendMarkets(vaultClient);
 
-    const [curatedTx, delistedTx] = await Promise.all([
+    const curatedTx = await this.rpcRead(() =>
       this.registryClient.is_manager_curated(
         { manager },
         mergeCallOptions(undefined, true),
       ),
+    );
+    const delistedTx = await this.rpcRead(() =>
       this.registryClient.is_delisted(
         { arka: arkaId },
         mergeCallOptions(undefined, true),
       ),
-    ]);
+    );
 
     const assets = await this.readArkaAssets(
       vaultClient,
@@ -167,7 +175,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     readLegacyState: () => Promise<LegacyArkaState>,
   ): Promise<string> {
     try {
-      const managerTx = await vaultClient.manager(mergeCallOptions(undefined, true));
+      const managerTx = await this.rpcRead(() =>
+        vaultClient.manager(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(managerTx, "manager");
     } catch (error) {
       if (isMissingContractFunction(error, "manager")) {
@@ -185,7 +195,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     readLegacyState: () => Promise<LegacyArkaState>,
   ): Promise<bigint> {
     try {
-      const navTx = await vaultClient.nav(mergeCallOptions(undefined, true));
+      const navTx = await this.rpcRead(() =>
+        vaultClient.nav(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(navTx, "nav");
     } catch (error) {
       if (isMissingContractFunction(error, "nav")) {
@@ -203,7 +215,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     readLegacyState: () => Promise<LegacyArkaState>,
   ): Promise<Asset> {
     try {
-      const denominationTx = await vaultClient.denomination(mergeCallOptions(undefined, true));
+      const denominationTx = await this.rpcRead(() =>
+        vaultClient.denomination(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(denominationTx, "denomination");
     } catch (error) {
       if (isMissingContractFunction(error, "denomination")) {
@@ -221,7 +235,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     readLegacyState: () => Promise<LegacyArkaState>,
   ): Promise<FeeStructure> {
     try {
-      const feesTx = await vaultClient.fees(mergeCallOptions(undefined, true));
+      const feesTx = await this.rpcRead(() =>
+        vaultClient.fees(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(feesTx, "fees");
     } catch (error) {
       if (isMissingContractFunction(error, "fees")) {
@@ -239,7 +255,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     readLegacyState: () => Promise<LegacyArkaState>,
   ): Promise<Asset[]> {
     try {
-      const whitelistTx = await vaultClient.whitelist(mergeCallOptions(undefined, true));
+      const whitelistTx = await this.rpcRead(() =>
+        vaultClient.whitelist(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(whitelistTx, "whitelist");
     } catch (error) {
       if (isMissingContractFunction(error, "whitelist")) {
@@ -254,7 +272,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
 
   private async readOptionalShareToken(vaultClient: ArkaClient): Promise<string | null> {
     try {
-      const shareTokenTx = await vaultClient.share_token(mergeCallOptions(undefined, true));
+      const shareTokenTx = await this.rpcRead(() =>
+        vaultClient.share_token(mergeCallOptions(undefined, true)),
+      );
       return expectSimulationResult(shareTokenTx, "share_token") ?? null;
     } catch (error) {
       if (isMissingContractFunction(error, "share_token")) {
@@ -266,8 +286,10 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
 
   private async readOptionalBlendMarkets(vaultClient: ArkaClient): Promise<bigint[]> {
     try {
-      const blendMarketsTx = await vaultClient.blend_markets(
-        mergeCallOptions(undefined, true),
+      const blendMarketsTx = await this.rpcRead(() =>
+        vaultClient.blend_markets(
+          mergeCallOptions(undefined, true),
+        ),
       );
       return expectSimulationResult(blendMarketsTx, "blend_markets");
     } catch (error) {
@@ -286,31 +308,29 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     syncedAt: string,
   ): Promise<ArkaAssetExposure[]> {
     const exposures = new Map<string, MutableAssetExposure>();
-    const liquidBalances = await Promise.all(
-      whitelistContracts.map(async (assetContract) => {
-        return {
-          assetContract,
-          liquidBalance: await this.readOptionalLiquidBalance(vaultClient, assetContract),
-        };
-      }),
-    );
+    const liquidBalances = [];
+    for (const assetContract of whitelistContracts) {
+      liquidBalances.push({
+        assetContract,
+        liquidBalance: await this.readOptionalLiquidBalance(vaultClient, assetContract),
+      });
+    }
     for (const { assetContract, liquidBalance } of liquidBalances) {
       const exposure = getOrCreateExposure(exposures, assetContract, denominationContract, syncedAt);
       exposure.liquidBalance += liquidBalance;
       exposure.netManagedAmount += liquidBalance;
     }
 
-    const marketPositions = await Promise.all(
-      blendMarketIds.map(async (marketId) => {
-        return {
-          marketId,
-          positions: await this.readOptionalBlendPositionValues(
-            vaultClient,
-            BigInt(marketId),
-          ),
-        };
-      }),
-    );
+    const marketPositions = [];
+    for (const marketId of blendMarketIds) {
+      marketPositions.push({
+        marketId,
+        positions: await this.readOptionalBlendPositionValues(
+          vaultClient,
+          BigInt(marketId),
+        ),
+      });
+    }
     for (const { marketId, positions } of marketPositions) {
       for (const position of positions) {
         const exposure = getOrCreateExposure(
@@ -347,9 +367,11 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     assetContract: string,
   ): Promise<bigint> {
     try {
-      const liquidBalanceTx = await vaultClient.liquid_balance(
-        { asset: assetContract },
-        mergeCallOptions(undefined, true),
+      const liquidBalanceTx = await this.rpcRead(() =>
+        vaultClient.liquid_balance(
+          { asset: assetContract },
+          mergeCallOptions(undefined, true),
+        ),
       );
       return expectSimulationResult(liquidBalanceTx, "liquid_balance");
     } catch (error) {
@@ -372,9 +394,11 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     }>
   > {
     try {
-      const positionsTx = await vaultClient.blend_position_values(
-        { market_id: marketId },
-        mergeCallOptions(undefined, true),
+      const positionsTx = await this.rpcRead(() =>
+        vaultClient.blend_position_values(
+          { market_id: marketId },
+          mergeCallOptions(undefined, true),
+        ),
       );
       return expectSimulationResult(positionsTx, "blend_position_values");
     } catch (error) {
@@ -386,7 +410,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
   }
 
   private async readLegacyState(arkaId: string): Promise<LegacyArkaState> {
-    const response = await this.rpcServer.getLedgerEntries(new Contract(arkaId).getFootprint());
+    const response = await this.rpcRead(() =>
+      this.rpcServer.getLedgerEntries(new Contract(arkaId).getFootprint()),
+    );
     const entry = response.entries[0];
     const storage = entry?.val.contractData().val().instance().storage() ?? [];
 
@@ -396,6 +422,61 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     }));
     return decodeLegacyInstanceStorage(nativeEntries);
   }
+
+  private async rpcRead<T>(operation: () => Promise<T>): Promise<T> {
+    return retryTransientRpc(operation, {
+      attempts: normalizedPositiveInteger(this.options.retryAttempts, 4),
+      baseDelayMs: normalizedPositiveInteger(this.options.retryDelayMs, 250),
+    });
+  }
+}
+
+type SettledResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: unknown };
+
+async function mapWithConcurrency<T, U>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<U>,
+): Promise<Array<SettledResult<U>>> {
+  const results: Array<SettledResult<U>> = new Array(items.length);
+  let nextIndex = 0;
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    async () => {
+      while (nextIndex < items.length) {
+        const index = nextIndex;
+        nextIndex += 1;
+        try {
+          results[index] = { ok: true, value: await worker(items[index]) };
+        } catch (error) {
+          results[index] = { ok: false, error };
+        }
+      }
+    },
+  );
+  await Promise.all(workers);
+  return results;
+}
+
+export async function retryTransientRpc<T>(
+  operation: () => Promise<T>,
+  options: { attempts: number; baseDelayMs: number },
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= options.attempts; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt >= options.attempts || !isTransientRpcError(error)) {
+        throw error;
+      }
+      await delay(transientRpcRetryDelayMs(error, attempt, options.baseDelayMs));
+    }
+  }
+  throw lastError;
 }
 
 export function isMissingContractFunction(error: unknown, functionName: string): boolean {
@@ -405,6 +486,44 @@ export function isMissingContractFunction(error: unknown, functionName: string):
     message.includes("trying to invoke non-existent contract function") &&
     message.includes(expectedFunction)
   );
+}
+
+export function isTransientRpcError(error: unknown): boolean {
+  const message = errorMessage(error).toLowerCase();
+  return (
+    message.includes("status code 429") ||
+    message.includes("too many requests") ||
+    message.includes("timeout") ||
+    message.includes("econnreset") ||
+    message.includes("etimedout")
+  );
+}
+
+export function transientRpcRetryDelayMs(
+  error: unknown,
+  attempt: number,
+  baseDelayMs: number,
+): number {
+  const retryAfterSeconds = extractRetryAfterSeconds(error);
+  if (retryAfterSeconds !== null) {
+    return retryAfterSeconds * 1_000;
+  }
+  return baseDelayMs * attempt;
+}
+
+function extractRetryAfterSeconds(error: unknown): number | null {
+  const shaped = error as {
+    response?: {
+      data?: { retry_after?: unknown };
+      headers?: Record<string, unknown>;
+    };
+  };
+  const dataValue = shaped.response?.data?.retry_after;
+  const headerValue =
+    shaped.response?.headers?.["retry-after"] ??
+    shaped.response?.headers?.["Retry-After"];
+  const parsed = Number(dataValue ?? headerValue);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 interface LegacyArkaState {
@@ -473,6 +592,12 @@ function coerceBigInt(value: unknown): bigint {
     return BigInt(value);
   }
   throw new Error(`Cannot coerce legacy bigint value from ${String(value)}`);
+}
+
+function normalizedPositiveInteger(value: number | undefined, fallback: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : fallback;
 }
 
 interface MutableAssetExposure {

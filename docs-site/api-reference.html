@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Interactive Arka.fund Catalog and NAV API reference." />
+    <title>Arka.fund API Reference</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://arka.fund/" aria-label="Arka.fund home">
+        <img src="https://arka.fund/logo-arkafund.png" alt="Arka.fund" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html">Guides</a>
+        <a href="./completion.html">Release evidence</a>
+        <a href="./openapi.json">OpenAPI JSON</a>
+        <a class="app-link" href="https://app.arka.fund/">Open app</a>
+      </nav>
+    </header>
+
+    <main class="api-main">
+      <section class="intro compact api-intro">
+        <p class="eyebrow">API Reference</p>
+        <h1>Catalog and NAV API</h1>
+        <p class="lead">
+          Public, read-only mainnet data for Arkas, managers, assets, history,
+          activity and operational monitoring. Run any GET request directly below.
+        </p>
+        <div class="api-facts" id="api-facts" aria-live="polite"></div>
+      </section>
+
+      <section class="api-layout">
+        <aside class="api-sidebar" aria-label="API endpoints">
+          <label for="endpoint-search">Find an endpoint</label>
+          <input id="endpoint-search" type="search" placeholder="Arkas, monitoring, NAV..." />
+          <nav id="endpoint-nav" class="endpoint-nav"></nav>
+        </aside>
+        <div id="api-reference" class="api-reference" aria-live="polite">
+          <p class="loading-state">Loading the API contract...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Arka.fund on Stellar mainnet</span>
+      <a href="./index.html">Integration guides</a>
+      <a href="https://www.npmjs.com/package/@arkafund/sdk">SDK on npm</a>
+      <a href="https://catalog.arka.fund/health">Live health</a>
+    </footer>
+    <script type="module" src="./api-reference.js"></script>
+  </body>
+</html>

@@ -1,0 +1,2808 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Arka.fund Catalog and NAV API",
+    "version": "1.0.0",
+    "description": "Public, read-only indexed data for Arka discovery, NAV, assets, managers, activity and operational monitoring. Exact monetary values are returned as integer strings to preserve on-chain precision.",
+    "contact": {
+      "name": "Arka.fund",
+      "url": "https://arka.fund/"
+    },
+    "license": {
+      "name": "Public API terms",
+      "url": "https://arka.fund/docs/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://catalog.arka.fund",
+      "description": "Stellar mainnet"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Catalog",
+      "description": "Network-level indexed totals."
+    },
+    {
+      "name": "Arkas",
+      "description": "Arka vault discovery and portfolio data."
+    },
+    {
+      "name": "Assets",
+      "description": "Asset-level exposure data."
+    },
+    {
+      "name": "Managers",
+      "description": "Manager profiles and managed Arkas."
+    },
+    {
+      "name": "Activity",
+      "description": "Indexed on-chain activity."
+    },
+    {
+      "name": "History",
+      "description": "Persisted snapshots and time series."
+    },
+    {
+      "name": "Dashboard",
+      "description": "Aggregates used by the public app."
+    },
+    {
+      "name": "NAV",
+      "description": "Application-level aggregate NAV response."
+    },
+    {
+      "name": "Operations",
+      "description": "Health, sync and alert state."
+    }
+  ],
+  "paths": {
+    "/api/nav": {
+      "get": {
+        "tags": [
+          "NAV"
+        ],
+        "summary": "Read aggregate NAV",
+        "operationId": "getNav",
+        "description": "Returns the public application NAV aggregate, denomination totals, oracle state, activity summary and indexer monitoring state.",
+        "servers": [
+          {
+            "url": "https://app.arka.fund",
+            "description": "Arka.fund application API on Stellar mainnet"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current aggregate NAV response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NavResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The catalog snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Read indexer health",
+        "operationId": "getHealth",
+        "description": "Returns sync freshness, indexed/failing Arka counts and active monitoring alerts. Critical alerts produce HTTP 503.",
+        "responses": {
+          "200": {
+            "description": "Indexer is available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Indexer has no snapshot or a critical alert is active.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metrics": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Read catalog totals",
+        "operationId": "getMetrics",
+        "responses": {
+          "200": {
+            "description": "Current catalog metrics.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas": {
+      "get": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "List indexed Arkas",
+        "operationId": "listArkas",
+        "description": "Returns paginated Arkas. Use curated=true and delisted=false for the public platform listing.",
+        "parameters": [
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Arka sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nav",
+                "manager",
+                "syncedAt"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "curated",
+            "in": "query",
+            "required": false,
+            "description": "Filter by platform curation state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "delisted",
+            "in": "query",
+            "required": false,
+            "description": "Filter by delisting state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive address or identity search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based result offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of returned items.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated Arka list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkaPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}": {
+      "get": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "Read an Arka",
+        "operationId": "getArka",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indexed Arka state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Arka"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}/assets": {
+      "get": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "List Arka asset exposures",
+        "operationId": "listArkaAssets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arka asset exposures.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssetExposure"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}/portfolio": {
+      "get": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "Read ranked Arka composition",
+        "operationId": "getArkaPortfolio",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of positions.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked portfolio composition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Read Arka NAV history",
+        "operationId": "getArkaHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 start time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 end time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of history points.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated Arka history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}/activity": {
+      "get": {
+        "tags": [
+          "Activity"
+        ],
+        "summary": "Read Arka contract activity",
+        "operationId": "getArkaActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "description": "Activity type.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deposit",
+                "redeem",
+                "profit",
+                "lend",
+                "borrow",
+                "repay",
+                "withdraw"
+              ]
+            }
+          },
+          {
+            "name": "fromLedger",
+            "in": "query",
+            "required": false,
+            "description": "Minimum ledger sequence.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "toLedger",
+            "in": "query",
+            "required": false,
+            "description": "Maximum ledger sequence.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of activity records.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated activity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "List indexed assets",
+        "operationId": "listAssets",
+        "parameters": [
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Asset sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "netManagedAmount",
+                "arkaCount",
+                "syncedAt"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive contract search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based result offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of returned items.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated asset list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetPage"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{id}": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "Read an asset",
+        "operationId": "getAsset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Asset contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indexed asset state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{id}/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Read asset history",
+        "operationId": "getAssetHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Asset contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 start time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 end time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of history points.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated asset history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/{id}/arkas": {
+      "get": {
+        "tags": [
+          "Assets"
+        ],
+        "summary": "List Arkas with an asset exposure",
+        "operationId": "listAssetArkas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Asset contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Arka sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nav",
+                "manager",
+                "syncedAt"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "curated",
+            "in": "query",
+            "required": false,
+            "description": "Filter by platform curation state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "delisted",
+            "in": "query",
+            "required": false,
+            "description": "Filter by delisting state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive address or identity search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based result offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of returned items.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated Arka list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkaPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/managers": {
+      "get": {
+        "tags": [
+          "Managers"
+        ],
+        "summary": "List indexed managers",
+        "operationId": "listManagers",
+        "parameters": [
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Manager sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "totalNav",
+                "arkaCount",
+                "manager"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive address or identity search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based result offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of returned items.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated managers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/managers/{id}": {
+      "get": {
+        "tags": [
+          "Managers"
+        ],
+        "summary": "Read a manager",
+        "operationId": "getManager",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Manager account address.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indexed manager state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manager"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/managers/{id}/history": {
+      "get": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Read manager history",
+        "operationId": "getManagerHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Manager account address.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 start time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Inclusive ISO-8601 end time.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of history points.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 365
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated manager history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/managers/{id}/arkas": {
+      "get": {
+        "tags": [
+          "Managers"
+        ],
+        "summary": "List a manager's Arkas",
+        "operationId": "listManagerArkas",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Manager account address.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Arka sort field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "nav",
+                "manager",
+                "syncedAt"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "curated",
+            "in": "query",
+            "required": false,
+            "description": "Filter by platform curation state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "delisted",
+            "in": "query",
+            "required": false,
+            "description": "Filter by delisting state.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive address or identity search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Zero-based result offset.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of returned items.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated Arka list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkaPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/activity": {
+      "get": {
+        "tags": [
+          "Activity"
+        ],
+        "summary": "Read indexed contract activity",
+        "operationId": "listActivity",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "description": "Activity type.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "deposit",
+                "redeem",
+                "profit",
+                "lend",
+                "borrow",
+                "repay",
+                "withdraw"
+              ]
+            }
+          },
+          {
+            "name": "fromLedger",
+            "in": "query",
+            "required": false,
+            "description": "Minimum ledger sequence.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "toLedger",
+            "in": "query",
+            "required": false,
+            "description": "Maximum ledger sequence.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of activity records.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated activity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivityPage"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/overview": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Read dashboard aggregates",
+        "operationId": "getDashboardOverview",
+        "parameters": [
+          {
+            "name": "activityLimit",
+            "in": "query",
+            "required": false,
+            "description": "Number of recent activity records used in aggregates.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard totals and monitoring summary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dashboard/composition": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Read aggregate portfolio composition",
+        "operationId": "getDashboardComposition",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of assets.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ranked asset composition.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/monitoring/status": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Read monitoring status",
+        "operationId": "getMonitoringStatus",
+        "responses": {
+          "200": {
+            "description": "Monitoring health, thresholds and active alerts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/monitoring/runs": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "List indexer sync runs",
+        "operationId": "listMonitoringRuns",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by run status.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "success",
+                "failure"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort direction.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of runs.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated sync runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitoringRunPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/monitoring/alerts": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "List monitoring alerts",
+        "operationId": "listMonitoringAlerts",
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "required": false,
+            "description": "Filter by active state.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Monitoring alert history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MonitoringAlert"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "FeeSummary": {
+        "type": "object",
+        "required": [
+          "mgmtBps",
+          "perfBps",
+          "depositBps",
+          "redeemBps"
+        ],
+        "description": "On-chain fee configuration in basis points. Divide by 100 to obtain a percentage.",
+        "properties": {
+          "mgmtBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "perfBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "depositBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "redeemBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          }
+        }
+      },
+      "AssetIdentity": {
+        "type": "object",
+        "required": [
+          "contract",
+          "symbol",
+          "label",
+          "decimals",
+          "usdPegged"
+        ],
+        "properties": {
+          "contract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "symbol": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "decimals": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18
+          },
+          "usdPegged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "IdentityMetadata": {
+        "type": "object",
+        "required": [
+          "displayName",
+          "description",
+          "avatarUrl",
+          "websiteUrl",
+          "socialUrl",
+          "trustState",
+          "updatedAt",
+          "updatedBy"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "websiteUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustState": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "curated",
+              "verified",
+              "official"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "pendingIndexation": {
+            "type": "boolean"
+          },
+          "arkaId": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "manager": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          }
+        }
+      },
+      "AssetExposure": {
+        "type": "object",
+        "required": [
+          "assetContract",
+          "isDenomination",
+          "liquidBalance",
+          "collateralAmount",
+          "debtAmount",
+          "netManagedAmount",
+          "netPositionValue",
+          "marketIds",
+          "syncedAt"
+        ],
+        "properties": {
+          "assetContract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "isDenomination": {
+            "type": "boolean"
+          },
+          "liquidBalance": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "collateralAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "debtAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "netManagedAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "netPositionValue": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "marketIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EconomicMetrics": {
+        "type": "object",
+        "required": [
+          "denominationAsset",
+          "navDenomination",
+          "navUsdEstimate",
+          "sharePrice",
+          "oracleStatus",
+          "valuationSource",
+          "missingPriceReasons"
+        ],
+        "properties": {
+          "denominationAsset": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssetIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "navDenomination": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "navUsdEstimate": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "sharePrice": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "oracleStatus": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "not_required_usd_stablecoin",
+              "missing_price"
+            ]
+          },
+          "valuationSource": {
+            "type": "string",
+            "enum": [
+              "usd_stablecoin_parity",
+              "oracle_verified",
+              "unavailable"
+            ]
+          },
+          "missingPriceReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeeSummary"
+          },
+          "returns": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "pnl": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "volume": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "flows": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "portfolioWeights": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Arka": {
+        "type": "object",
+        "required": [
+          "arkaId",
+          "manager",
+          "curated",
+          "delisted",
+          "nav",
+          "denominationContract",
+          "whitelistContracts",
+          "shareToken",
+          "fees",
+          "assets",
+          "syncedAt"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "arkaId": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "manager": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "curated": {
+            "type": "boolean"
+          },
+          "delisted": {
+            "type": "boolean"
+          },
+          "nav": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "denominationContract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address.",
+            "nullable": true
+          },
+          "whitelistContracts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[CG][A-Z2-7]{55}$",
+              "description": "Stellar account or Soroban contract address."
+            }
+          },
+          "shareToken": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address.",
+            "nullable": true
+          },
+          "fees": {
+            "$ref": "#/components/schemas/FeeSummary"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetExposure"
+            }
+          },
+          "economics": {
+            "$ref": "#/components/schemas/EconomicMetrics"
+          },
+          "identity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IdentityMetadata"
+              }
+            ],
+            "nullable": true
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Asset": {
+        "type": "object",
+        "required": [
+          "assetContract",
+          "arkaCount",
+          "managerCount",
+          "denominationArkaCount",
+          "liquidBalance",
+          "collateralAmount",
+          "debtAmount",
+          "netManagedAmount",
+          "netPositionValue",
+          "syncedAt"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "assetContract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "arkaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "managerCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "denominationArkaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "liquidBalance": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "collateralAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "debtAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "netManagedAmount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "netPositionValue": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Manager": {
+        "type": "object",
+        "required": [
+          "manager",
+          "arkaCount",
+          "curatedArkaCount",
+          "delistedArkaCount",
+          "totalNav",
+          "syncedAt"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "manager": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "arkaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "curatedArkaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "delistedArkaCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalNav": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "identity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IdentityMetadata"
+              }
+            ],
+            "nullable": true
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Metrics": {
+        "type": "object",
+        "required": [
+          "totalArkas",
+          "indexedArkas",
+          "failedArkas",
+          "totalManagers",
+          "curatedArkas",
+          "delistedArkas",
+          "totalAssets",
+          "totalNav",
+          "syncedAt"
+        ],
+        "properties": {
+          "totalArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "indexedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalManagers": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "curatedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "delistedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalAssets": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalNav": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NavResponse": {
+        "type": "object",
+        "required": [
+          "syncedAt",
+          "totalNav",
+          "totalNavUsdEstimate",
+          "valuationSource",
+          "oracleStatus",
+          "missingPriceReasons",
+          "denominationTotals",
+          "totalNavDelta",
+          "totalNavDeltaBps",
+          "totalArkas",
+          "totalManagers",
+          "totalAssets",
+          "curatedArkas",
+          "delistedArkas",
+          "largestAssetWeightBps",
+          "monitoring",
+          "activity"
+        ],
+        "properties": {
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalNav": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "totalNavUsdEstimate": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "valuationSource": {
+            "type": "string",
+            "enum": [
+              "usd_stablecoin_parity",
+              "oracle_verified",
+              "unavailable"
+            ]
+          },
+          "oracleStatus": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "not_required_usd_stablecoin",
+              "missing_price"
+            ]
+          },
+          "missingPriceReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "denominationTotals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "denominationAsset",
+                "totalNav",
+                "navUsdEstimate",
+                "arkaCount"
+              ],
+              "properties": {
+                "denominationAsset": {
+                  "$ref": "#/components/schemas/AssetIdentity"
+                },
+                "totalNav": {
+                  "type": "string",
+                  "pattern": "^-?[0-9]+$",
+                  "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+                },
+                "navUsdEstimate": {
+                  "type": "string",
+                  "pattern": "^-?[0-9]+$",
+                  "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+                  "nullable": true
+                },
+                "arkaCount": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "totalNavDelta": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "totalNavDeltaBps": {
+            "type": "integer",
+            "nullable": true
+          },
+          "totalArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalManagers": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalAssets": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "curatedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "delistedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "largestAssetWeightBps": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "monitoring": {
+            "type": "object",
+            "required": [
+              "healthy",
+              "degraded",
+              "snapshotAgeSeconds",
+              "consecutiveFailures",
+              "activeAlertCount",
+              "lastRunStatus"
+            ],
+            "properties": {
+              "healthy": {
+                "type": "boolean"
+              },
+              "degraded": {
+                "type": "boolean"
+              },
+              "snapshotAgeSeconds": {
+                "type": "number",
+                "nullable": true
+              },
+              "consecutiveFailures": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "activeAlertCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "lastRunStatus": {
+                "type": "string",
+                "enum": [
+                  "success",
+                  "failure"
+                ],
+                "nullable": true
+              }
+            }
+          },
+          "activity": {
+            "type": "object",
+            "required": [
+              "totalEvents",
+              "uniqueUsers",
+              "oldestLedger",
+              "latestLedger",
+              "counts",
+              "depositVolume",
+              "redeemVolume",
+              "profitVolume",
+              "netUserFlow"
+            ],
+            "properties": {
+              "totalEvents": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "uniqueUsers": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "oldestLedger": {
+                "type": "integer",
+                "minimum": 0,
+                "nullable": true
+              },
+              "latestLedger": {
+                "type": "integer",
+                "minimum": 0,
+                "nullable": true
+              },
+              "counts": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "depositVolume": {
+                "type": "string",
+                "pattern": "^-?[0-9]+$",
+                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+              },
+              "redeemVolume": {
+                "type": "string",
+                "pattern": "^-?[0-9]+$",
+                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+              },
+              "profitVolume": {
+                "type": "string",
+                "pattern": "^-?[0-9]+$",
+                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+              },
+              "netUserFlow": {
+                "type": "string",
+                "pattern": "^-?[0-9]+$",
+                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+              }
+            }
+          }
+        }
+      },
+      "MonitoringAlert": {
+        "type": "object",
+        "required": [
+          "kind",
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "snapshot_missing",
+              "snapshot_stale",
+              "sync_failed",
+              "consecutive_failures",
+              "sync_slow",
+              "partial_sync_failures"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "warning",
+              "critical"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "firstTriggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastTriggeredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastResolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MonitoringRun": {
+        "type": "object",
+        "required": [
+          "runId",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "status",
+          "indexedArkas",
+          "failedArkas",
+          "totalArkas",
+          "totalNav",
+          "errorMessage"
+        ],
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failure"
+            ]
+          },
+          "indexedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalNav": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MonitoringStatus": {
+        "type": "object",
+        "required": [
+          "healthy",
+          "degraded",
+          "evaluatedAt",
+          "snapshotAgeSeconds",
+          "consecutiveFailures",
+          "lastRun",
+          "activeAlerts",
+          "thresholds"
+        ],
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          },
+          "degraded": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshotAgeSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lastRun": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MonitoringRun"
+              }
+            ],
+            "nullable": true
+          },
+          "activeAlerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringAlert"
+            }
+          },
+          "thresholds": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "Health": {
+        "type": "object",
+        "required": [
+          "healthy",
+          "degraded",
+          "evaluatedAt",
+          "snapshotAgeSeconds",
+          "lastSyncedAt",
+          "indexedArkas",
+          "failedArkas",
+          "consecutiveFailures",
+          "activeAlerts"
+        ],
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          },
+          "degraded": {
+            "type": "boolean"
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshotAgeSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "lastSyncedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "indexedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failedArkas": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "activeAlerts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringAlert"
+            }
+          }
+        }
+      },
+      "Activity": {
+        "type": "object",
+        "required": [
+          "eventId",
+          "arkaId",
+          "manager",
+          "kind",
+          "ledger",
+          "ledgerClosedAt",
+          "txHash"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "cursor": {
+            "type": "string"
+          },
+          "arkaId": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "manager": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "deposit",
+              "redeem",
+              "profit",
+              "lend",
+              "borrow",
+              "repay",
+              "withdraw"
+            ]
+          },
+          "ledger": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ledgerClosedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "txHash": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address.",
+            "nullable": true
+          },
+          "assetContract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address.",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "shares": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "netOut": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "marketId": {
+            "type": "string",
+            "nullable": true
+          },
+          "stepCount": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "ArkaPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Arka"
+            }
+          }
+        }
+      },
+      "AssetPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            }
+          }
+        }
+      },
+      "ManagerPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Manager"
+            }
+          }
+        }
+      },
+      "ActivityPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            }
+          }
+        }
+      },
+      "MonitoringRunPage": {
+        "type": "object",
+        "required": [
+          "total",
+          "offset",
+          "limit",
+          "items"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonitoringRun"
+            }
+          }
+        }
+      }
+    }
+  }
+}

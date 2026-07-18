@@ -1,0 +1,13 @@
+:root {
+  --light-color-background: #f6f8ff;
+  --light-color-background-secondary: #ffffff;
+  --light-color-accent: #6f2cff;
+  --dark-color-background: #10092d;
+  --dark-color-background-secondary: #18103b;
+  --dark-color-accent: #73e9ff;
+}
+
+.site-menu .site-menu-entry a,
+.tsd-page-toolbar a.title {
+  letter-spacing: 0;
+}

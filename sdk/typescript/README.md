@@ -1,15 +1,19 @@
 # Arkafund TypeScript SDK
 
-This package provides a maintained TypeScript SDK for Arkafund contract integrations. It wraps generated Soroban contract bindings with a stable API for:
+Public TypeScript SDK for reading the Arka catalog and building wallet-signed
+Stellar contract interactions. The package combines:
 
-- mainnet network and contract-address presets
-- atomic Arka creation through the factory
-- registry administration and discovery reads
-- oracle policy administration and inspection
-- vault reads plus supported deposit and redeem builders
-- route execution with explicit per-hop minimum output
-- venue status inspection and authorized emergency disabling
-- extension registration for third-party tooling on top of the supported surface
+- a typed client for the public indexer and NAV API
+- Stellar mainnet network and contract presets
+- factory, vault, registry, router, venue-registry and oracle-guard modules
+- exact amount and percentage formatting helpers
+- transaction builders that preserve wallet custody and on-chain authorization
+
+## Requirements
+
+- Node.js 22 or newer
+- a supported Stellar wallet or signer for state-changing actions
+- no API key for public catalog and contract reads
 
 ## Install
 
@@ -17,75 +21,144 @@ This package provides a maintained TypeScript SDK for Arkafund contract integrat
 npm install @arkafund/sdk
 ```
 
-Runtime:
-- Node 22 or newer. The upstream Stellar SDK currently declares Node 22+ support.
+## Read mainnet data
 
-## Quick start
+The public catalog is read-only. Values such as NAV and balances are exact
+integer strings so consumers do not lose on-chain precision.
 
 ```ts
 import {
-  ArkafundSdk,
-  DivergenceMode,
-  createKeypairSigner,
+  CatalogClient,
+  formatAssetAmount,
+  formatBasisPoints,
 } from "@arkafund/sdk";
 
-const networkPassphrase = "Test SDF Network ; September 2015";
-const sdk = new ArkafundSdk({
-  rpcUrl: "https://soroban-testnet.stellar.org",
-  networkPassphrase,
-  ...createKeypairSigner(process.env.ADMIN_SECRET!, networkPassphrase),
+const catalog = new CatalogClient();
+const health = await catalog.health();
+const arkAs = await catalog.arkas({
+  curated: true,
+  delisted: false,
+  limit: 20,
 });
 
-const registry = sdk.registry(process.env.REGISTRY_CONTRACT_ID!);
-await registry.setRegistrar(
-  process.env.ADMIN_PUBLIC_KEY!,
-  process.env.WRITER_PUBLIC_KEY!,
-  true,
-);
+for (const arka of arkAs.items) {
+  console.log({
+    contractId: arka.arkaId,
+    name: arka.identity?.displayName ?? arka.arkaId,
+    nav: formatAssetAmount(arka.nav, 7),
+    managementFee: formatBasisPoints(arka.fees.mgmtBps),
+  });
+}
 
-const guard = sdk.oracleGuard(process.env.ORACLE_GUARD_CONTRACT_ID!);
-await guard.setStellarPolicy({
-  caller: process.env.ADMIN_PUBLIC_KEY!,
-  asset: process.env.ASSET_ID!,
-  primary: process.env.PRIMARY_ORACLE_ID!,
-  secondary: process.env.SECONDARY_ORACLE_ID!,
-  hasSecondary: true,
-  maxPriceAge: 900,
-  maxDeviationBps: 250,
-  requireSecondary: false,
-  divergenceMode: DivergenceMode.UseSecondary,
+console.log({
+  healthy: health.healthy,
+  indexedArkas: health.indexedArkas,
+  failedArkas: health.failedArkas,
 });
 ```
 
-## Mainnet preset
+Public API reference: <https://arka.fund/docs/api-reference.html>
 
-The SDK includes the public Stellar mainnet passphrase, RPC endpoint and the
-contract IDs in the release manifest. No private key or signing authority is
-included.
+## Verify catalog data on-chain
+
+The SDK can read the same Arka directly from its Soroban contract. This example
+compares the indexed manager and NAV with the contract values.
 
 ```ts
 import {
-  ARKAFUND_MAINNET_CONTRACTS,
   ArkafundSdk,
+  CatalogClient,
   createMainnetConfig,
 } from "@arkafund/sdk";
 
+const catalog = new CatalogClient();
 const sdk = new ArkafundSdk(createMainnetConfig());
-const factory = sdk.factory(ARKAFUND_MAINNET_CONTRACTS.arkaFactory);
-const venues = sdk.venueRegistry(ARKAFUND_MAINNET_CONTRACTS.venueRegistry);
+const curated = await catalog.arkas({ curated: true, delisted: false, limit: 1 });
+const indexed = curated.items[0];
+
+const vault = sdk.vault(indexed.arkaId);
+const [manager, nav, fees, whitelist] = await Promise.all([
+  vault.manager(),
+  vault.nav(),
+  vault.fees(),
+  vault.whitelist(),
+]);
+
+console.log({
+  managerMatches: manager === indexed.manager,
+  navMatches: nav.toString() === indexed.nav,
+  fees,
+  whitelist,
+});
+```
+
+The package includes a complete executable version at
+`examples/mainnet-read.mjs`.
+
+## Wallet signing
+
+Reads do not require a wallet. Deposits, redemptions, Arka creation, routing and
+governance actions require a public key and a wallet-backed `signTransaction`
+callback.
+
+```ts
+import {
+  ArkafundSdk,
+  STELLAR_MAINNET_PASSPHRASE,
+  createMainnetConfig,
+} from "@arkafund/sdk";
+
+const signedSdk = new ArkafundSdk(createMainnetConfig({
+  publicKey: walletAddress,
+  signTransaction: async (xdr) => {
+    const signed = await wallet.signTransaction(xdr, {
+      networkPassphrase: STELLAR_MAINNET_PASSPHRASE,
+    });
+    return { signedTxXdr: signed.signedTxXdr };
+  },
+}));
+```
+
+The wallet remains the transaction signer. The SDK does not include private
+keys, signing authority or a custody layer.
+
+## Deposit and redeem
+
+Amounts passed to contracts use exact base units. Convert a user-entered decimal
+amount with the asset's declared decimals before building the transaction.
+
+```ts
+const vault = signedSdk.vault(arkaContractId);
+
+const deposit = await vault.deposit({
+  user: walletAddress,
+  asset: { contract: usdcContractId },
+  amount: 25_0000000n,
+});
+
+console.log(deposit.hash);
+
+const redemption = await vault.redeem({
+  user: walletAddress,
+  shares: 10_0000000n,
+});
+
+console.log(redemption.hash);
 ```
 
 ## Create an Arka
 
-`createAndInitialize` is the supported factory creation path. It creates,
-initializes and registers the Arka atomically. The connected manager signs the
-transaction. Fees are supplied in basis points because this mirrors the
-on-chain contract interface.
+`createAndInitialize` is the supported factory path. Creation, initialization,
+registration, default venue policy and risk-policy configuration occur through
+the canonical factory flow.
 
 ```ts
+import { ARKAFUND_MAINNET_CONTRACTS } from "@arkafund/sdk";
+
+const factory = signedSdk.factory(ARKAFUND_MAINNET_CONTRACTS.arkaFactory);
 const created = await factory.createAndInitialize({
   salt: crypto.getRandomValues(new Uint8Array(32)),
-  manager: managerAddress,
+  manager: walletAddress,
   denomination: usdcContractId,
   managementFeeBps: 100,
   performanceFeeBps: 1_500,
@@ -98,23 +171,26 @@ const created = await factory.createAndInitialize({
 console.log(created.hash, created.simulationResult);
 ```
 
-## Execute a route
+Fee inputs mirror the on-chain basis-point interface. In a product UI, display
+them with `formatBasisPoints`: `100` becomes `1.00%` and `1_500` becomes
+`15.00%`.
 
-The router executes routes that have already been selected by the application
-or integration. It does not invent a price quote. Every hop requires a
-`minOut`; the first hop requires a positive `amountIn`. A subsequent hop can
-set `amountIn: 0` to use the prior hop's output.
+## Execute a routed swap
+
+The router executes a route selected by an application or quote engine. Every
+hop requires an explicit minimum output; the SDK rejects empty routes and a
+zero first-hop input before any network request.
 
 ```ts
-const router = sdk.router(ARKAFUND_MAINNET_CONTRACTS.router);
+const router = signedSdk.router(ARKAFUND_MAINNET_CONTRACTS.router);
 const result = await router.execute({
-  caller: managerAddress,
+  caller: walletAddress,
   steps: [
     {
       adapter: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
       poolId: 0,
-      amountIn: 1_000_000n,
-      minOut: 990_000n,
+      amountIn: 10_0000000n,
+      minOut: 9_9000000n,
       assetOut: xlmContractId,
     },
   ],
@@ -123,16 +199,16 @@ const result = await router.execute({
 console.log(result.hash);
 ```
 
-## Venue controls
+## Venue safety controls
 
-Venue status is public. Changing it requires the configured governor or,
-for emergency disabling, the authorized guardian. The SDK only constructs and
-submits the signed contract transaction; it does not bypass those controls.
+Venue status is public. Status changes require the configured governor or, for
+emergency disabling, the authorized guardian. The SDK constructs the signed
+transaction but cannot bypass those contract controls.
 
 ```ts
 import { VenueStatus } from "@arkafund/sdk";
 
-const registry = sdk.venueRegistry(ARKAFUND_MAINNET_CONTRACTS.venueRegistry);
+const registry = signedSdk.venueRegistry(ARKAFUND_MAINNET_CONTRACTS.venueRegistry);
 const phoenix = ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix;
 
 console.log(await registry.configFor(phoenix));
@@ -141,73 +217,44 @@ console.log(await registry.isAutoAllowed(phoenix));
 await registry.setStatus(governorAddress, phoenix, VenueStatus.ManualOnly);
 ```
 
-## Modules
+## Error handling
 
-`registry(contractId)`
-- admin initialization
-- registrar management
-- Arka registration and legacy registration
-- curated and delisted flags
-- discovery reads and counts
-
-`oracleGuard(contractId)`
-- admin rotation
-- stellar and symbol policy management
-- policy inspection
-- SEP-40 compatible `lastPrice` reads
-
-`vault(contractId)`
-- NAV, fee, router, manager, share token and whitelist reads
-- typed deposit and redeem builders
-- blend and credit market status reads
-
-`factory(contractId)`
-- Arka pagination and manager discovery
-- creation fee, default venue, router, adapter and risk-policy reads
-- atomic `createAndInitialize` transaction builder and submitter
-
-`router(contractId)`
-- signed `execute` and `executeFor` route builders
-- validates contract addresses, 128-bit values and mandatory minimum output
-
-`venueRegistry(contractId)`
-- venue pagination, configuration and allowed-status reads
-- signed governor status changes and guardian/governor emergency disable
-
-## Extension model
-
-Third-party tooling can install an extension module on top of the SDK without mutating core behavior:
+Catalog requests reject with `CatalogApiError`, including the HTTP status, path
+and decoded response body. Contract methods reject simulation failures before a
+transaction is submitted; submitted methods return the transaction hash,
+simulation result and Stellar send/get responses.
 
 ```ts
-const analytics = sdk.use({
-  id: "partner.analytics",
-  version: "1.0.0",
-  install(currentSdk) {
-    return {
-      async registeredCount(registryId: string) {
-        return currentSdk.registry(registryId).count();
-      },
-    };
-  },
-});
+import { CatalogApiError } from "@arkafund/sdk";
+
+try {
+  await catalog.arka(unknownContractId);
+} catch (error) {
+  if (error instanceof CatalogApiError) {
+    console.error(error.status, error.path, error.body);
+  }
+}
 ```
 
-Extension IDs are unique inside a given SDK instance and are retrievable through `sdk.getExtension(id)`.
+## Modules
 
-## Maintainer workflow
-
-Refresh the generated bindings after rebuilding contract WASM artifacts:
-
-```bash
-bash scripts/build-wasm.sh
-cd sdk/typescript
-npm run regen:bindings
-```
+- `catalog`: health, metrics, Arkas, assets, managers, activity and monitoring
+- `registry(contractId)`: registration, curation, delisting and discovery reads
+- `factory(contractId)`: creation, pagination, creation fee and default policies
+- `vault(contractId)`: NAV, fees, whitelist, deposits, redemptions and credit status
+- `router(contractId)`: signed route execution with mandatory minimum outputs
+- `venueRegistry(contractId)`: venue configuration and governed status changes
+- `oracleGuard(contractId)`: price-policy configuration and guarded price reads
 
 ## Validation
 
+Maintainers validate the release with:
+
 ```bash
-cd sdk/typescript
 npm run test:unit
-npm run test:e2e
+npm run test:consumer
+npm run example:mainnet
 ```
+
+`test:consumer` packs the SDK, installs the tarball into an empty npm project and
+verifies that its public exports work without relying on repository-local files.

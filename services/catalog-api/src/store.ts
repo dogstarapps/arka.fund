@@ -8,8 +8,13 @@ import {
   appendRunToMonitoringArchive,
   createEmptyMonitoringArchive,
 } from "./monitoring.js";
+import {
+  createEmptyIdentityArchive,
+  validateIdentityArchive,
+} from "./identity.js";
 import type {
   CatalogHistoryArchive,
+  IdentityArchive,
   CatalogSnapshot,
   MonitoringArchive,
   MonitoringAlertState,
@@ -162,6 +167,50 @@ export class InMemoryMonitoringStore {
 
   async clear(): Promise<void> {
     this.archive = createEmptyMonitoringArchive(this.archive.retentionLimit);
+  }
+}
+
+export class FileIdentityStore {
+  constructor(private readonly filePath: string) {}
+
+  async read(): Promise<IdentityArchive> {
+    try {
+      const payload = await readFile(this.filePath, "utf8");
+      return validateIdentityArchive(JSON.parse(payload) as IdentityArchive);
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return createEmptyIdentityArchive();
+      }
+      throw error;
+    }
+  }
+
+  async write(archive: IdentityArchive): Promise<void> {
+    const validated = validateIdentityArchive(archive);
+    await mkdir(dirname(this.filePath), { recursive: true });
+    const temporaryPath = `${this.filePath}.tmp`;
+    await writeFile(temporaryPath, `${JSON.stringify(validated, null, 2)}\n`, "utf8");
+    await rename(temporaryPath, this.filePath);
+  }
+
+  async clear(): Promise<void> {
+    await rm(this.filePath, { force: true });
+  }
+}
+
+export class InMemoryIdentityStore {
+  private archive: IdentityArchive = createEmptyIdentityArchive();
+
+  async read(): Promise<IdentityArchive> {
+    return structuredClone(this.archive);
+  }
+
+  async write(archive: IdentityArchive): Promise<void> {
+    this.archive = validateIdentityArchive(archive);
+  }
+
+  async clear(): Promise<void> {
+    this.archive = createEmptyIdentityArchive();
   }
 }
 

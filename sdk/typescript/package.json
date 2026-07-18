@@ -1,6 +1,6 @@
 {
   "name": "@arkafund/sdk",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Public TypeScript SDK for Arkafund on-chain integrations",
   "type": "module",
   "exports": {
@@ -9,6 +9,7 @@
   "types": "./dist/src/index.d.ts",
   "files": [
     "dist/src",
+    "examples",
     "README.md"
   ],
   "engines": {
@@ -18,6 +19,9 @@
     "build": "tsc -p tsconfig.json",
     "regen:bindings": "bash ./scripts/generate-bindings.sh",
     "verify:mainnet-preset": "node ./scripts/verify-mainnet-preset.mjs",
+    "docs:api": "typedoc --options typedoc.json",
+    "example:mainnet": "node ./examples/mainnet-read.mjs",
+    "test:consumer": "bash ./scripts/test-consumer.sh",
     "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
     "test:integration": "bash ./scripts/integration-local.sh",
     "test:integration:live": "npm run build && node --test dist/tests/integration/*.test.js",
@@ -29,6 +33,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "typedoc": "^0.28.20",
     "typescript": "^5.9.2"
   }
 }

@@ -1,5 +1,6 @@
 import { rpc, scValToNative, type xdr } from "@stellar/stellar-sdk";
 import { createClientOptions, type NetworkConfig } from "./clientOptions.js";
+import { retryTransientRpc } from "./runners.js";
 import type {
   ActivityEntry,
   ActivityKind,
@@ -35,6 +36,8 @@ export interface RpcActivityReaderOptions extends NetworkConfig {
   lookbackLedgers?: number;
   pageSize?: number;
   maxPages?: number;
+  retryAttempts?: number;
+  retryDelayMs?: number;
 }
 
 export class RpcActivityReader implements ActivityReader {
@@ -64,7 +67,7 @@ export class RpcActivityReader implements ActivityReader {
 
     const arkaById = new Map(arkas.map((arka) => [arka.arkaId, arka]));
     const contractIds = [...arkaById.keys()];
-    const health = await this.server.getHealth();
+    const health = await this.rpcRead(() => this.server.getHealth());
     const oldestLedger = health.oldestLedger ?? 1;
     const endLedger = query.toLedger ?? health.latestLedger;
     if (endLedger < oldestLedger) {
@@ -86,7 +89,10 @@ export class RpcActivityReader implements ActivityReader {
         items: [],
       };
     }
-    const events = await this.fetchEvents(contractIds, startLedger, endLedger);
+    const events: rpc.Api.EventResponse[] = [];
+    for (const chunk of chunkContractIds(contractIds)) {
+      events.push(...await this.fetchEvents(chunk, startLedger, endLedger));
+    }
     const mapped = events
       .map((event) => mapRpcEvent(event, arkaById))
       .filter((entry): entry is ActivityEntry => entry !== null);
@@ -102,12 +108,14 @@ export class RpcActivityReader implements ActivityReader {
     const filters = [{ type: "contract" as const, contractIds }];
     const events: rpc.Api.EventResponse[] = [];
     let pages = 0;
-    let response = await this.server.getEvents({
-      startLedger,
-      endLedger,
-      filters,
-      limit: this.pageSize,
-    });
+    let response = await this.rpcRead(() =>
+      this.server.getEvents({
+        startLedger,
+        endLedger,
+        filters,
+        limit: this.pageSize,
+      }),
+    );
 
     while (true) {
       pages += 1;
@@ -120,15 +128,24 @@ export class RpcActivityReader implements ActivityReader {
       if (response.events.length < this.pageSize || pages >= this.maxPages) {
         return events;
       }
-      response = await this.server.getEvents({
-        cursor: response.cursor,
-        filters,
-        limit: this.pageSize,
-      });
+      response = await this.rpcRead(() =>
+        this.server.getEvents({
+          cursor: response.cursor,
+          filters,
+          limit: this.pageSize,
+        }),
+      );
       if (response.events.length === 0) {
         return events;
       }
     }
+  }
+
+  private async rpcRead<T>(operation: () => Promise<T>): Promise<T> {
+    return retryTransientRpc(operation, {
+      attempts: normalizePositiveInteger(this.options.retryAttempts, 4),
+      baseDelayMs: normalizePositiveInteger(this.options.retryDelayMs, 250),
+    });
   }
 }
 
@@ -166,6 +183,18 @@ function paginateActivity(entries: ActivityEntry[], query: ActivityQuery): Page<
     limit,
     items: sorted.slice(0, limit),
   };
+}
+
+export function chunkContractIds(
+  contractIds: string[],
+  chunkSize = 5,
+): string[][] {
+  const normalizedChunkSize = normalizePositiveInteger(chunkSize, 5);
+  const chunks: string[][] = [];
+  for (let index = 0; index < contractIds.length; index += normalizedChunkSize) {
+    chunks.push(contractIds.slice(index, index + normalizedChunkSize));
+  }
+  return chunks;
 }
 
 function mapRpcEvent(
@@ -344,6 +373,12 @@ function nativeBigIntToString(value: unknown): string | null {
     return value;
   }
   return null;
+}
+
+function normalizePositiveInteger(value: number | undefined, fallback: number): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : fallback;
 }
 
 function nativeNumber(value: unknown): number | null {

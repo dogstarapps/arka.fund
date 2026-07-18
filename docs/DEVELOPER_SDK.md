@@ -1,6 +1,6 @@
 # Developer SDK
 
-The public TypeScript SDK lives in `sdk/typescript` from the repository root.
+The public TypeScript SDK lives at `sdk/typescript` and is published as `@arkafund/sdk`.
 
 ## Supported surface
 
@@ -18,6 +18,15 @@ The public TypeScript SDK lives in `sdk/typescript` from the repository root.
   - NAV, manager, router, share token, fee, and whitelist reads
   - typed deposit and redeem builders
   - blend and credit market status reads
+- `factory(contractId)`
+  - canonical Arka creation and initialization
+  - creation fee and default policy reads
+- `router(contractId)`
+  - route execution with explicit minimum-output validation
+- `venueRegistry(contractId)`
+  - public venue configuration and governed protocol status changes
+- `CatalogClient`
+  - typed health, metrics, Arka, asset, manager, activity and monitoring reads
 
 ## Extension model
 
@@ -52,5 +61,7 @@ Run locally:
 ```bash
 cd sdk/typescript
 npm run test:unit
+npm run test:consumer
+npm run example:mainnet
 npm run test:e2e
 ```

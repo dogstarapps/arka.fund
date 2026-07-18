@@ -37,7 +37,10 @@ jobs:
         run: node scripts/verify-docs-site.mjs
       - name: Verify public proof video
         run: |
-          headers="$(curl --fail --silent --show-error --head https://arka.fund/arka-mainnet-verifiable-proof.mp4)"
+          headers="$(curl --fail --silent --show-error --head \
+            --retry 4 --retry-all-errors --retry-delay 3 \
+            --connect-timeout 15 --max-time 60 \
+            https://arka.fund/arka-mainnet-verifiable-proof.mp4)"
           grep -qi '^content-type: video/mp4' <<<"$headers"
           grep -qi '^accept-ranges: bytes' <<<"$headers"
       - name: Upload reproducible evidence

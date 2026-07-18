@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,6 +39,35 @@ class CatalogLatencyTests(unittest.TestCase):
     def test_parse_https_endpoint_rejects_non_https_urls(self):
         with self.assertRaises(ValueError):
             latency.parse_https_endpoint("http://catalog.arka.fund/v1/nav")
+
+    def test_warm_connection_retries_with_a_fresh_connection(self):
+        first_connection = Mock()
+        second_connection = Mock()
+        with (
+            patch.object(
+                latency,
+                "HTTPSConnection",
+                side_effect=[first_connection, second_connection],
+            ) as connection_factory,
+            patch.object(
+                latency,
+                "request_ok",
+                side_effect=[OSError("cold start timeout"), None],
+            ) as request_ok,
+        ):
+            connection = latency.warm_connection(
+                "app.arka.fund",
+                443,
+                "/api/nav",
+                10.0,
+                3,
+            )
+
+        self.assertIs(connection, second_connection)
+        self.assertEqual(connection_factory.call_count, 2)
+        self.assertEqual(request_ok.call_count, 2)
+        first_connection.close.assert_called_once_with()
+        second_connection.close.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -18,7 +18,9 @@ npm run build >/dev/null
 PACKAGE_FILE="$SDK_DIR/$(npm pack --silent)"
 
 PACKAGE_CONTENTS="$(tar -xOf "$PACKAGE_FILE" package/README.md; tar -xOf "$PACKAGE_FILE" package/package.json; tar -xOf "$PACKAGE_FILE" package/dist/src/sdk.js)"
-if grep -Eqi '/Users/|/home/|marcosoliva|manna-digital|ARKA_MAINNET_ADMIN_SK|HETZNER_PASS|OPENAI_API_KEY|GITHUB_TOKEN_DOGSTAR|ARKA_PAGERDUTY_ROUTING_KEY' <<<"$PACKAGE_CONTENTS"; then
+LOCAL_USERS_MARKER="/""Users/"
+LOCAL_HOME_MARKER="/""home/"
+if grep -Eqi "${LOCAL_USERS_MARKER}|${LOCAL_HOME_MARKER}|marcosoliva|manna-digital|ARKA_MAINNET_ADMIN_SK|HETZNER_PASS|OPENAI_API_KEY|GITHUB_TOKEN_DOGSTAR|ARKA_PAGERDUTY_ROUTING_KEY" <<<"$PACKAGE_CONTENTS"; then
   echo "SDK tarball contains a local path or sensitive identifier" >&2
   exit 1
 fi

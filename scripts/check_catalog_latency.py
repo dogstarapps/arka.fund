@@ -54,26 +54,57 @@ def parse_https_endpoint(endpoint: str) -> tuple[str, int, str]:
     return parsed.hostname, parsed.port or 443, target
 
 
-def measure(endpoint: str, samples: int, timeout_seconds: float) -> list[float]:
+def request_ok(connection: HTTPSConnection, target: str) -> None:
+    connection.request("GET", target, headers={"Connection": "keep-alive"})
+    response = connection.getresponse()
+    if response.status != 200:
+        raise RuntimeError(f"request returned HTTP {response.status}")
+    response.read()
+
+
+def warm_connection(
+    host: str,
+    port: int,
+    target: str,
+    timeout_seconds: float,
+    attempts: int,
+) -> HTTPSConnection:
+    last_error: OSError | RuntimeError | None = None
+    for _ in range(attempts):
+        connection = HTTPSConnection(host, port, timeout=timeout_seconds)
+        try:
+            request_ok(connection, target)
+            return connection
+        except (OSError, RuntimeError) as error:
+            last_error = error
+            connection.close()
+    raise RuntimeError(f"warm-up failed after {attempts} attempts: {last_error}")
+
+
+def measure(
+    endpoint: str,
+    samples: int,
+    timeout_seconds: float,
+    warm_up_attempts: int = 3,
+) -> list[float]:
     if samples < 1:
         raise ValueError("samples must be at least 1")
     host, port, target = parse_https_endpoint(endpoint)
-    connection = HTTPSConnection(host, port, timeout=timeout_seconds)
+    connection = warm_connection(
+        host,
+        port,
+        target,
+        timeout_seconds,
+        warm_up_attempts,
+    )
     try:
-        connection.request("GET", target, headers={"Connection": "keep-alive"})
-        warm_up = connection.getresponse()
-        if warm_up.status != 200:
-            raise RuntimeError(f"warm-up request returned HTTP {warm_up.status}")
-        warm_up.read()
-
         values_ms: list[float] = []
         for index in range(samples):
             started = time.perf_counter()
-            connection.request("GET", target, headers={"Connection": "keep-alive"})
-            response = connection.getresponse()
-            if response.status != 200:
-                raise RuntimeError(f"sample {index + 1} returned HTTP {response.status}")
-            response.read()
+            try:
+                request_ok(connection, target)
+            except RuntimeError as error:
+                raise RuntimeError(f"sample {index + 1} failed: {error}") from error
             values_ms.append((time.perf_counter() - started) * 1000)
         return values_ms
     finally:

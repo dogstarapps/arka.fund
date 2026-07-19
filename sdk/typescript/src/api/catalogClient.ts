@@ -2,17 +2,21 @@ import type {
   CatalogActivity,
   CatalogActivityQuery,
   CatalogArka,
+  CatalogArkaIdentity,
   CatalogArkaQuery,
   CatalogAsset,
   CatalogAssetQuery,
   CatalogHealth,
   CatalogManager,
+  CatalogManagerIdentity,
   CatalogManagerQuery,
   CatalogMetrics,
   CatalogMonitoringAlert,
   CatalogMonitoringRun,
   CatalogMonitoringStatus,
+  CatalogNavResponse,
   CatalogPage,
+  CatalogIdentityUpdateRequest,
 } from "./types.js";
 
 export const ARKAFUND_CATALOG_MAINNET_URL = "https://catalog.arka.fund";
@@ -54,12 +58,27 @@ export class CatalogClient {
     return this.get("/v1/metrics");
   }
 
+  nav(activityLimit?: number): Promise<CatalogNavResponse> {
+    return this.get("/v1/nav", { activityLimit });
+  }
+
   arkas(query: CatalogArkaQuery = {}): Promise<CatalogPage<CatalogArka>> {
     return this.get("/v1/arkas", query);
   }
 
   arka(arkaId: string): Promise<CatalogArka> {
     return this.get(`/v1/arkas/${encodeURIComponent(arkaId)}`);
+  }
+
+  arkaIdentity(arkaId: string): Promise<CatalogArkaIdentity> {
+    return this.get(`/v1/arkas/${encodeURIComponent(arkaId)}/identity`);
+  }
+
+  updateArkaIdentity(
+    arkaId: string,
+    request: CatalogIdentityUpdateRequest,
+  ): Promise<CatalogArkaIdentity> {
+    return this.put(`/v1/arkas/${encodeURIComponent(arkaId)}/identity`, request);
   }
 
   arkaAssets(arkaId: string): Promise<CatalogArka["assets"]> {
@@ -98,6 +117,17 @@ export class CatalogClient {
 
   manager(managerId: string): Promise<CatalogManager> {
     return this.get(`/v1/managers/${encodeURIComponent(managerId)}`);
+  }
+
+  managerIdentity(managerId: string): Promise<CatalogManagerIdentity> {
+    return this.get(`/v1/managers/${encodeURIComponent(managerId)}/identity`);
+  }
+
+  updateManagerIdentity(
+    managerId: string,
+    request: CatalogIdentityUpdateRequest,
+  ): Promise<CatalogManagerIdentity> {
+    return this.put(`/v1/managers/${encodeURIComponent(managerId)}/identity`, request);
   }
 
   managerArkas(
@@ -158,6 +188,24 @@ export class CatalogClient {
       throw new CatalogApiError(response.status, `${url.pathname}${url.search}`, body);
     }
     return body as T;
+  }
+
+  private async put<T>(path: string, body: object): Promise<T> {
+    const url = new URL(path, `${this.baseUrl}/`);
+    const response = await this.fetchImpl(url, {
+      method: "PUT",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+    const responseBody = await readJson(response);
+    if (!response.ok) {
+      throw new CatalogApiError(response.status, url.pathname, responseBody);
+    }
+    return responseBody as T;
   }
 }
 

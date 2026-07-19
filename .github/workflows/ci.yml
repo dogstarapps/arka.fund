@@ -91,10 +91,11 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
       - run: npm run test:consumer
+      - run: npm run test:examples
       - run: npm run docs:api
       - run: npm run verify:mainnet-preset
 
-  release-evidence:
+  platform-material:
     runs-on: ubuntu-latest
     needs: [catalog-api, typescript-sdk]
     steps:
@@ -112,5 +113,5 @@ jobs:
       - name: Generate SDK reference
         working-directory: sdk/typescript
         run: npm ci && npm run docs:api
-      - name: Verify public release material
+      - name: Verify public platform material
         run: node scripts/verify-docs-site.mjs

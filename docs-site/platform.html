@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Arka.fund developer platform, live services and product walkthroughs." />
+    <title>Arka.fund Developer Platform</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://arka.fund/" aria-label="Arka.fund home">
+        <img src="https://arka.fund/logo-arkafund.png" alt="Arka.fund" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html">Guides</a>
+        <a href="./api-reference.html">API Reference</a>
+        <a href="./sdk-reference/index.html">SDK Reference</a>
+        <a href="https://github.com/dogstarapps/arka.fund">Source</a>
+        <a class="app-link" href="https://app.arka.fund/">Open app</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro compact">
+        <p class="eyebrow">Developer platform</p>
+        <h1>Build with Arka.fund</h1>
+        <p class="lead">
+          Explore indexed mainnet data, typed Stellar integrations, contract
+          addresses and the operational status of the Arka.fund platform.
+        </p>
+        <div class="intro-actions">
+          <a class="button primary" href="./api-reference.html">Explore the API</a>
+          <a class="button secondary" href="https://www.npmjs.com/package/@arkafund/sdk">Install the SDK</a>
+        </div>
+      </section>
+
+      <section class="content-section media-section">
+        <div class="section-heading">
+          <p class="eyebrow">Platform overview</p>
+          <h2>Data, contracts and integrations</h2>
+          <p>
+            A concise tour of the Catalog API and its NAV endpoint, monitoring, the TypeScript
+            SDK, curated Arka discovery and the mainnet contract directory.
+          </p>
+        </div>
+        <video controls preload="metadata" playsinline>
+          <source src="https://arka.fund/arka-developer-platform-overview.mp4" type="video/mp4" />
+          Your browser does not support HTML video. Open the
+          <a href="https://arka.fund/arka-developer-platform-overview.mp4">platform overview</a>.
+        </video>
+        <a class="inline-link" href="https://arka.fund/arka-developer-platform-overview.mp4">Open the video directly</a>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <p class="eyebrow">Product tour</p>
+          <h2>Using the Arka.fund application</h2>
+          <p>
+            Follow the core workflow from wallet connection and Arka discovery to
+            creation, funding, manager actions, routing and protocol integrations.
+          </p>
+        </div>
+        <video controls preload="metadata" playsinline>
+          <source src="https://arka.fund/arka-dapp-product-tour.mp4" type="video/mp4" />
+          Your browser does not support HTML video. Open the
+          <a href="https://arka.fund/arka-dapp-product-tour.mp4">application tour</a>.
+        </video>
+        <a class="inline-link" href="https://arka.fund/arka-dapp-product-tour.mp4">Open the video directly</a>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <p class="eyebrow">Live services</p>
+          <h2>Production endpoints</h2>
+          <p>Public mainnet data is available without an API key.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Service</th><th>What it provides</th><th>Open</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Catalog API</strong></td>
+                <td>Arkas, managers, assets, histories, activity and public profiles.</td>
+                <td><a href="https://catalog.arka.fund/v1/arkas">Browse Arkas</a></td>
+              </tr>
+              <tr>
+                <td><strong>NAV API</strong></td>
+                <td>Aggregate NAV, denomination totals, valuation state and recent activity.</td>
+                <td><a href="https://catalog.arka.fund/v1/nav">Read NAV</a></td>
+              </tr>
+              <tr>
+                <td><strong>System status</strong></td>
+                <td>Indexer freshness, sync health, active alerts and recent runs.</td>
+                <td><a href="https://catalog.arka.fund/v1/monitoring/status">View status</a></td>
+              </tr>
+              <tr>
+                <td><strong>Mainnet contracts</strong></td>
+                <td>Canonical contract IDs, WASM hashes and Stellar Explorer links.</td>
+                <td><a href="./contracts-mainnet.json">Open directory</a></td>
+              </tr>
+              <tr>
+                <td><strong>TypeScript SDK</strong></td>
+                <td>Typed catalog reads and wallet-signed contract transaction builders.</td>
+                <td><a href="./sdk-reference/index.html">Browse reference</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="content-section resource-grid">
+        <article>
+          <p class="eyebrow">API</p>
+          <h2>Query mainnet data</h2>
+          <pre><code>curl https://catalog.arka.fund/v1/nav
+curl "https://catalog.arka.fund/v1/arkas?curated=true"</code></pre>
+          <a class="inline-link" href="./api-reference.html">Open the interactive reference</a>
+        </article>
+        <article>
+          <p class="eyebrow">SDK</p>
+          <h2>Start a TypeScript integration</h2>
+          <pre><code>npm install @arkafund/sdk</code></pre>
+          <a class="inline-link" href="./index.html#sdk">Open the integration guide</a>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>Arka.fund on Stellar mainnet</span>
+      <a href="./openapi.json">OpenAPI JSON</a>
+      <a href="https://catalog.arka.fund/health">System health</a>
+      <a href="https://arka.fund/">arka.fund</a>
+    </footer>
+  </body>
+</html>

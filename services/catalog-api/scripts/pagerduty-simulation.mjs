@@ -17,10 +17,10 @@ if (!routingKey) {
 }
 
 const outputPath = resolve(
-  process.env.ARKA_PAGERDUTY_EVIDENCE_FILE ??
+  process.env.ARKA_PAGERDUTY_OUTPUT_FILE ??
     "../../docs-site/pagerduty-monitoring-cycle.json",
 );
-const runId = `arka-completion-${new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14)}`;
+const runId = `arka-monitoring-${new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14)}`;
 const directory = await mkdtemp(join(tmpdir(), "arka-pagerduty-e2e-"));
 const receipts = [];
 let run = 0;
@@ -42,7 +42,7 @@ const runner = new StaticCatalogSyncRunner(async () => {
       [healthyArka],
       [{
         arkaId: recoveredArka.arkaId,
-        message: "Controlled Stellar RPC timeout for monitoring acceptance test",
+        message: "Controlled Stellar RPC timeout for monitoring simulation",
         syncedAt,
       }],
       syncedAt,
@@ -53,7 +53,7 @@ const runner = new StaticCatalogSyncRunner(async () => {
 
 const notifier = new PagerDutyMonitoringNotifier({
   routingKey,
-  source: "catalog.arka.fund acceptance simulation",
+  source: "catalog.arka.fund monitoring simulation",
   dedupPrefix: runId,
   onDelivery: (receipt) => receipts.push(receipt),
 });
@@ -93,7 +93,7 @@ if (!triggeredStatus.degraded || resolvedStatus.degraded) {
   throw new Error("Monitoring status did not transition from degraded to recovered");
 }
 
-const evidence = {
+const monitoringCycle = {
   schemaVersion: 1,
   kind: "pagerduty_monitoring_e2e",
   runId,
@@ -115,7 +115,7 @@ const evidence = {
   alertHistory: alerts,
 };
 
-await writeFile(outputPath, `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
+await writeFile(outputPath, `${JSON.stringify(monitoringCycle, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({ outputPath, runId, receipts }, null, 2));
 
 function arka(arkaId, manager) {

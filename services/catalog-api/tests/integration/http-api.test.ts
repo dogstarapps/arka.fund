@@ -194,6 +194,14 @@ test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", asy
     assert.equal(dashboardOverview.json().totalNavDelta, "600");
     assert.equal(dashboardOverview.json().activity.depositVolume, "2500");
 
+    const nav = await app.inject({
+      method: "GET",
+      url: "/v1/nav?activityLimit=10",
+    });
+    assert.equal(nav.statusCode, 200);
+    assert.deepEqual(nav.json(), dashboardOverview.json());
+    assert.match(nav.headers["cache-control"] ?? "", /max-age=5/);
+
     const dashboardComposition = await app.inject({
       method: "GET",
       url: "/v1/dashboard/composition?limit=5",
@@ -310,14 +318,20 @@ test("HTTP API publishes a complete OpenAPI contract for every public GET route"
     assert.ok(document.components.schemas.Arka);
     assert.ok(document.components.schemas.MonitoringStatus);
     assert.ok(document.components.schemas.NavResponse);
+    assert.ok(document.components.schemas.IdentityUpdateRequest);
     assert.equal(
-      document.paths["/api/nav"].get.servers[0].url,
-      "https://app.arka.fund",
-    );
-    assert.equal(
-      document.paths["/api/nav"].get.responses["200"].content["application/json"].schema.$ref,
+      document.paths["/v1/nav"].get.responses["200"].content["application/json"].schema.$ref,
       "#/components/schemas/NavResponse",
     );
+    assert.equal(
+      document.paths["/v1/arkas/{id}/identity"].put.requestBody.content["application/json"].schema.$ref,
+      "#/components/schemas/IdentityUpdateRequest",
+    );
+    assert.equal(
+      document.paths["/v1/managers/{id}/identity"].put.requestBody.content["application/json"].schema.$ref,
+      "#/components/schemas/IdentityUpdateRequest",
+    );
+    assert.equal(document.paths["/api/nav"], undefined);
   } finally {
     await app.close();
   }
@@ -596,6 +610,20 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
     });
     assert.equal(managerResponse.statusCode, 200);
     assert.equal(managerResponse.json().displayName, "Stellar Growth Manager");
+
+    const arkaIdentity = await app.inject({
+      method: "GET",
+      url: `/v1/arkas/${arkaId}/identity`,
+    });
+    assert.equal(arkaIdentity.statusCode, 200);
+    assert.equal(arkaIdentity.json().displayName, "Stellar Growth Arka");
+
+    const managerIdentity = await app.inject({
+      method: "GET",
+      url: `/v1/managers/${manager}/identity`,
+    });
+    assert.equal(managerIdentity.statusCode, 200);
+    assert.equal(managerIdentity.json().displayName, "Stellar Growth Manager");
 
     const detail = await app.inject({
       method: "GET",

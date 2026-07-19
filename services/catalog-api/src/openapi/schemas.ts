@@ -79,6 +79,52 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
       manager: stellarAddress,
     },
   },
+  ArkaIdentity: {
+    allOf: [
+      { $ref: "#/components/schemas/IdentityMetadata" },
+      {
+        type: "object",
+        required: ["arkaId", "manager"],
+        properties: {
+          arkaId: stellarAddress,
+          manager: stellarAddress,
+        },
+      },
+    ],
+  },
+  ManagerIdentity: {
+    allOf: [
+      { $ref: "#/components/schemas/IdentityMetadata" },
+      {
+        type: "object",
+        required: ["manager"],
+        properties: { manager: stellarAddress },
+      },
+    ],
+  },
+  IdentityUpdatePayload: {
+    type: "object",
+    required: ["nonce", "issuedAt"],
+    properties: {
+      displayName: nullableString,
+      description: nullableString,
+      avatarUrl: nullableString,
+      websiteUrl: nullableString,
+      socialUrl: nullableString,
+      nonce: { type: "string", minLength: 1, maxLength: 128 },
+      issuedAt: { type: "string", format: "date-time" },
+    },
+  },
+  IdentityUpdateRequest: {
+    type: "object",
+    required: ["signer", "message", "signature", "payload"],
+    properties: {
+      signer: stellarAddress,
+      message: { type: "string", minLength: 1 },
+      signature: { type: "string", minLength: 1, description: "Base64 Stellar signature." },
+      payload: { $ref: "#/components/schemas/IdentityUpdatePayload" },
+    },
+  },
   AssetExposure: {
     type: "object",
     required: [

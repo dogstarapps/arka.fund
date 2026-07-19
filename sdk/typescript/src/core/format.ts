@@ -21,6 +21,25 @@ export function formatAssetAmount(
   return `${negative ? "-" : ""}${whole}${fraction ? `.${fraction}` : ""}`;
 }
 
+/** Convert a human-readable decimal amount into an exact on-chain integer. */
+export function parseAssetAmount(amount: string, decimals: number): bigint {
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 18) {
+    throw new Error("decimals must be an integer between 0 and 18");
+  }
+  const normalized = amount.trim();
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(normalized);
+  if (!match) {
+    throw new Error("amount must be a decimal string without separators or exponent notation");
+  }
+  const fraction = match[3] ?? "";
+  if (fraction.length > decimals) {
+    throw new Error(`amount has more than ${decimals} decimal places`);
+  }
+  const scale = 10n ** BigInt(decimals);
+  const units = BigInt(match[2]) * scale + BigInt(fraction.padEnd(decimals, "0") || "0");
+  return match[1] === "-" ? -units : units;
+}
+
 /** Convert contract basis points into a human-readable percentage string. */
 export function formatBasisPoints(bps: number, fractionDigits = 2): string {
   if (!Number.isFinite(bps) || !Number.isInteger(bps)) {

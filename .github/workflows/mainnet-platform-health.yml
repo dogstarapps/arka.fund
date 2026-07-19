@@ -1,4 +1,4 @@
-name: Mainnet Release Evidence
+name: Mainnet Platform Health
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  verify-live-evidence:
+  verify-mainnet-platform:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,28 +29,29 @@ jobs:
           npm ci
           npm run test:unit
           npm run test:consumer
+          npm run test:examples
           npm run docs:api
           npm run example:mainnet
       - name: Measure live Mainnet services
-        run: node scripts/build-completion-evidence.mjs
-      - name: Verify generated release material
+        run: node scripts/build-platform-status.mjs
+      - name: Verify generated platform material
         run: node scripts/verify-docs-site.mjs
-      - name: Verify public proof video
+      - name: Verify public platform video
         run: |
           headers="$(curl --fail --silent --show-error --head \
             --retry 4 --retry-all-errors --retry-delay 3 \
             --connect-timeout 15 --max-time 60 \
-            https://arka.fund/arka-mainnet-verifiable-proof.mp4)"
+            https://arka.fund/arka-developer-platform-overview.mp4)"
           grep -qi '^content-type: video/mp4' <<<"$headers"
           grep -qi '^accept-ranges: bytes' <<<"$headers"
-      - name: Upload reproducible evidence
+      - name: Upload platform status
         uses: actions/upload-artifact@v4
         with:
-          name: arkafund-mainnet-evidence
+          name: arkafund-mainnet-status
           path: |
             docs-site/openapi.json
             docs-site/contracts-mainnet.json
-            docs-site/live-evidence.json
+            docs-site/system-status.json
             docs-site/pagerduty-monitoring-cycle.json
           if-no-files-found: error
           retention-days: 90

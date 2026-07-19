@@ -12,7 +12,7 @@ from http.client import HTTPSConnection
 from urllib.parse import SplitResult, urlsplit
 
 
-DEFAULT_ENDPOINT = "https://app.arka.fund/api/nav"
+DEFAULT_ENDPOINT = "https://catalog.arka.fund/v1/nav"
 
 
 @dataclass(frozen=True)

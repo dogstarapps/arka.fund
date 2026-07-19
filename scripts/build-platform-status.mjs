@@ -18,7 +18,7 @@ const endpoints = {
   monitoring: "https://catalog.arka.fund/v1/monitoring/status",
   curatedArkas:
     "https://catalog.arka.fund/v1/arkas?curated=true&delisted=false&limit=20",
-  nav: "https://app.arka.fund/api/nav",
+  nav: "https://catalog.arka.fund/v1/nav",
 };
 
 const [health, metrics, monitoring, curatedArkas] = await Promise.all([
@@ -38,7 +38,7 @@ const contracts = Object.entries(manifest.contracts).map(([name, contractId]) =>
   explorer: `https://stellar.expert/explorer/public/contract/${contractId}`,
 }));
 
-const liveEvidence = {
+const systemSnapshot = {
   schemaVersion: 1,
   generatedAt,
   network: "Stellar mainnet",
@@ -71,7 +71,7 @@ const liveEvidence = {
   latency,
 };
 
-validateEvidence(liveEvidence);
+validateSystemSnapshot(systemSnapshot);
 
 await mkdir(docsDirectory, { recursive: true });
 await Promise.all([
@@ -84,7 +84,7 @@ await Promise.all([
     manifestUpdatedAt: manifest.updatedAt,
     contracts,
   }),
-  writeJson(resolve(docsDirectory, "live-evidence.json"), liveEvidence),
+  writeJson(resolve(docsDirectory, "system-status.json"), systemSnapshot),
 ]);
 
 console.log(
@@ -119,7 +119,7 @@ async function fetchJson(url, attempts = 3) {
       if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, attempt * 500));
     }
   }
-  throw new Error(`Evidence request failed after ${attempts} attempts: ${url}`, {
+    throw new Error(`Platform request failed after ${attempts} attempts: ${url}`, {
     cause: lastError,
   });
 }
@@ -165,13 +165,13 @@ function wasmHashFor(name, hashes) {
   return null;
 }
 
-function validateEvidence(evidence) {
-  if (!evidence.indexer.healthy) throw new Error("Production indexer is not healthy");
-  if (evidence.indexer.failedArkas !== 0) throw new Error("Production indexer has failed Arkas");
-  if (evidence.curatedArkas.total < 5) throw new Error("Fewer than five curated Arkas");
-  if (evidence.latency.averageMs >= evidence.latency.targetAverageMs) {
+function validateSystemSnapshot(snapshot) {
+  if (!snapshot.indexer.healthy) throw new Error("Production indexer is not healthy");
+  if (snapshot.indexer.failedArkas !== 0) throw new Error("Production indexer has failed Arkas");
+  if (snapshot.curatedArkas.total < 5) throw new Error("Fewer than five curated Arkas");
+  if (snapshot.latency.averageMs >= snapshot.latency.targetAverageMs) {
     throw new Error(
-      `NAV average latency ${evidence.latency.averageMs} ms exceeds ${evidence.latency.targetAverageMs} ms`,
+      `NAV average latency ${snapshot.latency.averageMs} ms exceeds ${snapshot.latency.targetAverageMs} ms`,
     );
   }
 }

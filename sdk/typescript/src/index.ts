@@ -1,4 +1,5 @@
 export * from "./api/catalogClient.js";
+export * from "./api/identity.js";
 export * from "./api/types.js";
 export * from "./core/config.js";
 export * from "./core/extensions.js";

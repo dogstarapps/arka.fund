@@ -9,6 +9,7 @@ import {
   STELLAR_MAINNET_RPC_URL,
   VenueRegistryModule,
   VenueStatus,
+  VaultModule,
   createMainnetConfig,
 } from "../../src/index.js";
 
@@ -72,4 +73,151 @@ test("venue registry rejects unsupported status values before any network reques
     registry.buildSetStatus(account, contract, 4 as VenueStatus),
     /supported venue status/,
   );
+});
+
+test("vault rejects unsafe rebalance and credit inputs before any network request", async () => {
+  const vault = new VaultModule(config, contract);
+  await assert.rejects(
+    vault.buildRebalance({ manager: account, steps: [] }),
+    /at least one swap/,
+  );
+  await assert.rejects(
+    vault.buildRebalance({
+      manager: account,
+      steps: [{
+        adapter: contract,
+        router: ARKAFUND_MAINNET_CONTRACTS.router,
+        poolId: 0,
+        assetIn: contract,
+        assetOut: ARKAFUND_MAINNET_CONTRACTS.arkaFactory,
+        amountIn: 1,
+        minOut: 0,
+      }],
+    }),
+    /minOut must be greater than zero/,
+  );
+  await assert.rejects(
+    vault.buildCreditSupply({
+      manager: account,
+      protocol: { tag: "Blend", values: undefined },
+      marketId: 1,
+      asset: contract,
+      amount: 0,
+    }),
+    /amount must be greater than zero/,
+  );
+});
+
+test("vault transaction builders call the generated rebalance and credit methods", async () => {
+  const vault = new VaultModule(config, contract);
+  const calls: Array<{ action: string; input: Record<string, unknown> }> = [];
+  const assembled = { result: 1n, toXDR: () => "AAAA" };
+  const build = (action: string) => async (input: Record<string, unknown>) => {
+    calls.push({ action, input });
+    return assembled;
+  };
+  (vault as unknown as { client: Record<string, unknown> }).client = {
+    rebalance: build("rebalance"),
+    blend_lend: build("blend_lend"),
+    blend_withdraw: build("blend_withdraw"),
+    blend_borrow: build("blend_borrow"),
+    blend_repay: build("blend_repay"),
+    credit_supply: build("credit_supply"),
+    credit_withdraw: build("credit_withdraw"),
+    credit_borrow: build("credit_borrow"),
+    credit_repay: build("credit_repay"),
+  };
+
+  await vault.buildRebalance({
+    manager: account,
+    steps: [{
+      adapter: contract,
+      router: ARKAFUND_MAINNET_CONTRACTS.router,
+      poolId: 0,
+      assetIn: contract,
+      assetOut: ARKAFUND_MAINNET_CONTRACTS.arkaFactory,
+      amountIn: 10,
+      minOut: 9,
+    }],
+  });
+  await vault.buildBlendLend({
+    manager: account,
+    adapter: contract,
+    marketId: 1,
+    asset: contract,
+    amount: 20,
+  });
+  await vault.buildBlendWithdraw({
+    manager: account,
+    adapter: contract,
+    marketId: 1,
+    asset: contract,
+    amount: 21,
+  });
+  await vault.buildBlendBorrow({
+    manager: account,
+    adapter: contract,
+    marketId: 1,
+    asset: contract,
+    amount: 22,
+  });
+  await vault.buildBlendRepay({
+    manager: account,
+    adapter: contract,
+    marketId: 1,
+    asset: contract,
+    amount: 23,
+  });
+  await vault.buildCreditSupply({
+    manager: account,
+    protocol: { tag: "Blend", values: undefined },
+    marketId: 1,
+    asset: contract,
+    amount: 30,
+  });
+  await vault.buildCreditWithdraw({
+    manager: account,
+    protocol: { tag: "Blend", values: undefined },
+    marketId: 1,
+    asset: contract,
+    amount: 31,
+  });
+  await vault.buildCreditBorrow({
+    manager: account,
+    protocol: { tag: "Blend", values: undefined },
+    marketId: 1,
+    asset: contract,
+    amount: 32,
+  });
+  await vault.buildCreditRepay({
+    manager: account,
+    protocol: { tag: "Blend", values: undefined },
+    marketId: 1,
+    asset: contract,
+    amount: 33,
+  });
+
+  assert.deepEqual(calls.map((call) => call.action), [
+    "rebalance",
+    "blend_lend",
+    "blend_withdraw",
+    "blend_borrow",
+    "blend_repay",
+    "credit_supply",
+    "credit_withdraw",
+    "credit_borrow",
+    "credit_repay",
+  ]);
+  assert.equal(
+    ((calls[0]?.input.steps as Array<{ amount_in: bigint }>)[0]?.amount_in),
+    10n,
+  );
+  assert.equal(calls[1]?.input.amount, 20n);
+  assert.equal(calls[2]?.input.amount, 21n);
+  assert.equal(calls[3]?.input.amount, 22n);
+  assert.equal(calls[4]?.input.amount, 23n);
+  assert.equal(calls[5]?.input.amount, 30n);
+  assert.equal(calls[6]?.input.amount, 31n);
+  assert.equal(calls[7]?.input.amount, 32n);
+  assert.equal(calls[8]?.input.amount, 33n);
 });

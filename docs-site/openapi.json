@@ -58,18 +58,24 @@
     }
   ],
   "paths": {
-    "/api/nav": {
+    "/v1/nav": {
       "get": {
         "tags": [
           "NAV"
         ],
         "summary": "Read aggregate NAV",
-        "operationId": "getNav",
-        "description": "Returns the public application NAV aggregate, denomination totals, oracle state, activity summary and indexer monitoring state.",
-        "servers": [
+        "operationId": "getCatalogNav",
+        "description": "Returns the canonical catalog NAV aggregate, denomination totals, valuation state, activity summary and indexer monitoring state.",
+        "parameters": [
           {
-            "url": "https://app.arka.fund",
-            "description": "Arka.fund application API on Stellar mainnet"
+            "name": "activityLimit",
+            "in": "query",
+            "required": false,
+            "description": "Number of recent activity records used in aggregates.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         ],
         "responses": {
@@ -84,7 +90,7 @@
             }
           },
           "503": {
-            "description": "The catalog snapshot is unavailable.",
+            "description": "The latest indexed snapshot is unavailable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -299,6 +305,119 @@
           },
           "503": {
             "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/arkas/{id}/identity": {
+      "get": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "Read an Arka profile",
+        "operationId": "getArkaIdentity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public Arka profile metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkaIdentity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Arkas"
+        ],
+        "summary": "Update an Arka profile",
+        "operationId": "updateArkaIdentity",
+        "description": "Saves public Arka profile metadata after verifying a Stellar signature from the current Arka manager.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Arka contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated Arka profile metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkaIdentity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The signed profile payload is invalid or expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The signer is not authorized to update this profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1076,6 +1195,119 @@
         }
       }
     },
+    "/v1/managers/{id}/identity": {
+      "get": {
+        "tags": [
+          "Managers"
+        ],
+        "summary": "Read a manager profile",
+        "operationId": "getManagerIdentity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Manager account address.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public manager profile metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerIdentity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Managers"
+        ],
+        "summary": "Update a manager profile",
+        "operationId": "updateManagerIdentity",
+        "description": "Saves public manager profile metadata after verifying a signature from the manager wallet.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Manager account address.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated manager profile metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerIdentity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The signed profile payload is invalid or expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The signer is not authorized to update this profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/managers/{id}/history": {
       "get": {
         "tags": [
@@ -1722,6 +1954,118 @@
             "type": "string",
             "pattern": "^[CG][A-Z2-7]{55}$",
             "description": "Stellar account or Soroban contract address."
+          }
+        }
+      },
+      "ArkaIdentity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdentityMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "arkaId",
+              "manager"
+            ],
+            "properties": {
+              "arkaId": {
+                "type": "string",
+                "pattern": "^[CG][A-Z2-7]{55}$",
+                "description": "Stellar account or Soroban contract address."
+              },
+              "manager": {
+                "type": "string",
+                "pattern": "^[CG][A-Z2-7]{55}$",
+                "description": "Stellar account or Soroban contract address."
+              }
+            }
+          }
+        ]
+      },
+      "ManagerIdentity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IdentityMetadata"
+          },
+          {
+            "type": "object",
+            "required": [
+              "manager"
+            ],
+            "properties": {
+              "manager": {
+                "type": "string",
+                "pattern": "^[CG][A-Z2-7]{55}$",
+                "description": "Stellar account or Soroban contract address."
+              }
+            }
+          }
+        ]
+      },
+      "IdentityUpdatePayload": {
+        "type": "object",
+        "required": [
+          "nonce",
+          "issuedAt"
+        ],
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "websiteUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "nonce": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IdentityUpdateRequest": {
+        "type": "object",
+        "required": [
+          "signer",
+          "message",
+          "signature",
+          "payload"
+        ],
+        "properties": {
+          "signer": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "signature": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Base64 Stellar signature."
+          },
+          "payload": {
+            "$ref": "#/components/schemas/IdentityUpdatePayload"
           }
         }
       },

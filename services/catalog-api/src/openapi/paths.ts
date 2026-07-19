@@ -7,11 +7,22 @@ const response = (description: string, schema: Record<string, unknown>) => ({
   content: json(schema),
 });
 
+const requestBody = (schema: Record<string, unknown>) => ({
+  required: true,
+  content: json(schema),
+});
+
 const schemaRef = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 
 const errorResponses = {
   "404": response("Resource not found.", schemaRef("Error")),
   "503": response("The latest indexed snapshot is unavailable.", schemaRef("Error")),
+};
+
+const identityErrorResponses = {
+  "400": response("The signed profile payload is invalid or expired.", schemaRef("Error")),
+  "403": response("The signer is not authorized to update this profile.", schemaRef("Error")),
+  "404": errorResponses["404"],
 };
 
 const idParameter = (name: string, description: string) => ({
@@ -66,22 +77,22 @@ const arkaFilters = [
 ];
 
 export const catalogOpenApiPaths: Record<string, unknown> = {
-  "/api/nav": {
+  "/v1/nav": {
     get: {
       tags: ["NAV"],
       summary: "Read aggregate NAV",
-      operationId: "getNav",
+      operationId: "getCatalogNav",
       description:
-        "Returns the public application NAV aggregate, denomination totals, oracle state, activity summary and indexer monitoring state.",
-      servers: [
-        {
-          url: "https://app.arka.fund",
-          description: "Arka.fund application API on Stellar mainnet",
-        },
+        "Returns the canonical catalog NAV aggregate, denomination totals, valuation state, activity summary and indexer monitoring state.",
+      parameters: [
+        query("activityLimit", "Number of recent activity records used in aggregates.", {
+          type: "integer",
+          minimum: 1,
+        }),
       ],
       responses: {
         "200": response("Current aggregate NAV response.", schemaRef("NavResponse")),
-        "503": response("The catalog snapshot is unavailable.", schemaRef("Error")),
+        "503": errorResponses["503"],
       },
     },
   },
@@ -129,6 +140,31 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       responses: {
         "200": response("Indexed Arka state.", schemaRef("Arka")),
         ...errorResponses,
+      },
+    },
+  },
+  "/v1/arkas/{id}/identity": {
+    get: {
+      tags: ["Arkas"],
+      summary: "Read an Arka profile",
+      operationId: "getArkaIdentity",
+      parameters: [idParameter("id", "Arka contract ID.")],
+      responses: {
+        "200": response("Public Arka profile metadata.", schemaRef("ArkaIdentity")),
+        "404": errorResponses["404"],
+      },
+    },
+    put: {
+      tags: ["Arkas"],
+      summary: "Update an Arka profile",
+      operationId: "updateArkaIdentity",
+      description:
+        "Saves public Arka profile metadata after verifying a Stellar signature from the current Arka manager.",
+      parameters: [idParameter("id", "Arka contract ID.")],
+      requestBody: requestBody(schemaRef("IdentityUpdateRequest")),
+      responses: {
+        "200": response("Updated Arka profile metadata.", schemaRef("ArkaIdentity")),
+        ...identityErrorResponses,
       },
     },
   },
@@ -272,6 +308,31 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       responses: {
         "200": response("Indexed manager state.", schemaRef("Manager")),
         ...errorResponses,
+      },
+    },
+  },
+  "/v1/managers/{id}/identity": {
+    get: {
+      tags: ["Managers"],
+      summary: "Read a manager profile",
+      operationId: "getManagerIdentity",
+      parameters: [idParameter("id", "Manager account address.")],
+      responses: {
+        "200": response("Public manager profile metadata.", schemaRef("ManagerIdentity")),
+        "404": errorResponses["404"],
+      },
+    },
+    put: {
+      tags: ["Managers"],
+      summary: "Update a manager profile",
+      operationId: "updateManagerIdentity",
+      description:
+        "Saves public manager profile metadata after verifying a signature from the manager wallet.",
+      parameters: [idParameter("id", "Manager account address.")],
+      requestBody: requestBody(schemaRef("IdentityUpdateRequest")),
+      responses: {
+        "200": response("Updated manager profile metadata.", schemaRef("ManagerIdentity")),
+        ...identityErrorResponses,
       },
     },
   },

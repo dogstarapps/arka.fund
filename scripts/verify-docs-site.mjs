@@ -7,14 +7,14 @@ const docsRoot = resolve(repositoryRoot, "docs-site");
 const sdkRoot = resolve(repositoryRoot, "sdk/typescript");
 const errors = [];
 
-const [openapi, contracts, evidence, curatedProof, pagerDuty, completionPage, sdkPackage, sdkSource] =
+const [openapi, contracts, systemStatus, curatedArkas, pagerDuty, platformPage, sdkPackage, sdkSource] =
   await Promise.all([
     readJson(resolve(docsRoot, "openapi.json")),
     readJson(resolve(docsRoot, "contracts-mainnet.json")),
-    readJson(resolve(docsRoot, "live-evidence.json")),
+    readJson(resolve(docsRoot, "system-status.json")),
     readJson(resolve(docsRoot, "mainnet-curated-arkas-20260718.json")),
     readJson(resolve(docsRoot, "pagerduty-monitoring-cycle.json")),
-    readFile(resolve(docsRoot, "completion.html"), "utf8"),
+    readFile(resolve(docsRoot, "platform.html"), "utf8"),
     readJson(resolve(sdkRoot, "package.json")),
     readFile(resolve(sdkRoot, "src/sdk.ts"), "utf8"),
   ]);
@@ -27,20 +27,23 @@ assert(
 const operations = Object.values(openapi.paths ?? {}).flatMap((path) =>
   Object.entries(path).filter(([method]) => method === "get"),
 );
-assert(operations.length >= 23, "OpenAPI must document the catalog and NAV GET routes");
-assert(
-  openapi.paths?.["/api/nav"]?.get?.servers?.[0]?.url === "https://app.arka.fund",
-  "OpenAPI NAV operation must target the production application API",
-);
+assert(operations.length >= 25, "OpenAPI must document the catalog and canonical NAV routes");
+assert(!openapi.paths?.["/api/nav"], "OpenAPI must not publish the DApp compatibility facade");
 assert(
   openapi.components?.schemas?.NavResponse,
   "OpenAPI must publish the aggregate NAV response schema",
 );
+assert(openapi.paths?.["/v1/nav"]?.get, "OpenAPI must publish the canonical NAV route");
+assert(
+  openapi.paths?.["/v1/arkas/{id}/identity"]?.put &&
+    openapi.paths?.["/v1/managers/{id}/identity"]?.put,
+  "OpenAPI must document signed public profile updates",
+);
 
-assert(contracts.network === "mainnet", "Contract evidence must target mainnet");
+assert(contracts.network === "mainnet", "Contract registry must target mainnet");
 assert(
   ["deployed", "mainnet_manual_release_ready"].includes(contracts.status),
-  "Contract evidence must carry a deployed mainnet release status",
+  "Contract registry must carry a deployed mainnet status",
 );
 assert(contracts.contracts?.length === 19, "Expected 19 mainnet contracts");
 for (const contract of contracts.contracts ?? []) {
@@ -52,25 +55,25 @@ for (const contract of contracts.contracts ?? []) {
   );
 }
 
-assert(evidence.network === "Stellar mainnet", "Live evidence must target mainnet");
-assert(evidence.indexer?.healthy === true, "Production indexer must be healthy");
-assert(evidence.indexer?.failedArkas === 0, "Production indexer must have zero failed Arkas");
-assert(evidence.curatedArkas?.total >= 5, "At least five curated Arkas are required");
+assert(systemStatus.network === "Stellar mainnet", "System snapshot must target mainnet");
+assert(systemStatus.indexer?.healthy === true, "Production indexer must be healthy");
+assert(systemStatus.indexer?.failedArkas === 0, "Production indexer must have zero failed Arkas");
+assert(systemStatus.curatedArkas?.total >= 5, "At least five curated Arkas are required");
 assert(
-  evidence.latency?.samples === 20 &&
-    evidence.latency.averageMs < evidence.latency.targetAverageMs,
-  "NAV evidence must contain 20 samples below the 200 ms average target",
+  systemStatus.latency?.samples === 20 &&
+    systemStatus.latency.averageMs < systemStatus.latency.targetAverageMs,
+  "NAV system snapshot must contain 20 samples below the 200 ms average target",
 );
 
 assert(
-  curatedProof.kind === "mainnet_curated_arkas_proof",
-  "Missing mainnet curated-Arka proof",
+  curatedArkas.kind === "mainnet_curated_arkas_snapshot",
+  "Missing mainnet curated-Arka snapshot",
 );
 assert(
-  curatedProof.metrics?.curatedArkas === 5 && curatedProof.curatedArkas?.length === 5,
-  "Curated-Arka proof must contain exactly five platform-listed Arkas",
+  curatedArkas.metrics?.curatedArkas === 5 && curatedArkas.curatedArkas?.length === 5,
+  "Curated-Arka snapshot must contain exactly five platform-listed Arkas",
 );
-for (const arka of curatedProof.curatedArkas ?? []) {
+for (const arka of curatedArkas.curatedArkas ?? []) {
   assert(/^C[A-Z2-7]{55}$/.test(arka.arkaId), `Invalid curated Arka ID ${arka.arkaId}`);
   assert(
     arka.stellarExpert ===
@@ -79,7 +82,7 @@ for (const arka of curatedProof.curatedArkas ?? []) {
   );
 }
 
-assert(pagerDuty.kind === "pagerduty_monitoring_e2e", "Missing PagerDuty E2E evidence");
+assert(pagerDuty.kind === "pagerduty_monitoring_e2e", "Missing PagerDuty monitoring cycle");
 assert(pagerDuty.trigger?.monitoring?.degraded === true, "PagerDuty trigger must start degraded");
 assert(pagerDuty.recovery?.monitoring?.degraded === false, "PagerDuty recovery must finish healthy");
 assert(pagerDuty.trigger?.pagerDuty?.httpStatus === 202, "PagerDuty trigger was not accepted");
@@ -92,9 +95,19 @@ assert(
 const sdkVersionMatch = sdkSource.match(/SDK_VERSION\s*=\s*"([^"]+)"/);
 assert(sdkVersionMatch?.[1] === sdkPackage.version, "SDK source and package versions differ");
 assert(
-  completionPage.includes("https://arka.fund/arka-mainnet-verifiable-proof.mp4"),
-  "Completion page must link the current operational proof video",
+  platformPage.includes("https://arka.fund/arka-developer-platform-overview.mp4") &&
+    platformPage.includes("https://arka.fund/arka-dapp-product-tour.mp4"),
+  "Platform page must link both current walkthrough videos",
 );
+
+const publicHtml = await Promise.all(
+  ["index.html", "platform.html", "api-reference.html", "completion.html", "evidence.html"]
+    .map((name) => readFile(resolve(docsRoot, name), "utf8")),
+);
+const reviewerLanguage = /\b(reviewer|tranche|proof|evidence|deliverable|reproduce|completion)\b/i;
+for (const [index, contents] of publicHtml.entries()) {
+  assert(!reviewerLanguage.test(contents), `Reviewer-oriented wording found in public HTML ${index}`);
+}
 
 const files = await walk(docsRoot);
 const textFiles = files.filter((file) =>
@@ -117,10 +130,10 @@ console.log(
     {
       openApiGetOperations: operations.length,
       mainnetContracts: contracts.contracts.length,
-      indexedArkas: evidence.indexer.indexedArkas,
-      curatedArkas: evidence.curatedArkas.total,
-      curatedArkaContracts: curatedProof.curatedArkas.length,
-      navAverageLatencyMs: evidence.latency.averageMs,
+      indexedArkas: systemStatus.indexer.indexedArkas,
+      curatedArkas: systemStatus.curatedArkas.total,
+      curatedArkaContracts: curatedArkas.curatedArkas.length,
+      navAverageLatencyMs: systemStatus.latency.averageMs,
       pagerDutyCycle: "triggered_and_resolved",
       sdkVersion: sdkPackage.version,
       checkedFiles: textFiles.length,

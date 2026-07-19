@@ -18,7 +18,7 @@
         <a href="./sdk-reference/index.html">SDK Reference</a>
         <a href="./api-reference.html">API Reference</a>
         <a href="#contracts">Contracts</a>
-        <a href="./completion.html">Release evidence</a>
+        <a href="./platform.html">Platform</a>
         <a class="app-link" href="https://app.arka.fund/">Open app</a>
       </nav>
     </header>
@@ -50,7 +50,7 @@
 
         <div class="endpoint-grid">
           <a href="https://catalog.arka.fund/health"><strong>GET</strong><span>https://catalog.arka.fund/health</span><small>Indexer health, sync freshness and alert state.</small></a>
-          <a href="https://app.arka.fund/api/nav"><strong>GET</strong><span>https://app.arka.fund/api/nav</span><small>Aggregated NAV data used by the application.</small></a>
+          <a href="https://catalog.arka.fund/v1/nav"><strong>GET</strong><span>https://catalog.arka.fund/v1/nav</span><small>Canonical aggregate NAV, valuation and activity data.</small></a>
           <a href="https://catalog.arka.fund/v1/metrics"><strong>GET</strong><span>https://catalog.arka.fund/v1/metrics</span><small>Total Arkas, indexed Arkas, curated Arkas and assets.</small></a>
           <a href="https://catalog.arka.fund/v1/arkas?curated=true&limit=20"><strong>GET</strong><span>/v1/arkas?curated=true&amp;limit=20</span><small>Curated Arka list with manager, NAV and asset metadata.</small></a>
           <a href="https://catalog.arka.fund/v1/dashboard/overview"><strong>GET</strong><span>/v1/dashboard/overview</span><small>Dashboard aggregates, activity summary and monitoring state.</small></a>
@@ -62,12 +62,12 @@
         <pre><code>import { CatalogClient } from "@arkafund/sdk";
 
 const catalog = new CatalogClient();
-const [health, metrics] = await Promise.all([
+const [health, nav] = await Promise.all([
   catalog.health(),
-  catalog.metrics(),
+  catalog.nav(),
 ]);
 
-console.log(metrics.totalArkas, metrics.totalManagers, health.healthy);</code></pre>
+console.log(nav.totalNav, nav.totalArkas, health.healthy);</code></pre>
 
         <h3>Fetch curated Arkas</h3>
         <pre><code>const page = await catalog.arkas({
@@ -122,7 +122,7 @@ const router = sdk.router(ARKAFUND_MAINNET_CONTRACTS.router);</code></pre>
           </div>
           <dl class="facts">
             <div><dt>npm package</dt><dd>@arkafund/sdk</dd></div>
-            <div><dt>Current release</dt><dd>0.2.2</dd></div>
+            <div><dt>Current release</dt><dd>0.3.0</dd></div>
             <div><dt>Network preset</dt><dd>Stellar mainnet</dd></div>
             <div><dt>Signing model</dt><dd>User wallet or integrator signer</dd></div>
           </dl>
@@ -131,7 +131,7 @@ const router = sdk.router(ARKAFUND_MAINNET_CONTRACTS.router);</code></pre>
         <div class="module-grid" aria-label="SDK modules">
           <article><h3>Catalog</h3><p>Typed mainnet reads for health, metrics, Arkas, assets, managers, activity and monitoring.</p></article>
           <article><h3>Factory</h3><p>Create Arka transactions and inspect creation-fee settings.</p></article>
-          <article><h3>Vault</h3><p>Read manager, NAV, fees, whitelist, deposits and redemptions.</p></article>
+          <article><h3>Vault</h3><p>Read vault state and build deposits, redemptions, rebalances and credit actions.</p></article>
           <article><h3>Registry</h3><p>List Arkas, read manager curation and delisting state.</p></article>
           <article><h3>Router</h3><p>Build route execution with explicit minimum output controls.</p></article>
           <article><h3>Venue registry</h3><p>Read enabled venues and protocol-level controls.</p></article>
@@ -148,6 +148,39 @@ const [manager, nav] = await Promise.all([vault.manager(), vault.nav()]);
 console.log({
   managerMatches: manager === indexed.manager,
   navMatches: nav.toString() === indexed.nav,
+});</code></pre>
+
+        <h3>Use human-readable amounts</h3>
+        <pre><code>import { parseAssetAmount } from "@arkafund/sdk";
+
+const amount = parseAssetAmount("25.50", 7);
+await vault.deposit({
+  user: walletAddress,
+  asset: { contract: usdcContractId },
+  amount,
+});</code></pre>
+
+        <h3>Rebalance through an enabled venue</h3>
+        <pre><code>await vault.rebalance({
+  manager: walletAddress,
+  steps: [{
+    adapter: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
+    router: phoenixRouterContractId,
+    poolId: 0,
+    assetIn: usdcContractId,
+    assetOut: xlmContractId,
+    amountIn: parseAssetAmount("10", 7),
+    minOut: parseAssetAmount("32.5", 7),
+  }],
+});</code></pre>
+
+        <h3>Manage a Blend position</h3>
+        <pre><code>await vault.blendLend({
+  manager: walletAddress,
+  adapter: ARKAFUND_MAINNET_CONTRACTS.adapterBlendFixedXlmUsdc,
+  marketId: 1,
+  asset: usdcContractId,
+  amount: parseAssetAmount("50", 7),
 });</code></pre>
 
         <p class="note">
@@ -208,11 +241,11 @@ console.log({
 
       <section class="content-section final-section">
         <div>
-          <p class="eyebrow">Release proof</p>
-          <h2>Reproduce what works</h2>
-          <p>Live endpoints, API execution, monitoring evidence, mainnet contracts, SDK validation and curated Arkas are collected in one place.</p>
+          <p class="eyebrow">Developer platform</p>
+          <h2>Explore the complete stack</h2>
+          <p>Live services, product walkthroughs, mainnet contracts and integration references are collected in one place.</p>
         </div>
-        <a class="button primary" href="./completion.html">Open release evidence</a>
+        <a class="button primary" href="./platform.html">Open platform overview</a>
       </section>
     </main>
 

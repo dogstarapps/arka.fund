@@ -35,6 +35,7 @@ import {
 
 const catalog = new CatalogClient();
 const health = await catalog.health();
+const nav = await catalog.nav();
 const arkAs = await catalog.arkas({
   curated: true,
   delisted: false,
@@ -54,6 +55,7 @@ console.log({
   healthy: health.healthy,
   indexedArkas: health.indexedArkas,
   failedArkas: health.failedArkas,
+  totalNav: nav.totalNav,
 });
 ```
 
@@ -124,16 +126,19 @@ keys, signing authority or a custody layer.
 
 ## Deposit and redeem
 
-Amounts passed to contracts use exact base units. Convert a user-entered decimal
-amount with the asset's declared decimals before building the transaction.
+Convert user-entered decimal amounts with the asset's declared decimals. This
+keeps product interfaces human-readable while preserving exact on-chain values.
 
 ```ts
+import { parseAssetAmount } from "@arkafund/sdk";
+
 const vault = signedSdk.vault(arkaContractId);
 
+const amount = parseAssetAmount("25", 7);
 const deposit = await vault.deposit({
   user: walletAddress,
   asset: { contract: usdcContractId },
-  amount: 25_0000000n,
+  amount,
 });
 
 console.log(deposit.hash);
@@ -145,6 +150,96 @@ const redemption = await vault.redeem({
 
 console.log(redemption.hash);
 ```
+
+## Rebalance an Arka
+
+Managers can submit the route chosen by their application or quote engine through
+the Arka contract. Every step identifies the adapter, protocol router, assets and
+minimum acceptable output.
+
+```ts
+const vault = signedSdk.vault(arkaContractId);
+const result = await vault.rebalance({
+  manager: walletAddress,
+  steps: [{
+    adapter: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
+    router: phoenixRouterContractId,
+    poolId: 0,
+    assetIn: usdcContractId,
+    assetOut: xlmContractId,
+    amountIn: parseAssetAmount("10", 7),
+    minOut: parseAssetAmount("32.5", 7),
+  }],
+});
+
+console.log(result.hash);
+```
+
+The route must also satisfy the Arka whitelist, allowed-venue configuration and
+on-chain swap-risk policy. The SDK cannot bypass those controls.
+
+## Blend credit actions
+
+The vault module exposes explicit supply, withdraw, borrow and repay builders.
+The manager signs the transaction and the Arka contract applies the configured
+market and risk policy.
+
+```ts
+await vault.blendLend({
+  manager: walletAddress,
+  adapter: ARKAFUND_MAINNET_CONTRACTS.adapterBlendFixedXlmUsdc,
+  marketId: 1,
+  asset: usdcContractId,
+  amount: parseAssetAmount("50", 7),
+});
+
+await vault.creditRepay({
+  manager: walletAddress,
+  protocol: { tag: "Blend", values: undefined },
+  marketId: 1,
+  asset: usdcContractId,
+  amount: parseAssetAmount("5", 7),
+});
+```
+
+Equivalent methods are available for `blendWithdraw`, `blendBorrow`,
+`blendRepay`, `creditSupply`, `creditWithdraw` and `creditBorrow`. Every action
+also has a `build...` variant for applications that manage submission separately.
+
+The complete wallet integration example is compiled in CI and ships with the
+package at `examples/wallet-integration.ts`.
+
+## Public Arka and manager profiles
+
+Profile updates are signed by the manager wallet. Build the canonical message,
+ask the wallet to sign its UTF-8 bytes, then send the signed request to the
+Catalog API.
+
+```ts
+const payload = {
+  displayName: "Stellar Growth",
+  description: "A diversified Stellar asset strategy.",
+  nonce: crypto.randomUUID(),
+  issuedAt: new Date().toISOString(),
+};
+const message = buildCatalogIdentityUpdateMessage({
+  scope: "arka",
+  target: arkaContractId,
+  signer: walletAddress,
+  payload,
+});
+const signature = await wallet.signMessage(Buffer.from(message, "utf8"));
+
+await catalog.updateArkaIdentity(arkaContractId, {
+  signer: walletAddress,
+  message,
+  signature,
+  payload,
+});
+```
+
+Wallet libraries return message signatures in different shapes. Pass the base64,
+base64url or hexadecimal signature string accepted by the Catalog API.
 
 ## Create an Arka
 
@@ -238,10 +333,10 @@ try {
 
 ## Modules
 
-- `catalog`: health, metrics, Arkas, assets, managers, activity and monitoring
+- `catalog`: health, NAV, Arkas, assets, managers, profiles, activity and monitoring
 - `registry(contractId)`: registration, curation, delisting and discovery reads
 - `factory(contractId)`: creation, pagination, creation fee and default policies
-- `vault(contractId)`: NAV, fees, whitelist, deposits, redemptions and credit status
+- `vault(contractId)`: NAV, deposits, redemptions, rebalance and credit operations
 - `router(contractId)`: signed route execution with mandatory minimum outputs
 - `venueRegistry(contractId)`: venue configuration and governed status changes
 - `oracleGuard(contractId)`: price-policy configuration and guarded price reads

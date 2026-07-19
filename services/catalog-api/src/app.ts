@@ -17,6 +17,19 @@ export interface CatalogAppOptions {
 
 export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   const app = Fastify({ logger: false });
+  const dashboardCache = new Map<
+    string,
+    { expiresAt: number; value: NonNullable<Awaited<ReturnType<CatalogService["dashboardOverview"]>>> }
+  >();
+
+  const readDashboardOverview = async (activityLimit?: number) => {
+    const key = String(activityLimit ?? "default");
+    const cached = dashboardCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.value;
+    const value = await options.service.dashboardOverview({ activityLimit });
+    if (value) dashboardCache.set(key, { expiresAt: Date.now() + 30_000, value });
+    return value;
+  };
 
   app.addHook("onSend", async (request, reply, payload) => {
     if (request.method === "GET") {
@@ -65,6 +78,7 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
     }
 
     const snapshot = await options.service.sync();
+    dashboardCache.clear();
     return {
       syncedAt: snapshot.syncedAt,
       metrics: snapshot.metrics,
@@ -83,13 +97,23 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
 
   app.get("/v1/dashboard/overview", async (request, reply) => {
     const query = request.query as RequestQuery;
-    const overview = await options.service.dashboardOverview({
-      activityLimit: parseOptionalInt(query.activityLimit),
-    });
+    const overview = await readDashboardOverview(parseOptionalInt(query.activityLimit));
     if (!overview) {
       reply.code(503);
       return { error: "snapshot_unavailable" };
     }
+    reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
+    return overview;
+  });
+
+  app.get("/v1/nav", async (request, reply) => {
+    const query = request.query as RequestQuery;
+    const overview = await readDashboardOverview(parseOptionalInt(query.activityLimit));
+    if (!overview) {
+      reply.code(503);
+      return { error: "snapshot_unavailable" };
+    }
+    reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
     return overview;
   });
 

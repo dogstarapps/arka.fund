@@ -1,7 +1,6 @@
 {
-  "kind": "mainnet_curated_arkas_proof",
-  "requestedMeasure": "Launch of >=5 whitelisted Arkas",
-  "platformListingSemantics": "Arka.fund exposes platform-listed Arkas through the registry curated flag and the public curated=true endpoint.",
+  "kind": "mainnet_curated_arkas_snapshot",
+  "listingPolicy": "Arka.fund exposes platform-listed Arkas through the registry curated flag and the public curated=true endpoint.",
   "verifiedAt": "2026-07-18T08:37:36Z",
   "registryContractId": "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY",
   "factoryContractId": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
@@ -9,7 +8,7 @@
     "metrics": "https://catalog.arka.fund/v1/metrics",
     "curatedArkas": "https://catalog.arka.fund/v1/arkas?curated=true&limit=20",
     "health": "https://catalog.arka.fund/health",
-    "nav": "https://app.arka.fund/api/nav"
+    "nav": "https://catalog.arka.fund/v1/nav"
   },
   "metrics": {
     "totalArkas": 6,

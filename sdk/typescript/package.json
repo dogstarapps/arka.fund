@@ -1,6 +1,6 @@
 {
   "name": "@arkafund/sdk",
-  "version": "0.2.2",
+  "version": "0.3.1",
   "description": "Public TypeScript SDK for Arkafund on-chain integrations",
   "type": "module",
   "exports": {
@@ -22,6 +22,7 @@
     "docs:api": "typedoc --options typedoc.json",
     "example:mainnet": "node ./examples/mainnet-read.mjs",
     "test:consumer": "bash ./scripts/test-consumer.sh",
+    "test:examples": "npm run build && tsc -p tsconfig.examples.json",
     "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
     "test:integration": "bash ./scripts/integration-local.sh",
     "test:integration:live": "npm run build && node --test dist/tests/integration/*.test.js",

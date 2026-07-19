@@ -10,7 +10,7 @@ import { RouterModule } from "./modules/router.js";
 import { VenueRegistryModule } from "./modules/venueRegistry.js";
 import { VaultModule } from "./modules/vault.js";
 
-export const SDK_VERSION = "0.2.2";
+export const SDK_VERSION = "0.3.1";
 
 export class ArkafundSdk {
   readonly extensions = new ExtensionRegistry();

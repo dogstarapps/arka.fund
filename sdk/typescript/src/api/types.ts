@@ -24,6 +24,32 @@ export interface CatalogIdentity {
   pendingIndexation?: boolean;
 }
 
+export interface CatalogArkaIdentity extends CatalogIdentity {
+  arkaId: string;
+  manager: string;
+}
+
+export interface CatalogManagerIdentity extends CatalogIdentity {
+  manager: string;
+}
+
+export interface CatalogIdentityUpdatePayload {
+  displayName?: string | null;
+  description?: string | null;
+  avatarUrl?: string | null;
+  websiteUrl?: string | null;
+  socialUrl?: string | null;
+  nonce: string;
+  issuedAt: string;
+}
+
+export interface CatalogIdentityUpdateRequest {
+  signer: string;
+  message: string;
+  signature: string;
+  payload: CatalogIdentityUpdatePayload;
+}
+
 export interface CatalogAssetExposure {
   assetContract: string;
   isDenomination: boolean;
@@ -142,6 +168,44 @@ export interface CatalogHealth {
   failedArkas: number;
   consecutiveFailures: number;
   activeAlerts: CatalogMonitoringAlert[];
+}
+
+export interface CatalogNavResponse {
+  syncedAt: string;
+  totalNav: string;
+  totalNavUsdEstimate: string | null;
+  valuationSource: "usd_stablecoin_parity" | "oracle_verified" | "unavailable";
+  oracleStatus: "verified" | "not_required_usd_stablecoin" | "missing_price";
+  missingPriceReasons: string[];
+  denominationTotals: Array<{
+    denominationAsset: {
+      contract: string;
+      symbol: string | null;
+      label: string | null;
+      decimals: number;
+      usdPegged: boolean;
+    } | null;
+    totalNav: string;
+    navUsdEstimate: string | null;
+    arkaCount: number;
+  }>;
+  totalNavDelta: string | null;
+  totalNavDeltaBps: number | null;
+  totalArkas: number;
+  totalManagers: number;
+  totalAssets: number;
+  curatedArkas: number;
+  delistedArkas: number;
+  largestAssetWeightBps: number | null;
+  monitoring: {
+    healthy: boolean;
+    degraded: boolean;
+    snapshotAgeSeconds: number | null;
+    consecutiveFailures: number;
+    activeAlertCount: number;
+    lastRunStatus: "success" | "failure" | null;
+  };
+  activity: Record<string, unknown>;
 }
 
 export type CatalogActivityKind =

@@ -14,12 +14,12 @@ const serverUrl = specification.servers?.[0]?.url ?? "https://catalog.arka.fund"
 const endpoints = Object.entries(specification.paths)
   .flatMap(([path, methods]) =>
     Object.entries(methods)
-      .filter(([method]) => method === "get")
+      .filter(([method]) => method === "get" || method === "put")
       .map(([method, operation]) => ({ path, method, operation })),
   );
 
 facts.innerHTML = `
-  <span><strong>${endpoints.length}</strong> documented GET endpoints</span>
+  <span><strong>${endpoints.length}</strong> documented operations</span>
   <span><strong>${specification.info.version}</strong> API contract</span>
   <span><strong>Mainnet</strong> ${new URL(serverUrl).host}</span>
 `;
@@ -71,6 +71,10 @@ function createEndpoint(endpoint, id) {
   article.id = id;
   const endpointServerUrl = endpoint.operation.servers?.[0]?.url ?? serverUrl;
   const parameters = endpoint.operation.parameters ?? [];
+  const isRead = endpoint.method === "get";
+  const requestSchema = endpoint.operation.requestBody?.content?.["application/json"]?.schema?.$ref
+    ?.split("/")
+    .at(-1);
   article.innerHTML = `
     <div class="endpoint-title">
       <span class="method">${endpoint.method.toUpperCase()}</span>
@@ -79,16 +83,17 @@ function createEndpoint(endpoint, id) {
     <h3>${escapeHtml(endpoint.operation.summary)}</h3>
     <p>${escapeHtml(endpoint.operation.description ?? "")}</p>
     ${parameters.length ? `<div class="parameter-list">${parameters.map(parameterField).join("")}</div>` : ""}
+    ${requestSchema ? `<p class="note">Request body: <code>${escapeHtml(requestSchema)}</code>. The message and signature are produced by the manager wallet.</p>` : ""}
     <div class="request-actions">
-      <button class="run-request" type="button">Run request</button>
-      <a href="${endpointServerUrl}${endpoint.path}" target="_blank" rel="noreferrer">Open endpoint</a>
+      ${isRead ? `<button class="run-request" type="button">Run request</button>` : `<span class="status ready">Wallet signature required</span>`}
+      ${isRead ? `<a href="${endpointServerUrl}${endpoint.path}" target="_blank" rel="noreferrer">Open endpoint</a>` : ""}
     </div>
     <div class="response-panel" hidden>
       <div class="response-meta"></div>
       <pre><code></code></pre>
     </div>
   `;
-  article.querySelector(".run-request").addEventListener("click", () =>
+  article.querySelector(".run-request")?.addEventListener("click", () =>
     runRequest(article, endpoint, endpointServerUrl),
   );
   return article;

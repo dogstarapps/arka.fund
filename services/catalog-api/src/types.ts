@@ -13,6 +13,9 @@ export type CatalogValuationSource =
 export type CatalogOracleStatus =
   | "verified"
   | "not_required_usd_stablecoin"
+  | "stale_price"
+  | "invalid_price"
+  | "policy_paused"
   | "missing_price";
 
 export interface CatalogAssetIdentity {
@@ -21,6 +24,19 @@ export interface CatalogAssetIdentity {
   label: string | null;
   decimals: number;
   usdPegged: boolean;
+}
+
+export interface CatalogAssetPrice {
+  assetContract: string;
+  priceUsd: string | null;
+  decimals: number;
+  timestamp: string | null;
+  oracleStatus: CatalogOracleStatus;
+  valuationSource: CatalogValuationSource;
+  primaryUsable: boolean | null;
+  secondaryUsable: boolean | null;
+  unavailableReason: string | null;
+  observedAt: string;
 }
 
 export interface CatalogPeriodMetric {
@@ -44,6 +60,7 @@ export interface CatalogPortfolioWeight {
 
 export interface CatalogEconomicMetrics {
   denominationAsset: CatalogAssetIdentity | null;
+  denominationPrice: CatalogAssetPrice | null;
   navDenomination: string;
   navUsdEstimate: string | null;
   sharePrice: string | null;
@@ -88,6 +105,8 @@ export interface ArkaCatalogEntry {
 
 export interface AssetCatalogEntry {
   assetContract: string;
+  identity?: CatalogAssetIdentity | null;
+  price?: CatalogAssetPrice | null;
   arkaCount: number;
   managerCount: number;
   denominationArkaCount: number;
@@ -181,6 +200,7 @@ export interface CatalogSnapshot {
   arkas: ArkaCatalogEntry[];
   assets: AssetCatalogEntry[];
   managers: ManagerCatalogEntry[];
+  assetPrices?: CatalogAssetPrice[];
   failures: CatalogSyncFailure[];
 }
 
@@ -309,6 +329,8 @@ export interface ActivityCountSummary {
 }
 
 export interface ActivitySummary {
+  dataStatus: "live" | "unavailable";
+  unavailableReason: string | null;
   totalEvents: number;
   uniqueUsers: number;
   oldestLedger: number | null;
@@ -353,6 +375,8 @@ export interface DashboardOverview {
   monitoring: DashboardMonitoringSummary;
   activity: ActivitySummary;
 }
+
+export type NavOverview = Omit<DashboardOverview, "activity">;
 
 export interface DashboardCompositionItem {
   assetContract: string;
@@ -463,6 +487,8 @@ export interface Page<T> {
   offset: number;
   limit: number;
   items: T[];
+  dataStatus?: "live" | "unavailable";
+  unavailableReason?: string | null;
 }
 
 export interface ArkaQuery {

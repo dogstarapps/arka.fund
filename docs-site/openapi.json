@@ -65,19 +65,7 @@
         ],
         "summary": "Read aggregate NAV",
         "operationId": "getCatalogNav",
-        "description": "Returns the canonical catalog NAV aggregate, denomination totals, valuation state, activity summary and indexer monitoring state.",
-        "parameters": [
-          {
-            "name": "activityLimit",
-            "in": "query",
-            "required": false,
-            "description": "Number of recent activity records used in aggregates.",
-            "schema": {
-              "type": "integer",
-              "minimum": 1
-            }
-          }
-        ],
+        "description": "Returns the canonical snapshot-backed NAV aggregate, denomination totals, valuation state and indexer monitoring state. Use the activity endpoints for live contract events.",
         "responses": {
           "200": {
             "description": "Current aggregate NAV response.",
@@ -790,6 +778,90 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AssetPage"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices": {
+      "get": {
+        "tags": [
+          "NAV"
+        ],
+        "summary": "List indexed USD prices",
+        "operationId": "listAssetPrices",
+        "description": "Returns the latest OracleGuard result for each asset observed by the catalog. Unavailable prices include an explicit status and reason and are never replaced by a guessed value.",
+        "responses": {
+          "200": {
+            "description": "Current asset prices and oracle state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetPriceList"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The latest indexed snapshot is unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices/{id}": {
+      "get": {
+        "tags": [
+          "NAV"
+        ],
+        "summary": "Read an indexed USD price",
+        "operationId": "getAssetPrice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Stellar asset contract ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current asset price and oracle state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetPrice"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -1891,6 +1963,99 @@
           }
         }
       },
+      "AssetPrice": {
+        "type": "object",
+        "required": [
+          "assetContract",
+          "priceUsd",
+          "decimals",
+          "timestamp",
+          "oracleStatus",
+          "valuationSource",
+          "primaryUsable",
+          "secondaryUsable",
+          "unavailableReason",
+          "observedAt"
+        ],
+        "properties": {
+          "assetContract": {
+            "type": "string",
+            "pattern": "^[CG][A-Z2-7]{55}$",
+            "description": "Stellar account or Soroban contract address."
+          },
+          "priceUsd": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "decimals": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 38
+          },
+          "timestamp": {
+            "type": "string",
+            "pattern": "^-?[0-9]+$",
+            "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users.",
+            "nullable": true
+          },
+          "oracleStatus": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "not_required_usd_stablecoin",
+              "stale_price",
+              "invalid_price",
+              "policy_paused",
+              "missing_price"
+            ]
+          },
+          "valuationSource": {
+            "type": "string",
+            "enum": [
+              "usd_stablecoin_parity",
+              "oracle_verified",
+              "unavailable"
+            ]
+          },
+          "primaryUsable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "secondaryUsable": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AssetPriceList": {
+        "type": "object",
+        "required": [
+          "syncedAt",
+          "items"
+        ],
+        "properties": {
+          "syncedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetPrice"
+            }
+          }
+        }
+      },
       "IdentityMetadata": {
         "type": "object",
         "required": [
@@ -2132,6 +2297,7 @@
         "type": "object",
         "required": [
           "denominationAsset",
+          "denominationPrice",
           "navDenomination",
           "navUsdEstimate",
           "sharePrice",
@@ -2144,6 +2310,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/AssetIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "denominationPrice": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssetPrice"
               }
             ],
             "nullable": true
@@ -2170,6 +2344,9 @@
             "enum": [
               "verified",
               "not_required_usd_stablecoin",
+              "stale_price",
+              "invalid_price",
+              "policy_paused",
               "missing_price"
             ]
           },
@@ -2324,6 +2501,22 @@
             "type": "string",
             "pattern": "^[CG][A-Z2-7]{55}$",
             "description": "Stellar account or Soroban contract address."
+          },
+          "identity": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssetIdentity"
+              }
+            ],
+            "nullable": true
+          },
+          "price": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AssetPrice"
+              }
+            ],
+            "nullable": true
           },
           "arkaCount": {
             "type": "integer",
@@ -2490,8 +2683,7 @@
           "curatedArkas",
           "delistedArkas",
           "largestAssetWeightBps",
-          "monitoring",
-          "activity"
+          "monitoring"
         ],
         "properties": {
           "syncedAt": {
@@ -2522,6 +2714,9 @@
             "enum": [
               "verified",
               "not_required_usd_stablecoin",
+              "stale_price",
+              "invalid_price",
+              "policy_paused",
               "missing_price"
             ]
           },
@@ -2634,67 +2829,6 @@
                   "failure"
                 ],
                 "nullable": true
-              }
-            }
-          },
-          "activity": {
-            "type": "object",
-            "required": [
-              "totalEvents",
-              "uniqueUsers",
-              "oldestLedger",
-              "latestLedger",
-              "counts",
-              "depositVolume",
-              "redeemVolume",
-              "profitVolume",
-              "netUserFlow"
-            ],
-            "properties": {
-              "totalEvents": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "uniqueUsers": {
-                "type": "integer",
-                "minimum": 0
-              },
-              "oldestLedger": {
-                "type": "integer",
-                "minimum": 0,
-                "nullable": true
-              },
-              "latestLedger": {
-                "type": "integer",
-                "minimum": 0,
-                "nullable": true
-              },
-              "counts": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "integer",
-                  "minimum": 0
-                }
-              },
-              "depositVolume": {
-                "type": "string",
-                "pattern": "^-?[0-9]+$",
-                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
-              },
-              "redeemVolume": {
-                "type": "string",
-                "pattern": "^-?[0-9]+$",
-                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
-              },
-              "profitVolume": {
-                "type": "string",
-                "pattern": "^-?[0-9]+$",
-                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
-              },
-              "netUserFlow": {
-                "type": "string",
-                "pattern": "^-?[0-9]+$",
-                "description": "Exact on-chain integer amount. Apply the asset decimals before displaying it to users."
               }
             }
           }
@@ -3028,6 +3162,17 @@
             "items": {
               "$ref": "#/components/schemas/Arka"
             }
+          },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "live",
+              "unavailable"
+            ]
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3057,6 +3202,17 @@
             "items": {
               "$ref": "#/components/schemas/Asset"
             }
+          },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "live",
+              "unavailable"
+            ]
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3086,6 +3242,17 @@
             "items": {
               "$ref": "#/components/schemas/Manager"
             }
+          },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "live",
+              "unavailable"
+            ]
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3115,6 +3282,17 @@
             "items": {
               "$ref": "#/components/schemas/Activity"
             }
+          },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "live",
+              "unavailable"
+            ]
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3144,6 +3322,17 @@
             "items": {
               "$ref": "#/components/schemas/MonitoringRun"
             }
+          },
+          "dataStatus": {
+            "type": "string",
+            "enum": [
+              "live",
+              "unavailable"
+            ]
+          },
+          "unavailableReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       }

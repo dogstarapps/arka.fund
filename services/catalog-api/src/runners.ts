@@ -10,8 +10,16 @@ import type {
   ArkaAssetExposure,
   ArkaCatalogEntry,
   CatalogSnapshot,
+  CatalogAssetPrice,
   CatalogSyncFailure,
 } from "./types.js";
+import { isUsdStablecoinContract } from "./economics.js";
+import {
+  OracleGuardPriceReader,
+  type OraclePriceReader,
+  unavailableOraclePrice,
+  usdParityPrice,
+} from "./oraclePrices.js";
 import { Contract, rpc, scValToNative, type xdr } from "@stellar/stellar-sdk";
 import {
   Client as ArkaClient,
@@ -41,6 +49,8 @@ export class StaticCatalogSyncRunner implements CatalogSyncRunner {
 
 export interface OnChainCatalogSyncRunnerOptions extends NetworkConfig {
   registryContractId: string;
+  oracleGuardContractId?: string;
+  oraclePriceReader?: OraclePriceReader;
   pageSize?: number;
   readConcurrency?: number;
   retryAttempts?: number;
@@ -50,6 +60,7 @@ export interface OnChainCatalogSyncRunnerOptions extends NetworkConfig {
 export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
   private readonly registryClient: RegistryClient;
   private readonly rpcServer: rpc.Server;
+  private readonly oraclePriceReader: OraclePriceReader | null;
 
   constructor(private readonly options: OnChainCatalogSyncRunnerOptions) {
     this.registryClient = new RegistryClient(
@@ -58,6 +69,14 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     this.rpcServer = new rpc.Server(options.rpcUrl, {
       allowHttp: options.allowHttp ?? options.rpcUrl.startsWith("http://"),
     });
+    this.oraclePriceReader = options.oraclePriceReader ?? (
+      options.oracleGuardContractId
+        ? new OracleGuardPriceReader({
+            ...options,
+            oracleGuardContractId: options.oracleGuardContractId,
+          })
+        : null
+    );
   }
 
   async run(): Promise<CatalogSnapshot> {
@@ -84,7 +103,43 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       });
     }
 
-    return buildSnapshot(arkas, failures, syncedAt);
+    const assetPrices = await this.readAssetPrices(arkas, syncedAt);
+    return buildSnapshot(arkas, failures, syncedAt, assetPrices);
+  }
+
+  private async readAssetPrices(
+    arkas: ArkaCatalogEntry[],
+    observedAt: string,
+  ): Promise<CatalogAssetPrice[]> {
+    const assetContracts = [...new Set(
+      arkas.flatMap((arka) => [
+        ...(arka.denominationContract ? [arka.denominationContract] : []),
+        ...arka.whitelistContracts,
+      ]),
+    )].sort();
+
+    const results = await mapWithConcurrency(
+      assetContracts,
+      normalizedPositiveInteger(this.options.readConcurrency, 1),
+      async (assetContract) => {
+        if (isUsdStablecoinContract(assetContract)) {
+          return usdParityPrice(assetContract, observedAt);
+        }
+        if (!this.oraclePriceReader) {
+          return unavailableOraclePrice(assetContract, observedAt, "oracle_guard_not_configured");
+        }
+        return this.rpcRead(() => this.oraclePriceReader!.read(assetContract, observedAt));
+      },
+    );
+
+    return results.map((result, index) =>
+      result.ok
+        ? result.value
+        : unavailableOraclePrice(
+            assetContracts[index],
+            observedAt,
+            `oracle_read_failed:${errorMessage(result.error)}`,
+          ));
   }
 
   private async listAllArkas(): Promise<string[]> {

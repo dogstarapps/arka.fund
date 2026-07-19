@@ -13,6 +13,7 @@ CONTRACTS=(
   "arka-registry:arka-registry.wasm"
   "oracle-guard:oracle-guard.wasm"
   "router:router.wasm"
+  "token:test-token.wasm"
   "venue-registry:venue-registry.wasm"
 )
 

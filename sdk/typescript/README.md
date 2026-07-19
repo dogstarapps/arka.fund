@@ -6,6 +6,7 @@ Stellar contract interactions. The package combines:
 - a typed client for the public indexer and NAV API
 - Stellar mainnet network and contract presets
 - factory, vault, registry, router, venue-registry and oracle-guard modules
+- a high-level workflow for creation, deposits, redemptions, routing and credit actions
 - exact amount and percentage formatting helpers
 - transaction builders that preserve wallet custody and on-chain authorization
 
@@ -130,22 +131,20 @@ Convert user-entered decimal amounts with the asset's declared decimals. This
 keeps product interfaces human-readable while preserving exact on-chain values.
 
 ```ts
-import { parseAssetAmount } from "@arkafund/sdk";
-
-const vault = signedSdk.vault(arkaContractId);
-
-const amount = parseAssetAmount("25", 7);
-const deposit = await vault.deposit({
-  user: walletAddress,
-  asset: { contract: usdcContractId },
-  amount,
+const workflow = signedSdk.workflow();
+const deposit = await workflow.deposit({
+  arkaId: arkaContractId,
+  account: walletAddress,
+  assetContract: usdcContractId,
+  amount: "25.50",
 });
 
 console.log(deposit.hash);
 
-const redemption = await vault.redeem({
-  user: walletAddress,
-  shares: 10_0000000n,
+const redemption = await workflow.redeem({
+  arkaId: arkaContractId,
+  account: walletAddress,
+  shares: "10",
 });
 
 console.log(redemption.hash);
@@ -153,30 +152,32 @@ console.log(redemption.hash);
 
 ## Rebalance an Arka
 
-Managers can submit the route chosen by their application or quote engine through
-the Arka contract. Every step identifies the adapter, protocol router, assets and
-minimum acceptable output.
+Managers can ask Arka's routing service for the best admitted route and then build
+the corresponding vault transaction. `AUTO` compares the supported venues; an
+explicit protocol can be requested when the product needs direct execution.
 
 ```ts
-const vault = signedSdk.vault(arkaContractId);
-const result = await vault.rebalance({
-  manager: walletAddress,
-  steps: [{
-    adapter: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
-    router: phoenixRouterContractId,
-    poolId: 0,
-    assetIn: usdcContractId,
-    assetOut: xlmContractId,
-    amountIn: parseAssetAmount("10", 7),
-    minOut: parseAssetAmount("32.5", 7),
-  }],
+const plan = await workflow.planRebalance({
+  protocol: "AUTO",
+  amount: "10",
+  tokenIn: usdcContractId,
+  tokenOut: xlmContractId,
+  slippagePercent: 0.5,
+  readerPubKey: walletAddress,
+  vaultNav: "1000",
+  dailyTurnoverUsed: "0",
+  projectedAllocationShiftPercent: "1",
 });
+
+const result = await workflow.rebalance(arkaContractId, walletAddress, plan);
 
 console.log(result.hash);
 ```
 
 The route must also satisfy the Arka whitelist, allowed-venue configuration and
 on-chain swap-risk policy. The SDK cannot bypass those controls.
+The allocation-shift percentage must come from a common valuation basis such as
+Catalog's verified USD prices; raw units from different assets are never compared.
 
 ## Blend credit actions
 
@@ -243,32 +244,48 @@ base64url or hexadecimal signature string accepted by the Catalog API.
 
 ## Create an Arka
 
-`createAndInitialize` is the supported factory path. Creation, initialization,
-registration, default venue policy and risk-policy configuration occur through
-the canonical factory flow.
+The workflow reads the current creation fee, verifies the wallet balance, reuses
+an adequate allowance or requests approval, and then calls the canonical factory.
+Creation, registration, venue policy and risk policy remain enforced on-chain.
 
 ```ts
-import { ARKAFUND_MAINNET_CONTRACTS } from "@arkafund/sdk";
-
-const factory = signedSdk.factory(ARKAFUND_MAINNET_CONTRACTS.arkaFactory);
-const created = await factory.createAndInitialize({
-  salt: crypto.getRandomValues(new Uint8Array(32)),
-  manager: walletAddress,
+const created = await workflow.createArkaWithFeeApproval({
   denomination: usdcContractId,
-  managementFeeBps: 100,
-  performanceFeeBps: 1_500,
-  depositFeeBps: 0,
-  redemptionFeeBps: 0,
+  managementFeePercent: "1",
+  performanceFeePercent: "15",
+  depositFeePercent: "0",
+  redemptionFeePercent: "0",
   whitelist: [usdcContractId, xlmContractId],
-  router: ARKAFUND_MAINNET_CONTRACTS.router,
-});
+}, approvalExpirationLedger);
 
-console.log(created.hash, created.simulationResult);
+console.log(created.approval?.hash, created.creation.hash);
 ```
 
-Fee inputs mirror the on-chain basis-point interface. In a product UI, display
-them with `formatBasisPoints`: `100` becomes `1.00%` and `1_500` becomes
-`15.00%`.
+Product inputs use percentages. The SDK converts them exactly to the contract
+representation and rejects values with more than two decimal places.
+
+## Prices and NAV
+
+`CatalogClient.nav()` returns the aggregate indexed NAV. `CatalogClient.prices()`
+returns the OracleGuard state used for USD valuation. USDC uses declared USD
+parity; other assets require a verified on-chain price. Stale, invalid, paused or
+missing feeds return `priceUsd: null` with an explicit status. The SDK does not
+substitute a guessed price.
+
+```ts
+const [nav, prices] = await Promise.all([
+  workflow.catalog.nav(),
+  workflow.catalog.prices(),
+]);
+
+for (const price of prices.items) {
+  console.log(price.assetContract, price.priceUsd, price.oracleStatus);
+}
+```
+
+The Catalog API is the canonical indexed data service. Its `/v1/nav` route is the
+NAV aggregate. The DApp's `/api/nav` route is a cache-aware proxy of that same
+response for browser clients; it is not a second indexer or valuation source.
 
 ## Execute a routed swap
 
@@ -340,6 +357,7 @@ try {
 - `router(contractId)`: signed route execution with mandatory minimum outputs
 - `venueRegistry(contractId)`: venue configuration and governed status changes
 - `oracleGuard(contractId)`: price-policy configuration and guarded price reads
+- `workflow()`: human-readable creation, deposit, redemption, routing and credit actions
 
 ## Validation
 

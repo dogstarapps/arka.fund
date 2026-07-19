@@ -2,6 +2,7 @@ import { Keypair, Transaction } from "@stellar/stellar-sdk";
 import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
+  MethodOptions,
 } from "@stellar/stellar-sdk/contract";
 
 export interface NetworkConfig {
@@ -13,7 +14,7 @@ export interface NetworkConfig {
 }
 
 export interface CallOptions {
-  fee?: number;
+  fee?: string | number;
   timeoutInSeconds?: number;
   simulate?: boolean;
 }
@@ -45,9 +46,9 @@ export function createClientOptions(
 export function mergeCallOptions(
   overrides?: CallOptions,
   simulate = true,
-): CallOptions {
+): MethodOptions {
   return {
-    fee: overrides?.fee,
+    fee: overrides?.fee === undefined ? undefined : String(overrides.fee),
     timeoutInSeconds: overrides?.timeoutInSeconds,
     simulate: overrides?.simulate ?? simulate,
   };

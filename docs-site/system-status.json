@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T13:10:31.757Z",
+  "generatedAt": "2026-07-19T17:43:20.907Z",
   "network": "Stellar mainnet",
   "endpoints": {
     "health": "https://catalog.arka.fund/health",
@@ -14,7 +14,7 @@
     "degraded": false,
     "indexedArkas": 6,
     "failedArkas": 0,
-    "lastSyncedAt": "2026-07-19T13:07:54.547Z"
+    "lastSyncedAt": "2026-07-19T17:40:58.515Z"
   },
   "nav": {
     "totalArkas": 6,
@@ -23,7 +23,7 @@
     "monitoring": {
       "healthy": true,
       "degraded": false,
-      "snapshotAgeSeconds": 155,
+      "snapshotAgeSeconds": 141,
       "consecutiveFailures": 0,
       "activeAlertCount": 0,
       "lastRunStatus": "success"
@@ -38,7 +38,7 @@
     "delistedArkas": 0,
     "totalAssets": 7,
     "totalNav": "68135558",
-    "syncedAt": "2026-07-19T13:07:54.547Z"
+    "syncedAt": "2026-07-19T17:40:58.515Z"
   },
   "curatedArkas": {
     "total": 5,
@@ -88,11 +88,11 @@
   "latency": {
     "samples": 20,
     "targetAverageMs": 200,
-    "averageMs": 60.55,
-    "p50Ms": 59.04,
-    "p95Ms": 65.02,
-    "minMs": 57.33,
-    "maxMs": 79.77,
-    "measuredAt": "2026-07-19T13:10:31.756Z"
+    "averageMs": 56.92,
+    "p50Ms": 56.05,
+    "p95Ms": 62.18,
+    "minMs": 53.04,
+    "maxMs": 62.45,
+    "measuredAt": "2026-07-19T17:43:20.906Z"
   }
 }

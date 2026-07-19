@@ -50,3 +50,17 @@ export function formatBasisPoints(bps: number, fractionDigits = 2): string {
   }
   return `${(bps / 100).toFixed(fractionDigits)}%`;
 }
+
+/** Convert a human-readable percentage such as `1.5` into exact basis points. */
+export function parsePercentageToBasisPoints(percent: string): number {
+  const normalized = percent.trim();
+  const match = /^(\d+)(?:\.(\d{1,2}))?$/.exec(normalized);
+  if (!match) {
+    throw new Error("percent must be a non-negative decimal with at most two decimal places");
+  }
+  const bps = Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0") || "0");
+  if (!Number.isSafeInteger(bps) || bps > 10_000) {
+    throw new Error("percent must be between 0 and 100");
+  }
+  return bps;
+}

@@ -16,6 +16,7 @@ export function createCatalogSyncRunnerFromEnv(
       rpcUrl: required(env, "CATALOG_API_RPC_URL"),
       networkPassphrase: required(env, "CATALOG_API_NETWORK_PASSPHRASE"),
       registryContractId: required(env, "CATALOG_API_REGISTRY_CONTRACT_ID"),
+      oracleGuardContractId: env.CATALOG_API_ORACLE_GUARD_CONTRACT_ID,
       pageSize: optionalInteger(env.CATALOG_API_REGISTRY_PAGE_SIZE),
       readConcurrency: optionalInteger(env.CATALOG_API_READ_CONCURRENCY),
       retryAttempts: optionalInteger(env.CATALOG_API_RPC_RETRY_ATTEMPTS),

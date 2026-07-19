@@ -8,6 +8,7 @@ This service provides the first indexed data surface needed by discovery and lea
 
 - pluggable ingestion with a native on-chain backend and a GraphQL backend
 - per-Arka snapshots with manager, NAV, fee summary, whitelist, share token, and asset exposure
+- OracleGuard-backed USD prices with explicit unavailable states
 - global asset aggregates and per-Arka asset breakdowns
 - manager aggregates with total NAV and Arka counts
 - persisted snapshots with atomic writes
@@ -24,6 +25,9 @@ This service provides the first indexed data surface needed by discovery and lea
 - `GET /openapi.json`
 - `POST /v1/sync`
 - `GET /v1/metrics`
+- `GET /v1/nav`
+- `GET /v1/prices`
+- `GET /v1/prices/:id`
 - `GET /v1/dashboard/overview`
 - `GET /v1/dashboard/composition`
 - `GET /v1/monitoring/status`
@@ -139,6 +143,8 @@ Snapshot ingestion is selected with:
   - `graphql` uses a GraphQL endpoint that exposes paginated Arka entities
 - `CATALOG_API_REGISTRY_CONTRACT_ID`
   - required for the `native` backend
+- `CATALOG_API_ORACLE_GUARD_CONTRACT_ID`
+  - enables OracleGuard valuation for non-USDC assets in the native backend
 - `CATALOG_API_GRAPHQL_URL`
   - required for the `graphql` backend
 - `CATALOG_API_GRAPHQL_PROFILE`

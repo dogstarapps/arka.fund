@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NoopActivityReader, type ActivityReader } from "./activity.js";
 import {
   findAsset,
+  findAssetPrice,
   findArka,
   findManager,
   getArkaAssetHistory,
@@ -20,6 +21,7 @@ import {
   buildArkaPortfolio,
   buildDashboardComposition,
   buildDashboardOverview,
+  buildNavOverview,
 } from "./dashboard.js";
 import {
   buildMonitoringStatus,
@@ -64,6 +66,7 @@ import type {
   AssetHistoryPoint,
   AssetQuery,
   CatalogHistoryArchive,
+  CatalogAssetPrice,
   CatalogSnapshot,
   CompositionQuery,
   DashboardComposition,
@@ -78,6 +81,7 @@ import type {
   MonitoringArchive,
   MonitoringRunQuery,
   MonitoringStatus,
+  NavOverview,
   MonitoringThresholds,
   Page,
   RankedArkaCatalogEntry,
@@ -194,6 +198,18 @@ export class CatalogService {
     return buildDashboardOverview(snapshot, history, monitoring, activity, query);
   }
 
+  async navOverview(): Promise<NavOverview | null> {
+    const snapshot = await this.current();
+    if (!snapshot) {
+      return null;
+    }
+    const [history, monitoring] = await Promise.all([
+      this.history(),
+      this.monitoringStatus(),
+    ]);
+    return buildNavOverview(snapshot, history, monitoring);
+  }
+
   async dashboardComposition(
     query: CompositionQuery = {},
   ): Promise<DashboardComposition | null> {
@@ -210,6 +226,20 @@ export class CatalogService {
       return emptyPage(query.limit);
     }
     return listAssets(snapshot, query);
+  }
+
+  async prices(): Promise<{ syncedAt: string; items: CatalogAssetPrice[] } | null> {
+    const snapshot = await this.current();
+    if (!snapshot) return null;
+    return {
+      syncedAt: snapshot.syncedAt,
+      items: [...(snapshot.assetPrices ?? [])],
+    };
+  }
+
+  async price(assetContract: string): Promise<CatalogAssetPrice | null> {
+    const snapshot = await this.current();
+    return snapshot ? findAssetPrice(snapshot, assetContract) : null;
   }
 
   async arkas(query: ArkaQuery = {}): Promise<Page<RankedArkaCatalogEntry>> {
@@ -471,10 +501,18 @@ export class CatalogService {
     query: ActivityQuery,
   ): Promise<Page<ActivityEntry>> {
     try {
-      return await this.activityReader.list(arkas, query);
+      return {
+        ...await this.activityReader.list(arkas, query),
+        dataStatus: "live",
+        unavailableReason: null,
+      };
     } catch (error) {
-      console.warn("catalog-api activity reader failed, serving empty activity page", error);
-      return emptyPage(query.limit);
+      console.warn("catalog-api activity reader failed, marking activity unavailable", error);
+      return {
+        ...emptyPage(query.limit),
+        dataStatus: "unavailable",
+        unavailableReason: "activity_index_unavailable",
+      };
     }
   }
 }

@@ -9,6 +9,7 @@ import type {
   AssetQuery,
   CatalogHistoryArchive,
   CatalogMetrics,
+  CatalogAssetPrice,
   CatalogSnapshot,
   CatalogSyncFailure,
   HistoryQuery,
@@ -20,17 +21,23 @@ import type {
   RankedAssetCatalogEntry,
   RankedManagerCatalogEntry,
 } from "./types.js";
-import { enrichArkaEconomics } from "./economics.js";
+import { enrichArkaEconomics, resolveAssetIdentity } from "./economics.js";
 
-const CURRENT_SNAPSHOT_SCHEMA_VERSION = 2;
+const CURRENT_SNAPSHOT_SCHEMA_VERSION = 3;
 
 export function buildSnapshot(
   arkas: ArkaCatalogEntry[],
   failures: CatalogSyncFailure[],
   syncedAt: string,
+  assetPrices: readonly CatalogAssetPrice[] = [],
 ): CatalogSnapshot {
-  const sortedArkas = [...arkas].sort(compareArkasByNavDesc).map(enrichArkaEconomics);
-  const assets = aggregateAssets(sortedArkas, syncedAt);
+  const pricesByAsset = new Map(
+    assetPrices.map((price) => [price.assetContract.trim().toUpperCase(), price]),
+  );
+  const sortedArkas = [...arkas]
+    .sort(compareArkasByNavDesc)
+    .map((entry) => enrichArkaEconomics(entry, { assetPrices: pricesByAsset }));
+  const assets = aggregateAssets(sortedArkas, syncedAt, pricesByAsset);
   const managers = aggregateManagers(sortedArkas, syncedAt);
   const metrics = buildMetrics(sortedArkas, assets.length, failures, managers.length, syncedAt);
   return {
@@ -40,6 +47,8 @@ export function buildSnapshot(
     arkas: sortedArkas,
     assets,
     managers,
+    assetPrices: [...assetPrices].sort((left, right) =>
+      left.assetContract.localeCompare(right.assetContract)),
     failures: [...failures].sort((left, right) => left.arkaId.localeCompare(right.arkaId)),
   };
 }
@@ -47,6 +56,7 @@ export function buildSnapshot(
 export function aggregateAssets(
   arkas: ArkaCatalogEntry[],
   syncedAt: string,
+  pricesByAsset: ReadonlyMap<string, CatalogAssetPrice> = new Map(),
 ): AssetCatalogEntry[] {
   const grouped = new Map<string, {
     managers: Set<string>;
@@ -59,6 +69,8 @@ export function aggregateAssets(
         managers: new Set<string>(),
         entry: {
           assetContract: asset.assetContract,
+          identity: resolveAssetIdentity(asset.assetContract),
+          price: pricesByAsset.get(asset.assetContract.trim().toUpperCase()) ?? null,
           arkaCount: 0,
           managerCount: 0,
           denominationArkaCount: 0,
@@ -187,7 +199,10 @@ export function listAssets(
 ): Page<RankedAssetCatalogEntry> {
   const filtered = snapshot.assets.filter((asset) => {
     if (query.search) {
-      return asset.assetContract.toLowerCase().includes(query.search.toLowerCase());
+      const search = query.search.toLowerCase();
+      return [asset.assetContract, asset.identity?.symbol, asset.identity?.label]
+        .filter((value): value is string => Boolean(value))
+        .some((value) => value.toLowerCase().includes(search));
     }
     return true;
   });
@@ -241,6 +256,15 @@ export function findAsset(
   assetContract: string,
 ): AssetCatalogEntry | null {
   return snapshot.assets.find((asset) => asset.assetContract === assetContract) ?? null;
+}
+
+export function findAssetPrice(
+  snapshot: CatalogSnapshot,
+  assetContract: string,
+): CatalogAssetPrice | null {
+  return snapshot.assetPrices?.find(
+    (price) => price.assetContract === assetContract.trim().toUpperCase(),
+  ) ?? null;
 }
 
 export function findManager(

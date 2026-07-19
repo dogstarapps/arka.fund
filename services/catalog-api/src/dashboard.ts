@@ -15,6 +15,7 @@ import type {
   DashboardMonitoringSummary,
   DashboardOverview,
   DashboardOverviewQuery,
+  NavOverview,
   MonitoringStatus,
   Page,
 } from "./types.js";
@@ -55,8 +56,33 @@ export function buildDashboardOverview(
     delistedArkas: snapshot.metrics.delistedArkas,
     largestAssetWeightBps: composition.items[0]?.weightBps ?? null,
     monitoring: summarizeMonitoring(monitoring),
-    activity: summarizeActivity(activity.items),
+    activity: summarizeActivity(
+      activity.items,
+      activity.dataStatus ?? "live",
+      activity.unavailableReason ?? null,
+    ),
   };
+}
+
+export function buildNavOverview(
+  snapshot: CatalogSnapshot,
+  history: CatalogHistoryArchive,
+  monitoring: MonitoringStatus,
+): NavOverview {
+  const { activity: _activity, ...nav } = buildDashboardOverview(
+    snapshot,
+    history,
+    monitoring,
+    {
+      total: 0,
+      offset: 0,
+      limit: 0,
+      items: [],
+      dataStatus: "unavailable",
+      unavailableReason: null,
+    },
+  );
+  return nav;
 }
 
 interface DashboardValuationSummary {
@@ -120,14 +146,40 @@ function buildDashboardValuation(snapshot: CatalogSnapshot): DashboardValuationS
         .reduce((total, arka) => total + BigInt(arka.economics?.navUsdEstimate ?? "0"), 0n)
         .toString()
     : null;
+  const valuedSources = new Set(
+    snapshot.arkas.map((arka) => arka.economics?.valuationSource ?? "unavailable"),
+  );
+  const oracleStatuses = snapshot.arkas.map(
+    (arka) => arka.economics?.oracleStatus ?? "missing_price",
+  );
 
   return {
     totalNavUsdEstimate,
-    valuationSource: allUsdValued ? "usd_stablecoin_parity" : "unavailable",
-    oracleStatus: allUsdValued ? "not_required_usd_stablecoin" : "missing_price",
+    valuationSource: !allUsdValued
+      ? "unavailable"
+      : valuedSources.has("oracle_verified")
+        ? "oracle_verified"
+        : "usd_stablecoin_parity",
+    oracleStatus: allUsdValued
+      ? oracleStatuses.includes("verified")
+        ? "verified"
+        : "not_required_usd_stablecoin"
+      : mostRelevantUnavailableStatus(oracleStatuses),
     missingPriceReasons,
     denominationTotals,
   };
+}
+
+function mostRelevantUnavailableStatus(
+  statuses: CatalogOracleStatus[],
+): CatalogOracleStatus {
+  const priority: CatalogOracleStatus[] = [
+    "policy_paused",
+    "stale_price",
+    "invalid_price",
+    "missing_price",
+  ];
+  return priority.find((status) => statuses.includes(status)) ?? "missing_price";
 }
 
 export function buildDashboardComposition(
@@ -206,7 +258,11 @@ export function buildArkaPortfolio(
   };
 }
 
-export function summarizeActivity(entries: ActivityEntry[]): ActivitySummary {
+export function summarizeActivity(
+  entries: ActivityEntry[],
+  dataStatus: "live" | "unavailable" = "live",
+  unavailableReason: string | null = null,
+): ActivitySummary {
   const counts: ActivityCountSummary = {
     deposit: 0,
     redeem: 0,
@@ -242,6 +298,8 @@ export function summarizeActivity(entries: ActivityEntry[]): ActivitySummary {
   }
 
   return {
+    dataStatus,
+    unavailableReason,
     totalEvents: entries.length,
     uniqueUsers: users.size,
     oldestLedger,

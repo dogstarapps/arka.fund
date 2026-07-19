@@ -61,7 +61,7 @@ function fixtureArkas(syncedAt: string): ArkaCatalogEntry[] {
   ];
 }
 
-test("CatalogService degrades activity endpoints to empty pages when the reader fails", async () => {
+test("CatalogService marks activity unavailable instead of presenting a false empty history", async () => {
   const directory = await mkdtemp(join(tmpdir(), "catalog-service-"));
   const first = buildSnapshot(fixtureArkas("2026-03-28T10:00:00.000Z"), [], "2026-03-28T10:00:00.000Z");
   const second = buildSnapshot(
@@ -106,12 +106,22 @@ test("CatalogService degrades activity endpoints to empty pages when the reader 
   assert.equal(overview.totalNavDelta, "500");
   assert.equal(overview.activity.depositVolume, "0");
   assert.equal(overview.activity.totalEvents, 0);
+  assert.equal(overview.activity.dataStatus, "unavailable");
+  assert.equal(overview.activity.unavailableReason, "activity_index_unavailable");
+
+  const nav = await service.navOverview();
+  assert.ok(nav);
+  assert.equal(nav.totalNav, "2500");
+  assert.equal(nav.totalNavDelta, "500");
+  assert.equal("activity" in nav, false);
 
   const activity = await service.activity({ limit: 5 } satisfies ActivityQuery);
   assert.equal(activity.total, 0);
   assert.deepEqual(activity.items, []);
+  assert.equal(activity.dataStatus, "unavailable");
 
   const arkaActivity = await service.arkaActivity(second.arkas[0].arkaId, { limit: 5 });
   assert.equal(arkaActivity.total, 0);
   assert.deepEqual(arkaActivity.items, []);
+  assert.equal(arkaActivity.dataStatus, "unavailable");
 });

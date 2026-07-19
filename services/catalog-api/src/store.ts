@@ -215,7 +215,7 @@ export class InMemoryIdentityStore {
 }
 
 function validateSnapshot(snapshot: CatalogSnapshot): CatalogSnapshot {
-  if (snapshot.schemaVersion !== 1 && snapshot.schemaVersion !== 2) {
+  if (![1, 2, 3].includes(snapshot.schemaVersion)) {
     throw new Error(`Unsupported snapshot schema version: ${snapshot.schemaVersion}`);
   }
   if (
@@ -233,18 +233,19 @@ function validateSnapshot(snapshot: CatalogSnapshot): CatalogSnapshot {
   }));
   return {
     ...snapshot,
-    schemaVersion: 2,
+    schemaVersion: 3,
     metrics: {
       ...snapshot.metrics,
       totalAssets: snapshot.metrics.totalAssets ?? (Array.isArray(snapshot.assets) ? snapshot.assets.length : 0),
     },
     arkas: normalizedArkas,
     assets: Array.isArray(snapshot.assets) ? snapshot.assets : [],
+    assetPrices: Array.isArray(snapshot.assetPrices) ? snapshot.assetPrices : [],
   };
 }
 
 function validateHistoryArchive(archive: CatalogHistoryArchive): CatalogHistoryArchive {
-  if (archive.schemaVersion !== 1 && archive.schemaVersion !== 2) {
+  if (![1, 2, 3].includes(archive.schemaVersion)) {
     throw new Error(`Unsupported history schema version: ${archive.schemaVersion}`);
   }
   if (!Array.isArray(archive.runs)) {
@@ -255,7 +256,7 @@ function validateHistoryArchive(archive: CatalogHistoryArchive): CatalogHistoryA
   }
   return {
     ...archive,
-    schemaVersion: 2,
+    schemaVersion: 3,
     runs: archive.runs.map(validateSnapshot),
   };
 }

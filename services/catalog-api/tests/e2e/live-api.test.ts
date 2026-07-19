@@ -224,6 +224,7 @@ async function mutateLiveFixture(): Promise<void> {
         owner: depositorPublicKey,
         spender: arkaTwoContractId,
         amount: 500n,
+        expiration_ledger: 1_000_000,
       },
       mergeCallOptions(undefined, true),
     ),

@@ -62,7 +62,7 @@ test("CatalogClient calls canonical NAV and signed identity endpoints", async ()
     },
   });
 
-  await client.nav(12);
+  await client.nav();
   await client.updateArkaIdentity("CARKA", {
     signer: "GMANAGER",
     message: "signed-message",
@@ -71,13 +71,44 @@ test("CatalogClient calls canonical NAV and signed identity endpoints", async ()
   });
 
   assert.equal(requests[0]?.url.pathname, "/v1/nav");
-  assert.equal(requests[0]?.url.searchParams.get("activityLimit"), "12");
+  assert.equal(requests[0]?.url.search, "");
   assert.equal(requests[1]?.url.pathname, "/v1/arkas/CARKA/identity");
   assert.equal(requests[1]?.init?.method, "PUT");
   assert.equal(
     (requests[1]?.init?.headers as Record<string, string>)["content-type"],
     "application/json",
   );
+});
+
+test("CatalogClient exposes explicit OracleGuard price state", async () => {
+  const paths: string[] = [];
+  const client = new CatalogClient({
+    baseUrl: "https://catalog.example.test",
+    fetchImpl: async (input) => {
+      const url = new URL(String(input));
+      paths.push(url.pathname);
+      return Response.json(url.pathname === "/v1/prices"
+        ? { syncedAt: "2026-07-19T10:00:00.000Z", items: [] }
+        : {
+            assetContract: "CXLM",
+            priceUsd: "19000000000000",
+            decimals: 14,
+            timestamp: "1784476800",
+            oracleStatus: "verified",
+            valuationSource: "oracle_verified",
+            primaryUsable: true,
+            secondaryUsable: true,
+            unavailableReason: null,
+            observedAt: "2026-07-19T10:00:00.000Z",
+          });
+    },
+  });
+
+  const prices = await client.prices();
+  const xlm = await client.price("CXLM");
+  assert.equal(prices.items.length, 0);
+  assert.equal(xlm.oracleStatus, "verified");
+  assert.deepEqual(paths, ["/v1/prices", "/v1/prices/CXLM"]);
 });
 
 test("human-readable formatters preserve exact integer amounts", () => {

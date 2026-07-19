@@ -10,6 +10,7 @@ export * from "./graphqlRunner.js";
 export * from "./identity.js";
 export * from "./monitoring.js";
 export * from "./notifier.js";
+export * from "./oraclePrices.js";
 export * from "./openapi/document.js";
 export * from "./parity.js";
 export * from "./runners.js";

@@ -21,6 +21,10 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
     string,
     { expiresAt: number; value: NonNullable<Awaited<ReturnType<CatalogService["dashboardOverview"]>>> }
   >();
+  let navCache: {
+    expiresAt: number;
+    value: NonNullable<Awaited<ReturnType<CatalogService["navOverview"]>>>;
+  } | null = null;
 
   const readDashboardOverview = async (activityLimit?: number) => {
     const key = String(activityLimit ?? "default");
@@ -79,6 +83,7 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
 
     const snapshot = await options.service.sync();
     dashboardCache.clear();
+    navCache = null;
     return {
       syncedAt: snapshot.syncedAt,
       metrics: snapshot.metrics,
@@ -106,13 +111,16 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
     return overview;
   });
 
-  app.get("/v1/nav", async (request, reply) => {
-    const query = request.query as RequestQuery;
-    const overview = await readDashboardOverview(parseOptionalInt(query.activityLimit));
+  app.get("/v1/nav", async (_request, reply) => {
+    const now = Date.now();
+    const overview = navCache && navCache.expiresAt > now
+      ? navCache.value
+      : await options.service.navOverview();
     if (!overview) {
       reply.code(503);
       return { error: "snapshot_unavailable" };
     }
+    navCache = { expiresAt: now + 30_000, value: overview };
     reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
     return overview;
   });
@@ -323,6 +331,27 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
       offset: parseOptionalInt(query.offset),
       limit: parseOptionalInt(query.limit),
     });
+  });
+
+  app.get("/v1/prices", async (_request, reply) => {
+    const prices = await options.service.prices();
+    if (!prices) {
+      reply.code(503);
+      return { error: "snapshot_unavailable" };
+    }
+    reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
+    return prices;
+  });
+
+  app.get("/v1/prices/:id", async (request, reply) => {
+    const params = request.params as RequestParams;
+    const price = await options.service.price(params.id);
+    if (!price) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+    reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
+    return price;
   });
 
   app.get("/v1/assets/:id", async (request, reply) => {

@@ -50,6 +50,57 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
       usdPegged: { type: "boolean" },
     },
   },
+  AssetPrice: {
+    type: "object",
+    required: [
+      "assetContract",
+      "priceUsd",
+      "decimals",
+      "timestamp",
+      "oracleStatus",
+      "valuationSource",
+      "primaryUsable",
+      "secondaryUsable",
+      "unavailableReason",
+      "observedAt",
+    ],
+    properties: {
+      assetContract: stellarAddress,
+      priceUsd: nullableExactInteger,
+      decimals: { type: "integer", minimum: 0, maximum: 38 },
+      timestamp: nullableExactInteger,
+      oracleStatus: {
+        type: "string",
+        enum: [
+          "verified",
+          "not_required_usd_stablecoin",
+          "stale_price",
+          "invalid_price",
+          "policy_paused",
+          "missing_price",
+        ],
+      },
+      valuationSource: {
+        type: "string",
+        enum: ["usd_stablecoin_parity", "oracle_verified", "unavailable"],
+      },
+      primaryUsable: { type: "boolean", nullable: true },
+      secondaryUsable: { type: "boolean", nullable: true },
+      unavailableReason: nullableString,
+      observedAt: { type: "string", format: "date-time" },
+    },
+  },
+  AssetPriceList: {
+    type: "object",
+    required: ["syncedAt", "items"],
+    properties: {
+      syncedAt: { type: "string", format: "date-time" },
+      items: {
+        type: "array",
+        items: { $ref: "#/components/schemas/AssetPrice" },
+      },
+    },
+  },
   IdentityMetadata: {
     type: "object",
     required: [
@@ -154,6 +205,7 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
     type: "object",
     required: [
       "denominationAsset",
+      "denominationPrice",
       "navDenomination",
       "navUsdEstimate",
       "sharePrice",
@@ -166,12 +218,23 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
         allOf: [{ $ref: "#/components/schemas/AssetIdentity" }],
         nullable: true,
       },
+      denominationPrice: {
+        allOf: [{ $ref: "#/components/schemas/AssetPrice" }],
+        nullable: true,
+      },
       navDenomination: exactInteger,
       navUsdEstimate: nullableExactInteger,
       sharePrice: nullableExactInteger,
       oracleStatus: {
         type: "string",
-        enum: ["verified", "not_required_usd_stablecoin", "missing_price"],
+        enum: [
+          "verified",
+          "not_required_usd_stablecoin",
+          "stale_price",
+          "invalid_price",
+          "policy_paused",
+          "missing_price",
+        ],
       },
       valuationSource: {
         type: "string",
@@ -241,6 +304,14 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
     properties: {
       rank: { type: "integer", minimum: 1 },
       assetContract: stellarAddress,
+      identity: {
+        allOf: [{ $ref: "#/components/schemas/AssetIdentity" }],
+        nullable: true,
+      },
+      price: {
+        allOf: [{ $ref: "#/components/schemas/AssetPrice" }],
+        nullable: true,
+      },
       arkaCount: { type: "integer", minimum: 0 },
       managerCount: { type: "integer", minimum: 0 },
       denominationArkaCount: { type: "integer", minimum: 0 },
@@ -320,7 +391,6 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
       "delistedArkas",
       "largestAssetWeightBps",
       "monitoring",
-      "activity",
     ],
     properties: {
       syncedAt: { type: "string", format: "date-time" },
@@ -332,7 +402,14 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
       },
       oracleStatus: {
         type: "string",
-        enum: ["verified", "not_required_usd_stablecoin", "missing_price"],
+        enum: [
+          "verified",
+          "not_required_usd_stablecoin",
+          "stale_price",
+          "invalid_price",
+          "policy_paused",
+          "missing_price",
+        ],
       },
       missingPriceReasons: { type: "array", items: { type: "string" } },
       denominationTotals: {
@@ -373,34 +450,6 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
           consecutiveFailures: { type: "integer", minimum: 0 },
           activeAlertCount: { type: "integer", minimum: 0 },
           lastRunStatus: { type: "string", enum: ["success", "failure"], nullable: true },
-        },
-      },
-      activity: {
-        type: "object",
-        required: [
-          "totalEvents",
-          "uniqueUsers",
-          "oldestLedger",
-          "latestLedger",
-          "counts",
-          "depositVolume",
-          "redeemVolume",
-          "profitVolume",
-          "netUserFlow",
-        ],
-        properties: {
-          totalEvents: { type: "integer", minimum: 0 },
-          uniqueUsers: { type: "integer", minimum: 0 },
-          oldestLedger: { type: "integer", minimum: 0, nullable: true },
-          latestLedger: { type: "integer", minimum: 0, nullable: true },
-          counts: {
-            type: "object",
-            additionalProperties: { type: "integer", minimum: 0 },
-          },
-          depositVolume: exactInteger,
-          redeemVolume: exactInteger,
-          profitVolume: exactInteger,
-          netUserFlow: exactInteger,
         },
       },
     },
@@ -563,6 +612,8 @@ function pageSchema(itemSchema: string): Record<string, unknown> {
         type: "array",
         items: { $ref: `#/components/schemas/${itemSchema}` },
       },
+      dataStatus: { type: "string", enum: ["live", "unavailable"] },
+      unavailableReason: nullableString,
     },
   };
 }

@@ -2,6 +2,7 @@ import type {
   ArkaAssetExposure,
   ArkaCatalogEntry,
   CatalogAssetIdentity,
+  CatalogAssetPrice,
   CatalogEconomicMetrics,
   CatalogFlowMetrics,
   CatalogOracleStatus,
@@ -10,33 +11,11 @@ import type {
   CatalogValuationSource,
   FeeSummary,
 } from "./types.js";
+import { findMainnetAsset } from "./assets.js";
 
 const DEFAULT_USD_STABLECOIN_CONTRACTS = new Set([
   "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
   "CA2E53VHFZ6YSWQIEIPBXJQGT6VW3VKWWZO555XKRQXYJ63GEBJJGHY7",
-]);
-
-const KNOWN_ASSETS = new Map<string, CatalogAssetIdentity>([
-  [
-    "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
-    {
-      contract: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
-      symbol: "USDC",
-      label: "USD Coin",
-      decimals: 7,
-      usdPegged: true,
-    },
-  ],
-  [
-    "CA2E53VHFZ6YSWQIEIPBXJQGT6VW3VKWWZO555XKRQXYJ63GEBJJGHY7",
-    {
-      contract: "CA2E53VHFZ6YSWQIEIPBXJQGT6VW3VKWWZO555XKRQXYJ63GEBJJGHY7",
-      symbol: "USDC",
-      label: "USD Coin",
-      decimals: 7,
-      usdPegged: true,
-    },
-  ],
 ]);
 
 const EMPTY_PERIOD: CatalogPeriodMetric = { amount: null, bps: null };
@@ -47,37 +26,55 @@ const EMPTY_FLOWS: CatalogFlowMetrics = {
   activeUsers: null,
 };
 
-export function enrichArkaEconomics(entry: ArkaCatalogEntry): ArkaCatalogEntry {
+export interface CatalogValuationContext {
+  assetPrices?: ReadonlyMap<string, CatalogAssetPrice>;
+}
+
+export function enrichArkaEconomics(
+  entry: ArkaCatalogEntry,
+  context: CatalogValuationContext = {},
+): ArkaCatalogEntry {
   return {
     ...entry,
-    economics: buildArkaEconomicMetrics(entry),
+    economics: buildArkaEconomicMetrics(entry, context),
   };
 }
 
-export function buildArkaEconomicMetrics(entry: ArkaCatalogEntry): CatalogEconomicMetrics {
+export function buildArkaEconomicMetrics(
+  entry: ArkaCatalogEntry,
+  context: CatalogValuationContext = {},
+): CatalogEconomicMetrics {
   const denominationAsset = resolveAssetIdentity(entry.denominationContract);
-  const usdValued = Boolean(
+  const usdParity = Boolean(
     entry.denominationContract &&
       denominationAsset?.usdPegged &&
       isUsdStablecoinContract(entry.denominationContract),
   );
-  const valuationSource: CatalogValuationSource = usdValued
+  const denominationPrice = entry.denominationContract
+    ? context.assetPrices?.get(entry.denominationContract.trim().toUpperCase()) ?? null
+    : null;
+  const verifiedOraclePrice = denominationPrice?.oracleStatus === "verified"
+    && denominationPrice.priceUsd !== null;
+  const valuationSource: CatalogValuationSource = usdParity
     ? "usd_stablecoin_parity"
-    : "unavailable";
-  const oracleStatus: CatalogOracleStatus = usdValued
+    : verifiedOraclePrice
+      ? "oracle_verified"
+      : "unavailable";
+  const oracleStatus: CatalogOracleStatus = usdParity
     ? "not_required_usd_stablecoin"
-    : "missing_price";
-  const navUsdEstimate = usdValued ? entry.nav : null;
-  const missingPriceReasons = navUsdEstimate
+    : denominationPrice?.oracleStatus ?? "missing_price";
+  const navUsdEstimate = usdParity
+    ? entry.nav
+    : verifiedOraclePrice && denominationPrice
+      ? multiplyByOraclePrice(entry.nav, denominationPrice.priceUsd!, denominationPrice.decimals)
+      : null;
+  const missingPriceReasons = navUsdEstimate !== null
     ? []
-    : [
-        entry.denominationContract
-          ? "denomination_price_unavailable"
-          : "denomination_asset_missing",
-      ];
+    : [missingPriceReason(entry.denominationContract, oracleStatus)];
 
   return {
     denominationAsset,
+    denominationPrice,
     navDenomination: entry.nav,
     navUsdEstimate,
     sharePrice: null,
@@ -102,7 +99,7 @@ export function buildArkaEconomicMetrics(entry: ArkaCatalogEntry): CatalogEconom
 export function resolveAssetIdentity(contract: string | null): CatalogAssetIdentity | null {
   if (!contract) return null;
   const normalized = contract.trim().toUpperCase();
-  const known = KNOWN_ASSETS.get(normalized);
+  const known = findMainnetAsset(normalized);
   if (known) return { ...known };
   return {
     contract: normalized,
@@ -111,6 +108,27 @@ export function resolveAssetIdentity(contract: string | null): CatalogAssetIdent
     decimals: 7,
     usdPegged: isUsdStablecoinContract(normalized),
   };
+}
+
+export function multiplyByOraclePrice(
+  amountBase: string,
+  price: string,
+  oracleDecimals: number,
+): string {
+  if (!Number.isInteger(oracleDecimals) || oracleDecimals < 0 || oracleDecimals > 38) {
+    throw new Error("oracleDecimals must be an integer between 0 and 38");
+  }
+  return ((BigInt(amountBase) * BigInt(price)) / (10n ** BigInt(oracleDecimals))).toString();
+}
+
+function missingPriceReason(
+  denominationContract: string | null,
+  status: CatalogOracleStatus,
+): string {
+  if (!denominationContract) return "denomination_asset_missing";
+  if (status === "stale_price") return "denomination_price_stale";
+  if (status === "invalid_price") return "denomination_price_invalid";
+  return "denomination_price_unavailable";
 }
 
 export function isUsdStablecoinContract(contract: string): boolean {

@@ -83,13 +83,7 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       summary: "Read aggregate NAV",
       operationId: "getCatalogNav",
       description:
-        "Returns the canonical catalog NAV aggregate, denomination totals, valuation state, activity summary and indexer monitoring state.",
-      parameters: [
-        query("activityLimit", "Number of recent activity records used in aggregates.", {
-          type: "integer",
-          minimum: 1,
-        }),
-      ],
+        "Returns the canonical snapshot-backed NAV aggregate, denomination totals, valuation state and indexer monitoring state. Use the activity endpoints for live contract events.",
       responses: {
         "200": response("Current aggregate NAV response.", schemaRef("NavResponse")),
         "503": errorResponses["503"],
@@ -241,6 +235,31 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       responses: {
         "200": response("Paginated asset list.", schemaRef("AssetPage")),
         "503": errorResponses["503"],
+      },
+    },
+  },
+  "/v1/prices": {
+    get: {
+      tags: ["NAV"],
+      summary: "List indexed USD prices",
+      operationId: "listAssetPrices",
+      description:
+        "Returns the latest OracleGuard result for each asset observed by the catalog. Unavailable prices include an explicit status and reason and are never replaced by a guessed value.",
+      responses: {
+        "200": response("Current asset prices and oracle state.", schemaRef("AssetPriceList")),
+        "503": errorResponses["503"],
+      },
+    },
+  },
+  "/v1/prices/{id}": {
+    get: {
+      tags: ["NAV"],
+      summary: "Read an indexed USD price",
+      operationId: "getAssetPrice",
+      parameters: [idParameter("id", "Stellar asset contract ID.")],
+      responses: {
+        "200": response("Current asset price and oracle state.", schemaRef("AssetPrice")),
+        ...errorResponses,
       },
     },
   },

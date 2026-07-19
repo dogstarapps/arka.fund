@@ -10,6 +10,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 CONTRACTS=(
   "arka:arka.wasm"
   "arka-registry:arka-registry.wasm"
+  "oracle-guard:oracle-guard.wasm"
   "test-token:test-token.wasm"
 )
 

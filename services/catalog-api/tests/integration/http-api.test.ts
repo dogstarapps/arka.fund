@@ -199,7 +199,9 @@ test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", asy
       url: "/v1/nav?activityLimit=10",
     });
     assert.equal(nav.statusCode, 200);
-    assert.deepEqual(nav.json(), dashboardOverview.json());
+    assert.equal(nav.json().totalNav, dashboardOverview.json().totalNav);
+    assert.equal(nav.json().totalNavDelta, dashboardOverview.json().totalNavDelta);
+    assert.equal(nav.json().activity, undefined);
     assert.match(nav.headers["cache-control"] ?? "", /max-age=5/);
 
     const dashboardComposition = await app.inject({
@@ -332,6 +334,49 @@ test("HTTP API publishes a complete OpenAPI contract for every public GET route"
       "#/components/schemas/IdentityUpdateRequest",
     );
     assert.equal(document.paths["/api/nav"], undefined);
+  } finally {
+    await app.close();
+  }
+});
+
+test("HTTP API exposes indexed OracleGuard prices without fallback values", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-api-prices-"));
+  const xlmPrice = {
+    assetContract: tokenContract,
+    priceUsd: "19000000000000",
+    decimals: 14,
+    timestamp: "1784476800",
+    oracleStatus: "verified" as const,
+    valuationSource: "oracle_verified" as const,
+    primaryUsable: true,
+    secondaryUsable: true,
+    unavailableReason: null,
+    observedAt: syncedAt,
+  };
+  const service = new CatalogService(
+    new FileCatalogStore(join(directory, "snapshot.json")),
+    new FileCatalogHistoryStore(join(directory, "history.json")),
+    new StaticCatalogSyncRunner(async () => buildSnapshot([arkaOne], [], syncedAt, [xlmPrice])),
+  );
+  const app = createCatalogApp({ service });
+
+  try {
+    await service.sync();
+    const list = await app.inject({ method: "GET", url: "/v1/prices" });
+    assert.equal(list.statusCode, 200);
+    assert.equal(list.json().items[0].priceUsd, xlmPrice.priceUsd);
+    assert.equal(list.json().items[0].oracleStatus, "verified");
+
+    const detail = await app.inject({
+      method: "GET",
+      url: `/v1/prices/${tokenContract}`,
+    });
+    assert.equal(detail.statusCode, 200);
+    assert.equal(detail.json().valuationSource, "oracle_verified");
+
+    const missing = await app.inject({ method: "GET", url: "/v1/prices/CUNKNOWN" });
+    assert.equal(missing.statusCode, 404);
+    assert.equal(missing.json().error, "not_found");
   } finally {
     await app.close();
   }

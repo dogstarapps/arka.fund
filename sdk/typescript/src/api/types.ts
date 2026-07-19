@@ -3,6 +3,8 @@ export interface CatalogPage<T> {
   offset: number;
   limit: number;
   items: T[];
+  dataStatus?: "live" | "unavailable";
+  unavailableReason?: string | null;
 }
 
 export interface CatalogFeeSummary {
@@ -62,6 +64,62 @@ export interface CatalogAssetExposure {
   syncedAt: string;
 }
 
+export type CatalogValuationSource =
+  | "usd_stablecoin_parity"
+  | "oracle_verified"
+  | "unavailable";
+
+export type CatalogOracleStatus =
+  | "verified"
+  | "not_required_usd_stablecoin"
+  | "stale_price"
+  | "invalid_price"
+  | "policy_paused"
+  | "missing_price";
+
+export interface CatalogAssetIdentity {
+  contract: string;
+  symbol: string | null;
+  label: string | null;
+  decimals: number;
+  usdPegged: boolean;
+}
+
+export interface CatalogAssetPrice {
+  assetContract: string;
+  priceUsd: string | null;
+  decimals: number;
+  timestamp: string | null;
+  oracleStatus: CatalogOracleStatus;
+  valuationSource: CatalogValuationSource;
+  primaryUsable: boolean | null;
+  secondaryUsable: boolean | null;
+  unavailableReason: string | null;
+  observedAt: string;
+}
+
+export interface CatalogEconomicMetrics {
+  denominationAsset: CatalogAssetIdentity | null;
+  denominationPrice: CatalogAssetPrice | null;
+  navDenomination: string;
+  navUsdEstimate: string | null;
+  sharePrice: string | null;
+  returns: Record<string, { amount: string | null; bps: number | null }>;
+  pnl: { amount: string | null; bps: number | null };
+  volume: { amount: string | null; bps: number | null };
+  flows: Record<string, string | number | null>;
+  fees: CatalogFeeSummary;
+  portfolioWeights: Array<{
+    assetContract: string;
+    weightBps: number;
+    valueDenomination: string;
+    valueUsdEstimate: string | null;
+  }>;
+  oracleStatus: CatalogOracleStatus;
+  valuationSource: CatalogValuationSource;
+  missingPriceReasons: string[];
+}
+
 export interface CatalogArka {
   rank?: number;
   arkaId: string;
@@ -74,7 +132,7 @@ export interface CatalogArka {
   shareToken: string | null;
   fees: CatalogFeeSummary;
   assets: CatalogAssetExposure[];
-  economics?: Record<string, unknown>;
+  economics?: CatalogEconomicMetrics;
   identity?: CatalogIdentity | null;
   syncedAt: string;
 }
@@ -82,6 +140,8 @@ export interface CatalogArka {
 export interface CatalogAsset {
   rank?: number;
   assetContract: string;
+  identity?: CatalogAssetIdentity | null;
+  price?: CatalogAssetPrice | null;
   arkaCount: number;
   managerCount: number;
   denominationArkaCount: number;
@@ -174,8 +234,8 @@ export interface CatalogNavResponse {
   syncedAt: string;
   totalNav: string;
   totalNavUsdEstimate: string | null;
-  valuationSource: "usd_stablecoin_parity" | "oracle_verified" | "unavailable";
-  oracleStatus: "verified" | "not_required_usd_stablecoin" | "missing_price";
+  valuationSource: CatalogValuationSource;
+  oracleStatus: CatalogOracleStatus;
   missingPriceReasons: string[];
   denominationTotals: Array<{
     denominationAsset: {
@@ -205,7 +265,6 @@ export interface CatalogNavResponse {
     activeAlertCount: number;
     lastRunStatus: "success" | "failure" | null;
   };
-  activity: Record<string, unknown>;
 }
 
 export type CatalogActivityKind =

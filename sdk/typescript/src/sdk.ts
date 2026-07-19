@@ -9,8 +9,11 @@ import { RegistryModule } from "./modules/registry.js";
 import { RouterModule } from "./modules/router.js";
 import { VenueRegistryModule } from "./modules/venueRegistry.js";
 import { VaultModule } from "./modules/vault.js";
+import { TokenModule } from "./modules/token.js";
+import { RoutingClient, type RoutingClientOptions } from "./api/routingClient.js";
+import { ArkaWorkflow, type ArkaWorkflowOptions } from "./workflows/arkaWorkflow.js";
 
-export const SDK_VERSION = "0.3.1";
+export const SDK_VERSION = "0.4.0";
 
 export class ArkafundSdk {
   readonly extensions = new ExtensionRegistry();
@@ -39,6 +42,18 @@ export class ArkafundSdk {
 
   venueRegistry(contractId: string): VenueRegistryModule {
     return new VenueRegistryModule(this.config, contractId);
+  }
+
+  token(contractId: string): TokenModule {
+    return new TokenModule(this.config, contractId);
+  }
+
+  routing(options?: RoutingClientOptions): RoutingClient {
+    return new RoutingClient(options);
+  }
+
+  workflow(options?: ArkaWorkflowOptions): ArkaWorkflow {
+    return new ArkaWorkflow(this.config, options);
   }
 
   use<T>(extension: ArkafundSdkExtension<T>): T {

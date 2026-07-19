@@ -5,6 +5,7 @@ import type {
   CatalogArkaIdentity,
   CatalogArkaQuery,
   CatalogAsset,
+  CatalogAssetPrice,
   CatalogAssetQuery,
   CatalogHealth,
   CatalogManager,
@@ -58,8 +59,8 @@ export class CatalogClient {
     return this.get("/v1/metrics");
   }
 
-  nav(activityLimit?: number): Promise<CatalogNavResponse> {
-    return this.get("/v1/nav", { activityLimit });
+  nav(): Promise<CatalogNavResponse> {
+    return this.get("/v1/nav");
   }
 
   arkas(query: CatalogArkaQuery = {}): Promise<CatalogPage<CatalogArka>> {
@@ -98,6 +99,14 @@ export class CatalogClient {
 
   assets(query: CatalogAssetQuery = {}): Promise<CatalogPage<CatalogAsset>> {
     return this.get("/v1/assets", query);
+  }
+
+  prices(): Promise<{ syncedAt: string; items: CatalogAssetPrice[] }> {
+    return this.get("/v1/prices");
+  }
+
+  price(assetId: string): Promise<CatalogAssetPrice> {
+    return this.get(`/v1/prices/${encodeURIComponent(assetId)}`);
   }
 
   asset(assetId: string): Promise<CatalogAsset> {

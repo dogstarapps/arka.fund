@@ -51,6 +51,7 @@
         <div class="endpoint-grid">
           <a href="https://catalog.arka.fund/health"><strong>GET</strong><span>https://catalog.arka.fund/health</span><small>Indexer health, sync freshness and alert state.</small></a>
           <a href="https://catalog.arka.fund/v1/nav"><strong>GET</strong><span>https://catalog.arka.fund/v1/nav</span><small>Canonical aggregate NAV, USD valuation and oracle state.</small></a>
+          <a href="https://catalog.arka.fund/v1/prices"><strong>GET</strong><span>https://catalog.arka.fund/v1/prices</span><small>Indexed USD prices with verified, stale, paused or unavailable state.</small></a>
           <a href="https://catalog.arka.fund/v1/metrics"><strong>GET</strong><span>https://catalog.arka.fund/v1/metrics</span><small>Total Arkas, indexed Arkas, curated Arkas and assets.</small></a>
           <a href="https://catalog.arka.fund/v1/arkas?curated=true&limit=20"><strong>GET</strong><span>/v1/arkas?curated=true&amp;limit=20</span><small>Curated Arka list with manager, NAV and asset metadata.</small></a>
           <a href="https://catalog.arka.fund/v1/dashboard/overview"><strong>GET</strong><span>/v1/dashboard/overview</span><small>Dashboard aggregates, activity summary and monitoring state.</small></a>
@@ -67,7 +68,14 @@ const [health, nav] = await Promise.all([
   catalog.nav(),
 ]);
 
-console.log(nav.totalNav, nav.totalArkas, health.healthy);</code></pre>
+console.log(nav.totalNavUsdEstimate, nav.oracleStatus, health.healthy);</code></pre>
+
+        <h3>Inspect price availability</h3>
+        <pre><code>const prices = await catalog.prices();
+
+for (const price of prices.items) {
+  console.log(price.assetContract, price.priceUsd, price.oracleStatus);
+}</code></pre>
 
         <h3>Fetch curated Arkas</h3>
         <pre><code>const page = await catalog.arkas({
@@ -97,9 +105,9 @@ for (const arka of page.items) {
           <p class="eyebrow">TypeScript SDK</p>
           <h2>Build wallet-signed integrations</h2>
           <p>
-            The SDK exposes typed modules for the factory, vault, registry, router,
-            venue registry and oracle guard. It builds contract calls; signatures
-            are supplied by the user wallet or by the integrator's signer.
+            The SDK exposes typed Catalog and routing clients, wallet-backed product
+            workflows and lower-level contract modules. Every state-changing call is
+            signed by the connected Stellar wallet or the integrator's signer.
           </p>
         </div>
 
@@ -108,79 +116,93 @@ for (const arka of page.items) {
             <pre><code>npm install @arkafund/sdk</code></pre>
             <pre><code>import {
   ARKAFUND_MAINNET_CONTRACTS,
+  ARKAFUND_MAINNET_ASSETS,
   ArkafundSdk,
-  CatalogClient,
   createMainnetConfig,
+  walletSdkConfig,
 } from "@arkafund/sdk";
 
-const sdk = new ArkafundSdk(createMainnetConfig());
-const catalog = new CatalogClient();
-
-const registry = sdk.registry(ARKAFUND_MAINNET_CONTRACTS.arkaRegistry);
-const factory = sdk.factory(ARKAFUND_MAINNET_CONTRACTS.arkaFactory);
-const router = sdk.router(ARKAFUND_MAINNET_CONTRACTS.router);</code></pre>
+const network = createMainnetConfig();
+const sdk = new ArkafundSdk(
+  walletSdkConfig(network, walletAddress, wallet),
+);
+const workflow = sdk.workflow();</code></pre>
           </div>
           <dl class="facts">
             <div><dt>npm package</dt><dd>@arkafund/sdk</dd></div>
-            <div><dt>Current release</dt><dd>0.3.0</dd></div>
+            <div><dt>Current release</dt><dd>0.4.0</dd></div>
             <div><dt>Network preset</dt><dd>Stellar mainnet</dd></div>
             <div><dt>Signing model</dt><dd>User wallet or integrator signer</dd></div>
           </dl>
         </div>
 
         <div class="module-grid" aria-label="SDK modules">
-          <article><h3>Catalog</h3><p>Typed mainnet reads for health, metrics, Arkas, assets, managers, activity and monitoring.</p></article>
+          <article><h3>Product workflow</h3><p>Create and fund Arkas, plan guarded swaps and manage credit positions with human-readable inputs.</p></article>
+          <article><h3>Catalog</h3><p>Typed mainnet reads for health, NAV, prices, Arkas, assets, managers, activity and monitoring.</p></article>
+          <article><h3>Routing</h3><p>Request AUTO or protocol-specific plans with slippage and stateful risk checks.</p></article>
           <article><h3>Factory</h3><p>Create Arka transactions and inspect creation-fee settings.</p></article>
           <article><h3>Vault</h3><p>Read vault state and build deposits, redemptions, rebalances and credit actions.</p></article>
           <article><h3>Registry</h3><p>List Arkas, read manager curation and delisting state.</p></article>
           <article><h3>Router</h3><p>Build route execution with explicit minimum output controls.</p></article>
           <article><h3>Venue registry</h3><p>Read enabled venues and protocol-level controls.</p></article>
           <article><h3>Oracle guard</h3><p>Inspect asset valuation policy and guarded price surfaces.</p></article>
+          <article><h3>Token</h3><p>Read balances and allowances and submit wallet-signed approvals.</p></article>
         </div>
 
         <h3>Verify indexed state against an Arka contract</h3>
-        <pre><code>const curated = await catalog.arkas({ curated: true, delisted: false, limit: 1 });
+        <pre><code>const curated = await workflow.catalog.arkas({
+  curated: true,
+  delisted: false,
+  limit: 1,
+});
 const indexed = curated.items[0];
-const vault = sdk.vault(indexed.arkaId);
+const inspection = await workflow.inspectArka(indexed.arkaId);
 
-const [manager, nav] = await Promise.all([vault.manager(), vault.nav()]);
+console.log(inspection.consistent, inspection.indexed, inspection.onChain);</code></pre>
 
-console.log({
-  managerMatches: manager === indexed.manager,
-  navMatches: nav.toString() === indexed.nav,
+        <h3>Create an Arka and approve its fee</h3>
+        <pre><code>await workflow.createArkaWithFeeApproval({
+  denomination: ARKAFUND_MAINNET_ASSETS.USDC,
+  managementFeePercent: "1",
+  performanceFeePercent: "15",
+  depositFeePercent: "0",
+  redemptionFeePercent: "0",
+  whitelist: [
+    ARKAFUND_MAINNET_ASSETS.USDC,
+    ARKAFUND_MAINNET_ASSETS.XLM,
+  ],
+}, approvalExpirationLedger);</code></pre>
+
+        <h3>Deposit a human-readable amount</h3>
+        <pre><code>await workflow.deposit({
+  arkaId,
+  account: walletAddress,
+  assetContract: ARKAFUND_MAINNET_ASSETS.USDC,
+  amount: "25.50",
 });</code></pre>
 
-        <h3>Use human-readable amounts</h3>
-        <pre><code>import { parseAssetAmount } from "@arkafund/sdk";
+        <h3>Plan and sign an AUTO rebalance</h3>
+        <pre><code>const prepared = await workflow.planRebalance({
+  protocol: "AUTO",
+  amount: "10",
+  tokenIn: ARKAFUND_MAINNET_ASSETS.USDC,
+  tokenOut: ARKAFUND_MAINNET_ASSETS.XLM,
+  slippagePercent: 0.5,
+  readerPubKey: walletAddress,
+  vaultNav: "1000",
+  dailyTurnoverUsed: "0",
+  projectedAllocationShiftPercent: "1",
+});
 
-const amount = parseAssetAmount("25.50", 7);
-await vault.deposit({
-  user: walletAddress,
-  asset: { contract: usdcContractId },
-  amount,
-});</code></pre>
-
-        <h3>Rebalance through an enabled venue</h3>
-        <pre><code>await vault.rebalance({
-  manager: walletAddress,
-  steps: [{
-    adapter: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
-    router: phoenixRouterContractId,
-    poolId: 0,
-    assetIn: usdcContractId,
-    assetOut: xlmContractId,
-    amountIn: parseAssetAmount("10", 7),
-    minOut: parseAssetAmount("32.5", 7),
-  }],
-});</code></pre>
+await workflow.rebalance(arkaId, walletAddress, prepared);</code></pre>
 
         <h3>Manage a Blend position</h3>
-        <pre><code>await vault.blendLend({
-  manager: walletAddress,
+        <pre><code>await workflow.blendLend({
+  arkaId,
   adapter: ARKAFUND_MAINNET_CONTRACTS.adapterBlendFixedXlmUsdc,
   marketId: 1,
-  asset: usdcContractId,
-  amount: parseAssetAmount("50", 7),
+  assetContract: ARKAFUND_MAINNET_ASSETS.USDC,
+  amount: "50",
 });</code></pre>
 
         <p class="note">

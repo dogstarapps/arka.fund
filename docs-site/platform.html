@@ -90,6 +90,11 @@
                 <td><a href="https://catalog.arka.fund/v1/nav">Read NAV</a></td>
               </tr>
               <tr>
+                <td><strong>Price API</strong></td>
+                <td>OracleGuard-backed USD prices with explicit unavailable states.</td>
+                <td><a href="https://catalog.arka.fund/v1/prices">Read prices</a></td>
+              </tr>
+              <tr>
                 <td><strong>System status</strong></td>
                 <td>Indexer freshness, sync health, active alerts and recent runs.</td>
                 <td><a href="https://catalog.arka.fund/v1/monitoring/status">View status</a></td>
@@ -114,6 +119,7 @@
           <p class="eyebrow">API</p>
           <h2>Query mainnet data</h2>
           <pre><code>curl https://catalog.arka.fund/v1/nav
+curl https://catalog.arka.fund/v1/prices
 curl "https://catalog.arka.fund/v1/arkas?curated=true"</code></pre>
           <a class="inline-link" href="./api-reference.html">Open the interactive reference</a>
         </article>

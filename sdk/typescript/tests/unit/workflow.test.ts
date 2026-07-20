@@ -172,3 +172,76 @@ test("ArkaWorkflow normalizes human-readable Blend and credit amounts", () => {
   });
   assert.equal(credit.action.amount, 1_250_000n);
 });
+
+test("ArkaWorkflow approves the vault before depositing when allowance is insufficient", async () => {
+  const workflow = new ArkaWorkflow(createMainnetConfig({ publicKey: ACCOUNT }));
+  const calls: Array<{ method: string; input?: unknown }> = [];
+  const approval = { hash: "approval", simulationResult: null };
+  const deposit = { hash: "deposit", simulationResult: 100_000n };
+
+  Object.assign(workflow as unknown as Record<string, unknown>, {
+    tokenModule: () => ({
+      balance: async () => 1_000_000n,
+      allowance: async () => 0n,
+      approve: async (input: unknown) => {
+        calls.push({ method: "approve", input });
+        return approval;
+      },
+    }),
+    vaultModule: () => ({
+      deposit: async (input: unknown) => {
+        calls.push({ method: "deposit", input });
+        return deposit;
+      },
+    }),
+  });
+
+  const result = await workflow.depositWithApproval({
+    arkaId: ARKAFUND_MAINNET_CONTRACTS.arkaFactory,
+    account: ACCOUNT,
+    assetContract: TOKEN_IN,
+    amount: "0.01",
+  }, 123_456);
+
+  assert.equal(result.approval, approval);
+  assert.equal(result.deposit, deposit);
+  assert.deepEqual(calls, [
+    {
+      method: "approve",
+      input: {
+        owner: ACCOUNT,
+        spender: ARKAFUND_MAINNET_CONTRACTS.arkaFactory,
+        amount: 100_000n,
+        expirationLedger: 123_456,
+      },
+    },
+    {
+      method: "deposit",
+      input: {
+        user: ACCOUNT,
+        asset: { contract: TOKEN_IN },
+        amount: 100_000n,
+      },
+    },
+  ]);
+});
+
+test("ArkaWorkflow rejects a deposit before approval when token balance is insufficient", async () => {
+  const workflow = new ArkaWorkflow(createMainnetConfig({ publicKey: ACCOUNT }));
+  Object.assign(workflow as unknown as Record<string, unknown>, {
+    tokenModule: () => ({
+      balance: async () => 99_999n,
+      allowance: async () => 0n,
+    }),
+  });
+
+  await assert.rejects(
+    workflow.depositWithApproval({
+      arkaId: ARKAFUND_MAINNET_CONTRACTS.arkaFactory,
+      account: ACCOUNT,
+      assetContract: TOKEN_IN,
+      amount: "0.01",
+    }, 123_456),
+    /not have enough balance/,
+  );
+});

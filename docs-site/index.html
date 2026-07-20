@@ -130,7 +130,7 @@ const workflow = sdk.workflow();</code></pre>
           </div>
           <dl class="facts">
             <div><dt>npm package</dt><dd>@arkafund/sdk</dd></div>
-            <div><dt>Current release</dt><dd>0.4.0</dd></div>
+            <div><dt>Current release</dt><dd>0.4.1</dd></div>
             <div><dt>Network preset</dt><dd>Stellar mainnet</dd></div>
             <div><dt>Signing model</dt><dd>User wallet or integrator signer</dd></div>
           </dl>
@@ -174,12 +174,12 @@ console.log(inspection.consistent, inspection.indexed, inspection.onChain);</cod
 }, approvalExpirationLedger);</code></pre>
 
         <h3>Deposit a human-readable amount</h3>
-        <pre><code>await workflow.deposit({
+        <pre><code>await workflow.depositWithApproval({
   arkaId,
   account: walletAddress,
   assetContract: ARKAFUND_MAINNET_ASSETS.USDC,
   amount: "25.50",
-});</code></pre>
+}, approvalExpirationLedger);</code></pre>
 
         <h3>Plan and sign an AUTO rebalance</h3>
         <pre><code>const prepared = await workflow.planRebalance({
@@ -212,6 +212,7 @@ await workflow.rebalance(arkaId, walletAddress, prepared);</code></pre>
         <div class="link-list">
           <a href="./sdk-reference/index.html">Browse every public SDK type and method</a>
           <a href="https://github.com/dogstarapps/arka.fund/tree/main/sdk/typescript/examples">Run the mainnet examples</a>
+          <a href="./published-sdk-mainnet-canary.json">Inspect a published-SDK mainnet run</a>
         </div>
       </section>
 

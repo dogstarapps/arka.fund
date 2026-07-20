@@ -1,4 +1,4 @@
-import { Keypair, Transaction } from "@stellar/stellar-sdk";
+import { Keypair, TransactionBuilder } from "@stellar/stellar-sdk";
 import type { SignedArkafundSdkConfig } from "./config.js";
 
 export function createKeypairSigner(
@@ -9,12 +9,12 @@ export function createKeypairSigner(
   return {
     publicKey: keypair.publicKey(),
     signTransaction: async (transactionXdr, options) => {
-      const tx = new Transaction(
+      const tx = TransactionBuilder.fromXDR(
         transactionXdr,
         options?.networkPassphrase ?? networkPassphrase,
       );
       tx.sign(keypair);
-      return { signedTxXdr: tx.toEnvelope().toXDR("base64") };
+      return { signedTxXdr: tx.toXDR() };
     },
   };
 }

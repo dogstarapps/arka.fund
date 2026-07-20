@@ -49,6 +49,9 @@ if (!sdk.registry(ARKAFUND_MAINNET_CONTRACTS.arkaRegistry)) {
 if (!(new CatalogClient({ baseUrl: "https://catalog.arka.fund" }))) {
   throw new Error("Catalog client was not created");
 }
+if (typeof sdk.workflow().depositWithApproval !== "function") {
+  throw new Error("Allowance-aware deposit workflow was not exported");
+}
 if (formatAssetAmount("10000000", 7) !== "1") {
   throw new Error("Amount formatter produced an unexpected value");
 }

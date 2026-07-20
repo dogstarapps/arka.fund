@@ -1,0 +1,38 @@
+{
+  "kind": "published_sdk_mainnet_canary",
+  "executedAt": "2026-07-20T10:40:15.824Z",
+  "package": "@arkafund/sdk@0.4.1",
+  "network": "mainnet",
+  "account": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+  "arkaId": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+  "amount": {
+    "asset": "USDC",
+    "human": "0.01",
+    "decimals": 7
+  },
+  "approval": {
+    "hash": "f0b0a67dbe98360141c9fe29cb6e702aaa0cc0286fd4153a9d3b5765fad2b88b",
+    "status": "SUCCESS",
+    "explorer": "https://stellar.expert/explorer/public/tx/f0b0a67dbe98360141c9fe29cb6e702aaa0cc0286fd4153a9d3b5765fad2b88b"
+  },
+  "deposit": {
+    "hash": "ab5bafaae16d1c6a6a5269fedf533bece61fd4e968fedaf44409535f1930878a",
+    "status": "SUCCESS",
+    "mintedSharesBase": "100000",
+    "mintedSharesHuman": "0.01",
+    "explorer": "https://stellar.expert/explorer/public/tx/ab5bafaae16d1c6a6a5269fedf533bece61fd4e968fedaf44409535f1930878a"
+  },
+  "redemption": {
+    "hash": "949757388b1dcaebc9b6f500f3add370b8775ea21b8261eb59e729566b40c6b7",
+    "status": "SUCCESS",
+    "returnedAmountBase": "99999",
+    "returnedAmountHuman": "0.0099999",
+    "explorer": "https://stellar.expert/explorer/public/tx/949757388b1dcaebc9b6f500f3add370b8775ea21b8261eb59e729566b40c6b7"
+  },
+  "state": {
+    "walletBalanceBefore": "585995150",
+    "walletBalanceAfter": "585995149",
+    "vaultNavBefore": "999999",
+    "vaultNavAfter": "1000000"
+  }
+}

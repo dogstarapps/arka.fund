@@ -1,6 +1,6 @@
 {
   "name": "@arkafund/sdk",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Public TypeScript SDK for Arkafund on-chain integrations",
   "type": "module",
   "exports": {
@@ -21,6 +21,7 @@
     "verify:mainnet-preset": "node ./scripts/verify-mainnet-preset.mjs",
     "docs:api": "typedoc --options typedoc.json",
     "example:mainnet": "node ./examples/mainnet-read.mjs",
+    "example:mainnet:wallet": "node ./examples/mainnet-wallet-canary.mjs",
     "test:consumer": "bash ./scripts/test-consumer.sh",
     "test:examples": "npm run build && tsc -p tsconfig.examples.json",
     "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",

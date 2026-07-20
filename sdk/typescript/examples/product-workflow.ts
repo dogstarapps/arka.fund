@@ -69,14 +69,15 @@ export async function depositUsdc(
   walletAddress: string,
   wallet: StellarWalletSigner,
   arkaId: string,
+  approvalExpirationLedger: number,
 ) {
   const { workflow } = await createProductSdk(walletAddress, wallet);
-  return workflow.deposit({
+  return workflow.depositWithApproval({
     arkaId,
     account: walletAddress,
     assetContract: ARKAFUND_MAINNET_ASSETS.USDC,
     amount: "25.50",
-  });
+  }, approvalExpirationLedger);
 }
 
 export const mainnetContracts = ARKAFUND_MAINNET_CONTRACTS;

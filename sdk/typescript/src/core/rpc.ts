@@ -17,10 +17,13 @@ interface RpcEnvelope<T> {
 
 interface SendTransactionResult {
   hash?: string;
+  status?: string;
+  errorResultXdr?: string;
 }
 
 interface GetTransactionResult {
   status?: string;
+  resultXdr?: string;
 }
 
 async function rpcRequest<T>(
@@ -60,8 +63,13 @@ async function waitForTransaction(
       "getTransaction",
       { hash },
     );
-    if (result.status && result.status !== "NOT_FOUND") {
+    if (result.status === "SUCCESS") {
       return result;
+    }
+    if (result.status === "FAILED") {
+      throw new Error(
+        `Transaction ${hash} failed${result.resultXdr ? `: ${result.resultXdr}` : ""}`,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
@@ -82,6 +90,16 @@ export async function submitTransaction<T>(
     "sendTransaction",
     { transaction: signed.signedTxXdr },
   );
+  if (sendResponse.status === "ERROR") {
+    throw new Error(
+      `sendTransaction rejected the transaction${
+        sendResponse.errorResultXdr ? `: ${sendResponse.errorResultXdr}` : ""
+      }`,
+    );
+  }
+  if (sendResponse.status === "TRY_AGAIN_LATER") {
+    throw new Error("sendTransaction asked the client to try again later");
+  }
   if (!sendResponse.hash) {
     throw new Error("sendTransaction did not return a transaction hash");
   }

@@ -65,6 +65,11 @@ export interface HumanRedeemInput {
   shareDecimals?: number;
 }
 
+export interface DepositWithApprovalResult {
+  approval: SubmittedTransaction<null> | null;
+  deposit: SubmittedTransaction<bigint>;
+}
+
 export interface HumanBlendActionInput {
   arkaId: string;
   manager?: string;
@@ -189,6 +194,40 @@ export class ArkaWorkflow {
       asset: { contract: input.assetContract },
       amount: parseAssetAmount(input.amount, input.decimals ?? 7),
     }, options);
+  }
+
+  async depositWithApproval(
+    input: HumanAmountInput,
+    expirationLedger: number,
+    options?: ArkafundCallOptions,
+  ): Promise<DepositWithApprovalResult> {
+    const account = ensureSorobanAddress(input.account, "account");
+    const arkaId = ensureSorobanAddress(input.arkaId, "arkaId");
+    const assetContract = ensureSorobanAddress(input.assetContract, "assetContract");
+    const amount = parseAssetAmount(input.amount, input.decimals ?? 7);
+    const token = this.tokenModule(assetContract);
+    const balance = await token.balance(account);
+    if (balance < amount) {
+      throw new Error("The connected wallet does not have enough balance for this deposit");
+    }
+
+    let approval: SubmittedTransaction<null> | null = null;
+    const allowance = await token.allowance(account, arkaId);
+    if (allowance < amount) {
+      approval = await token.approve({
+        owner: account,
+        spender: arkaId,
+        amount,
+        expirationLedger,
+      }, options);
+    }
+
+    const deposit = await this.vaultModule(arkaId).deposit({
+      user: account,
+      asset: { contract: assetContract },
+      amount,
+    }, options);
+    return { approval, deposit };
   }
 
   buildRedeem(
@@ -365,6 +404,14 @@ export class ArkaWorkflow {
     const resolved = manager ?? this.config.publicKey;
     if (!resolved) throw new Error("manager is required when the SDK has no connected wallet");
     return ensureSorobanAddress(resolved, "manager");
+  }
+
+  private tokenModule(contractId: string): TokenModule {
+    return new TokenModule(this.config, contractId);
+  }
+
+  private vaultModule(arkaId: string): VaultModule {
+    return new VaultModule(this.config, arkaId);
   }
 
   private normalizeBlendAction(input: HumanBlendActionInput): {

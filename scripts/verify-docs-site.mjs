@@ -7,13 +7,14 @@ const docsRoot = resolve(repositoryRoot, "docs-site");
 const sdkRoot = resolve(repositoryRoot, "sdk/typescript");
 const errors = [];
 
-const [openapi, contracts, systemStatus, curatedArkas, pagerDuty, platformPage, sdkPackage, sdkSource] =
+const [openapi, contracts, systemStatus, curatedArkas, pagerDuty, sdkCanary, platformPage, sdkPackage, sdkSource] =
   await Promise.all([
     readJson(resolve(docsRoot, "openapi.json")),
     readJson(resolve(docsRoot, "contracts-mainnet.json")),
     readJson(resolve(docsRoot, "system-status.json")),
     readJson(resolve(docsRoot, "mainnet-curated-arkas-20260718.json")),
     readJson(resolve(docsRoot, "pagerduty-monitoring-cycle.json")),
+    readJson(resolve(docsRoot, "published-sdk-mainnet-canary.json")),
     readFile(resolve(docsRoot, "platform.html"), "utf8"),
     readJson(resolve(sdkRoot, "package.json")),
     readFile(resolve(sdkRoot, "src/sdk.ts"), "utf8"),
@@ -92,6 +93,18 @@ assert(
   "PagerDuty trigger and resolution must share one deduplication key",
 );
 
+assert(sdkCanary.kind === "published_sdk_mainnet_canary", "Missing published SDK mainnet run");
+assert(sdkCanary.package === "@arkafund/sdk@0.4.1", "SDK mainnet run must use release 0.4.1");
+for (const operation of ["approval", "deposit", "redemption"]) {
+  const transaction = sdkCanary[operation];
+  assert(transaction?.status === "SUCCESS", `SDK ${operation} transaction was not successful`);
+  assert(
+    transaction?.explorer ===
+      `https://stellar.expert/explorer/public/tx/${transaction?.hash}`,
+    `SDK ${operation} explorer link is invalid`,
+  );
+}
+
 const sdkVersionMatch = sdkSource.match(/SDK_VERSION\s*=\s*"([^"]+)"/);
 assert(sdkVersionMatch?.[1] === sdkPackage.version, "SDK source and package versions differ");
 assert(
@@ -135,6 +148,7 @@ console.log(
       curatedArkaContracts: curatedArkas.curatedArkas.length,
       navAverageLatencyMs: systemStatus.latency.averageMs,
       pagerDutyCycle: "triggered_and_resolved",
+      sdkMainnetTransactions: 3,
       sdkVersion: sdkPackage.version,
       checkedFiles: textFiles.length,
     },

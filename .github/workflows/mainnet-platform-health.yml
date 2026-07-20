@@ -53,5 +53,7 @@ jobs:
             docs-site/contracts-mainnet.json
             docs-site/system-status.json
             docs-site/pagerduty-monitoring-cycle.json
+            docs-site/published-sdk-mainnet-canary.json
+            docs-site/mainnet-curated-arkas-20260718.json
           if-no-files-found: error
           retention-days: 90

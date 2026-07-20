@@ -30,7 +30,7 @@ The public TypeScript SDK lives at `sdk/typescript` and is published as `@arkafu
 - `workflow()`
   - human-readable percentages and decimal asset amounts
   - creation-fee balance and allowance handling
-  - deposit and redemption
+  - allowance-aware deposit and redemption
   - AUTO or protocol-specific routing and vault rebalance construction
   - Blend and generic credit actions
 
@@ -55,12 +55,12 @@ const sdk = new ArkafundSdk(walletSdkConfig(
 ));
 const workflow = sdk.workflow();
 
-await workflow.deposit({
+await workflow.depositWithApproval({
   arkaId,
   account: walletAddress,
   assetContract: ARKAFUND_MAINNET_ASSETS.USDC,
   amount: "25.50",
-});
+}, approvalExpirationLedger);
 
 const plan = await workflow.planRebalance({
   protocol: "AUTO",

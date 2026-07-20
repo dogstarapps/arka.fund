@@ -13,7 +13,7 @@ import { TokenModule } from "./modules/token.js";
 import { RoutingClient, type RoutingClientOptions } from "./api/routingClient.js";
 import { ArkaWorkflow, type ArkaWorkflowOptions } from "./workflows/arkaWorkflow.js";
 
-export const SDK_VERSION = "0.4.0";
+export const SDK_VERSION = "0.4.1";
 
 export class ArkafundSdk {
   readonly extensions = new ExtensionRegistry();

@@ -132,14 +132,14 @@ keeps product interfaces human-readable while preserving exact on-chain values.
 
 ```ts
 const workflow = signedSdk.workflow();
-const deposit = await workflow.deposit({
+const { approval, deposit } = await workflow.depositWithApproval({
   arkaId: arkaContractId,
   account: walletAddress,
   assetContract: usdcContractId,
   amount: "25.50",
-});
+}, approvalExpirationLedger);
 
-console.log(deposit.hash);
+console.log(approval?.hash, deposit.hash);
 
 const redemption = await workflow.redeem({
   arkaId: arkaContractId,
@@ -209,6 +209,10 @@ also has a `build...` variant for applications that manage submission separately
 
 The complete wallet integration example is compiled in CI and ships with the
 package at `examples/wallet-integration.ts`.
+
+The reversible Mainnet canary at `examples/mainnet-wallet-canary.mjs` exercises
+the same workflow with environment-provided signing. It approves the selected
+vault, deposits a human-readable amount and redeems the newly minted shares.
 
 ## Public Arka and manager profiles
 

@@ -115,6 +115,10 @@ td code { color: var(--ink); overflow-wrap: anywhere; word-break: break-word; }
   aspect-ratio: 16 / 9;
   object-fit: contain;
 }
+.monitoring-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.monitoring-grid figure { margin: 0; padding: 14px; border: 1px solid var(--line-soft); background: var(--panel); }
+.monitoring-grid img { display: block; width: 100%; height: auto; border: 1px solid var(--line); background: #fff; }
+.monitoring-grid figcaption { margin-top: 12px; color: var(--muted); font-size: 0.86rem; }
 .metric { color: var(--green) !important; font-size: 2rem; font-weight: 800; line-height: 1.1; }
 .inline-link { display: inline-block; margin-top: 18px; font-weight: 700; }
 .steps { max-width: 800px; margin: 0; padding-left: 22px; color: var(--muted); }
@@ -172,7 +176,7 @@ footer a { text-decoration: none; }
   nav a:not(.app-link) { display: none; }
   main { width: min(100% - 32px, 1120px); }
   .intro { padding: 68px 0 54px; }
-  .two-column, .module-grid, .endpoint-grid, .resource-grid { grid-template-columns: 1fr; }
+  .two-column, .module-grid, .endpoint-grid, .resource-grid, .monitoring-grid { grid-template-columns: 1fr; }
   .facts { border-left: 0; border-top: 1px solid var(--line); }
   .facts div { padding-left: 0; }
   .final-section { align-items: flex-start; flex-direction: column; }

@@ -112,9 +112,19 @@ assert(
     platformPage.includes("https://arka.fund/arka-dapp-product-tour.mp4"),
   "Platform page must link both current walkthrough videos",
 );
-
+const monitoringPage = await readFile(resolve(docsRoot, "monitoring-lifecycle.html"), "utf8");
+assert(platformPage.includes("./monitoring-lifecycle.html"), "Platform page must link monitoring lifecycle");
+for (const requiredText of [
+  "pagerduty-incident-85-resolved.png",
+  "pagerduty-alert-85-resolved.png",
+  "monitoringStatus()",
+  "monitoringRuns({ limit: 10 })",
+  "monitoringAlerts()",
+]) {
+  assert(monitoringPage.includes(requiredText), `Monitoring lifecycle is missing ${requiredText}`);
+}
 const publicHtml = await Promise.all(
-  ["index.html", "platform.html", "api-reference.html", "completion.html", "evidence.html"]
+  ["index.html", "platform.html", "api-reference.html", "completion.html", "evidence.html", "monitoring-lifecycle.html"]
     .map((name) => readFile(resolve(docsRoot, name), "utf8")),
 );
 const reviewerLanguage = /\b(reviewer|tranche|proof|evidence|deliverable|reproduce|completion)\b/i;
@@ -181,7 +191,7 @@ function scanSensitiveText(file, contents) {
     /\/Users\//,
     /\/home\//,
     /marcosoliva/i,
-    /manna-digital/i,
+    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
     /ARKA_MAINNET_ADMIN_SK/,
     /HETZNER_PASS/,
     /OPENAI_API_KEY/,

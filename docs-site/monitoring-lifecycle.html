@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Arka.fund production monitoring lifecycle and public SDK access." />
+    <title>Arka.fund Monitoring Lifecycle</title>
+    <link rel="stylesheet" href="./styles.css?v=20260720-2" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://arka.fund/" aria-label="Arka.fund home">
+        <img src="https://arka.fund/logo-arkafund.png" alt="Arka.fund" />
+      </a>
+      <nav aria-label="Primary">
+        <a href="./index.html">Guides</a>
+        <a href="./api-reference.html">API Reference</a>
+        <a href="./sdk-reference/index.html">SDK Reference</a>
+        <a class="app-link" href="https://app.arka.fund/">Open app</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro compact">
+        <p class="eyebrow">Production monitoring</p>
+        <h1>Alert lifecycle</h1>
+        <p class="lead">
+          Arka Indexer Production detects unhealthy sync conditions, opens a PagerDuty incident
+          and resolves it after the service returns to its healthy state.
+        </p>
+      </section>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <p class="eyebrow">PagerDuty incident #85</p>
+          <h2>Controlled partial-sync failure</h2>
+          <p>
+            A 50% sync failure ratio exceeded the configured 25% threshold. PagerDuty received
+            the alert through its Events API and recorded the subsequent resolution.
+          </p>
+        </div>
+        <div class="monitoring-grid">
+          <figure>
+            <img src="./assets/pagerduty-incident-85-resolved.png" alt="PagerDuty incident 85 resolved after a controlled Arka catalog sync failure" />
+            <figcaption>PagerDuty incident status after service recovery.</figcaption>
+          </figure>
+          <figure>
+            <img src="./assets/pagerduty-alert-85-resolved.png" alt="Resolved PagerDuty alert for Arka Indexer Production" />
+            <figcaption>The associated warning alert for Arka Indexer Production.</figcaption>
+          </figure>
+        </div>
+        <div class="link-list compact-links">
+          <a href="./pagerduty-monitoring-cycle.json">Open the machine-readable trigger and resolution record</a>
+          <a href="https://catalog.arka.fund/v1/monitoring/status">Read current production monitoring status</a>
+        </div>
+      </section>
+
+      <section class="content-section two-column">
+        <div>
+          <p class="eyebrow">TypeScript SDK</p>
+          <h2>Read Arka monitoring state</h2>
+          <p>
+            The public SDK exposes Arka monitoring status, recent indexer runs and alert history.
+            PagerDuty remains isolated within the private operations layer.
+          </p>
+          <pre><code>import { CatalogClient } from "@arkafund/sdk";
+
+const catalog = new CatalogClient();
+const status = await catalog.monitoringStatus();
+const runs = await catalog.monitoringRuns({ limit: 10 });
+const alerts = await catalog.monitoringAlerts();</code></pre>
+        </div>
+        <dl class="facts">
+          <div><dt>Public surface</dt><dd>Arka monitoring data</dd></div>
+          <div><dt>Operations surface</dt><dd>PagerDuty Events API</dd></div>
+          <div><dt>Credential exposure</dt><dd>None</dd></div>
+        </dl>
+      </section>
+    </main>
+
+    <footer>
+      <span>Arka.fund on Stellar mainnet</span>
+      <a href="./platform.html">Developer platform</a>
+      <a href="https://catalog.arka.fund/health">System health</a>
+      <a href="https://arka.fund/">arka.fund</a>
+    </footer>
+  </body>
+</html>

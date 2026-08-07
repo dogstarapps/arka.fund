@@ -174,3 +174,42 @@ This hardening backlog can be considered closed when:
 - broader risk bounds are explicit and governance-controlled
 - multi-asset Blend positions are validated on testnet
 - the dApp surfaces pricing/risk status clearly
+# Blend Market Access Model
+
+## Production rule
+
+Arka uses one deployed adapter instance for each approved external Blend market.
+That adapter is shared by Arkas; it is not deployed once per Arka. The current
+Fixed XLM-USDC adapter is the canonical example.
+
+Access is deliberately two-layered:
+
+1. The global venue registry can allow or disable an adapter for the entire platform.
+2. Each Arka must explicitly configure that adapter, the market identifier and every
+   permitted action. A market is never granted to existing Arkas automatically.
+
+This keeps a new market opt-in, preserves the existing Arka policy surface and
+lets the platform stop a vulnerable venue immediately without modifying each
+Arka. A manager or governance actor can configure an approved market for a
+particular Arka only through its existing policy controls.
+
+## Mainnet access audit
+
+Run the following read-only check before enabling a new Blend action or market:
+
+```bash
+python3 scripts/mainnet_blend_access_audit.py
+```
+
+The report verifies the canonical registry, each registered Arka's Blend policy,
+and the global status of every referenced adapter. It does not sign or submit
+transactions.
+
+## Borrow activation
+
+The established Fixed XLM-USDC supply/withdraw adapter remains the only live
+Blend market until a separately governed borrow policy is fully validated. A
+borrow promotion must use the approved shared adapter for its external market,
+set bounded limits and oracle/risk controls on each opted-in Arka, and complete
+a canary with no unresolved debt or collateral. It must not auto-enable
+borrow/repay for existing Arkas.

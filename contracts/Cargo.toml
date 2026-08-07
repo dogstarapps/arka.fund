@@ -37,3 +37,7 @@ authors = ["Arka.fund Team"]
 
 [workspace.dependencies]
 soroban-sdk = { version = "23.0.0" }
+
+[profile.release]
+# Production contract arithmetic must trap rather than wrap on overflow.
+overflow-checks = true

@@ -40,6 +40,9 @@ class MainnetBlendBorrowCanaryScriptTests(unittest.TestCase):
         self.assertIn("assert_canary_budget", source)
         self.assertIn("create_canary_account", source)
         self.assertIn("close_canary_account", source)
+        self.assertIn('keys generate "$CANARY_IDENTITY" >/dev/null', source)
+        self.assertIn('keys secret "$CANARY_IDENTITY"', source)
+        self.assertIn('account_exists "$CANARY_ADDRESS"', source)
         self.assertIn('--source-account "$CANARY_SECRET"', source)
         self.assertIn('invoke_send_as "$CANARY_SECRET"', source)
 
@@ -48,8 +51,9 @@ class MainnetBlendBorrowCanaryScriptTests(unittest.TestCase):
 
         self.assertIn('invoke_admin_send "$VENUE_REGISTRY" set_venue_status', source)
         self.assertIn('invoke_admin_send "$VENUE_REGISTRY" disable_venue', source)
-        self.assertIn('stellar tx new create-account', source)
-        self.assertIn('stellar tx new account-merge', source)
+        self.assertIn('stellar -q tx new create-account', source)
+        self.assertIn('stellar -q tx new account-merge', source)
+        self.assertNotIn('| stellar tx send', source)
         self.assertIn('--manager "$CANARY_ADDRESS"', source)
         self.assertIn('--caller "$CANARY_ADDRESS"', source)
 

@@ -42,7 +42,8 @@ class MainnetBlendBorrowCanaryScriptTests(unittest.TestCase):
         self.assertIn("close_canary_account", source)
         self.assertIn('keys generate "$CANARY_IDENTITY" >/dev/null', source)
         self.assertIn('keys secret "$CANARY_IDENTITY"', source)
-        self.assertIn('account_exists "$CANARY_ADDRESS"', source)
+        self.assertIn('wait_for_account_closure "$CANARY_ADDRESS"', source)
+        self.assertIn('for attempt in $(seq 1 12)', source)
         self.assertIn('--source-account "$CANARY_SECRET"', source)
         self.assertIn('invoke_send_as "$CANARY_SECRET"', source)
 

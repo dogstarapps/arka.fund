@@ -97,16 +97,32 @@ read_scalar() {
 }
 
 native_balance_stroops() {
-  local account="$1"
-  curl -fsS "https://horizon.stellar.org/accounts/$account" \
-    | jq -r '.balances[] | select(.asset_type == "native") | .balance' \
-    | awk -F. '{ fraction = $2 "0000000"; print ($1 * 10000000) + substr(fraction, 1, 7) }'
+  local account="$1" response attempt
+  # Horizon indexes a just-created account asynchronously. Do not turn that
+  # short propagation window into a false canary failure.
+  for attempt in $(seq 1 12); do
+    if response="$(curl -fsS "https://horizon.stellar.org/accounts/$account")"; then
+      jq -r '.balances[] | select(.asset_type == "native") | .balance' <<<"$response" \
+        | awk -F. '{ fraction = $2 "0000000"; print ($1 * 10000000) + substr(fraction, 1, 7) }'
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Unable to determine native XLM balance for $account after Horizon propagation." >&2
+  return 1
 }
 
-account_exists() {
-  local account="$1" status
-  status="$(curl -sS -o /dev/null -w '%{http_code}' "https://horizon.stellar.org/accounts/$account")"
-  [[ "$status" == "200" ]]
+wait_for_account_closure() {
+  local account="$1" status attempt
+  for attempt in $(seq 1 12); do
+    status="$(curl -sS -o /dev/null -w '%{http_code}' "https://horizon.stellar.org/accounts/$account")"
+    if [[ "$status" == "404" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "Canary account did not close after account merge; retaining its recovery key." >&2
+  return 1
 }
 
 assert_canary_budget() {
@@ -181,8 +197,7 @@ close_canary_account() {
     --inclusion-fee "$INCLUSION_FEE" \
     --rpc-url "$RPC_URL" \
     --network-passphrase "$NETWORK_PASSPHRASE" >/dev/null
-  if account_exists "$CANARY_ADDRESS"; then
-    echo "Canary account merge was not finalized; retaining its recovery key." >&2
+  if ! wait_for_account_closure "$CANARY_ADDRESS"; then
     return 1
   fi
   CANARY_ACCOUNT_FUNDED=0

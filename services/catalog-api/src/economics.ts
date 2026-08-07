@@ -45,32 +45,48 @@ export function buildArkaEconomicMetrics(
   context: CatalogValuationContext = {},
 ): CatalogEconomicMetrics {
   const denominationAsset = resolveAssetIdentity(entry.denominationContract);
-  const usdParity = Boolean(
-    entry.denominationContract &&
-      denominationAsset?.usdPegged &&
-      isUsdStablecoinContract(entry.denominationContract),
-  );
   const denominationPrice = entry.denominationContract
     ? context.assetPrices?.get(entry.denominationContract.trim().toUpperCase()) ?? null
     : null;
-  const verifiedOraclePrice = denominationPrice?.oracleStatus === "verified"
-    && denominationPrice.priceUsd !== null;
-  const valuationSource: CatalogValuationSource = usdParity
-    ? "usd_stablecoin_parity"
-    : verifiedOraclePrice
+  const assetValues = entry.assets.map((asset) =>
+    valueAssetContribution(asset, context),
+  );
+  const hasRecordedAssets = entry.assets.length > 0;
+  const hasUnpricedContribution = assetValues.some((value) => value.usdValue === null);
+  const recordedTotal = assetValues.reduce(
+    (total, value) => total + BigInt(value.contribution),
+    0n,
+  );
+  const navMatchesRecordedAssets = recordedTotal === BigInt(entry.nav);
+  const denominationFallback = hasRecordedAssets
+    ? null
+    : valueAmountInUsd(entry.nav, entry.denominationContract, context);
+  const navUsdEstimate = hasRecordedAssets
+    ? hasUnpricedContribution || !navMatchesRecordedAssets
+      ? null
+      : assetValues.reduce((total, value) => total + BigInt(value.usdValue ?? "0"), 0n).toString()
+    : denominationFallback?.usdValue ?? null;
+  const missingPriceReasons = hasRecordedAssets
+    ? [
+        ...new Set([
+          ...assetValues.flatMap((value) => value.missingReason ? [value.missingReason] : []),
+          ...(navMatchesRecordedAssets ? [] : ["asset_exposure_does_not_reconcile_with_nav"]),
+        ]),
+      ]
+    : denominationFallback?.missingReason
+      ? [denominationFallback.missingReason]
+      : [];
+  const pricedValues = hasRecordedAssets ? assetValues : [denominationFallback].filter(Boolean);
+  const valuationSource = navUsdEstimate === null
+    ? "unavailable"
+    : pricedValues.some((value) => value?.valuationSource === "oracle_verified")
       ? "oracle_verified"
-      : "unavailable";
-  const oracleStatus: CatalogOracleStatus = usdParity
-    ? "not_required_usd_stablecoin"
-    : denominationPrice?.oracleStatus ?? "missing_price";
-  const navUsdEstimate = usdParity
-    ? entry.nav
-    : verifiedOraclePrice && denominationPrice
-      ? multiplyByOraclePrice(entry.nav, denominationPrice.priceUsd!, denominationPrice.decimals)
-      : null;
-  const missingPriceReasons = navUsdEstimate !== null
-    ? []
-    : [missingPriceReason(entry.denominationContract, oracleStatus)];
+      : "usd_stablecoin_parity";
+  const oracleStatus = navUsdEstimate === null
+    ? firstUnavailableOracleStatus(pricedValues)
+    : valuationSource === "oracle_verified"
+      ? "verified"
+      : "not_required_usd_stablecoin";
 
   return {
     denominationAsset,
@@ -89,7 +105,7 @@ export function buildArkaEconomicMetrics(
     volume: EMPTY_PERIOD,
     flows: EMPTY_FLOWS,
     fees: cloneFees(entry.fees),
-    portfolioWeights: buildPortfolioWeights(entry.assets, entry.nav, navUsdEstimate),
+    portfolioWeights: buildPortfolioWeights(assetValues, navUsdEstimate),
     oracleStatus,
     valuationSource,
     missingPriceReasons,
@@ -121,16 +137,6 @@ export function multiplyByOraclePrice(
   return ((BigInt(amountBase) * BigInt(price)) / (10n ** BigInt(oracleDecimals))).toString();
 }
 
-function missingPriceReason(
-  denominationContract: string | null,
-  status: CatalogOracleStatus,
-): string {
-  if (!denominationContract) return "denomination_asset_missing";
-  if (status === "stale_price") return "denomination_price_stale";
-  if (status === "invalid_price") return "denomination_price_invalid";
-  return "denomination_price_unavailable";
-}
-
 export function isUsdStablecoinContract(contract: string): boolean {
   const normalized = contract.trim().toUpperCase();
   if (DEFAULT_USD_STABLECOIN_CONTRACTS.has(normalized)) return true;
@@ -147,32 +153,107 @@ function readConfiguredUsdStablecoinContracts(): Set<string> {
   );
 }
 
+interface AssetContributionValue {
+  assetContract: string;
+  contribution: string;
+  usdValue: string | null;
+  oracleStatus: CatalogOracleStatus;
+  valuationSource: CatalogValuationSource;
+  missingReason: string | null;
+}
+
 function buildPortfolioWeights(
-  assets: ArkaAssetExposure[],
-  nav: string,
+  values: AssetContributionValue[],
   navUsdEstimate: string | null,
 ): CatalogPortfolioWeight[] {
-  const total = BigInt(nav || "0");
-  return assets.map((asset) => {
-    const valueDenomination = navContribution(asset);
-    const weightBps = total > 0n
-      ? Number((BigInt(valueDenomination) * 10_000n) / total)
-      : 0;
-    const valueUsdEstimate =
-      navUsdEstimate && total > 0n
-        ? ((BigInt(navUsdEstimate) * BigInt(valueDenomination)) / total).toString()
-        : null;
+  const totalUsd = navUsdEstimate === null ? 0n : BigInt(navUsdEstimate);
+  const totalRaw = values.reduce((total, value) => total + BigInt(value.contribution), 0n);
+  return values.map((value) => {
+    const weightBps = totalUsd > 0n && value.usdValue !== null
+      ? Number((BigInt(value.usdValue) * 10_000n) / totalUsd)
+      : totalRaw > 0n
+        ? Number((BigInt(value.contribution) * 10_000n) / totalRaw)
+        : 0;
     return {
-      assetContract: asset.assetContract,
+      assetContract: value.assetContract,
       weightBps,
-      valueDenomination,
-      valueUsdEstimate,
+      valueDenomination: value.contribution,
+      valueUsdEstimate: value.usdValue,
     };
   });
 }
 
 function navContribution(asset: ArkaAssetExposure): string {
   return (BigInt(asset.liquidBalance) + BigInt(asset.netPositionValue)).toString();
+}
+
+function valueAssetContribution(
+  asset: ArkaAssetExposure,
+  context: CatalogValuationContext,
+): AssetContributionValue {
+  const contribution = navContribution(asset);
+  const valuation = valueAmountInUsd(contribution, asset.assetContract, context);
+  return {
+    assetContract: asset.assetContract,
+    contribution,
+    ...valuation,
+  };
+}
+
+function valueAmountInUsd(
+  amount: string,
+  assetContract: string | null,
+  context: CatalogValuationContext,
+): Omit<AssetContributionValue, "assetContract" | "contribution"> {
+  if (BigInt(amount) === 0n) {
+    return {
+      usdValue: "0",
+      oracleStatus: "not_required_usd_stablecoin",
+      valuationSource: "usd_stablecoin_parity",
+      missingReason: null,
+    };
+  }
+  if (!assetContract) {
+    return {
+      usdValue: null,
+      oracleStatus: "missing_price",
+      valuationSource: "unavailable",
+      missingReason: "asset_contract_missing",
+    };
+  }
+  const identity = resolveAssetIdentity(assetContract);
+  if (identity?.usdPegged && isUsdStablecoinContract(assetContract)) {
+    return {
+      usdValue: amount,
+      oracleStatus: "not_required_usd_stablecoin",
+      valuationSource: "usd_stablecoin_parity",
+      missingReason: null,
+    };
+  }
+  const price = context.assetPrices?.get(assetContract.trim().toUpperCase()) ?? null;
+  if (price?.oracleStatus === "verified" && price.priceUsd !== null) {
+    return {
+      usdValue: multiplyByOraclePrice(amount, price.priceUsd, price.decimals),
+      oracleStatus: "verified",
+      valuationSource: "oracle_verified",
+      missingReason: null,
+    };
+  }
+  const status = price?.oracleStatus ?? "missing_price";
+  return {
+    usdValue: null,
+    oracleStatus: status,
+    valuationSource: "unavailable",
+    missingReason: `asset_price_${status}`,
+  };
+}
+
+function firstUnavailableOracleStatus(
+  values: Array<Pick<AssetContributionValue, "oracleStatus"> | null | undefined>,
+): CatalogOracleStatus {
+  const statuses = values.map((value) => value?.oracleStatus).filter(Boolean) as CatalogOracleStatus[];
+  const priority: CatalogOracleStatus[] = ["policy_paused", "stale_price", "invalid_price", "missing_price"];
+  return priority.find((status) => statuses.includes(status)) ?? "missing_price";
 }
 
 function cloneFees(fees: FeeSummary): FeeSummary {

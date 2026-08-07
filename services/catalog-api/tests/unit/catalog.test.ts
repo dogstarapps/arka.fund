@@ -108,6 +108,61 @@ test("listArkas sorts by nav and applies ranking", () => {
   assert.equal(page.items[1]?.rank, 2);
 });
 
+test("catalog rankings use USD valuation and leave unavailable entries last", () => {
+  const snapshot = buildSnapshot(fixtureArkas(), [], "2026-03-27T10:00:00.000Z");
+  const [first, second] = snapshot.arkas;
+  assert.ok(first);
+  assert.ok(second);
+
+  snapshot.arkas = [
+    {
+      ...first,
+      nav: "9000000",
+      economics: { ...first.economics!, navUsdEstimate: "10000000" },
+    },
+    {
+      ...second,
+      nav: "1",
+      economics: { ...second.economics!, navUsdEstimate: "20000000" },
+    },
+    {
+      ...first,
+      arkaId: "CEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+      nav: "999999999",
+      economics: { ...first.economics!, navUsdEstimate: null },
+    },
+  ];
+
+  const page = listArkas(snapshot, { sort: "nav", order: "desc" });
+  assert.equal(page.items[0]?.arkaId, second.arkaId);
+  assert.equal(page.items[1]?.arkaId, first.arkaId);
+  assert.equal(page.items[2]?.economics?.navUsdEstimate, null);
+});
+
+test("asset and manager rankings use USD valuation", () => {
+  const snapshot = buildSnapshot(fixtureArkas(), [], "2026-03-27T10:00:00.000Z");
+  const [firstAsset, secondAsset] = snapshot.assets;
+  const [firstManager, secondManager] = snapshot.managers;
+  assert.ok(firstAsset);
+  assert.ok(secondAsset);
+  assert.ok(firstManager);
+  assert.ok(secondManager);
+
+  snapshot.assets = [
+    { ...firstAsset, netManagedAmount: "9000000", netManagedUsdEstimate: "10000000" },
+    { ...secondAsset, netManagedAmount: "1", netManagedUsdEstimate: "20000000" },
+  ];
+  snapshot.managers = [
+    { ...firstManager, totalNav: "9000000", totalNavUsdEstimate: "10000000" },
+    { ...secondManager, totalNav: "1", totalNavUsdEstimate: "20000000" },
+  ];
+
+  const assets = listAssets(snapshot, { sort: "netManagedAmount", order: "desc" });
+  const managers = listManagers(snapshot, { sort: "totalNav", order: "desc" });
+  assert.equal(assets.items[0]?.assetContract, secondAsset.assetContract);
+  assert.equal(managers.items[0]?.manager, secondManager.manager);
+});
+
 test("listAssets supports ranking and search", () => {
   const snapshot = buildSnapshot(fixtureArkas(), [], "2026-03-27T10:00:00.000Z");
   const page = listAssets(snapshot, {

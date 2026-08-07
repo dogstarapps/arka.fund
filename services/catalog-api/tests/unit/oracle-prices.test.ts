@@ -138,15 +138,118 @@ test("snapshot economics value XLM through OracleGuard and USDC through parity",
     oracleDecimals: 14,
     observedAt: OBSERVED_AT,
   });
+  const xlmArka = {
+    ...arka(XLM, "10000000"),
+    assets: [
+      {
+        assetContract: XLM,
+        isDenomination: true,
+        liquidBalance: "10000000",
+        collateralAmount: "0",
+        debtAmount: "0",
+        netManagedAmount: "10000000",
+        netPositionValue: "0",
+        marketIds: [],
+        syncedAt: OBSERVED_AT,
+      },
+    ],
+  };
+  const usdcArka = {
+    ...arka(USDC, "25000000"),
+    arkaId: `${arka(USDC, "0").arkaId.slice(0, -1)}D`,
+    assets: [
+      {
+        assetContract: USDC,
+        isDenomination: true,
+        liquidBalance: "25000000",
+        collateralAmount: "0",
+        debtAmount: "0",
+        netManagedAmount: "25000000",
+        netPositionValue: "0",
+        marketIds: [],
+        syncedAt: OBSERVED_AT,
+      },
+    ],
+  };
   const snapshot = buildSnapshot(
-    [arka(XLM, "10000000"), { ...arka(USDC, "25000000"), arkaId: `${arka(USDC, "0").arkaId.slice(0, -1)}D` }],
+    [xlmArka, usdcArka],
     [],
     OBSERVED_AT,
     [xlmPrice, usdParityPrice(USDC, OBSERVED_AT)],
   );
-  assert.equal(snapshot.arkas[0].economics?.navUsdEstimate, "25000000");
-  assert.equal(snapshot.arkas[1].economics?.navUsdEstimate, "1907918");
-  assert.equal(snapshot.arkas[1].economics?.valuationSource, "oracle_verified");
+  const indexedXlmArka = snapshot.arkas.find((entry) => entry.denominationContract === XLM);
+  const indexedUsdcArka = snapshot.arkas.find((entry) => entry.denominationContract === USDC);
+  assert.equal(indexedXlmArka?.economics?.navUsdEstimate, "1907918");
+  assert.equal(indexedXlmArka?.economics?.valuationSource, "oracle_verified");
+  assert.equal(indexedUsdcArka?.economics?.navUsdEstimate, "25000000");
+  assert.equal(
+    snapshot.assets.find((asset) => asset.assetContract === XLM)?.netManagedUsdEstimate,
+    "1907918",
+  );
+  assert.equal(
+    snapshot.assets.find((asset) => asset.assetContract === USDC)?.netManagedUsdEstimate,
+    "25000000",
+  );
+});
+
+test("snapshot economics values each recorded asset instead of treating mixed exposure as denomination units", () => {
+  const xlmPrice = classifyOracleInspection({
+    assetContract: XLM,
+    inspection: inspection(),
+    policy,
+    paused: false,
+    oracleDecimals: 14,
+    observedAt: OBSERVED_AT,
+  });
+  const mixedArka: ArkaCatalogEntry = {
+    ...arka(USDC, "16409803"),
+    arkaId: "CEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+    whitelistContracts: [USDC, XLM],
+    assets: [
+      {
+        assetContract: USDC,
+        isDenomination: true,
+        liquidBalance: "8470000",
+        collateralAmount: "0",
+        debtAmount: "0",
+        netManagedAmount: "8470000",
+        netPositionValue: "0",
+        marketIds: [],
+        syncedAt: OBSERVED_AT,
+      },
+      {
+        assetContract: XLM,
+        isDenomination: false,
+        liquidBalance: "7939803",
+        collateralAmount: "0",
+        debtAmount: "0",
+        netManagedAmount: "7939803",
+        netPositionValue: "0",
+        marketIds: [],
+        syncedAt: OBSERVED_AT,
+      },
+    ],
+  };
+
+  const snapshot = buildSnapshot(
+    [mixedArka],
+    [],
+    OBSERVED_AT,
+    [xlmPrice, usdParityPrice(USDC, OBSERVED_AT)],
+  );
+  const entry = snapshot.arkas[0];
+  const expectedUsd = (
+    8_470_000n +
+    BigInt(multiplyByOraclePrice("7939803", xlmPrice.priceUsd!, xlmPrice.decimals))
+  ).toString();
+
+  assert.equal(entry.economics?.navUsdEstimate, expectedUsd);
+  assert.notEqual(entry.economics?.navUsdEstimate, mixedArka.nav);
+  assert.equal(
+    entry.economics?.portfolioWeights.find((item) => item.assetContract === XLM)
+      ?.valueUsdEstimate,
+    multiplyByOraclePrice("7939803", xlmPrice.priceUsd!, xlmPrice.decimals),
+  );
 });
 
 test("the canonical registry resolves every launch asset without exposing raw unknown labels", () => {

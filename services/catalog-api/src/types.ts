@@ -115,6 +115,8 @@ export interface AssetCatalogEntry {
   debtAmount: string;
   netManagedAmount: string;
   netPositionValue: string;
+  /** USD valuation of the current managed amount, when every non-zero amount is priced. */
+  netManagedUsdEstimate: string | null;
   syncedAt: string;
 }
 
@@ -124,6 +126,8 @@ export interface ManagerCatalogEntry {
   curatedArkaCount: number;
   delistedArkaCount: number;
   totalNav: string;
+  /** USD valuation across this manager's Arkas, when all are priced. */
+  totalNavUsdEstimate: string | null;
   identity?: ManagerIdentityMetadata | null;
   syncedAt: string;
 }
@@ -385,6 +389,7 @@ export interface DashboardCompositionItem {
   managerCount: number;
   denominationArkaCount: number;
   navContribution: string;
+  valueUsdEstimate: string | null;
   weightBps: number;
   liquidBalance: string;
   collateralAmount: string;
@@ -395,6 +400,7 @@ export interface DashboardCompositionItem {
 export interface DashboardComposition {
   syncedAt: string;
   totalNav: string;
+  totalNavUsdEstimate: string | null;
   items: DashboardCompositionItem[];
 }
 
@@ -404,6 +410,7 @@ export interface ArkaPortfolioItem {
   isDenomination: boolean;
   marketIds: string[];
   navContribution: string;
+  valueUsdEstimate: string | null;
   weightBps: number;
   liquidBalance: string;
   collateralAmount: string;
@@ -419,6 +426,7 @@ export interface ArkaPortfolio {
   syncedAt: string;
   nav: string;
   totalNavContribution: string;
+  totalNavUsdEstimate: string | null;
   items: ArkaPortfolioItem[];
 }
 

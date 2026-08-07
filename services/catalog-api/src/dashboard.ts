@@ -186,7 +186,13 @@ export function buildDashboardComposition(
   snapshot: CatalogSnapshot,
   query: CompositionQuery = {},
 ): DashboardComposition {
-  const totalNav = snapshot.metrics.totalNav;
+  const rawTotalNav = snapshot.metrics.totalNav;
+  const totalNavUsdEstimate = snapshot.assets.every((asset) => asset.netManagedUsdEstimate !== null)
+    ? snapshot.assets.reduce(
+      (total, asset) => total + BigInt(asset.netManagedUsdEstimate ?? "0"),
+      0n,
+    ).toString()
+    : null;
   const items = snapshot.assets
     .map((asset, index) => {
       const navContribution = addBigIntStrings(asset.liquidBalance, asset.netPositionValue);
@@ -197,7 +203,10 @@ export function buildDashboardComposition(
         managerCount: asset.managerCount,
         denominationArkaCount: asset.denominationArkaCount,
         navContribution,
-        weightBps: bigintRatioBps(navContribution, totalNav),
+        valueUsdEstimate: asset.netManagedUsdEstimate,
+        weightBps: totalNavUsdEstimate !== null && asset.netManagedUsdEstimate !== null
+          ? bigintRatioBps(asset.netManagedUsdEstimate, totalNavUsdEstimate)
+          : bigintRatioBps(navContribution, rawTotalNav),
         liquidBalance: asset.liquidBalance,
         collateralAmount: asset.collateralAmount,
         debtAmount: asset.debtAmount,
@@ -209,7 +218,8 @@ export function buildDashboardComposition(
 
   return {
     syncedAt: snapshot.syncedAt,
-    totalNav,
+    totalNav: rawTotalNav,
+    totalNavUsdEstimate,
     items: items.map((item, index) => ({ ...item, rank: index + 1 })),
   };
 }
@@ -236,7 +246,12 @@ export function buildArkaPortfolio(
         isDenomination: asset.isDenomination,
         marketIds: [...asset.marketIds].sort(),
         navContribution: contribution,
-        weightBps: bigintRatioBps(contribution, arka.nav),
+        valueUsdEstimate: arka.economics?.portfolioWeights.find(
+          (weight) => weight.assetContract === asset.assetContract,
+        )?.valueUsdEstimate ?? null,
+        weightBps: arka.economics?.portfolioWeights.find(
+          (weight) => weight.assetContract === asset.assetContract,
+        )?.weightBps ?? bigintRatioBps(contribution, arka.nav),
         liquidBalance: asset.liquidBalance,
         collateralAmount: asset.collateralAmount,
         debtAmount: asset.debtAmount,
@@ -254,6 +269,7 @@ export function buildArkaPortfolio(
     syncedAt: arka.syncedAt,
     nav: arka.nav,
     totalNavContribution,
+    totalNavUsdEstimate: arka.economics?.navUsdEstimate ?? null,
     items: items.map((item, index) => ({ ...item, rank: index + 1 })),
   };
 }

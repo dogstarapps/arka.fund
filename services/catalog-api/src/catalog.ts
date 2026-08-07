@@ -21,7 +21,12 @@ import type {
   RankedAssetCatalogEntry,
   RankedManagerCatalogEntry,
 } from "./types.js";
-import { enrichArkaEconomics, resolveAssetIdentity } from "./economics.js";
+import {
+  enrichArkaEconomics,
+  multiplyByOraclePrice,
+  resolveAssetIdentity,
+  isUsdStablecoinContract,
+} from "./economics.js";
 
 const CURRENT_SNAPSHOT_SCHEMA_VERSION = 3;
 
@@ -34,9 +39,9 @@ export function buildSnapshot(
   const pricesByAsset = new Map(
     assetPrices.map((price) => [price.assetContract.trim().toUpperCase(), price]),
   );
-  const sortedArkas = [...arkas]
-    .sort(compareArkasByNavDesc)
-    .map((entry) => enrichArkaEconomics(entry, { assetPrices: pricesByAsset }));
+  const sortedArkas = arkas
+    .map((entry) => enrichArkaEconomics(entry, { assetPrices: pricesByAsset }))
+    .sort(compareArkasByNavDesc);
   const assets = aggregateAssets(sortedArkas, syncedAt, pricesByAsset);
   const managers = aggregateManagers(sortedArkas, syncedAt);
   const metrics = buildMetrics(sortedArkas, assets.length, failures, managers.length, syncedAt);
@@ -79,6 +84,7 @@ export function aggregateAssets(
           debtAmount: "0",
           netManagedAmount: "0",
           netPositionValue: "0",
+          netManagedUsdEstimate: "0",
           syncedAt,
         },
       };
@@ -110,6 +116,7 @@ export function aggregateAssets(
     .map(({ entry, managers }) => ({
       ...entry,
       managerCount: managers.size,
+      netManagedUsdEstimate: valueAssetEntryInUsd(entry),
     }))
     .sort(compareAssetsByNetManagedAmountDesc);
 }
@@ -126,16 +133,33 @@ export function aggregateManagers(
       curatedArkaCount: 0,
       delistedArkaCount: 0,
       totalNav: "0",
+      totalNavUsdEstimate: "0",
       syncedAt,
     };
     current.arkaCount += 1;
     current.curatedArkaCount += arka.curated ? 1 : 0;
     current.delistedArkaCount += arka.delisted ? 1 : 0;
     current.totalNav = addBigIntStrings(current.totalNav, arka.nav);
+    current.totalNavUsdEstimate =
+      current.totalNavUsdEstimate === null || arka.economics?.navUsdEstimate === null || arka.economics?.navUsdEstimate === undefined
+        ? null
+        : addBigIntStrings(current.totalNavUsdEstimate, arka.economics.navUsdEstimate);
     grouped.set(arka.manager, current);
   }
 
   return [...grouped.values()].sort(compareManagersByNavDesc);
+}
+
+function valueAssetEntryInUsd(entry: AssetCatalogEntry): string | null {
+  const amount = addBigIntStrings(entry.liquidBalance, entry.netPositionValue);
+  if (BigInt(amount) === 0n) return "0";
+  const contract = entry.assetContract;
+  const identity = resolveAssetIdentity(contract);
+  if (identity?.usdPegged && isUsdStablecoinContract(contract)) return amount;
+  const price = entry.price;
+  return price?.oracleStatus === "verified" && price.priceUsd !== null
+    ? multiplyByOraclePrice(amount, price.priceUsd, price.decimals)
+    : null;
 }
 
 export function buildMetrics(
@@ -497,7 +521,12 @@ function compareArkaEntries(
   const direction = order === "asc" ? 1 : -1;
   let comparison = 0;
   if (sort === "nav") {
-    comparison = compareBigIntStrings(left.nav, right.nav);
+    comparison = compareUsdEstimates(
+      left.economics?.navUsdEstimate,
+      right.economics?.navUsdEstimate,
+      order,
+    );
+    return comparison !== 0 ? comparison : left.arkaId.localeCompare(right.arkaId);
   } else if (sort === "manager") {
     comparison = left.manager.localeCompare(right.manager);
   } else {
@@ -518,7 +547,12 @@ function compareAssetEntries(
   const direction = order === "asc" ? 1 : -1;
   let comparison = 0;
   if (sort === "netManagedAmount") {
-    comparison = compareBigIntStrings(left.netManagedAmount, right.netManagedAmount);
+    comparison = compareUsdEstimates(
+      left.netManagedUsdEstimate,
+      right.netManagedUsdEstimate,
+      order,
+    );
+    return comparison !== 0 ? comparison : left.assetContract.localeCompare(right.assetContract);
   } else if (sort === "arkaCount") {
     comparison = left.arkaCount - right.arkaCount;
   } else {
@@ -539,7 +573,12 @@ function compareManagerEntries(
   const direction = order === "asc" ? 1 : -1;
   let comparison = 0;
   if (sort === "totalNav") {
-    comparison = compareBigIntStrings(left.totalNav, right.totalNav);
+    comparison = compareUsdEstimates(
+      left.totalNavUsdEstimate,
+      right.totalNavUsdEstimate,
+      order,
+    );
+    return comparison !== 0 ? comparison : left.manager.localeCompare(right.manager);
   } else if (sort === "arkaCount") {
     comparison = left.arkaCount - right.arkaCount;
   } else {
@@ -552,9 +591,13 @@ function compareManagerEntries(
 }
 
 function compareArkasByNavDesc(left: ArkaCatalogEntry, right: ArkaCatalogEntry): number {
-  const comparison = compareBigIntStrings(left.nav, right.nav);
+  const comparison = compareUsdEstimates(
+    left.economics?.navUsdEstimate,
+    right.economics?.navUsdEstimate,
+    "desc",
+  );
   if (comparison !== 0) {
-    return comparison * -1;
+    return comparison;
   }
   return left.arkaId.localeCompare(right.arkaId);
 }
@@ -563,9 +606,13 @@ function compareAssetsByNetManagedAmountDesc(
   left: AssetCatalogEntry,
   right: AssetCatalogEntry,
 ): number {
-  const comparison = compareBigIntStrings(left.netManagedAmount, right.netManagedAmount);
+  const comparison = compareUsdEstimates(
+    left.netManagedUsdEstimate,
+    right.netManagedUsdEstimate,
+    "desc",
+  );
   if (comparison !== 0) {
-    return comparison * -1;
+    return comparison;
   }
   return left.assetContract.localeCompare(right.assetContract);
 }
@@ -585,11 +632,29 @@ function compareManagersByNavDesc(
   left: ManagerCatalogEntry,
   right: ManagerCatalogEntry,
 ): number {
-  const comparison = compareBigIntStrings(left.totalNav, right.totalNav);
+  const comparison = compareUsdEstimates(
+    left.totalNavUsdEstimate,
+    right.totalNavUsdEstimate,
+    "desc",
+  );
   if (comparison !== 0) {
-    return comparison * -1;
+    return comparison;
   }
   return left.manager.localeCompare(right.manager);
+}
+
+function compareUsdEstimates(
+  left: string | null | undefined,
+  right: string | null | undefined,
+  order: "asc" | "desc",
+): number {
+  if (left === null || left === undefined) {
+    return right === null || right === undefined ? 0 : 1;
+  }
+  if (right === null || right === undefined) {
+    return -1;
+  }
+  return compareBigIntStrings(left, right) * (order === "asc" ? 1 : -1);
 }
 
 function compareBigIntStrings(left: string, right: string): number {

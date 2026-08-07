@@ -205,6 +205,17 @@ The report verifies the canonical registry, each registered Arka's Blend policy,
 and the global status of every referenced adapter. It does not sign or submit
 transactions.
 
+### Current Mainnet readout (2026-08-07)
+
+The read-only audit recorded six registered Arkas. Three explicitly opt into
+the canonical Fixed XLM-USDC adapter with supply and withdrawal enabled. The
+other three have no Blend market configured. No registered Arka has borrowing
+or repayment enabled.
+
+This is the expected fail-closed state: a future credit-market promotion must
+be made deliberately for each chosen Arka, rather than inherited by every
+existing or newly created Arka.
+
 ## Borrow activation
 
 The established Fixed XLM-USDC supply/withdraw adapter remains the only live

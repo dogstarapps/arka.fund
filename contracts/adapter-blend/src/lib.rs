@@ -90,7 +90,7 @@ impl BlendAdapter {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -103,7 +103,7 @@ impl BlendAdapter {
         let Some(governor) = env
             .storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -181,7 +181,18 @@ impl BlendAdapter {
         out
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(env: Env, admin: Address, router: Address) {
+        Self::initialize(env, admin, router);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, router: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, router: Address) {
         let store = env.storage().instance();
         if store.has(&DataKey::Admin) {
             panic_with_error!(&env, Error::AlreadyInitialized);

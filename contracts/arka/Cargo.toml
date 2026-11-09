@@ -17,9 +17,13 @@ adapter-blend = { path = "../adapter-blend" }
 blend-router-mock = { path = "../blend-router-mock" }
 oracle-guard = { path = "../oracle-guard" }
 router = { path = "../router" }
+adapter-phoenix = { path = "../adapter-phoenix" }
+adapter-sushi = { path = "../adapter-sushi" }
 test-token = { path = "../test-token", features = ["testutils"] }
 test-profit-adapter = { path = "../test-profit-adapter", features = ["testutils"] }
 venue-registry = { path = "../venue-registry", features = ["testutils"] }
+share-token = { path = "../share-token", features = ["testutils"] }
+serde_json = "1"
 
 [features]
 default = []

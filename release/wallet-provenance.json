@@ -1,0 +1,447 @@
+{
+  "at": "2026-10-29T17:02:02.171Z",
+  "upstreamPackage": {
+    "sha256": "f3d24d028faa14da55e0b10fee37ac2fd06295dc19f0fab485053b47ec1c9920",
+    "bytes": 2326
+  },
+  "upstreamVersion": "1.9.5",
+  "localVersion": "1.9.5-arka.1",
+  "license": {
+    "sha256": "4ce4c85cb464a888f98e0b4bfdef79552d9f38aaefe15f71f2c9bedea2b0772b",
+    "bytes": 1080
+  },
+  "files": [
+    {
+      "relative": "components/button/stellar-wallets-button.d.ts",
+      "upstream": {
+        "sha256": "1381701451897375079548d14aa31fa47aa5115c70795b7a8ce482c4c42ef2e3",
+        "bytes": 1079
+      },
+      "selected": {
+        "sha256": "1381701451897375079548d14aa31fa47aa5115c70795b7a8ce482c4c42ef2e3",
+        "bytes": 1079
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/button/stellar-wallets-button.mjs",
+      "upstream": {
+        "sha256": "7c2a723d20ba23e645bc0eefb04569783409d20c41d42e951e6ee6eeaa214e21",
+        "bytes": 10589
+      },
+      "selected": {
+        "sha256": "7c2a723d20ba23e645bc0eefb04569783409d20c41d42e951e6ee6eeaa214e21",
+        "bytes": 10589
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/button/styles.d.ts",
+      "upstream": {
+        "sha256": "7bd0083b2016e62a59439482c0f5b99abf39350375c7b08327d0725b8761c35b",
+        "bytes": 222
+      },
+      "selected": {
+        "sha256": "7bd0083b2016e62a59439482c0f5b99abf39350375c7b08327d0725b8761c35b",
+        "bytes": 222
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/button/styles.mjs",
+      "upstream": {
+        "sha256": "ef7e5e68336bd9152ea272dd1713a8e9cfe3f3dc9264692075c9de0d776f0d15",
+        "bytes": 3790
+      },
+      "selected": {
+        "sha256": "ef7e5e68336bd9152ea272dd1713a8e9cfe3f3dc9264692075c9de0d776f0d15",
+        "bytes": 3790
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/index.d.ts",
+      "upstream": {
+        "sha256": "3407241a994ea7763fe2c998dd431e26d23475ed3b5489e77b77b6a99d433e00",
+        "bytes": 485
+      },
+      "selected": {
+        "sha256": "3407241a994ea7763fe2c998dd431e26d23475ed3b5489e77b77b6a99d433e00",
+        "bytes": 485
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/modal/stellar-wallets-modal.d.ts",
+      "upstream": {
+        "sha256": "3c753dc13a5cb0783c32cc4f2eaeece879a7207c0085e520f7e8fd66bbe6c296",
+        "bytes": 1542
+      },
+      "selected": {
+        "sha256": "3c753dc13a5cb0783c32cc4f2eaeece879a7207c0085e520f7e8fd66bbe6c296",
+        "bytes": 1542
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/modal/stellar-wallets-modal.mjs",
+      "upstream": {
+        "sha256": "fff4b4dbb7a14b7403d01b95a47ed100e39edf2f8c2560cfe4eb175e7a7f363c",
+        "bytes": 9727
+      },
+      "selected": {
+        "sha256": "fff4b4dbb7a14b7403d01b95a47ed100e39edf2f8c2560cfe4eb175e7a7f363c",
+        "bytes": 9727
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/modal/styles.d.ts",
+      "upstream": {
+        "sha256": "bc094389076a65a07efadc13746db365d85043f1d121833ad1e10cbf73997ff4",
+        "bytes": 426
+      },
+      "selected": {
+        "sha256": "bc094389076a65a07efadc13746db365d85043f1d121833ad1e10cbf73997ff4",
+        "bytes": 426
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/modal/styles.mjs",
+      "upstream": {
+        "sha256": "4b290343250d59bce4b7967fd5b281d77273e96008641628151ca2050bc4abfb",
+        "bytes": 6629
+      },
+      "selected": {
+        "sha256": "4b290343250d59bce4b7967fd5b281d77273e96008641628151ca2050bc4abfb",
+        "bytes": 6629
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/selector-modal/stellar-selector-modal.d.ts",
+      "upstream": {
+        "sha256": "5ab70726b2200c595f00f55f0d57624fcad9db09f874c14694f569728a35e60b",
+        "bytes": 789
+      },
+      "selected": {
+        "sha256": "5ab70726b2200c595f00f55f0d57624fcad9db09f874c14694f569728a35e60b",
+        "bytes": 789
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/selector-modal/stellar-selector-modal.mjs",
+      "upstream": {
+        "sha256": "b987acee7689ded02e6b56dd507e3e8f8a4ebb5a43936abb1004d3b8ea49e59f",
+        "bytes": 5783
+      },
+      "selected": {
+        "sha256": "b987acee7689ded02e6b56dd507e3e8f8a4ebb5a43936abb1004d3b8ea49e59f",
+        "bytes": 5783
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/selector-modal/styles.d.ts",
+      "upstream": {
+        "sha256": "bc094389076a65a07efadc13746db365d85043f1d121833ad1e10cbf73997ff4",
+        "bytes": 426
+      },
+      "selected": {
+        "sha256": "bc094389076a65a07efadc13746db365d85043f1d121833ad1e10cbf73997ff4",
+        "bytes": 426
+      },
+      "modified": false
+    },
+    {
+      "relative": "components/selector-modal/styles.mjs",
+      "upstream": {
+        "sha256": "d10630b8b51b3c0fc68816fc76115bfef0b19c14d95ea7e3ddb9f93d462edcda",
+        "bytes": 7080
+      },
+      "selected": {
+        "sha256": "d10630b8b51b3c0fc68816fc76115bfef0b19c14d95ea7e3ddb9f93d462edcda",
+        "bytes": 7080
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/albedo.module.d.ts",
+      "upstream": {
+        "sha256": "e1ca01276325681d0d2149eb7567c8b39ac447a678640e3ec834ab1b9fe76a67",
+        "bytes": 1212
+      },
+      "selected": {
+        "sha256": "e1ca01276325681d0d2149eb7567c8b39ac447a678640e3ec834ab1b9fe76a67",
+        "bytes": 1212
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/albedo.module.mjs",
+      "upstream": {
+        "sha256": "d56a82605c949b641c674564ac63208a786c2c7102280cfa82c07a7c339601b0",
+        "bytes": 1882
+      },
+      "selected": {
+        "sha256": "d56a82605c949b641c674564ac63208a786c2c7102280cfa82c07a7c339601b0",
+        "bytes": 1882
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/freighter.module.d.ts",
+      "upstream": {
+        "sha256": "92e2741fe62e0902a5ad4883cf365e0e85973551274619fe7a0ba9bd7f4ee714",
+        "bytes": 1328
+      },
+      "selected": {
+        "sha256": "92e2741fe62e0902a5ad4883cf365e0e85973551274619fe7a0ba9bd7f4ee714",
+        "bytes": 1328
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/freighter.module.mjs",
+      "upstream": {
+        "sha256": "e57652afa524f6a8510cd9f3864e0090fb420d3837faf72cead0d4a9d461aa0b",
+        "bytes": 3206
+      },
+      "selected": {
+        "sha256": "e57652afa524f6a8510cd9f3864e0090fb420d3837faf72cead0d4a9d461aa0b",
+        "bytes": 3206
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/xbull.module.d.ts",
+      "upstream": {
+        "sha256": "7989f01b60d73841e363283e090085364a16d996a96f42e352e9542b8dc98983",
+        "bytes": 1110
+      },
+      "selected": {
+        "sha256": "7989f01b60d73841e363283e090085364a16d996a96f42e352e9542b8dc98983",
+        "bytes": 1110
+      },
+      "modified": false
+    },
+    {
+      "relative": "modules/xbull.module.mjs",
+      "upstream": {
+        "sha256": "09806517fab742b3e63a0f02e60f410ace29e6414523442f8d8823d5711eb367",
+        "bytes": 1840
+      },
+      "selected": {
+        "sha256": "09806517fab742b3e63a0f02e60f410ace29e6414523442f8d8823d5711eb367",
+        "bytes": 1840
+      },
+      "modified": false
+    },
+    {
+      "relative": "services/account.service.d.ts",
+      "upstream": {
+        "sha256": "1bde69f66d93e2194a513993dc9dae8ea3b6dcb39a10ba90fdbbebf5d7759f35",
+        "bytes": 119
+      },
+      "selected": {
+        "sha256": "1bde69f66d93e2194a513993dc9dae8ea3b6dcb39a10ba90fdbbebf5d7759f35",
+        "bytes": 119
+      },
+      "modified": false
+    },
+    {
+      "relative": "services/account.service.mjs",
+      "upstream": {
+        "sha256": "e9e1f0e1cb85ce0c27b513bbc7711c62b5fb13d1f63c8fd9c53d410b7bcdbbc5",
+        "bytes": 600
+      },
+      "selected": {
+        "sha256": "e9e1f0e1cb85ce0c27b513bbc7711c62b5fb13d1f63c8fd9c53d410b7bcdbbc5",
+        "bytes": 600
+      },
+      "modified": false
+    },
+    {
+      "relative": "services/clipboard.service.d.ts",
+      "upstream": {
+        "sha256": "263179340d36d31f234407bd8cbed2f01b3d80a22cd9efd46d46677c2d4bf366",
+        "bytes": 123
+      },
+      "selected": {
+        "sha256": "263179340d36d31f234407bd8cbed2f01b3d80a22cd9efd46d46677c2d4bf366",
+        "bytes": 123
+      },
+      "modified": false
+    },
+    {
+      "relative": "services/clipboard.service.mjs",
+      "upstream": {
+        "sha256": "4554840110121702c3867e9adfddbf537dd2ecb0a8431e747497655fd3c4504e",
+        "bytes": 272
+      },
+      "selected": {
+        "sha256": "4554840110121702c3867e9adfddbf537dd2ecb0a8431e747497655fd3c4504e",
+        "bytes": 272
+      },
+      "modified": false
+    },
+    {
+      "relative": "state/reactive-state.d.ts",
+      "upstream": {
+        "sha256": "eed5688dc25090c45e4f0336bbde0e68db3b5a39a23fabe47b8cc45bf3b23a02",
+        "bytes": 537
+      },
+      "selected": {
+        "sha256": "eed5688dc25090c45e4f0336bbde0e68db3b5a39a23fabe47b8cc45bf3b23a02",
+        "bytes": 537
+      },
+      "modified": false
+    },
+    {
+      "relative": "state/reactive-state.mjs",
+      "upstream": {
+        "sha256": "ca35eb62f512656ff285bfd8cb494b51050d8cbfab16f338922b287a8215cacb",
+        "bytes": 580
+      },
+      "selected": {
+        "sha256": "ca35eb62f512656ff285bfd8cb494b51050d8cbfab16f338922b287a8215cacb",
+        "bytes": 580
+      },
+      "modified": false
+    },
+    {
+      "relative": "state/store.d.ts",
+      "upstream": {
+        "sha256": "c28ba3ddf7555fcdb5e56ccf1d468870f8681418eb3ffea8ec1634fb1e44fd07",
+        "bytes": 2090
+      },
+      "selected": {
+        "sha256": "c28ba3ddf7555fcdb5e56ccf1d468870f8681418eb3ffea8ec1634fb1e44fd07",
+        "bytes": 2090
+      },
+      "modified": false
+    },
+    {
+      "relative": "state/store.mjs",
+      "upstream": {
+        "sha256": "72ec90bd92d60d5baef58a7b3bf28a01509e707950a67eee5bf0aa3265a9cb0e",
+        "bytes": 2424
+      },
+      "selected": {
+        "sha256": "72ec90bd92d60d5baef58a7b3bf28a01509e707950a67eee5bf0aa3265a9cb0e",
+        "bytes": 2424
+      },
+      "modified": false
+    },
+    {
+      "relative": "stellar-wallets-kit.d.ts",
+      "upstream": {
+        "sha256": "f16eb562e67860d407c20fd1e211aca77413d741a1ccd127032a4e4379ccc1b0",
+        "bytes": 4455
+      },
+      "selected": {
+        "sha256": "f16eb562e67860d407c20fd1e211aca77413d741a1ccd127032a4e4379ccc1b0",
+        "bytes": 4455
+      },
+      "modified": false
+    },
+    {
+      "relative": "stellar-wallets-kit.mjs",
+      "upstream": {
+        "sha256": "02ef9dee5146a8f5f60b79a2ac2b2297bf01edbc6d759ba11d2caf20682b5579",
+        "bytes": 8682
+      },
+      "selected": {
+        "sha256": "02ef9dee5146a8f5f60b79a2ac2b2297bf01edbc6d759ba11d2caf20682b5579",
+        "bytes": 8682
+      },
+      "modified": false
+    },
+    {
+      "relative": "types.d.ts",
+      "upstream": {
+        "sha256": "4e441305ef0026513d202572f9a2ec74c499017c168de8cdb3a2be0fdf389805",
+        "bytes": 7261
+      },
+      "selected": {
+        "sha256": "4e441305ef0026513d202572f9a2ec74c499017c168de8cdb3a2be0fdf389805",
+        "bytes": 7261
+      },
+      "modified": false
+    },
+    {
+      "relative": "types.mjs",
+      "upstream": {
+        "sha256": "13b967a197880f182a3136b40936086cc0be642dc3d84f821a35adf2eb4bef84",
+        "bytes": 843
+      },
+      "selected": {
+        "sha256": "13b967a197880f182a3136b40936086cc0be642dc3d84f821a35adf2eb4bef84",
+        "bytes": 843
+      },
+      "modified": false
+    },
+    {
+      "relative": "index.mjs",
+      "upstream": {
+        "sha256": "e098c459c289b225f12569169a79bfea056039a750d4c4fbb3da679690285ed0",
+        "bytes": 1124
+      },
+      "selected": {
+        "sha256": "841bf391e8f90471e5e6f8326e44faa417a2556e5848977ddea9f63560565ddd",
+        "bytes": 647
+      },
+      "modified": true
+    },
+    {
+      "relative": "index.d.ts",
+      "upstream": {
+        "sha256": "a755b0dac2215f83c508bdc938928d49d7ecbbfa7d9a552f28283c5859e0377e",
+        "bytes": 735
+      },
+      "selected": {
+        "sha256": "b2bae027bfb9e9e6db5dbfab0e4e215a62fc1ff33016cfb2e6e4569d63dcf5e8",
+        "bytes": 470
+      },
+      "modified": true
+    },
+    {
+      "relative": "utils.mjs",
+      "upstream": {
+        "sha256": "5a24b9255e818c1ef6369314e8b188815d3bc03a6d687276f5b37b0962930ee2",
+        "bytes": 1292
+      },
+      "selected": {
+        "sha256": "db063fb2babfc1710f25a619786e21e14f885f74189aa1c135076dd036829802",
+        "bytes": 256
+      },
+      "modified": true
+    },
+    {
+      "relative": "utils.d.ts",
+      "upstream": {
+        "sha256": "5890e2b3949169a37819b54c5e124fdc8d56ed85789ec76e0d2041f1a7d61e02",
+        "bytes": 787
+      },
+      "selected": {
+        "sha256": "e672a4080bb5d0529e162d743bb2a049c6aa13247877f5b06c4685540b65b5e3",
+        "bytes": 91
+      },
+      "modified": true
+    }
+  ],
+  "external": [
+    "lit",
+    "rxjs",
+    "@albedo-link/intent",
+    "@stellar/freighter-api",
+    "buffer",
+    "@creit.tech/xbull-wallet-connect",
+    "@ngneat/elf"
+  ],
+  "rationale": "Remove only unoffered wallet implementations and their vulnerable dependency chains; retain all three supported wallets and original UI.",
+  "sourceEvidenceSha256": "d49b43a3038695cb4293f9bd8ccfc885b8af06aa6c18f1c425b361b88cba4365",
+  "directory": "apps/web/vendor/stellar-wallets-kit"
+}

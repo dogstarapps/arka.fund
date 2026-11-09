@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-20T08:59:45.471Z",
+  "mode": "dry_run",
+  "dryRun": true,
+  "selectedIds": [
+    "arka-factory",
+    "arka-registry",
+    "oracle-guard"
+  ],
+  "unknownSelected": [],
+  "sourceAccount": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+  "rpcUrl": null,
+  "networkPassphrase": null,
+  "ledgersToExtend": 518400,
+  "runbook": {
+    "cadenceDays": 14,
+    "warningThresholdLedgers": 120960,
+    "criticalThresholdLedgers": 17280,
+    "liveRunConfirmationEnv": "ARKAFUND_STORAGE_EXTEND_CONFIRM",
+    "liveRunConfirmationValue": "EXTEND_STORAGE_TTL"
+  },
+  "safeguards": {
+    "defaultsToDryRun": true,
+    "requiresExplicitExecute": true,
+    "liveRunConfirmMatched": false,
+    "destructiveOperations": false,
+    "commandAllowlist": [
+      "stellar contract extend"
+    ],
+    "blockedEntryCount": 0,
+    "disallowedCommandCount": 0
+  },
+  "entries": [
+    {
+      "id": "arka-factory",
+      "title": "Arka Factory",
+      "category": "core",
+      "envKey": "NEXT_PUBLIC_ARKA_FACTORY",
+      "required": true,
+      "contractId": "CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW",
+      "status": "ready",
+      "storageClassesAudited": [
+        "persistent",
+        "instance",
+        "temporary"
+      ],
+      "extendScopes": [
+        "persistent_contract_data",
+        "instance_contract_state"
+      ],
+      "durability": "persistent",
+      "cadenceDays": 14,
+      "warningThresholdLedgers": 120960,
+      "criticalThresholdLedgers": 17280,
+      "temporaryPolicy": "Temporary storage is audited for presence and intentionally excluded from the extend command; temporary entries must be recreated by the owning transaction path instead of force-extended.",
+      "ledgersToExtend": 518400,
+      "sourceAccount": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "rpcUrl": null,
+      "networkPassphrase": null,
+      "commandArgs": [
+        "contract",
+        "extend",
+        "--id",
+        "CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW",
+        "--durability",
+        "persistent",
+        "--ledgers-to-extend",
+        "518400",
+        "--source-account",
+        "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE"
+      ],
+      "command": "stellar contract extend --id CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW --durability persistent --ledgers-to-extend 518400 --source-account GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "commandAllowed": true,
+      "destructive": false
+    },
+    {
+      "id": "arka-registry",
+      "title": "Arka Registry",
+      "category": "core",
+      "envKey": "NEXT_PUBLIC_ARKA_REGISTRY",
+      "required": true,
+      "contractId": "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+      "status": "ready",
+      "storageClassesAudited": [
+        "persistent",
+        "instance",
+        "temporary"
+      ],
+      "extendScopes": [
+        "persistent_contract_data",
+        "instance_contract_state"
+      ],
+      "durability": "persistent",
+      "cadenceDays": 14,
+      "warningThresholdLedgers": 120960,
+      "criticalThresholdLedgers": 17280,
+      "temporaryPolicy": "Temporary storage is audited for presence and intentionally excluded from the extend command; temporary entries must be recreated by the owning transaction path instead of force-extended.",
+      "ledgersToExtend": 518400,
+      "sourceAccount": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "rpcUrl": null,
+      "networkPassphrase": null,
+      "commandArgs": [
+        "contract",
+        "extend",
+        "--id",
+        "CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW",
+        "--durability",
+        "persistent",
+        "--ledgers-to-extend",
+        "518400",
+        "--source-account",
+        "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE"
+      ],
+      "command": "stellar contract extend --id CD7NVBDWH7YDCAJGPESKANQMQGNC2FCNX7WBUIRWWKF4QI5NMPRP22NW --durability persistent --ledgers-to-extend 518400 --source-account GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "commandAllowed": true,
+      "destructive": false
+    },
+    {
+      "id": "oracle-guard",
+      "title": "Oracle Guard",
+      "category": "oracle",
+      "envKey": "NEXT_PUBLIC_ORACLE_GUARD",
+      "required": true,
+      "contractId": "CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ",
+      "status": "ready",
+      "storageClassesAudited": [
+        "persistent",
+        "instance",
+        "temporary"
+      ],
+      "extendScopes": [
+        "persistent_contract_data",
+        "instance_contract_state"
+      ],
+      "durability": "persistent",
+      "cadenceDays": 14,
+      "warningThresholdLedgers": 120960,
+      "criticalThresholdLedgers": 17280,
+      "temporaryPolicy": "Temporary storage is audited for presence and intentionally excluded from the extend command; temporary entries must be recreated by the owning transaction path instead of force-extended.",
+      "ledgersToExtend": 518400,
+      "sourceAccount": "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "rpcUrl": null,
+      "networkPassphrase": null,
+      "commandArgs": [
+        "contract",
+        "extend",
+        "--id",
+        "CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ",
+        "--durability",
+        "persistent",
+        "--ledgers-to-extend",
+        "518400",
+        "--source-account",
+        "GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE"
+      ],
+      "command": "stellar contract extend --id CBVIUEY2C627QSVCKNC4XSVSHRH3DTRK6HQOBOQVJBIXKUKJDH5E22BZ --durability persistent --ledgers-to-extend 518400 --source-account GCO7KAJ7WCIFDLAEDHKSFQRNQLR3SQ6JTIVSMYYFUC5KRTA2KG2QJYDE",
+      "commandAllowed": true,
+      "destructive": false
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "ready": 3,
+    "blocked": 0,
+    "optionalMissing": 0,
+    "byCategory": {
+      "core": {
+        "total": 2,
+        "ready": 2,
+        "blocked": 0,
+        "optionalMissing": 0
+      },
+      "oracle": {
+        "total": 1,
+        "ready": 1,
+        "blocked": 0,
+        "optionalMissing": 0
+      }
+    },
+    "byStorageClass": {
+      "persistent": {
+        "audited": 3,
+        "extendable": 3,
+        "excluded": 0
+      },
+      "instance": {
+        "audited": 3,
+        "extendable": 3,
+        "excluded": 0
+      },
+      "temporary": {
+        "audited": 3,
+        "extendable": 0,
+        "excluded": 3
+      }
+    }
+  },
+  "planHash": "2bbf8a62850bf878c250863c77e2359b93d828c67eba429c03ede5d0bb53fe32"
+}

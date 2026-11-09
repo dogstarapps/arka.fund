@@ -1,0 +1,42 @@
+VERSION = "2.7.0"
+NETWORK_PASSPHRASE = "Public Global Stellar Network ; September 2015"
+
+ACCOUNTS = [
+  "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD"
+]
+
+[DOCUMENTATION]
+ORG_NAME = "Arka Fund"
+ORG_DBA = "Arka Fund"
+ORG_URL = "https://app.arka.fund"
+ORG_LOGO = "https://app.arka.fund/figma/logo-arkafund.png"
+ORG_DESCRIPTION = "Arka Fund is a non-custodial Stellar and Soroban asset management protocol and dApp."
+ORG_GITHUB = "dogstarapps/arka.fund"
+
+# Arka Fund mainnet Soroban deployment.
+ARKA_FACTORY_CONTRACT_ID = "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK"
+ARKA_REGISTRY_CONTRACT_ID = "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY"
+ARKA_ROUTER_CONTRACT_ID = "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D"
+ARKA_VENUE_REGISTRY_CONTRACT_ID = "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN"
+ARKA_ORACLE_GUARD_CONTRACT_ID = "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6"
+ARKA_GOVERNANCE_EXECUTOR_CONTRACT_ID = "CCTJRPZP7WDJZAPMJVCKUX6TOOZKKSTEVQ66YP6KZ5N6TCHRXLKTNEAS"
+
+[[CURRENCIES]]
+code = "ARKA"
+contract = "CDXCWYQZCLKS5EP4UFZLXVMNVMXPT33P3PDLGLFYA2FQQW6SZKKH5B5S"
+name = "Arka Fund"
+desc = "Arka Fund protocol token contract. Public tokenomics rollout is controlled by the Arka governance release plan."
+status = "private"
+display_decimals = 7
+is_asset_anchored = false
+image = "https://app.arka.fund/figma/logo-arkafund.png"
+
+[[CURRENCIES]]
+code = "lARKA"
+contract = "CAXJQAKJTEICXP3WBHP3YTJ24ZIJXTN5RFXX7OG7VNLE2P42UYOVE3WF"
+name = "Locked Arka"
+desc = "Locked Arka voting-power token contract used by Arka governance."
+status = "private"
+display_decimals = 7
+is_asset_anchored = false
+image = "https://app.arka.fund/figma/logo-arkafund.png"

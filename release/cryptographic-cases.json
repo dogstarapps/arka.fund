@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "originallyPending": 18,
+  "scope": "Offline local Ed25519 signing with runtime-random keys only. Includes real XDR verification in the client and backend receipt verification for eleven actions and adversarial cases. Wallet UI, admission/index/RPC response metadata and wire are doubles; no real wallet/device, consensus or submitted canary qualification.",
+  "cases": [
+    {
+      "file": "apps/web/tests/integration/api-e2e-wallet-signature.test.ts",
+      "name": "E2E wallet message signing signs the SEP-53 message hash used by real Stellar wallets"
+    },
+    {
+      "file": "apps/web/tests/integration/api-operator-access-route.test.ts",
+      "name": "operator access API route sets, validates and clears the httpOnly operator session cookie"
+    },
+    {
+      "file": "apps/web/tests/integration/managed-local-wallet-bridge.test.ts",
+      "name": "Cryptographic local wallet bridge signs a real XDR with ephemeral keys and applies an approved action once"
+    },
+    {
+      "file": "apps/web/tests/integration/managed-local-wallet-bridge.test.ts",
+      "name": "Cryptographic local wallet bridge rejects a stale ledger after signing"
+    },
+    {
+      "file": "apps/web/tests/integration/managed-local-wallet-bridge.test.ts",
+      "name": "Cryptographic local wallet bridge rejects a restarted local engine"
+    },
+    {
+      "file": "apps/web/tests/integration/managed-local-wallet-bridge.test.ts",
+      "name": "Cryptographic local wallet bridge serializes concurrent duplicate submissions"
+    },
+    {
+      "file": "apps/web/tests/integration/managed-local-wallet-bridge.test.ts",
+      "name": "Cryptographic local wallet bridge uses the actual atomic factory method for creation"
+    },
+    {
+      "file": "apps/web/tests/unit/managed-soroban-transport.test.ts",
+      "name": "Explicit local Soroban RPC transport boundary allows ten bounded minutes for human review without extending an existing draft"
+    },
+    {
+      "file": "apps/web/tests/unit/managed-soroban-transport.test.ts",
+      "name": "Explicit local Soroban RPC transport boundary assembles and signs the exact SDK transaction, then polls reads until confirmation"
+    },
+    {
+      "file": "apps/web/tests/unit/managed-soroban-transport.test.ts",
+      "name": "Explicit local Soroban RPC transport boundary never resubmits after bounded polling cannot confirm"
+    },
+    {
+      "file": "apps/web/tests/unit/managed-soroban-transport.test.ts",
+      "name": "Explicit local Soroban RPC transport boundary rejects another signature before broadcasting"
+    },
+    {
+      "file": "apps/web/tests/unit/managed-soroban-transport.test.ts",
+      "name": "Explicit local Soroban RPC transport boundary rechecks the actual RPC network before sending a signed transaction"
+    },
+    {
+      "file": "apps/web/tests/unit/operator-access.test.ts",
+      "name": "operator access gate verifies Stellar message signatures for authorized wallets"
+    },
+    {
+      "file": "apps/web/tests/unit/operator-access.test.ts",
+      "name": "operator access gate accepts SEP-53 wallet challenges without accepting other messages or wallets"
+    },
+    {
+      "file": "services/catalog-api/tests/unit/read-only-recovery.test.ts",
+      "name": "RPC gate denies sends, restores, batches, signed transactions and mutation methods before I/O"
+    },
+    {
+      "file": "services/catalog-api/tests/unit/identity.test.ts",
+      "name": "SEP-53 signatures are not interchangeable with raw-message signatures"
+    },
+    {
+      "file": "services/catalog-api/tests/integration/http-api.test.ts",
+      "name": "HTTP API saves signed Arka and manager identity metadata"
+    },
+    {
+      "file": "sdk/typescript/tests/unit/config.test.ts",
+      "name": "createKeypairSigner returns a valid signed transaction envelope"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for approve"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for deposit"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for request"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for instant"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for cancel"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for claim"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for prepare"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for settle"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for portfolio-swap"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for recover-spot"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies the real source signature and receipt for create"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects another source signer before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects another network hash before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a valid signature over a changed fee before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a valid signature over a changed destination before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a valid signature over changed authorization before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a body changed after signing before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a corrupted signature before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects an unsigned response before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a zero-filled signature before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects an additional signature before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a signed fee bump before any wire call"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks expiry changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks wallet changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks network changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks fund changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks activation changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography blocks stale-plan changed after a real signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography verifies a failed receipt with a real public signature"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography retains a signed but unindexed receipt until catalog reconciliation"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography recovers an ambiguous signed action after reload without repeating the write"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography keeps an expired missing receipt confirmation-only"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a cryptographic receipt with invalid another-signer"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a cryptographic receipt with invalid changed-body"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a cryptographic receipt with invalid status"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a cryptographic receipt with invalid fee"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a cryptographic receipt with invalid ledger"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography rejects a forged verified-receipt flag without the backend verification handle"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography keeps Noah excluded before profile reads, wallet signing or RPC construction"
+    },
+    {
+      "file": "apps/web/tests/unit/mainnet-execution-crypto.test.ts",
+      "name": "Mainnet ephemeral cryptography keeps execution disabled without explicit activation"
+    }
+  ],
+  "revision": "R13",
+  "baselineCases": 18,
+  "newMainnetExecutionCases": 40,
+  "totalCases": 58
+}

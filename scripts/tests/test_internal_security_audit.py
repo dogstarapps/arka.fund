@@ -43,9 +43,12 @@ impl Demo {
         self.assertIn("adapter-aquarius", crates)
         self.assertIn("adapter-soroswap", crates)
         self.assertIn("adapter-blend", crates)
+        self.assertIn("adapter-sushi", crates)
+        self.assertIn("venue-registry", crates)
+        self.assertIn("router", crates)
 
         by_crate = {contract["crate"]: contract for contract in report["contracts"]}
-        for crate in ("adapter-aquarius", "adapter-soroswap", "adapter-blend"):
+        for crate in ("adapter-aquarius", "adapter-soroswap", "adapter-blend", "adapter-sushi", "adapter-balanced"):
             execute_fn = next((fn for fn in by_crate[crate]["functions"] if fn["name"] == "execute"), None)
             self.assertIsNotNone(execute_fn, crate)
             self.assertTrue(execute_fn["invokes_external"], crate)
@@ -59,8 +62,12 @@ impl Demo {
 
         high_findings = [finding for finding in report["findings"] if finding["severity"] == "high"]
         self.assertEqual(high_findings, [])
+        self.assertFalse(report["protocolActivationVerified"])
+        self.assertIn("Sushi", report["retainedProtocolSurface"])
+        self.assertEqual(by_crate["adapter-sushi"]["tier"], "high")
+        self.assertTrue(next(fn for fn in by_crate["adapter-sushi"]["functions"] if fn["name"] == "execute")["requires_auth"])
 
-    def test_analyze_contract_tracks_transitive_auth_and_external_symbols(self):
+    def test_analyze_contract_tracks_transitive_auth_and_generic_external_symbols(self):
         source = """
 #[contractimpl]
 impl Demo {
@@ -74,7 +81,7 @@ impl Demo {
 
     fn stage_two(env: Env, caller: Address) -> i128 {
         caller.require_auth();
-        env.invoke_contract(
+        env.invoke_contract::<i128>(
             &caller,
             &symbol_short!("swap"),
             ().into_val(&env),

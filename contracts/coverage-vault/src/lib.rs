@@ -149,7 +149,18 @@ impl CoverageVault {
         (balance * lock_bps as i128) / 10_000
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, manager: Address, token: Address, lock_bps: i32) {
+        Self::initialize(env, manager, token, lock_bps);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, manager: Address, token: Address, lock_bps: i32) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, manager: Address, token: Address, lock_bps: i32) {
         let store = env.storage().instance();
         if store.has(&DataKey::Manager) {
             panic_with_error!(&env, Error::AlreadyInitialized);

@@ -54,7 +54,9 @@ test("createKeypairSigner derives a public key", () => {
   assert.match(signer.publicKey, /^G[A-Z2-7]{55}$/);
 });
 
-test("createKeypairSigner returns a valid signed transaction envelope", async () => {
+// Cryptographic cases require the explicit contained ephemeral-key test profile.
+const cryptoTest = process.env.ARKA_EPHEMERAL_SIGNATURE_TESTS === '1' ? test : test.skip;
+cryptoTest("createKeypairSigner returns a valid signed transaction envelope", async () => {
   const keypair = Keypair.random();
   const signer = createKeypairSigner(keypair.secret(), Networks.TESTNET);
   const transaction = new TransactionBuilder(
@@ -70,4 +72,12 @@ test("createKeypairSigner returns a valid signed transaction envelope", async ()
   });
   const decoded = TransactionBuilder.fromXDR(signed.signedTxXdr, Networks.TESTNET);
   assert.equal(decoded.signatures.length, 1);
+  const signature = decoded.signatures[0].signature();
+  assert('source' in decoded);
+  assert.equal(decoded.source, keypair.publicKey());
+  assert.deepEqual(decoded.signatureBase(), transaction.signatureBase());
+  assert.equal(keypair.verify(decoded.hash(), signature), true);
+  assert.equal(Keypair.random().verify(decoded.hash(), signature), false);
+  const wrongNetwork = TransactionBuilder.fromXDR(signed.signedTxXdr, Networks.PUBLIC);
+  assert.equal(keypair.verify(wrongNetwork.hash(), signature), false);
 });

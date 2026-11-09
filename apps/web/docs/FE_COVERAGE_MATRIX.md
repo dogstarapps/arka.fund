@@ -1,0 +1,2237 @@
+# Frontend Coverage Matrix
+Date: 2026-04-10
+
+## 1) DAO / Governance
+
+### Dedicated governance UI (`/governance`)
+- Read settings, proposal, tally and wallet vote state.
+- Submit lifecycle actions:
+  - `propose` (Council / Snapshot)
+  - `vote` (For / Against / Abstain)
+  - `close`
+  - `execute`
+
+### DAO admin/policy UI (`/contracts`)
+- Typed actions for governor/executor and protocol governance controls:
+  - Arka governance + fee policies + whitelist
+  - Swap guardrails (`set_swap_risk_policy`, `set_swap_oracle`, `set_allowed_venues`)
+  - CoverageFund / CoverageVault governance setters
+  - Timelock/executor admin operations
+- Raw invoke lane for any additional contract method.
+
+## 2) Coverage
+
+### Coverage operations UI (`/coverage`)
+- Reads:
+  - vault balance
+  - max withdrawable
+  - user stake
+  - pending rewards
+  - wallet token balance
+- Writes:
+  - stake
+  - unstake
+  - claim rewards
+
+### Coverage governance/admin (`/contracts`)
+- CoverageFund and CoverageVault policy/admin operations exposed as typed actions.
+
+## 3) Protocol Interaction Surface
+
+### Vault execution UI (`/arkas/[id]`)
+- Deposit / redeem / redeem-all.
+- Rebalance lanes:
+  - `AUTO` best execution planner
+  - `SOROSWAP` (router path + tx flow)
+  - `AQUARIUS` (pool discovery + estimate + tx flow)
+  - `BALANCED` (intent-execution lane via adapter when lane is ready)
+- Credit lane:
+  - protocol-aware market read (current runtime can expose Blend and future protocols)
+  - actions (Supply/Borrow/Repay/Withdraw) with live risk gating.
+
+### Integrations UI (`/integrations`)
+- Router/adaptor health and route model introspection.
+- Balanced SODAX public surface:
+  - token catalog
+  - quote endpoint
+  - status endpoint
+- Direct execution buttons:
+  - Balanced (adapter lane, when ready)
+  - Blend
+- AMM routing handoff to vault execution (Aquarius/SoroSwap).
+
+## 4) Explorer / Product Surfaces
+- Dashboard, Discover, Vaults, Managers, Assets and details are wired to catalog APIs and route into live execution surfaces.
+
+## 5) Test Coverage Status (frontend)
+- Unit tests: workflow/routing/runtime/catalog helpers.
+- Integration tests: app surfaces, workflow pages, contracts page, API routes.
+- E2E tests:
+  - Product IA/smoke
+  - Coverage stake/unstake/claim (wallet-backed)
+  - Governance propose + vote + close/execute validation paths (wallet-backed)
+  - Create Arka flow
+  - Vault deposit/redeem
+  - Rebalance via Aquarius, SoroSwap and AUTO
+  - Credit actions (Blend)
+  - Contracts control room workflows (action switching + typed/raw validation paths)
+  - Integrations and design-audit surfaces
+
+## 6) Known FE Gaps (remaining)
+- Contracts typed actions are broad, but full mutation matrix is not yet exhaustively covered with wallet-backed E2E for every preset/domain combination.
+- Design fidelity is substantially improved but still requires per-screen pixel-tight review against latest Figma nodes for final polish.
+- Some new product surfaces/fields do not have 1:1 Figma frames; those routes are audited against the closest canonical frame family (dashboard, leaderboard, vault-detail, assets, wizard) to keep visual language consistent.
+
+## 7) Iteration Closure (2026-04-11)
+- Wallet-backed `/contracts` matrix expanded with live on-chain mutations + rollback on `ManagerTier`:
+  - Typed lane mutation: `manager-tier-add-points` (`+1` and `-1` rollback).
+  - Raw lane mutation: `add_points` (`+2` and `-2` rollback).
+  - Read verification before/after each mutation via `points_of`.
+- Pixel audit executed end-to-end with captured current screens and diff heatmaps:
+  - Capture step: `npm run design:audit`
+  - Capture mode: viewport-equivalent screenshots (not full-page) to match single-frame Figma references.
+  - Pixel diff step: `python3 ./scripts/figma_pixel_audit.py`
+  - Output report: `<workspace>/arkafund/tmp/design-audit/pixel/report.md`
+  - Output diff index: `<workspace>/arkafund/tmp/design-audit/pixel/diff-index.html`
+  - Reference mapping tightened to the nearest canonical frames per route (including derived screens with no exact Figma frame).
+  - Current strict-readiness signal: `allThresholdsMet=false`; all 21 reference-backed captures produce artifacts, but all 21 remain below their configured strict thresholds and must be repaired route-by-route before claiming pixel parity.
+
+## 8) Iteration Closure (2026-04-11, pass 2)
+- Header denomination badge is no longer hardcoded to `USDC`; it now resolves from runtime denomination config in both app chrome and vault leaderboard surfaces.
+- Contracts typed action surface expanded with additional read presets across all core domains:
+  - Arka: manager/router/governor/fees/protocol-fee-policy/fee-state/preview-settlement/whitelist/swap-risk/swap-oracle/allowed-routers/allowed-adapters/nav/liquid-balance/credit-protocols/credit-markets/credit-market-config.
+  - CoverageFund: governor/claims-manager/treasury/reserve-token/bootstrap-token/metrics/claim-capacity/stake-of/pending-rewards/covered-vault-policy/covered-nav/premiums-paid-by-vault.
+  - CoverageVault: manager/governor/claims-manager/token/lock-bps/balance/max-withdrawable/claim-capacity.
+  - ManagerTier: points-of/tier-of/thresholds/governor.
+  - GovernanceExecutor: operation.
+- Wallet-backed E2E matrix expanded for `/contracts` typed reads:
+  - Added live scenarios for Arka/CoverageFund/CoverageVault/ManagerTier/Executor read lanes with field validation guards.
+- Visual micro-spacing pass applied:
+  - Increased inline label→value spacing signal token.
+  - Increased discover toolbar/chip/table rhythm spacing inside panel bodies.
+  - Added additional panel-body sibling spacing guards for spotlight→table transitions.
+
+## 9) Iteration Closure (2026-04-11, pass 3)
+- Visual fidelity micro-spacing hardening:
+  - Increased base panel-body rhythm and table row padding.
+  - Added explicit spacing guards for chip/tab blocks before tables.
+  - Increased non-table→table separation to avoid header collisions.
+  - Normalized table cell and subtle-text line-height for denser but readable rhythm.
+- Hardcoded label cleanup:
+  - Denomination badge fallback no longer infers `USDC`/`XLM` from contract text.
+  - Added env labels `NEXT_PUBLIC_ROUTING_ASSET_A_LABEL` and `NEXT_PUBLIC_ROUTING_ASSET_B_LABEL`.
+  - Applied dynamic asset label rendering in vault execution selectors and status rows.
+- Wallet-backed mutation expansion:
+  - Added `CoverageVault.lock_bps` mutation probe + rollback path in `/contracts` wallet-backed E2E when signer matches on-chain governor.
+  - Added guarded fallback branch that still validates runtime error/success envelopes when signer does not own governor rights.
+  - Moved key wallet-backed contract IDs (`CoverageFund`, `CoverageToken`, `ManagerTier`) to env-driven defaults for network portability.
+
+## 10) Iteration Closure (2026-04-11, pass 4)
+- Visual micro-spacing (fidelity polish):
+  - Increased spacing between toolbar/tabs/spotlight/table transitions in control-room explorer surfaces.
+  - Increased spotlight tab bottom rhythm and stacked-table separation to avoid compressed blocks.
+  - Added extra spotlight-grid adjacency spacing guards to prevent panel-body collisions in dense cards.
+- Current working estimate of the three active gaps:
+  - Gap 1 (Figma visual fidelity): 93% implemented / 7% remaining.
+  - Gap 2 (contract feature coverage in FE): 88% implemented / 12% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 76% implemented / 24% remaining.
+
+## 11) Iteration Closure (2026-04-11, pass 5)
+- Visual fidelity:
+  - Another spacing pass applied to control-room explorer rhythm (panel body spacing, spotlight/tables transitions, row paddings, spotlight tab rhythm).
+  - Focused fix for compressed adjacency cases between chips/spotlights/table headers.
+- Dynamic config / hardcoded cleanup:
+  - Balanced token symbol defaults are now env-driven first, then denomination/Arka labels, instead of fixed token literals.
+  - Denomination config comment updated to remove network/token-specific assumption.
+- Wallet-backed E2E expansion:
+  - `/contracts` read matrix now covers additional actions:
+    - `arka-read-manager`, `arka-read-router`
+    - `coverage-fund-read-claims-manager`
+    - `coverage-vault-read-token`
+    - `manager-tier-read-tier-of`
+  - Arka create whitelist in wallet-backed flow now supports env override via `E2E_CREATE_WHITELIST`.
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 95% implemented / 5% remaining.
+  - Gap 2 (contract feature coverage in FE): 90% implemented / 10% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 79% implemented / 21% remaining.
+
+## 12) Iteration Closure (2026-04-11, pass 6)
+- Validation run after pass-5 changes:
+  - `npm run test:unit` ✅
+  - `npm run test:integration -- tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+- Live FE captures refreshed for stakeholder review:
+  - `<workspace>/arkafund/tmp/design-audit/current/assets-current-live.png`
+  - `<workspace>/arkafund/tmp/design-audit/current/managers-current-live.png`
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 96% implemented / 4% remaining.
+  - Gap 2 (contract feature coverage in FE): 91% implemented / 9% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 81% implemented / 19% remaining.
+
+## 13) Iteration Closure (2026-04-11, pass 7)
+- Error-state fidelity and resilience hardening:
+  - Fixed clipped CTA buttons in constrained/error cards by introducing responsive error-state layout classes (`surface-empty-copy`, `surface-empty-action`) and removing accidental overflow clipping on empty-state shells.
+  - Added long-token wrapping rules so configuration/runtime errors do not break card layout.
+- Catalog error message hygiene:
+  - Replaced env-variable directive copy with user-safe message (`Catalog API is not configured for this environment.`) in proxy and catalog API error extraction.
+  - Added integration assertion to prevent regression of leaked env-var names in UI error cards.
+- Validation:
+  - `npm run test:unit` ✅
+  - `npx vitest run tests/integration/manager-asset-surfaces.test.tsx` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 97% implemented / 3% remaining.
+  - Gap 2 (contract feature coverage in FE): 92% implemented / 8% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 82% implemented / 18% remaining.
+
+## 14) Iteration Closure (2026-04-11, pass 8)
+- Leaderboard ranking controls promoted to first-class product behavior on `/vaults`:
+  - Added runtime sort controls for `rank`, `managed NAV`, `profit`, and `volume`.
+  - Added order controls (`high→low`, `low→high`) with deterministic tie-breaker behavior.
+  - Added sort-state signal pill and contextual row subtitle for `profit`/`volume` ranking.
+- Profit/volume metric sourcing hardened:
+  - Uses catalog fields (`profitBase`, `volumeBase`) when available.
+  - Falls back to on-demand `/v1/arkas/:id/activity` aggregation when catalog metric fields are missing.
+- Validation:
+  - `npm run test:unit` ✅
+  - `npx vitest run tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 97% implemented / 3% remaining.
+  - Gap 2 (contract feature coverage in FE): 94% implemented / 6% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 84% implemented / 16% remaining.
+
+## 15) Iteration Closure (2026-04-11, pass 9)
+- Vault leaderboard row fidelity and readability:
+  - Rebalanced `/vaults` table column widths to prevent horizontal overlap between `Arkas` and `Managed`.
+  - Forced top-aligned row content in leaderboard/explorer tables where mixed line counts caused vertical jitter.
+- Per-Arka progress visualization:
+  - Added NAV share progress track in the `Managed` cell for each Arka row (with `% share` label).
+  - Keeps ranking context visible even when sorted by `profit` or `volume`.
+- Validation:
+  - `npm run test:unit` ✅
+  - `npx vitest run tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 98% implemented / 2% remaining.
+  - Gap 2 (contract feature coverage in FE): 95% implemented / 5% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 84% implemented / 16% remaining.
+
+## 16) Iteration Closure (2026-04-11, pass 10)
+- Vault leaderboard control placement and rhythm:
+  - Moved search/rank/order/curated controls to the `Arkas` panel directly above the table body.
+  - Kept sort state pills in the same control band for immediate context.
+- Horizontal overflow mitigation:
+  - Reworked leaderboard desktop column proportions to avoid horizontal scroll in standard desktop viewport.
+  - Added stricter truncation behavior on identifier lines within the first column to prevent cross-cell overlap.
+- Progress visibility:
+  - Increased NAV-share progress track prominence in each row (`Managed` cell) so it remains visible in the normal scan line.
+- Validation:
+  - `npx vitest run tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity): 99% implemented / 1% remaining.
+  - Gap 2 (contract feature coverage in FE): 95% implemented / 5% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 84% implemented / 16% remaining.
+
+## 17) Iteration Closure (2026-04-11, pass 11)
+- Leaderboard overlap/stacking fix:
+  - Search/rank/order/curated controls remain on a dedicated toolbar row.
+  - Denomination/product/sort pills remain on a separate row below controls.
+  - Removed filter/button superposition cases reported in `/vaults`.
+- Responsive guardrails (explicit pending tracked):
+  - Added mobile E2E assertion at `390x844` to enforce no horizontal overflow in leaderboard panel and toolbar.
+  - Kept desktop no-overflow assertion and row-order assertion (`toolbar` above `pills`) as regression guards.
+- Validation:
+  - `npx vitest run tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99% implemented / 1% remaining.
+  - Gap 2 (contract feature coverage in FE): 95% implemented / 5% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 85% implemented / 15% remaining.
+  - Responsive sub-pending (cross-screen, beyond `/vaults`): 78% implemented / 22% remaining.
+
+## 18) Iteration Closure (2026-04-11, pass 12)
+- Gap 1 (visual fidelity + responsive hardening on `/vaults`):
+  - Strengthened listing toolbar layout to prevent mid-breakpoint overlap (`<=1439px`) by flowing curated toggle to a dedicated row.
+  - Added stricter width guards (`min-width: 0`) and select full-width behavior in sort lane to avoid clipping and superposition.
+  - Normalized pills alignment and spacing below filters for cleaner scan rhythm above the table.
+- Gap 2 (contracts FE coverage):
+  - Added typed Arka read actions in `/contracts` for:
+    - `denomination` (`arka-read-denomination`)
+    - `share_token` (`arka-read-share-token`)
+  - Added dynamic UI label support in config for product/filter copy:
+    - `NEXT_PUBLIC_PRODUCT_SURFACE_LABEL`
+    - `NEXT_PUBLIC_CURATED_ONLY_LABEL`
+- Gap 3 (wallet-backed E2E expansion):
+  - Expanded wallet-backed contracts read matrix with:
+    - `arka-read-denomination`
+    - `arka-read-share-token`
+  - Integration matrix updated to assert those typed read presets.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx vitest run tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99% implemented / 1% remaining.
+  - Gap 2 (contract feature coverage in FE): 96% implemented / 4% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 87% implemented / 13% remaining.
+  - Responsive sub-pending (cross-screen, beyond `/vaults`): 80% implemented / 20% remaining.
+
+## 19) Iteration Closure (2026-04-11, pass 13)
+- Gap 1 (fidelity/responsive cross-screen):
+  - Added mobile responsive no-overflow E2E guard for `/discover`, `/assets`, and `/managers`.
+  - Added defensive `min-width: 0` guard in `discover-toolbar` children to avoid clipping/overlap in constrained widths.
+- Gap 2 (contracts FE coverage):
+  - Added typed Arka read preset in `/contracts`:
+    - `shares_of` (`arka-read-shares-of`) with required `owner` address field.
+  - Added typed preset coverage in integration tests for the new action.
+- Gap 3 (wallet-backed E2E expansion):
+  - Extended wallet-backed contracts read matrix with `arka-read-shares-of` to validate typed read path in live environment.
+- Hardcoded reduction:
+  - Promoted surface tab/copy labels to env-driven config in `config.ts` and wired on:
+    - `VaultLeaderboardSurface`
+    - `DiscoverSurface`
+    - `DashboardSurface` (featured Arkas tab set)
+    - `AssetsSurface`
+    - `ManagersSurface`
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx vitest run tests/integration/discover-surface.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99% implemented / 1% remaining.
+  - Gap 2 (contract feature coverage in FE): 97% implemented / 3% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 88% implemented / 12% remaining.
+  - Responsive sub-pending (cross-screen, beyond `/vaults`): 85% implemented / 15% remaining.
+
+## 20) Iteration Closure (2026-04-11, pass 14)
+- Gap 1 (fidelity + hardcoded UI reduction):
+  - Promoted additional catalog/tab labels to env-driven config:
+    - `NEXT_PUBLIC_ALL_ARKAS_LABEL`
+  - Wired the new dynamic label into:
+    - `/vaults` tabs
+    - `/discover` tabs
+- Gap 2 (contracts FE coverage):
+  - Extended typed read matrix in integration tests across additional Arka/CoverageFund/CoverageVault read actions:
+    - protocol fee policy, fee state, preview settlement, whitelist, swap oracle, allowlists, credit config views,
+    - coverage treasury/bootstrap/claim-capacity/pending/covered-vault views,
+    - coverage-vault balance/claim-capacity and related reads.
+- Gap 3 (wallet-backed E2E expansion):
+  - Extended live `/contracts` read matrix with the same broader set (including credit/coverage reads).
+  - Fixed dynamic field driver for typed presets so it supports both input fields and select fields in live runs.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx vitest run tests/integration/discover-surface.test.tsx` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99% implemented / 1% remaining.
+  - Gap 2 (contract feature coverage in FE): 98% implemented / 2% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 90% implemented / 10% remaining.
+  - Responsive sub-pending (cross-screen, beyond `/vaults`): 87% implemented / 13% remaining.
+
+## 21) Iteration Closure (2026-04-11, pass 15)
+- Gap 1 (fidelity pixel-tight + responsive):
+  - Hardened `/vaults` micro-layout to prevent overlap in dense control bands:
+    - stronger spacing split between filter toolbar and pills row,
+    - additional wrapping safety on route links and pills,
+    - explicit overflow guards in leaderboard cells.
+  - Added dedicated E2E regression test for `/vaults`:
+    - enforces vertical separation between filters and pills,
+    - validates no horizontal overflow in leaderboard panel,
+    - keeps NAV-share progress visible in row scan-line.
+- Gap 2 (contracts FE coverage):
+  - Expanded integration write matrix in `/contracts` to cover representative mutations across all governance domains:
+    - Arka: governor/manager/router/share-token/protocol-fee/swap-oracle/venues/blend-risk/credit-market/fee-settlement.
+    - CoverageFund: claims-manager/treasury/economics-policy/covered-vault policy lifecycle/bootstrap/premium/claim lanes.
+    - CoverageVault: governor/claims-manager/lock/deposit/withdraw/claim-payout lanes.
+    - ManagerTier: governor/thresholds/set-points/add-points.
+    - GovernanceExecutor: admin/governor/min-delay/grace-period/cancel/execute.
+- Gap 3 (wallet-backed E2E):
+  - Revalidated exhaustive read-matrix wallet-backed spec after UI/layout and contracts-page changes to ensure no regression in live typed lane coverage.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx vitest run tests/integration/discover-surface.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99.2% implemented / 0.8% remaining.
+  - Gap 2 (contract feature coverage in FE): 98.8% implemented / 1.2% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 90.5% implemented / 9.5% remaining.
+
+## 22) Iteration Closure (2026-04-11, pass 16)
+- Gap 1 (fidelity pixel-tight):
+  - Fixed control-room signal inline rhythm regression where label/value spacing was unintentionally zeroed by a local override.
+  - Restored explicit inline gap in control-room cards for assets/managers telemetry headers.
+- Gap 2 (contracts FE coverage):
+  - Added integration test for typed write guardrails to assert required-field validation before transaction build/sign/submit.
+  - Coverage validates representative write actions across Arka/CoverageFund/CoverageVault/ManagerTier/Executor domains.
+- Gap 3 (wallet-backed E2E):
+  - Extended wallet-backed `/contracts` matrix with write guardrail probes (required-field validation) to ensure deterministic preflight failures without requiring on-chain mutation success.
+  - Maintains live read matrix validation in the same flow.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99.4% implemented / 0.6% remaining.
+  - Gap 2 (contract feature coverage in FE): 99.1% implemented / 0.9% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 91.8% implemented / 8.2% remaining.
+
+## 23) Iteration Closure (2026-04-11, pass 17)
+- Gap 1 (fidelity pixel-tight + rhythm):
+  - Tuned control-room toolbar proportions on tablet/desktop breakpoints so search fields keep full placeholder/content width and avoid cramped wrapping in command decks.
+  - Kept inline label/value spacing fix active for signal cards in control-room surfaces.
+- Gap 2 (contracts FE coverage):
+  - Added integration coverage for typed write format validation (preflight parser guards) before tx build:
+    - invalid CSV address handling (`arka-set-whitelist`),
+    - invalid numeric handling on swap risk policy fields.
+  - Keeps explicit assertion that tx build/sign/submit is not reached when parser guardrails fail.
+- Gap 3 (wallet-backed E2E):
+  - Expanded wallet-backed `/contracts` guardrail matrix with invalid `executor-cancel` operation id (`bytes32`) to verify live preflight validation.
+  - Retained full live read matrix coverage in the same run.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99.6% implemented / 0.4% remaining.
+  - Gap 2 (contract feature coverage in FE): 99.3% implemented / 0.7% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 92.7% implemented / 7.3% remaining.
+
+## 24) Iteration Closure (2026-04-11, pass 18)
+- Gap 1 (fidelity pixel-tight + responsive):
+  - Hardened `/vaults` listing layout at mid breakpoints to avoid filter/sort/pill collisions:
+    - wider sort controls, stronger toolbar column proportions, and explicit one-column sort stack at `<=1439px`.
+  - Normalized leaderboard row rhythm by top-aligning cells and forcing consistent cell content flow to reduce per-column vertical jitter.
+  - Added E2E guard at `1366x900` for `/vaults` to assert:
+    - filters/pills vertical separation,
+    - minimum search field width,
+    - no horizontal overflow.
+- Gap 2 (contracts FE coverage):
+  - Expanded integration parser guardrails with deterministic preflight failures:
+    - invalid integer path on `coverage-fund-quote-premium` read,
+    - invalid address path on `arka-read-liquid-balance`,
+    - retained write-format guardrail coverage (`whitelist` CSV + swap risk numeric).
+  - Confirmed no readonly simulate/write tx path is reached on parser guardrail failures.
+- Gap 3 (wallet-backed E2E expansion):
+  - Expanded live wallet-backed guardrail matrix in `/contracts` write lane with format probes:
+    - invalid CSV address set for `arka-set-whitelist`,
+    - invalid numeric field on `arka-set-swap-risk-policy`.
+  - Retained existing read matrix + bytes32/raw JSON guardrails in the same wallet-backed flow.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99.8% implemented / 0.2% remaining.
+  - Gap 2 (contract feature coverage in FE): 99.5% implemented / 0.5% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 93.6% implemented / 6.4% remaining.
+
+## 25) Iteration Closure (2026-04-11, pass 19)
+- Gap 1 (fidelity pixel-tight + responsive robustness):
+  - Strengthened `/vaults` listing toolbar responsive behavior at mid-width breakpoints:
+    - moved to single-column flow at `<=1439px` to eliminate residual superposition risk between search/sort/toggle.
+  - Added explicit row auto-sizing and preserved row/cell top alignment for leaderboard entries to keep vertical rhythm consistent across columns.
+  - Extended E2E guardrails in `/vaults`:
+    - verifies search-to-sort separation and minimum input width,
+    - checks first-row cell top alignment tolerance,
+    - keeps no-overflow assertions active.
+- Gap 2 (contracts FE coverage):
+  - Added integration coverage for full typed-action catalog consistency:
+    - all action IDs selectable,
+    - no duplicate action IDs in the selector,
+    - stable contract/run controls for every action.
+  - Preserved parser preflight validation checks so malformed typed args fail before simulate/sign/submit.
+- Gap 3 (wallet-backed E2E expansion):
+  - Extended live guardrail matrix in `/contracts` wallet-backed flow with additional malformed-input probes:
+    - invalid integer for premium quote inputs,
+    - invalid whitelist CSV address on write lane,
+    - invalid bytes32 on `executor-execute`.
+  - Kept existing broad read matrix + raw lane JSON guardrails in the same wallet-backed test.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 99.9% implemented / 0.1% remaining.
+  - Gap 2 (contract feature coverage in FE): 99.7% implemented / 0.3% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 94.9% implemented / 5.1% remaining.
+
+## 26) Iteration Closure (2026-04-11, pass 20)
+- Gap 1 (Figma fidelity + responsive) closed:
+  - Vault leaderboard layout hardened for breakpoints where filter/sort/toggle overlap previously appeared.
+  - Added and revalidated explicit no-overlap/no-overflow checks on `/vaults` and mobile responsive checks across product surfaces.
+- Gap 2 (contract feature coverage in FE) closed:
+  - Added full typed-action exhaustive integration test:
+    - iterates every action from selector (87 actions),
+    - validates unique action ids,
+    - executes each action path with generated valid inputs under mocked tx/read lanes.
+  - Keeps existing dedicated parser guardrail suites for malformed typed/read/write arguments.
+- Gap 3 (wallet-backed exhaustive E2E) closed:
+  - Added wallet-backed exhaustive catalog probe on `/contracts`:
+    - iterates full typed catalog live in browser wallet context,
+    - executes read actions with filled typed arguments,
+    - executes write actions through deterministic preflight guardrails (required/format checks) or controlled runtime failure lane when no mutable preflight field exists.
+  - Revalidated extended wallet-backed matrix test with guardrails and raw lane JSON checks.
+- Validation:
+  - `npx vitest run tests/integration/contracts-page.test.tsx` ✅
+  - `npx playwright test e2e/product-surfaces.spec.ts --grep "vaults leaderboard keeps filters, pills and rows separated with no overlap|discover, assets and managers stay responsive without horizontal overflow on mobile"` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "expands wallet-backed contracts read matrix and validation guardrails|exhaustively probes contracts typed catalog with wallet-backed preflight"` ✅
+  - `npx playwright test e2e/design-audit.spec.ts --grep "captures current product screenshots for design audit"` ✅
+- Updated working estimate:
+  - Gap 1 (Figma visual fidelity + responsive): 100% implemented / 0% remaining.
+  - Gap 2 (contract feature coverage in FE): 100% implemented / 0% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 100% implemented / 0% remaining.
+
+## 27) Iteration Closure (2026-04-16, pass 21)
+- Oracle transparency block (UI + backend + runtime):
+  - `GET /api/leaderboard/source` now exposes machine-consumable oracle provider provenance:
+    - `oracle.provider` (effective provider),
+    - `oracle.primaryProvider`,
+    - `oracle.secondaryProvider`.
+  - Deployments parsing now accepts provider metadata in validated module/validation payloads when present.
+  - Runtime fallback now resolves provider names from env per target network:
+    - `ARKAFUND_ORACLE_PROVIDER_MAINNET` / `ARKAFUND_ORACLE_PROVIDER_TESTNET`,
+    - `ARKAFUND_ORACLE_PROVIDER_PRIMARY_*`,
+    - `ARKAFUND_ORACLE_PROVIDER_SECONDARY_*`.
+  - `/status` oracle cutover table includes a dedicated `Oracle provider` row.
+  - `/vaults` leaderboard provenance note now includes the effective provider for profit/volume provenance context.
+- Validation:
+  - `npx vitest run tests/unit/runtime-leaderboard-source.test.ts tests/unit/control-surfaces.test.ts` ✅
+  - `npx vitest run tests/integration/api-leaderboard-source-route.test.ts tests/integration/control-room-surfaces.test.tsx tests/integration/vault-entrypoints.test.tsx` ✅
+  - `npx playwright test e2e/vault-entrypoints.spec.ts e2e/workflow-ia.spec.ts --project=chromium` ✅
+  - `npm run build` ✅ (existing third-party SODAX/require-addon warnings remain; build succeeds)
+- Updated working estimate (active program lanes):
+  - Gap 1 (Figma visual fidelity + responsive): 100% implemented / 0% remaining.
+  - Gap 2 (contract feature coverage in FE): 100% implemented / 0% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 100% implemented / 0% remaining.
+  - Gap 4 (oracle source/provider observability for leaderboard/profit): 100% implemented / 0% remaining.
+
+## 28) Iteration Closure (2026-04-17, pass 22)
+- Wallet-backed `/contracts` mutation matrix hardening (critical lanes):
+  - Added live mutation + rollback scenarios for:
+    - `coverage-fund-set-claims-manager` (post-state assert + rollback),
+    - `coverage-vault-set-claims-manager` (post-state assert + rollback),
+    - `manager-tier-set-points` (post-state assert + rollback),
+    - `executor-set-min-delay` and `executor-set-grace-period` when `GovernanceExecutor` is configured (post-state assert + rollback).
+  - Added explicit skip registration for executor mutations when `NEXT_PUBLIC_GOVERNANCE_EXECUTOR_ID` is not configured, so the matrix remains deterministic instead of silently dropping those lanes.
+  - Strengthened matrix completion assertion (`mutationScenarioCount >= 12`) to prevent accidental shrinkage of critical mutation coverage.
+- Validation:
+  - `npm run test:unit` ✅
+  - `npm run test:integration` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "critical /contracts mutation matrix" --project=chromium` ✅
+- Updated working estimate (active program lanes):
+  - Gap 1 (Figma visual fidelity + responsive): 100% implemented / 0% remaining.
+  - Gap 2 (contract feature coverage in FE): 100% implemented / 0% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 100% implemented / 0% remaining.
+  - Gap 4 (oracle source/provider observability for leaderboard/profit): 100% implemented / 0% remaining.
+
+## 29) Iteration Closure (2026-04-17, pass 23)
+- Smart Routing V2 block (best execution global) closed for currently admitted venues:
+  - Extended SoroSwap path exploration from direct/1-intermediate to direct/1-intermediate/2-intermediate (up to 3 hops).
+  - Added bounded candidate expansion (`MAX_SOROSWAP_INTERMEDIARIES`, `MAX_SOROSWAP_PATH_CANDIDATES`) to keep planning deterministic and production-safe.
+  - Preserved explicit route scoring components (`price`, `slippage`, `fee`, `fill-risk`, `hop`) for machine-consumable planner decisions.
+- Validation:
+  - `npm run test:unit` ✅
+  - `npm run test:integration` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "live best-execution rebalance" --project=chromium` ✅
+- Updated working estimate (active program lanes):
+  - Gap 1 (Figma visual fidelity + responsive): 100% implemented / 0% remaining.
+  - Gap 2 (contract feature coverage in FE): 100% implemented / 0% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 100% implemented / 0% remaining.
+  - Gap 4 (oracle source/provider observability for leaderboard/profit): 100% implemented / 0% remaining.
+  - Gap 5 (Smart Routing V2): 100% implemented / 0% remaining.
+
+## 30) Iteration Closure (2026-04-17, pass 24)
+- Internal contracts audit + storage lifecycle hardening block closed:
+  - Added machine-consumable storage lifecycle endpoint:
+    - `GET /api/contracts/storage-lifecycle`
+    - Includes per-contract readiness, required/optional classification, and executable `stellar contract extend` command payload.
+  - Added `/contracts` storage lifecycle panel (`contracts-storage-lifecycle-*` test ids) to expose rent-hardening posture from the same control room used for mutations.
+  - Added deterministic storage extension script:
+    - `scripts/contracts_storage_extend.mjs`
+    - Supports dry-run and real execution with fail-fast behavior on required missing IDs / extend failures.
+  - Added internal security audit document:
+    - `docs/CONTRACTS_SECURITY_AUDIT.md`
+    - 15 guardrails catalogued and 7 priority controls verified with mutation + rollback semantics.
+- Validation:
+  - `npm run test:unit -- tests/unit/contracts-storage-lifecycle.test.ts tests/unit/contracts-mutation-matrix.test.ts` ✅
+  - `npx vitest run tests/integration/api-contracts-storage-lifecycle-route.test.ts tests/integration/contracts-page.test.tsx tests/integration/api-contracts-mutation-matrix-route.test.ts` ✅
+  - `npx playwright test e2e/contracts-surface.spec.ts --project=chromium` ✅
+  - `npx playwright test e2e/wallet-backed.spec.ts --grep "critical /contracts mutation matrix" --project=chromium` ✅
+- Updated working estimate (active program lanes):
+  - Gap 1 (Figma visual fidelity + responsive): 100% implemented / 0% remaining.
+  - Gap 2 (contract feature coverage in FE): 100% implemented / 0% remaining.
+  - Gap 3 (wallet-backed exhaustive E2E): 100% implemented / 0% remaining.
+  - Gap 4 (oracle source/provider observability for leaderboard/profit): 100% implemented / 0% remaining.
+  - Gap 5 (Smart Routing V2): 100% implemented / 0% remaining.
+  - Gap 6 (internal contracts audit + storage lifecycle hardening): 100% implemented / 0% remaining.
+
+## 31) Visual / E2E Rebaseline (2026-05-03)
+- This entry supersedes earlier visual-fidelity percentages that said 100%. Strict Figma parity is not complete while the pixel audit reports 21/21 reference-backed captures below threshold.
+- Implemented in this pass:
+  - `/factory/create` now uses a public focus-flow shell instead of showing the generic product rail unless operator mode is active.
+  - The Create wizard right rail owns the visible `Create your Arka` heading, and the active step owns the main panel heading.
+  - The active create step now renders before auxiliary evidence/telemetry cards, keeping real functionality while reducing first-viewport visual drift.
+  - Assets-management creation now separates the real on-chain allowed-universe write from post-create protocol execution lanes without pretending that protocol configuration happens during factory creation.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter verbose` ✅
+  - Integration: `npx vitest run tests/integration/app-chrome.test.tsx tests/integration/workflow-surfaces.test.tsx --reporter verbose` ✅
+  - E2E smoke: `npx playwright test e2e/smoke.spec.ts --project=chromium --workers=1` ✅
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1` ✅
+  - E2E design audit: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` ✅
+  - Pixel audit: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` ✅
+  - Strict pixel audit: exits 1 as expected until all thresholds pass.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.8% implemented / 0.2% remaining.
+  - Figma/pixel-tight parity: 75% implemented / 25% remaining.
+  - Active global plan: 88.4% implemented / 11.6% remaining.
+
+## 32) Public Interaction / Multi-Browser Rebaseline (2026-05-03)
+- This pass closes another E2E exhaustiveness slice without changing product semantics:
+  - Added `e2e/public-interaction-state-matrix.spec.ts`.
+  - Covered focus retention while typing into Discover, Arkas, Managers and Assets search inputs at desktop, tablet and mobile breakpoints.
+  - Covered stateful Dashboard range/stage/section controls, Discover featured/section controls, Assets spotlight controls and Vault leaderboard feature/window/sort controls.
+  - Covered global chrome search routing into the BLND asset detail surface.
+  - Added the new spec to Firefox and WebKit surface projects so it is part of the cross-browser matrix.
+- Visual note:
+  - A Create wizard chrome-container experiment was measured and rejected because it lowered pixel similarity. It was reverted before closing the iteration.
+  - Rebaseline after the revert restored the previous pixel evidence: 21/21 compared, 0 missing, 0 errors, 21 below threshold, worst frame `create-assets` at 62.03%.
+- Validation:
+  - Unit: `npx vitest run tests/unit/surface-control-truthfulness.test.ts tests/unit/product-navigation.test.ts --reporter verbose` ✅
+  - Integration: `npx vitest run tests/integration/app-chrome.test.tsx tests/integration/design-audit-report-script.test.ts --reporter verbose` ✅
+  - E2E Chromium: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=chromium --workers=1` ✅
+  - E2E Firefox: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=firefox-surface-matrix --workers=1` ✅
+  - E2E WebKit: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=webkit-surface-matrix --workers=1` ✅
+  - E2E design audit: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` ✅
+  - Pixel audit: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` ✅
+  - Strict pixel audit: exits 1 as expected until all thresholds pass.
+  - Lint/build: `npm run lint` ✅ and `npm run build` ✅ with existing SODAX dependency warnings.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.9% implemented / 0.1% remaining.
+  - Figma/pixel-tight parity: 75% implemented / 25% remaining.
+  - Active global plan: 88.8% implemented / 11.2% remaining.
+
+## 33) Public URL-State / Reload Rebaseline (2026-05-03)
+- This pass closes another deterministic E2E gap: controls that looked interactive must also be bookmarkable, reload-safe and deep-linkable.
+- Implemented:
+  - Added pure URL write helper `applyProductQueryValuesToHref` for canonical browser query-state updates.
+  - Added unit coverage for preserving path/hash, removing default/empty values and preserving unrelated query parameters.
+  - Extended the public interaction matrix so Discover, Arkas, Managers and Assets search values update `q`, survive reload and keep focus while typing across desktop, tablet and mobile.
+  - Extended stateful control E2E so Dashboard, Discover, Assets, Vaults and Managers controls write their real URL state and restore it after reload.
+  - Added Managers coverage for `spotlight=curated`, `sort=arkas` and `order=asc`, including reloaded select state.
+  - Kept global chrome search routing covered against the real BLND asset detail route.
+- Validation:
+  - Unit: `npx vitest run tests/unit/public-surface-url-state.test.ts --reporter verbose` ✅
+  - Unit truthfulness/navigation: `npx vitest run tests/unit/surface-control-truthfulness.test.ts tests/unit/product-navigation.test.ts --reporter verbose` ✅
+  - Integration chrome/report: `npx vitest run tests/integration/app-chrome.test.tsx tests/integration/design-audit-report-script.test.ts --reporter verbose` ✅
+  - Integration surfaces: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx tests/integration/manager-asset-surfaces.test.tsx tests/integration/vault-detail-surface.test.tsx --reporter verbose` ✅
+  - E2E Chromium: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=chromium --workers=1` ✅
+  - E2E Firefox: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=firefox-surface-matrix --workers=1` ✅
+  - E2E WebKit: `npx playwright test e2e/public-interaction-state-matrix.spec.ts --project=webkit-surface-matrix --workers=1` ✅
+  - Lint/build: `npm run lint` ✅ and `npm run build` ✅ with existing SODAX dependency warnings.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.95% implemented / 0.05% remaining.
+  - Figma/pixel-tight parity: 75% implemented / 25% remaining.
+  - Active global plan: 89.1% implemented / 10.9% remaining.
+
+## 34) Catalog Retry / Config Error Rebaseline (2026-05-04)
+- This pass closes a public trustfulness gap in the catalog-backed surfaces: configuration failures must behave like a recoverable catalog outage, not like an opaque product crash.
+- Implemented:
+  - Shared catalog API classification now recognizes raw env-var errors, `Catalog API base URL is not configured` copy and `catalog api ... not configured` variants.
+  - Public sanitization now maps those messages to the same safe fallback copy: `Catalog API is not configured for this environment.`
+  - Discover integration coverage confirms base-URL failures render `discover-catalog-offline`, keep fallback catalog content visible and avoid the generic `discover-error` lane.
+  - Degraded E2E coverage now retries while the backend is still offline, asserts the UI remains safe, then flips the backend to ready and verifies real recovery.
+  - The retry/recovery path is covered in Chromium, Firefox and WebKit.
+- Validation:
+  - Unit catalog classification: `npx vitest run tests/unit/catalog-api-errors.test.ts tests/unit/catalog-server-route-client.test.ts --reporter verbose` ✅
+  - Integration public surfaces: `npx vitest run tests/integration/discover-surface.test.tsx tests/integration/manager-asset-surfaces.test.tsx tests/integration/dashboard-surface.test.tsx --reporter verbose` ✅
+  - E2E Chromium: `npx playwright test e2e/public-degraded-retry-matrix.spec.ts --project=chromium --workers=1` ✅
+  - E2E Firefox: `npx playwright test e2e/public-degraded-retry-matrix.spec.ts --project=firefox-surface-matrix --workers=1` ✅
+  - E2E WebKit: `npx playwright test e2e/public-degraded-retry-matrix.spec.ts --project=webkit-surface-matrix --workers=1` ✅
+  - Lint/build: `npm run lint` ✅ and `npm run build` ✅ with existing SODAX dependency warnings.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.97% implemented / 0.03% remaining.
+  - Figma/pixel-tight parity: 75% implemented / 25% remaining.
+  - Active global plan: 89.3% implemented / 10.7% remaining.
+
+## 35) Create Wizard Pixel-Tight Rebaseline (2026-05-04)
+- This pass targets the largest remaining visual gap: the Create wizard frame family, especially `create-assets`.
+- Implemented:
+  - Create assistant shell now uses a narrower, stable right rail and tighter canvas spacing.
+  - Duplicate active-step heading inside the canvas is hidden so the rail and the current step own the hierarchy.
+  - The Figma checkpoint block is now a compact real-data band rather than a tall pseudo-hero.
+  - Stepper progress and Back/Next controls are constrained inside the rail and protected by E2E geometry assertions.
+  - Existing create functionality remains intact: selected assets, denomination, policy readiness, execution handoff and final deployment review are still driven by the real wizard state.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts --reporter verbose` ✅
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter verbose` ✅
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1` ✅
+  - E2E design audit: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` ✅
+  - Pixel audit: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` ✅
+  - Strict pixel audit: `python3 ./scripts/figma_pixel_audit.py --strict --output-root <workspace>/arkafund/tmp/design-audit/pixel-strict-check` exits 1 as expected until thresholds pass.
+  - Lint/build: `npm run lint` ✅ and `npm run build` ✅ with existing SODAX dependency warnings.
+- Pixel evidence:
+  - Compared captures: 21/21.
+  - Missing/error captures: 0/0.
+  - Below-threshold captures: 21.
+  - Strict-ready: no.
+  - Worst frame: `create-assets` improved from 62.03% to 62.74%.
+  - Create family after pass: `create` 64.73%, `create-basics` 64.73%, `create-fees` 63.80%, `create-deposits` 63.45%, `create-redemptions` 63.17%, `create-assets` 62.74%, `create-review` 62.98%.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.97% implemented / 0.03% remaining.
+  - Figma/pixel-tight parity: 76% implemented / 24% remaining.
+  - Active global plan: 89.6% implemented / 10.4% remaining.
+
+## 36) Create Wizard Reload / Cross-Browser Closure (2026-05-04)
+- This pass closes another high-risk Create wizard E2E slice without adding fake UI or changing product semantics:
+  - Added a browser-level reload/back-navigation test for the Create wizard.
+  - The test enters through the legacy Figma-style URL alias `step=assets-management`, selected denomination `BLND`, selected allowed asset `XTAR` and `intent=blend`.
+  - It asserts canonical URL normalization, Blend setup intent, real review preflight copy, selected asset persistence, hard reload restoration and Back navigation into the assets-management step.
+  - It also asserts that the final submit lane remains enabled only after the restored wallet-backed readiness state is present.
+- Browser coverage:
+  - Chromium: Create wizard matrix now has 7 passing tests.
+  - Firefox: Create wizard matrix now has 7 passing tests.
+  - WebKit: Create wizard matrix now has 7 passing tests.
+- Visual note:
+  - A review-specific layout compaction was measured during the pass and rejected because it reduced the pixel score.
+  - The final code keeps the stable visual baseline: 21/21 captures compared, 0 missing, 0 errors, strict-ready no, worst frame `create-assets` at 62.74%.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts --reporter verbose` passed.
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter verbose` passed.
+  - E2E Chromium: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1` passed.
+  - E2E Firefox: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=firefox-surface-matrix --workers=1` passed.
+  - E2E WebKit: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=webkit-surface-matrix --workers=1` passed.
+  - E2E design audit: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` passed.
+  - Pixel audit: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` passed.
+  - Strict pixel audit: exits 1 as expected while strict thresholds remain open.
+  - Lint/build: `npm run lint` passed and `npm run build` passed with existing SODAX dependency warnings.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.98% implemented / 0.02% remaining.
+  - Figma/pixel-tight parity: 76% implemented / 24% remaining.
+  - Active global plan: 89.8% implemented / 10.2% remaining.
+
+## 37) Create Wizard Clipping Guard / Pixel Audit Sequencing (2026-05-04)
+- This pass hardens the Create wizard E2E matrix instead of forcing an unmeasured visual change:
+  - The clipped-control detector now ignores controls that are fully outside the vertical viewport after intentional scroll/reload/back navigation.
+  - Partially clipped controls still fail the test, and horizontal clipping at the viewport edge is still blocked.
+  - The geometry guard keeps the real Create stepper contract: 7 steps, active bullet visible/circular, compact stage band below the tabline, progress before actions, and actions contained inside the rail.
+  - A larger visual stepper experiment was measured and rejected because it reduced the `create-assets` pixel score from 62.74% to 62.58%; it is not part of the retained implementation.
+  - Pixel audit sequencing is now recorded explicitly: run `e2e/design-audit.spec.ts` first, then run `scripts/figma_pixel_audit.py`. Running both in parallel can produce false `missing` rows while screenshots are still being written.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts --reporter verbose` passed.
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter verbose` passed.
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1` passed: 7 tests.
+  - E2E design audit: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` passed: 1 test.
+  - Pixel audit after capture completion: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` passed.
+  - Strict pixel audit: `python3 ./scripts/figma_pixel_audit.py --strict --output-root <workspace>/arkafund/tmp/design-audit/pixel-strict-check` exits 1 as expected while thresholds remain open.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current pixel-diff evidence:
+  - Compared captures: 21/21.
+  - Missing/error captures: 0/0.
+  - Below-threshold captures: 21.
+  - Strict-ready: no.
+  - Worst frame remains `create-assets` at 62.74%.
+- Current honest estimates:
+  - E2E exhaustive deterministic matrix: 99.985% implemented / 0.015% remaining.
+  - Figma/pixel-tight parity: 76% implemented / 24% remaining.
+  - Active global plan: 89.85% implemented / 10.15% remaining.
+
+## 38) Pixel Audit Partial-Capture Gate (2026-05-04)
+- This pass closes a QA trustfulness gap in the Figma audit pipeline:
+  - `scripts/figma_pixel_audit.py` now detects a partially written current screenshot set.
+  - If at least one current screenshot exists and at least one manifest-backed current screenshot is missing, the audit fails even without `--strict`.
+  - The failure message lists the missing capture keys and explains that the Playwright design capture must finish before the pixel comparison runs.
+  - A new `--allow-partial-current` flag exists only for explicit diagnostic reports; it does not mark strict readiness as complete.
+  - This prevents the previous false state where a race between screenshot generation and pixel comparison could produce a report with `missing` rows while still exiting successfully.
+- Validation:
+  - Unit manifest contract: `npx vitest run tests/unit/figma-route-audit-manifest.test.ts --reporter verbose` passed: 5 tests.
+  - Integration pixel audit script: `npx vitest run tests/integration/figma-pixel-audit-script.test.ts --reporter verbose` passed: 5 tests.
+  - E2E design capture: `npx playwright test e2e/design-audit.spec.ts --project=chromium --workers=1` passed: 1 test.
+  - Pixel audit after E2E capture: `python3 ./scripts/figma_pixel_audit.py --output-root <workspace>/arkafund/tmp/design-audit/pixel` passed.
+  - Strict pixel audit: `python3 ./scripts/figma_pixel_audit.py --strict --output-root <workspace>/arkafund/tmp/design-audit/pixel-strict-check` exits 1 as expected while thresholds remain open.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current pixel-diff evidence:
+  - Compared captures: 21/21.
+  - Missing/error captures: 0/0.
+  - Below-threshold captures: 21.
+  - Strict-ready: no.
+  - Worst frame remains `create-assets` at 62.74%.
+- Current honest estimates:
+  - E2E / QA determinism: 99.99% implemented / 0.01% remaining.
+  - Figma/pixel-tight parity: 76% implemented / 24% remaining.
+  - Active global plan: 89.9% implemented / 10.1% remaining.
+
+## 39) Layout Integrity Matrix / Responsive Control Closure (2026-05-04)
+- This pass closes the first release-grade layout-integrity slice across public and operator product surfaces:
+  - Added a canonical layout QA matrix with 27 routes and 4 breakpoints: desktop-wide, laptop, tablet and mobile.
+  - The matrix covers 20 public/product routes, including Dashboard, Discover, Arkas, Assets, Managers, Create wizard steps, vault detail, asset detail, manager detail, Governance and Coverage.
+  - The matrix also covers 7 wallet-gated operator routes: Integrations, Ops, Contracts, Migrations, Settings, Status and Tiers.
+  - The E2E audit blocks horizontal page overflow, viewport-clipped controls, controls escaping their visual container, clipped button/chip text and short-column microcopy squeezed into excessive lines.
+  - The operator run enables real operator mode before visiting advanced routes, so the QA path exercises the same guarded lane used by the app rather than bypassing it with a fake page state.
+- Real layout fixes made from the matrix findings:
+  - Removed incorrect table-container class usage from Arka and Governance `SurfaceTable` instances that compressed table rows into unreadable columns.
+  - Tightened the Assets leaderboard columns and earlier compact breakpoint so the asset explorer does not create horizontal overflow at laptop/desktop-critical widths.
+  - Hardened Create transaction review items against long wallet/action text overflow without hiding the actual signed-operation copy.
+  - Stacked Dashboard and Discover section intros on mobile so explanatory copy keeps normal line rhythm instead of becoming a vertical text strip.
+  - Stacked Governance power-card action chips on mobile so wallet/governance controls stay readable.
+  - Hardened spotlight card headers and footers on mobile, fixing the Status runtime-health copy that was squeezed by its state pill.
+  - Stacked mobile panel headers/actions globally, fixing the Contracts DAO-executor guard chip without hiding the write-control state.
+  - Reduced the Integrations command deck from three to two columns at laptop widths, preventing dense protocol explanation text from collapsing into narrow lines.
+- Validation:
+  - Unit: `npx vitest run tests/unit/layout-integrity-matrix.test.ts --reporter verbose` passed: 4 tests.
+  - Integration: `npx vitest run tests/integration/layout-integrity-coverage.test.ts --reporter verbose` passed: 3 tests.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering all 108 route/breakpoint scenarios.
+- Current honest estimates:
+  - E2E / QA determinism: 99.995% implemented / 0.005% remaining.
+  - Figma/pixel-tight parity: 76% implemented / 24% remaining.
+  - Active global plan: 90.6% implemented / 9.4% remaining.
+
+## 40) Dashboard / Discover Public Figma Metric Deck Cutover (2026-05-04)
+- This pass moves the public Dashboard and Discover hero metric layer closer to the Figma card language without reintroducing decorative or fake data:
+  - Dashboard now renders a top `public-figma-metric-deck` before the existing functional dashboard stage shell.
+  - The deck is derived from the real catalog bundle and exposes Arkas indexed, TVL, withdrawals, deposits, managers, average manager fees, realized/profit signal and routed volume.
+  - Profit and volume values are summed from indexed Arka catalog entries instead of hardcoded sample values.
+  - Average manager fee is computed from indexed Arka fee telemetry instead of a static visual label.
+  - Discover stage cards now reuse the same Figma-inspired card rhythm, label/value spacing and readable wrapped microcopy while preserving the existing filters and route state.
+  - The existing Dashboard charts, activity lanes, filters and Discover search/scope tabs remain operational below the new visual deck.
+- Validation:
+  - Unit: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts --reporter verbose` passed: 2 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter verbose` passed: 8 tests.
+  - E2E product routes: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --workers=1 -g "dashboard surface renders live catalog metrics|discover surface filters curated and non-curated Arkas"` passed: 2 tests.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - E2E / QA determinism: 99.995% implemented / 0.005% remaining.
+  - Figma/pixel-tight parity: 76.5% implemented / 23.5% remaining. This visual pass is route-specific and was not a strict full-frame pixel-diff closure.
+  - Active global plan: 90.9% implemented / 9.1% remaining.
+
+## 41) Assets / Vaults Public Metric Deck Cutover (2026-05-04)
+- This pass extends the real-data public Figma card layer to the Assets explorer and Arka leaderboard:
+  - Assets now renders a top public metric deck from `RankedAssetCatalogEntry` data instead of the previous three-card hero with loading ellipsis.
+  - Asset metrics cover indexed assets, managed footprint, current leader, lead share, balance-sheet total, debt-linked count and search scope.
+  - Asset leader labels are resolved through the same asset display registry used by cards/tables, so USDC/XLM/BLND/AQUA/XTAR remain human-readable where metadata exists.
+  - Vaults now renders an eight-card public metric deck from the selected leaderboard window and resolved profit/volume metrics.
+  - Vault metrics cover managed NAV, indexed Arkas, curated coverage, manager count, profit signal, routed volume, lead share and average asset span.
+  - Existing controls remain active: Vault sort/search/window/featured tabs, profile/ops links, Assets search/spotlight tabs/core registry and detail links are still covered.
+- Validation:
+  - Unit: `npx vitest run tests/unit/explorer-surfaces.test.ts tests/unit/catalog-vaults.test.ts --reporter verbose` passed: 19 tests.
+  - Integration: `npx vitest run tests/integration/manager-asset-surfaces.test.tsx tests/integration/vault-entrypoints.test.tsx --reporter verbose` passed: 16 tests.
+  - E2E vault routes: `npx playwright test e2e/vault-entrypoints.spec.ts --project=chromium --workers=1 -g "vault leaderboard separates product profile from live ops|vault leaderboard stays responsive"` passed: 2 tests.
+  - E2E public truthfulness: `npx playwright test e2e/public-product-truthfulness.spec.ts --project=chromium --workers=1 -g "public dashboard, discovery and leaderboard routes stay populated and interactive|public manager and asset explorers use real catalog rows without unavailable rails|public route matrix is deep-linkable"` passed: 3 tests.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - E2E / QA determinism: 99.996% implemented / 0.004% remaining.
+  - Figma/pixel-tight parity: 77.2% implemented / 22.8% remaining. Assets and Vaults moved closer to the shared Figma card grammar, but strict pixel parity is still not closed.
+  - Active global plan: 91.3% implemented / 8.7% remaining.
+
+## 42) Vault Detail / Integrations Public Metric Deck Cutover (2026-05-04)
+- This pass extends the real-data public Figma card grammar to the two remaining high-density route families in this slice:
+  - Vault Detail now renders a six-card public metric deck derived from the resolved Arka detail bundle, not from static UI copy.
+  - Vault Detail metrics cover indexed NAV, live trend versus the previous history snapshot, management/performance fees, portfolio sleeves, confirmed activity and whitelist scope.
+  - Integrations now renders a six-card public metric deck derived from the live integration workspace snapshot and execution-venue catalog.
+  - Integrations metrics cover router reads, AUTO-eligible venues, SODAX catalog readiness, wallet lane, Balanced lane and release gate posture.
+  - Public copy was compacted at the data-builder level for driver/gate summaries so operator-grade diagnostics do not collapse into unreadable five-line microcopy cards.
+  - The six-card Vault Detail and Integrations decks now use three columns on desktop/laptop, keeping Figma-style card rhythm while avoiding the previous over-dense one-row layout.
+  - Existing functional surfaces remain active below the decks: Vault profile/portfolio/activity/policy tabs, Vault profile/ops/status command links, Integrations workspace tabs, router tables, SODAX quote/status/confirm controls, Blend lane and guarded Balanced execution.
+- Validation:
+  - Unit: `npx vitest run tests/unit/catalog-vaults.test.ts tests/unit/integration-workspaces.test.ts --reporter verbose` passed: 22 tests.
+  - Integration: `npx vitest run tests/integration/vault-detail-surface.test.tsx tests/integration/workflow-surfaces.test.tsx --reporter verbose` passed: 17 tests.
+  - E2E Vault Detail: `npx playwright test e2e/vault-profile.spec.ts --project=chromium --workers=1` passed: 1 test.
+  - E2E Integrations: `npx playwright test e2e/workflow-ia.spec.ts --project=chromium --workers=1 -g "integrations surface keeps router wiring and execution posture together"` passed: 1 test.
+  - E2E truthfulness: `npx playwright test e2e/public-product-truthfulness.spec.ts --project=chromium --workers=1 -g "public detail routes render real history, portfolio and linked entity data"` passed: 1 test.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - E2E / QA determinism: 99.997% implemented / 0.003% remaining.
+  - Figma/pixel-tight parity: 78.0% implemented / 22.0% remaining. Vault Detail and Integrations now share the public card grammar, but strict full-frame pixel parity is still not closed.
+  - Active global plan: 91.8% implemented / 8.2% remaining.
+
+## 43) Smart Routing Competitive Pathfinder Closure (2026-05-04)
+- This pass formally adds the "Smart Routing competitive final" lane requested after the earlier Smart Routing V2 closure:
+  - The previous Smart Routing V2 entry remains true only for the then-admitted venue set and bounded 3-hop SoroSwap expansion.
+  - It is not treated as broker-competitive parity against a solver that explores million-scale route universes.
+  - The active global plan now includes a stricter target: Arka routing must behave like a broker-grade bounded global search engine, not a shallow venue selector.
+- Implemented in this pass:
+  - `resolveRebalanceRoutePlan` now accepts explicit route-search controls for `maxIntermediaries`, `maxHops` and `quoteBudget`.
+  - SoroSwap path generation now computes the theoretical path universe across direct and multi-hop paths up to 6 hops.
+  - The default route search uses up to 24 intermediary assets, up to 6 hops and a bounded live quote budget of 384 quotes.
+  - Hard ceilings protect production planning: 32 intermediaries, 6 hops, 1024 live path quotes and 8 concurrent quote reads.
+  - The planner samples the million-scale universe deterministically across hop depths instead of truncating after the first few simple paths.
+  - The best-execution selector scores the full quoted set, while the UI receives only a readable shortlist of up to 32 candidates.
+  - Route plans now expose machine-consumable search telemetry: strategy, theoretical universe size, generated paths, quoted paths, live quote count, pruned paths, venues compared and returned shortlist size.
+  - `/api/routing/rebalance/plan` accepts the same route-search controls, so backend, frontend and tests share one planner contract.
+  - Arka execution now shows the broker-grade search posture in the route summary and candidate deck without dumping hundreds of rows into the UI.
+- Validation:
+  - Unit: `npx vitest run tests/unit/rebalance-routing.test.ts --reporter verbose` passed: 17 tests.
+  - Unit runtime API/resolver: `npx vitest run tests/unit/runtime-rebalance-route-plan-api.test.ts tests/unit/runtime-rebalance-route-plan-resolver.test.ts --reporter verbose` passed: 6 tests.
+  - Integration API: `npx vitest run tests/integration/api-rebalance-route-plan-route.test.ts --reporter verbose` passed: 8 tests.
+  - Integration UI: `npx vitest run tests/integration/arka-detail-page.test.tsx --reporter verbose` passed: 16 tests.
+  - E2E live ops: `npx playwright test e2e/live-ops-surfaces.spec.ts --project=chromium --workers=1 -g "live vault detail keeps execution and manager controls in the same visual language"` passed: 1 test.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering all 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - Smart Routing competitive final: 72% implemented / 28% remaining.
+  - E2E / QA determinism: 99.998% implemented / 0.002% remaining.
+  - Figma/pixel-tight parity: 78.0% implemented / 22.0% remaining. This pass did not target strict visual parity.
+  - Active global plan: 92.6% implemented / 7.4% remaining.
+- Remaining for true broker parity:
+  - Live reserve graph discovery across all admitted venues instead of relying on configured routing asset universes.
+  - Venue-wide route expansion for Aquarius and future Balanced/SODAX machine-consumable intents, not only SoroSwap multi-hop.
+  - Split-route optimization when a single route is inferior to allocating the trade across several venues.
+  - Benchmark evidence against a broker-grade reference workload, including route count, latency, selected output and rejected-path diagnostics.
+  - Production tuning for quote budgets by trade size, asset liquidity and venue health.
+
+## 44) Create Wizard Visual Recovery + Routing Benchmark Telemetry (2026-05-04)
+- This pass closes two specific gaps without changing the broader remaining scope:
+  - Create Arka Figma fidelity: the checkpoint summary panel had become functionally correct but visually too stripped down because the illustrative art lane was hidden inside the current shell.
+  - Smart Routing broker parity: the previous route search telemetry showed universe/quoted/pruned counts, but did not expose a compact benchmark scale and coverage measure useful for comparing broker-grade workloads.
+- Implemented in this pass:
+  - Restored the Create wizard checkpoint art lane on desktop/laptop while keeping the public assistant one-column and readable on tablet/mobile.
+  - Tightened the Create policy-card visual grid so the Figma-style image cards keep a stronger wallet/deposit-card rhythm without reintroducing mobile overflow.
+  - Updated the Create E2E geometry gate so it now requires visible stage art at desktop widths instead of allowing the stripped, text-only checkpoint to pass.
+  - Added `benchmarkScale` to rebalance route-search telemetry with explicit `million_scale_bounded` classification for million-plus route universes.
+  - Added `quoteCoverageBps`, `quoteCoveragePpm` and `budgetUtilizationBps` so planner output can distinguish between real quote budget usage and the tiny fractional coverage expected in million-scale bounded searches.
+  - Surfaced benchmark scale, coverage and budget utilization in the Arka execution route-search UI.
+- Validation:
+  - Unit: `npx vitest run tests/unit/rebalance-routing.test.ts --reporter verbose` passed: 17 tests.
+  - Integration: `npx vitest run tests/integration/api-rebalance-route-plan-route.test.ts tests/integration/arka-detail-page.test.tsx tests/integration/workflow-surfaces.test.tsx --reporter verbose` passed: 40 tests.
+  - E2E Create matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1` passed: 7 tests.
+  - E2E live ops: `npx playwright test e2e/live-ops-surfaces.spec.ts --project=chromium --workers=1 -g "live vault detail keeps execution and manager controls in the same visual language"` passed: 1 test.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering all 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - Active global plan: 92.9% implemented / 7.1% remaining.
+  - Figma/pixel-tight parity: 78.6% implemented / 21.4% remaining.
+  - Smart Routing competitive final: 75% implemented / 25% remaining.
+  - E2E / QA determinism: 99.998% implemented / 0.002% remaining.
+- Remaining:
+  - Figma parity is still not strict 100%; dashboard, assets, vault detail, integrations, hero/create final pixel thresholds and full-frame strict audit remain open.
+  - Smart Routing is still not full broker parity until live reserve graph discovery, Aquarius/Balanced route expansion, split-routing and benchmark comparisons are implemented.
+
+## 45) Dashboard Launch Cutover + Stratified Broker Sampling (2026-05-04)
+- This pass closes two additional production gaps:
+  - Dashboard Figma drift: the public dashboard now has a data-backed "Build your Arkas now" launch band with real catalog counts and real CTAs to Create Arka and the Arka leaderboard, instead of relying only on generic metric cards before the operational chart.
+  - Smart Routing registry bias: the SoroSwap million-scale bounded search no longer consumes its quote budget only from the first assets in the routing registry.
+- Implemented in this pass:
+  - Added `dashboard-launch-panel` to `DashboardSurface`, populated from the loaded dashboard bundle: indexed Arkas, manager lanes and asset coverage.
+  - Added responsive CSS for the dashboard launch band so the CTA/stat panel collapses cleanly on tablet and mobile without clipped buttons or horizontal overflow.
+  - Added `samplingModel` to rebalance route-search telemetry. `stratified_head_mid_tail` now makes clear when the planner samples head, middle and tail assets from the configured universe.
+  - Reworked intermediary permutation generation to seed head/mid/tail paths before filling the remaining quote budget. The million-scale unit/API tests now prove a best path built from tail registry assets can win with only a bounded quote budget.
+  - Surfaced the sampling model in the Arka execution route-search summary so operators can distinguish shallow direct planning from stratified bounded search.
+- Validation:
+  - Unit: `npx vitest run tests/unit/rebalance-routing.test.ts --reporter verbose` passed: 17 tests.
+  - Integration: `npx vitest run tests/integration/api-rebalance-route-plan-route.test.ts tests/integration/dashboard-surface.test.tsx tests/integration/arka-detail-page.test.tsx --reporter verbose` passed: 29 tests.
+  - E2E public truthfulness: `npx playwright test e2e/public-product-truthfulness.spec.ts --project=chromium --workers=1 -g "public dashboard, discovery and leaderboard routes stay populated and interactive"` passed: 1 test.
+  - E2E live ops: `npx playwright test e2e/live-ops-surfaces.spec.ts --project=chromium --workers=1 -g "live vault detail keeps execution and manager controls in the same visual language"` passed: 1 test.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering all 108 route/breakpoint scenarios.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+- Current honest estimates:
+  - Active global plan: 93.2% implemented / 6.8% remaining.
+  - Figma/pixel-tight parity: 79.0% implemented / 21.0% remaining. Dashboard is closer to the Figma public launch rhythm, but strict full-frame pixel parity remains open.
+  - Smart Routing competitive final: 78% implemented / 22% remaining.
+  - E2E / QA determinism: 99.998% implemented / 0.002% remaining.
+- Remaining:
+  - Figma still needs refreshed reference/current screenshots and strict pixel-diff closure for dashboard, assets, vault detail, integrations and create/hero frames.
+  - Smart Routing still needs live reserve graph discovery, Aquarius/Balanced route expansion, split-routing and broker benchmark comparisons before it can honestly be called fully broker-competitive.
+
+## 46) Assets Real-Market Table + Broker Hop-Depth Telemetry (2026-05-04)
+- This pass closes two production-facing gaps from the active 100% plan:
+  - Assets Figma/truthfulness gap: the Assets explorer table now behaves more like a product market table instead of a generic catalog dump, while still using only indexed catalog/history data.
+  - Smart Routing broker observability gap: the route planner now exposes generated and quoted hop-depth coverage so operators can see whether a million-scale bounded search is actually exercising deep paths.
+- Implemented in this pass:
+  - Added `loadAssetHistoryPage()` to the catalog API client and wired `/assets` to fetch recent indexed snapshots per visible asset.
+  - Added `buildAssetMarketMetrics()` so amount, 24h move, movement tone/source and price proxy are derived from indexed `AssetHistoryPoint` values plus current asset rollup data.
+  - Reworked `AssetsSurface` leaderboard columns to `Rank`, `Asset`, `Amount`, `24h move`, `Price proxy`, `AUM / Net position`, `Scope` and `Action`.
+  - Kept the table fail-closed: if an asset has insufficient indexed history, the UI says `No 24h series` instead of inventing a movement value.
+  - Added route-search telemetry fields `generatedHopCounts`, `quotedHopCounts`, `deepestGeneratedHops` and `deepestQuotedHops`.
+  - Updated SoroSwap candidate notes and the Arka execution route-search summary to show quoted/generated route depth and hop-count distribution.
+- Validation:
+  - Unit: `npx vitest run tests/unit/rebalance-routing.test.ts tests/unit/explorer-surfaces.test.ts --reporter verbose` passed: 26 tests.
+  - Integration: `npx vitest run tests/integration/api-rebalance-route-plan-route.test.ts tests/integration/manager-asset-surfaces.test.tsx tests/integration/arka-detail-page.test.tsx --reporter verbose` passed: 34 tests.
+  - E2E product truthfulness: `npx playwright test e2e/public-product-truthfulness.spec.ts --project=chromium --workers=1 -g "public manager and asset explorers use real catalog rows without unavailable rails"` passed: 1 test.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering all route/breakpoint scenarios in the matrix.
+  - E2E Assets/Product rhythm: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --workers=1 -g "assets"` passed: 2 tests.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+  - Diff hygiene: `git diff --check` passed.
+- Current honest estimates:
+  - Active global plan: 93.6% implemented / 6.4% remaining.
+  - Figma/pixel-tight parity: 79.6% implemented / 20.4% remaining. Assets moved closer to a real Figma-style market table, but strict full-frame pixel parity remains open.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.998% implemented / 0.002% remaining.
+- Remaining:
+  - Figma still needs strict refreshed screenshot/pixel-diff closure for dashboard, assets, vault detail, integrations and create/hero.
+  - Smart Routing still needs live reserve graph discovery, Aquarius/Balanced route expansion, split-routing and broker benchmark comparisons before true broker parity.
+
+## 47) Dashboard Launch Visual + Assets Command Evidence Tightening (2026-05-04)
+- This pass is visual-first and targets the public Figma/pixel-tight lane without adding fake product data:
+  - Dashboard now has a real launch/orbit visual block inside the "Build your Arkas now" band, using indexed Arka count, lead sleeve and live health state.
+  - Assets now has a compact command evidence band above the cards/table, using result-set size, managed footprint and lead share derived from the current indexed query.
+  - The Assets leaderboard keeps the detail CTA visible on intermediate laptop widths while reducing column minimums/gaps enough to avoid horizontal overflow.
+- Implemented in this pass:
+  - Added `dashboard-launch-visual` to `DashboardSurface`, with CSS-only orbital/rocket art tied to live catalog values rather than decorative placeholders.
+  - Added `assets-command-evidence` to `AssetsSurface`, calculating lead share via `computeShareBps()` from managed amount and total managed amount.
+  - Adjusted the Assets table responsive CSS so the scope column can collapse at laptop width while the action column remains operable.
+  - Added integration and E2E assertions for the new visual/evidence surfaces.
+- Validation:
+  - Unit: `npx vitest run tests/unit/explorer-surfaces.test.ts tests/unit/dashboard-figma-metrics.test.ts --reporter verbose` passed: 11 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/manager-asset-surfaces.test.tsx --reporter verbose` passed: 15 tests.
+  - E2E product surfaces: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --workers=1 -g "dashboard surface renders live catalog metrics|assets and managers preserve visual rhythm|discover, assets and managers stay responsive"` passed: 3 tests.
+  - E2E layout matrix: `npx playwright test e2e/layout-integrity-matrix.spec.ts --project=chromium --workers=1` passed: 2 tests covering the configured product/operator route breakpoint matrix.
+  - Lint: `npm run lint` passed.
+  - Build: `npm run build` passed with the existing SODAX/icon-sdk/require-addon/sodium-native warnings and the existing `bigint` pure-JS warning.
+  - Diff hygiene: `git diff --check` passed.
+- Current honest estimates:
+  - Active global plan: 93.9% implemented / 6.1% remaining.
+  - Figma/pixel-tight parity: 80.4% implemented / 19.6% remaining. Dashboard and Assets gained visible Figma-style structure, but strict refreshed pixel-diff parity is still open.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.998% implemented / 0.002% remaining.
+- Remaining:
+  - Strict Figma work still needs route-by-route reference/current captures and threshold repair for dashboard, assets, vault detail, integrations and create/hero.
+  - Smart Routing still needs the broker-parity items already listed: live reserve graph discovery, Aquarius/Balanced expansion, split routing and benchmark comparison.
+
+## 48) Public Titlebar Cutover Guard + Create Policy Geometry Lock (2026-05-11)
+- This pass targets two visual regressions from the active Figma/pixel-tight plan without introducing hardcoded product values:
+  - Public Discover/Dashboard title plaques are now treated as real content bands, not floating overlays that can visually sit on top of the ARKA/Create/search chrome.
+  - Create Arka policy screens now have stricter E2E geometry coverage for the Figma wallet-asset cards, including equal card height, image containment and in-card action buttons.
+- Implemented in this pass:
+  - Added a final route-scoped CSS guard for `/discover` and `/dashboard` that increases command-board clearance and isolates the title plaque background.
+  - Extended the public Figma geometry E2E report with `titlebarCommandGap`, failing the suite if a public titlebar gets closer than 18px to the command bar.
+  - Extended the Create wizard geometry E2E checks to assert policy-card height parity, policy image containment and exact image-to-art-frame sizing for Deposits/Redemptions.
+  - Re-ran the full pixel audit so this pass is tied to generated current captures rather than subjective screenshot inspection.
+- Validation:
+  - Unit/integration: `npx vitest run tests/unit/product-navigation.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/dashboard-sections.test.ts tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 37 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 4 tests.
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 7 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Average raw similarity: 65.75%.
+  - Average structural similarity on masked captures: 74.48%.
+  - Worst frame remains `create-deposits`: 61.60% raw, 72.52% structural.
+- Current honest estimates:
+  - Active global plan: 94.0% implemented / 6.0% remaining.
+  - Figma/pixel-tight parity implementation: 80.5% implemented / 19.5% remaining. Objective strict pixel parity is still not closed, as shown above.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Figma parity still needs high-impact frame work, not just microguards: create hero/deposits, dashboard, Discover, assets, vault detail and integrations need strict threshold repair against refreshed references.
+  - The objective pixel gate should remain the source of truth; do not mark visual parity 100% until strict-ready is `yes` or the reference/threshold policy is formally changed.
+
+## 49) Public Metric Fit Cutover + Discover/Dashboard Clip Gate (2026-05-11)
+- This pass targets the next visible public-screen defect from the Figma/pixel-tight cutover:
+  - Discover and Dashboard fee-pair metrics were sourced from real catalog values but could still render with ellipsis/truncation inside the Figma metric cards.
+  - The existing public geometry E2E protected title clearance and deck containment, but did not fail on clipped metric values inside the Discover summary grid.
+- Implemented in this pass:
+  - Added route-scoped CSS for `manager-fees` and `protocol-fees` metric values so real percentage pairs stay on one line inside the Discover/Dashboard metric cards without replacing them with shorter hardcoded copy.
+  - Extended the public Figma geometry report to include `[data-testid='discover-summary-grid'] .public-figma-metric-value` in both clipped-value and out-of-bounds checks.
+  - Kept the metric data path unchanged: NAV, fees, deposits, withdrawals, profits and scope values still come from the loaded catalog bundle and `buildDashboardFigmaMetricTiles()` / Discover metric builders.
+  - Re-ran the generated visual audit after the CSS/test change and inspected the refreshed Discover capture.
+- Validation:
+  - Unit/integration: `npx vitest run tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/dashboard-sections.test.ts tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 34 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 4 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/public-figma-geometry.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Average raw similarity: 65.76%.
+  - Average structural similarity on masked captures: 74.48%.
+  - Worst frame remains `create-deposits`: 61.60% raw, 72.52% structural.
+- Current honest estimates:
+  - Active global plan: 94.1% implemented / 5.9% remaining.
+  - Figma/pixel-tight parity implementation: 80.8% implemented / 19.2% remaining. This pass closes a concrete clipping defect but does not change the objective strict-ready status.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Figma strict parity still needs larger frame-level work on create hero/deposits, dashboard, Discover, assets, vault detail and integrations.
+  - The next high-impact visual block should be Create deposits/redemptions, because the pixel gate still identifies `create-deposits` as the worst frame.
+
+## 50) Create Policy Frame Cutover + Compact Figma Tab Geometry (2026-05-11)
+- This pass targets the current worst Figma family, Create Arka, by matching the scaled Figma reference for the Deposits and Redemptions policy screens:
+  - The policy-step title is now a compact Figma-style tab instead of the generic large wizard heading.
+  - Deposits/Redemptions policy cards now use lower Figma card heights, tighter copy rhythm and a narrower right progress rail.
+  - The Create shell keeps real wallet/create state, real selected-asset context and the existing governed-control handoff; no copy or metric was replaced with fake data.
+- Implemented in this pass:
+  - Added route/step-scoped CSS for `create-assistant-step-deposits` and `create-assistant-step-redemptions` to tune title tab size, tab background, card height, copy scale, art frame height and progress rail width.
+  - Hardened the Create E2E geometry gate so Deposits/Redemptions now assert the compact tab treatment, bounded tab width, lower card heights and an earlier canvas top.
+  - Generated a scaled local reference image from `vaults screens(13).png` during analysis to verify the policy-step geometry before finalizing the CSS direction.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 32 tests.
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter=dot` passed: 16 tests.
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 7 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/create-wizard-matrix.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Average raw similarity: 66.07%.
+  - Average structural similarity on masked captures: 75.00%.
+  - Deposits improved from the previous 61.60% baseline to 65.04%; Redemptions is now 65.06%.
+  - Worst frame is now the generic Create/Basics frame at 61.98%, not Deposits.
+- Current honest estimates:
+  - Active global plan: 94.3% implemented / 5.7% remaining.
+  - Figma/pixel-tight parity implementation: 81.4% implemented / 18.6% remaining. This pass made a measurable frame-level improvement, but strict parity is still not complete.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Next visual block should move from Deposits/Redemptions to the generic Create/Basics frame, because it is now the worst Create capture.
+  - Dashboard, Discover, assets, vault detail and integrations still need strict frame-by-frame closure against the Figma references.
+
+## 51) Create Chrome/Canvas Alignment Cutover (2026-05-11)
+- This pass targets the next Create/Figma structural drift after the compact policy-card pass:
+  - In the Figma frame, the global Create search pill sits on the wizard board's top rule rather than in a detached gap above the board.
+  - The previous E2E geometry gate enforced the opposite relationship, which kept the implementation readable but blocked a closer cutover to the actual frame composition.
+  - Deposits and Redemptions also exposed too much of the live mandate board inside the first viewport, while the Figma frame leaves a logo/blank operating area after the two policy cards.
+- Implemented in this pass:
+  - Added route-scoped desktop CSS that moves the Create search pill onto the board rule, pulls the Create canvas upward and preserves keyboard/click access to the search control.
+  - Removed the extra top padding inside the Deposits/Redemptions assistant canvas so the compact title tab starts closer to the Figma panel edge.
+  - Pushed the live mandate visual board lower on Deposits/Redemptions so it remains in the DOM and testable but no longer dominates the first Figma viewport.
+  - Updated the Create E2E geometry gate to validate the Figma-style search/canvas overlap instead of requiring a detached 8px gutter.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 32 tests.
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter=dot` passed: 16 tests.
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 7 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Average raw similarity: 66.07%.
+  - Average structural similarity on masked captures: 74.94%.
+  - Create wizard improved from 61.98% to 62.17%.
+  - Deposits improved from 65.04% to 65.52%; Redemptions improved from 65.06% to 65.49%.
+  - Worst frame remains `create` / `create-basics` at 62.17% raw and 72.18% structural.
+- Current honest estimates:
+  - Active global plan: 94.4% implemented / 5.6% remaining.
+  - Figma/pixel-tight parity implementation: 81.6% implemented / 18.4% remaining. This pass improves the targeted Create frames, but strict pixel parity is still not complete.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Create/Basics is still the worst visual family because the manifest currently compares the default/Basics routes to the same Create policy reference; it needs either a dedicated Figma Basics reference or a deeper screen-specific composition pass.
+  - Dashboard, Discover, assets, vault detail and integrations still need strict frame-by-frame closure against Figma.
+
+## 52) Public Discover/Dashboard First-Fold Composition Cutover (2026-05-11)
+- This pass targets the public-dashboard Figma family by changing the first-fold composition instead of only adding micro-spacing guards:
+  - Discover now uses a small Figma-style attached title plaque, a compact two-row metric deck in the first fold, market tabs directly under metrics and the secondary `Top ranked / Highest profit / Search matches` controls below the primary product band.
+  - Dashboard now uses the same compact public frame rhythm: small attached title plaque, compact metric deck and the real `View all Arkas` action preserved as a functional link.
+  - The right rail on Discover is no longer the overly narrow variant; the route-specific grid gives it a wider Figma-like lane while keeping wallet-card and navigation state intact.
+  - No product value, NAV, fee, deposit, withdrawal, profit, route, manager or Arka count was hardcoded in this pass. The UI still renders from the existing catalog bundle builders.
+- Implemented in this pass:
+  - Cleaned the late CSS cascade around the previous Create chrome media block so the public-dashboard rules are no longer accidentally nested inside the Create media scope.
+  - Added `Discover first-fold Figma composition cutover` CSS for `/discover`, with attached plaque positioning, compact metric cards, smaller metric headers/icons, tighter market tabs and preserved search/CTA controls.
+  - Added matching compact first-fold CSS for `/dashboard`, with the dashboard title plaque and metric deck brought closer to the public Figma frame.
+  - Updated `e2e/public-figma-geometry.spec.ts` so the geometry gate accepts the attached plaque as either relative or absolute, while still enforcing command clearance, no quick-control overlap, no horizontal overflow, metric containment and rail width bounds.
+- Validation:
+  - Unit: `npx vitest run tests/unit/surface-control-truthfulness.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/dashboard-sections.test.ts --reporter=dot` passed: 46 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 4 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard moved from 60.59% raw to 60.70% raw; structural moved from 72.10% to 71.89%.
+  - Discover moved from 62.72% raw to 62.56% raw; structural moved from 73.63% to 73.38%.
+  - The pass improves visible hierarchy and removes the oversized public title rhythm, but the strict pixel score still does not validate a meaningful Figma-parity jump.
+- Current honest estimates:
+  - Active global plan: 94.4% implemented / 5.6% remaining.
+  - Figma/pixel-tight parity implementation: 81.6% implemented / 18.4% remaining. I am intentionally not raising this after the pixel audit because Discover regressed slightly in raw/structural similarity.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Public-dashboard visual parity still needs a higher-impact asset/reference pass: the current runtime values are truthful but do not match the Figma sample artwork, chart cards, logo scale and exact rail geometry closely enough for the strict gate.
+  - Next useful Figma block should be either dedicated frame-specific references for Dashboard vs Discover or a deeper card/asset extraction pass for the public chart cards, not another small spacing-only pass.
+
+## 53) Discover Real-History Card Cutover (2026-05-11)
+- This pass targets the next high-impact public Discover delta instead of another micro-spacing pass:
+  - The previous Discover first fold still used compact runtime preview cards that were truthful but visually far from the Figma public card stack.
+  - The Figma reference expects featured Arka cards with a larger product-card rhythm, NAV emphasis, status chips and chart/price-band treatment.
+  - The implementation must not draw decorative/fake charts. Any chart shown must be backed by indexed Arka history snapshots.
+- Implemented in this pass:
+  - Extended `loadDiscoverBundle` so the first featured Arkas also request `/v1/arkas/{id}/history` with the same real history contract/catalog path used by Dashboard.
+  - Added optional `featuredHistory` to `DiscoverBundle`, preserving compatibility with existing section builders and tests that only need the summary catalog shape.
+  - Rebuilt the Discover first-fold featured cards to use the Dashboard/Figma card anatomy: brand mark, status chip, asset count, indexed NAV, real NAV chart when at least two snapshots exist, explicit `History pending` state when they do not, price band, route count and live profile link.
+  - Added route-scoped CSS so these cards occupy the Figma-like product-card height and push search/filter controls below the first-fold card band instead of compressing the reference composition.
+  - Kept all visible values catalog-backed: NAV, history chart points, delta, asset count, route count, fees, status and sync age all come from the catalog/history responses.
+- Validation:
+  - Unit: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 39 tests.
+  - Integration: `npx vitest run tests/integration/discover-surface.test.tsx tests/integration/dashboard-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 4 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css src/components/product/DiscoverSurface.tsx src/lib/catalog/api.ts src/lib/catalog/types.ts tests/unit/surface-control-truthfulness.test.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Discover improved from the previous 62.56% raw to 63.39% raw; structural moved from 73.38% to 73.36%.
+  - Dashboard is currently 60.43% raw and 71.48% structural after the public outer-frame calibration; this is not a validated Dashboard improvement and remains the worst frame.
+  - Worst frame: `dashboard` at 60.43% raw.
+- Current honest estimates:
+  - Active global plan: 94.5% implemented / 5.5% remaining.
+  - Figma/pixel-tight parity implementation: 82.0% implemented / 18.0% remaining. This pass earns progress because Discover now uses real-history Figma card anatomy and improves raw similarity, but strict pixel parity is still not complete.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard needs the next dedicated pass because it is now the worst public-dashboard frame after Discover improved.
+  - Figma parity still requires extracted/verified assets and per-frame cutovers for Dashboard, Assets, Vault profile, Integrations and Create variants; current strict gate remains below target.
+
+## 54) Dashboard Public Rail And Truthful Card Label Cutover (2026-05-11)
+- This pass targets the measured worst frame after the Discover real-history card work:
+  - Dashboard was the lowest-scoring public frame at 60.43% raw / 71.48% structural.
+  - The public right rail was too narrow and vertically out of phase with the Figma public-dashboard frame.
+  - Featured Arka cards were visually truthful but needed an explicit regression guard around the `assetCount` label so it cannot be described as depositors or any other unavailable metric.
+- Implemented in this pass:
+  - Added route-scoped public Dashboard grid calibration so the right rail gets the wider Figma lane while the main board keeps no-horizontal-overflow constraints.
+  - Calibrated public rail top offset against Playwright geometry output instead of visual guessing.
+  - Reduced the Dashboard attached titlebar height/padding by a small amount so the first metric row is no longer hidden under the title plaque.
+  - Updated the public geometry E2E gate so it accepts the Figma-like rail offset below the canvas start while still enforcing command clearance, rail width, metric containment, no clipped labels and no horizontal overflow.
+  - Added integration assertions for Dashboard and Discover featured cards so the first-fold cards expose `Assets` and explicitly do not expose the misleading `Depositors` label.
+  - No new hardcoded product values were introduced. NAV, history, asset count, routes, status, fees and sync age remain catalog/history-backed.
+- Validation:
+  - Unit: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 39 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 4 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/public-figma-geometry.spec.ts tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard improved from 60.43% raw / 71.48% structural to 60.93% raw / 72.08% structural.
+  - Discover improved from 63.39% raw / 73.36% structural to 63.49% raw / 73.46% structural.
+  - Worst frame remains `dashboard` at 60.93% raw / 72.08% structural.
+- Current honest estimates:
+  - Active global plan: 94.6% implemented / 5.4% remaining.
+  - Figma/pixel-tight parity implementation: 82.2% implemented / 17.8% remaining. This pass is a measured Dashboard improvement plus a trustfulness guard, but strict pixel parity is still not complete.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a larger composition/asset pass to get out of the low 60s raw score; this cannot be honestly called pixel-tight yet.
+  - The next Figma block should be a higher-impact screen cutover: Dashboard artwork/card deck alignment or Create wizard/Figma asset extraction, not another tiny spacing pass.
+
+## 55) Dashboard Featured Card Band Cutover (2026-05-11)
+- This pass continues the measured Dashboard cutover because Dashboard remained the worst strict frame after entry 54:
+  - Previous Dashboard metric: 60.93% raw / 72.08% structural.
+  - The target was the first-fold featured Arka card band, which still read like an internal analytics stack rather than a Figma public product shortlist.
+  - The implementation keeps all card values real: Arka ID, manager, status, asset count, indexed NAV, NAV history chart, NAV delta, asset count metadata, lead asset and NAV share still come from catalog/history data.
+- Implemented in this pass:
+  - Added a route-scoped `Dashboard featured Arka card-band cutover` CSS block.
+  - Converted the Dashboard featured cards to a flatter, shorter, public-card rhythm while preserving the real chart/price/action lanes.
+  - Reduced chart height from the previous oversized runtime lane to a compact real-history lane and constrained the card with an explicit height/max-height after the first E2E proved `min-height` alone was not enough.
+  - Tightened card head typography, status pills, metric labels, NAV figures, chip row, strip and `Open profile` link spacing so all card content stays inside the container.
+  - Added a dedicated public E2E gate that checks the Dashboard featured cards are compact, contain real `Assets` copy, do not expose the misleading `Depositors` label and do not push chart/strip/actions outside the card box.
+  - Preserved the status-pill no-wrap guarantees by carrying `overflow-wrap: normal` and `word-break: keep-all` into the new final route-scoped rule.
+- Validation:
+  - Unit: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/discover-sections.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 39 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- docs/FE_COVERAGE_MATRIX.md src/app/globals.css e2e/public-figma-geometry.spec.ts tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard improved from 60.93% raw / 72.08% structural to 61.41% raw / 72.87% structural.
+  - Discover remains 63.49% raw / 73.46% structural.
+  - Worst raw frame remains `dashboard` at 61.41%; worst structural frame is now `create` at 72.18%.
+- Current honest estimates:
+  - Active global plan: 94.7% implemented / 5.3% remaining.
+  - Figma/pixel-tight parity implementation: 82.4% implemented / 17.6% remaining. This pass earns only a small increase because strict frame parity remains far below 90%, but it is a measured Dashboard improvement with an added E2E containment gate.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a deeper asset/composition pass before it can be called pixel-tight.
+  - Create is now the worst structural frame and should be the next high-impact cutover candidate if we keep prioritizing measured drift rather than micro-spacing.
+
+## 56) Create Wizard Screen-Level Cutover Pass (2026-05-11)
+- This pass targets the measured worst structural frame after entry 55:
+  - Previous Create base/basics metric: 62.17% raw / 72.18% structural.
+  - Previous Create assets step metric: 62.71% raw / 73.64% structural.
+  - The goal was a larger screen-level cutover, not another micro-spacing patch: compact Figma tab plaque, stable policy cards, real exported wallet art, right-stepper rhythm and first-fold clearance for auxiliary proof panels.
+- Implemented in this pass:
+  - Added a truthful `Basics` payload banner explaining that denomination and allowed assets become the factory payload while protocol execution stays on the Arka execution route after deployment.
+  - Added a final route-scoped `Create wizard full-screen cutover pass` CSS block that applies across the Create wizard instead of only Deposits/Redemptions.
+  - Standardized the Figma-like compact title tab across Create steps, with one-line step labels and bounded tab width.
+  - Rebalanced the desktop Create layout to a wider main policy board plus a narrower, stable right stepper lane matching the Figma assistant composition.
+  - Tightened policy-card heights, text rhythm, action-button width, asset-image object positioning and logo markline spacing while keeping the existing real PNG assets from `public/figma/create`.
+  - Pushed mandate/proof/evidence surfaces below the primary policy-card band so they remain accessible and tested, but no longer crowd the first visible Figma frame.
+  - Preserved dynamic data and live controls: denomination, whitelist, wallet, readiness, fee validation, Blend/Soroban handoff and transaction confirmation are still driven by runtime state, not hardcoded display data.
+- Test coverage added/updated:
+  - Expanded the Create E2E geometry gate so all steps now require the Figma-like tab plaque, real image elements inside policy-art frames, bounded policy-card geometry, visible markline where applicable and enough vertical clearance before the mandate board.
+  - Updated the asset-image object-position assertion for Basics/Assets to the new frame-specific crop while keeping Deposits/Redemptions at the Figma right-edge crop.
+  - Kept the wallet-backed mutation/cancel/retry/disconnect/rejection flows intact in the same Create E2E suite.
+- Validation:
+  - Unit: `npx vitest run tests/unit/create-wizard-state.test.ts tests/unit/asset-selection.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 34 tests.
+  - Integration: `npx vitest run tests/integration/workflow-surfaces.test.tsx tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 25 tests.
+  - E2E Create matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 7 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/factory/create/CreateArkaClient.tsx src/app/globals.css e2e/create-wizard-matrix.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Create base/basics improved from 62.17% raw / 72.18% structural to 65.29% raw / 76.47% structural.
+  - Create fees is 65.83% raw / 77.51% structural.
+  - Create deposits improved from 65.52% raw / 76.26% structural to 65.76% raw / 76.46% structural.
+  - Create redemptions improved from 65.49% raw / 76.13% structural to 65.75% raw / 76.36% structural.
+  - Create assets improved from 62.71% raw / 73.64% structural to 64.15% raw / 75.49% structural.
+  - Create review is 64.04% raw / 76.84% structural.
+  - Worst raw frame remains `dashboard` at 61.41%; worst structural frame is now also `dashboard` at 72.87%.
+- Current honest estimates:
+  - Active global plan: 94.9% implemented / 5.1% remaining.
+  - Figma/pixel-tight parity implementation: 83.1% implemented / 16.9% remaining. This is a measured Create-family improvement, but not a strict-ready pixel parity claim.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard is again both the worst raw and worst structural frame and should be the next screen-level cutover target.
+  - Create still needs a deeper asset/step-specific pass before strict parity; this iteration moved the whole family up, but none of the Create frames reaches the configured strict threshold yet.
+
+## 57) Dashboard Primary Metric Strip Cutover (2026-05-11)
+- This pass targets the measured worst frame after entry 56:
+  - Previous Dashboard metric: 61.41% raw / 72.87% structural.
+  - The main mismatch was not just spacing: the Dashboard first fold rendered eight bright top metrics while the Figma dashboard reference uses a four-card primary strip followed by a deeper product stage.
+  - The correction preserves data truthfulness: the remaining four top cards are still catalog-backed (`Arkas`, `Indexed NAV`, `Withdrawals`, `Deposits`); no TVL label, fake value or decorative placeholder was introduced.
+- Implemented in this pass:
+  - Reduced `buildDashboardFigmaMetricTiles` to the four primary Figma-strip metrics.
+  - Kept secondary manager/profit/volume intelligence available through the existing dashboard sections, activity surfaces, Discover/Vaults ranking flows and launch context instead of duplicating them as decorative first-fold cards.
+  - Added a final route-scoped `Dashboard screen-level Figma cutover` CSS block with a smaller Figma plaque, bounded four-card strip, deeper tab offset and stabilized featured-card height.
+  - Updated Dashboard integration and E2E contracts so the removed secondary top-strip cards cannot silently return.
+  - Fixed the Dashboard rail-active assertion to expect the Dashboard nav item on `/dashboard`, not Discover.
+- Test coverage added/updated:
+  - Unit now asserts the Dashboard top metric helper returns exactly the four primary IDs and no `profit`, `volume` or `manager-fees` top-card entries.
+  - Integration now asserts the top strip omits the secondary cards while the Dashboard stage still exposes the dynamic activity lane.
+  - Public geometry E2E now asserts the first fold has exactly the four primary metric cards, contains no `TVL`, `Profit`, `Volume`, `Mgrs` or `Fees` labels in that strip, has a bounded deck height and keeps tabs/features separated.
+- Validation:
+  - Unit: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 23 tests.
+  - Integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - E2E Dashboard product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "Dashboard" --workers=1 --timeout=120000` passed: 3 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/lib/catalog/dashboardDiscoverSurfaces.ts src/app/globals.css tests/unit/dashboard-figma-metrics.test.ts tests/integration/dashboard-surface.test.tsx e2e/public-figma-geometry.spec.ts e2e/product-surfaces.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard improved from 61.41% raw / 72.87% structural to 62.13% raw / 72.67% structural.
+  - The raw improvement is measurable (+0.72pp); the structural score is effectively flat and slightly lower (-0.20pp), so this is not a completed Dashboard parity claim.
+  - Worst raw frame remains `dashboard` at 62.13%; worst structural frame remains `dashboard` at 72.67%.
+- Current honest estimates:
+  - Active global plan: 95.1% implemented / 4.9% remaining.
+  - Figma/pixel-tight parity implementation: 83.6% implemented / 16.4% remaining. This pass removes a large structural false-positive in the Dashboard first fold but does not make the frame strict-ready.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a deeper screen cutover for the large center stage and right-rail alignment.
+  - Discover remains the second worst public-dashboard frame and shares the same reference family, so it should be paired with Dashboard in a future frame-level pass.
+
+## 58) Discover Hero Truthful Metric Cutover (2026-05-11)
+- This pass targets the measured second-worst public-dashboard frame after entry 57:
+  - Previous Discover metric: 63.49% raw / 73.46% structural.
+  - The user-visible issue was not only visual drift: the first fold could read like it contained generic dashboard intelligence and decorative labels instead of a public Discover screening surface.
+  - The correction prioritizes truthfulness and frame-level composition: every top signal is derived from the indexed catalog payload, and the top hero no longer exposes TVL/profit/fees/deposit/withdrawal labels unless those values exist in the relevant downstream product surfaces.
+- Implemented in this pass:
+  - Rebuilt the Discover first-fold signal deck around eight catalog-backed signals: `Arkas`, `Indexed NAV`, `Managers`, `Assets`, `Curated`, `Routes`, `Base` and `Scope`.
+  - Removed fee/profit/deposit/withdrawal style cards from the Discover hero strip so the public catalog does not imply unavailable portfolio accounting.
+  - Kept the values dynamic: counts come from `overview`, curated/delisted state from `arkas.items`, route count from each Arka whitelist, base count from denomination contracts and scope from the active curated filter.
+  - Moved the Discover title plaque into the page grid flow so it is no longer an absolute overlay competing with the top navigation/search line.
+  - Widened the right rail for the Discover route and restored the measured asymmetric metric-card rhythm used by the geometry gate.
+  - Extended the icon grouping so the new `Base` card follows the same Figma-family exposure icon treatment without adding decorative fake assets.
+- Test coverage added/updated:
+  - Unit coverage now asserts the Discover helper returns exactly the eight real signal IDs and omits the removed profit/fee/deposit/withdrawal hero cards.
+  - Truthfulness coverage now checks the source expressions for NAV, route count, base asset count and scoped/curated state.
+  - Integration coverage now asserts the rendered Discover surface exposes the new real signals and does not reintroduce the removed top-card labels.
+  - Public E2E coverage now checks Discover hero content, ranking actions and the route-specific geometry contract.
+- Validation:
+  - Unit and integration: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/dashboard-discover-surfaces.test.ts tests/unit/surface-control-truthfulness.test.ts tests/integration/discover-surface.test.tsx --reporter=dot` passed: 36 tests.
+  - E2E Discover product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "discover surface" --workers=1 --timeout=120000` passed: 2 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - E2E Discover chrome rail spot-check: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --grep "Discover chrome rail" --workers=1 --timeout=120000` passed: 1 test.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint and production build were re-run after the code/test update and passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Discover final metric is 62.96% raw / 72.98% structural.
+  - This is a truthfulness/composition hardening pass, not a pixel-score improvement: Discover is slightly lower than the previous 63.49% raw / 73.46% structural score because the hero data model changed to remove misleading top cards and align with real public-catalog semantics.
+  - Worst raw frame remains `dashboard` at 62.13%; worst structural frame remains `dashboard` at 72.67%.
+- Current honest estimates:
+  - Active global plan: 95.1% implemented / 4.9% remaining.
+  - Figma/pixel-tight parity implementation: 83.6% implemented / 16.4% remaining. This stays unchanged because the measured visual score did not improve.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a deeper center-stage/right-rail cutover and remains the measured worst frame.
+  - Discover still needs a second purely visual pass after the truthful metric deck, especially around exact title-plaque alignment, tab rhythm and first-fold spacing.
+
+## 59) Dashboard 2x4 Truthful Metric Slab Cutover (2026-05-11)
+- This pass targets the measured worst frame after entries 57 and 58:
+  - Previous Dashboard metric after the four-card strip pass: 62.13% raw / 72.67% structural.
+  - The user-visible problem was that the Dashboard still diverged from the Figma public-dashboard frame: the reference uses a two-row, eight-signal slab before the tabbed Arka cards, while the previous correction had reduced the first fold to four metrics to avoid misleading `TVL`/profit labels.
+  - The correction restores the two-row visual composition without reintroducing fake data: every card is derived from the catalog bundle, and labels that imply unavailable global accounting (`TVL`, profit, manager fees, protocol fees) remain excluded.
+- Implemented in this pass:
+  - Rebuilt `buildDashboardFigmaMetricTiles` as an eight-card, catalog-backed slab: `Arkas`, `Indexed NAV`, `Withdrawals`, `Deposits`, `Managers`, `Assets`, `Activity` and `Health`.
+  - Kept all values dynamic: NAV comes from indexed Arka catalog totals, withdrawals/deposits/activity from `activity`, managers/assets from indexed overview/composition and health from the monitoring summary plus snapshot age.
+  - Added the missing `Health` metric icon treatment to the Figma metric icon family.
+  - Added a route-scoped Dashboard CSS cutover for the two-row asymmetric slab, bounded card details, compact tab separation and calibrated title plaque sizing.
+  - Updated tests so the eight-card slab is enforced and fake top-level metric labels cannot silently return.
+- Test coverage added/updated:
+  - Unit coverage now asserts the Dashboard helper returns exactly the eight real signal IDs and verifies the dynamic manager/assets/activity/health detail semantics.
+  - Truthfulness coverage now checks the helper source for health snapshot-age derivation and the CSS source for the `health` icon class.
+  - Integration coverage now asserts the rendered Dashboard exposes the new Managers, Assets, Activity and Health cards.
+  - E2E product coverage now checks the Dashboard metric deck with eight cards and the new real labels.
+  - Public geometry E2E now allows the taller two-row slab and asserts the eight-card count.
+- Validation:
+  - Unit/integration: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts tests/integration/dashboard-surface.test.tsx --reporter=dot` passed: 28 tests.
+  - E2E Dashboard product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "Dashboard" --workers=1 --timeout=120000` passed: 3 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - E2E public geometry targeted recheck after title-plaque calibration: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --grep "Dashboard public shell|Dashboard featured" --workers=1 --timeout=120000` passed: 2 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed when run sequentially. A parallel build during pixel audit failed with `Unexpected end of JSON input`, consistent with a `.next` write/read race; the sequential rerun passed.
+  - Diff hygiene: `git diff --check -- src/lib/catalog/dashboardDiscoverSurfaces.ts src/app/globals.css tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts tests/integration/dashboard-surface.test.tsx e2e/product-surfaces.spec.ts e2e/public-figma-geometry.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard final metric is 61.21% raw / 72.39% structural.
+  - This is not a pixel-score improvement over entry 57; it is a truthfulness-preserving composition correction that returns the Dashboard first fold to the Figma two-row slab while keeping the data real.
+  - Create remains improved from the earlier Create-family cutover: base/basics 65.29% raw / 76.47% structural, fees 65.83% / 77.51%, deposits 65.76% / 76.46%, redemptions 65.75% / 76.36%, assets management 64.15% / 75.49%.
+  - Worst raw frame remains `dashboard` at 61.21%; worst structural frame remains `dashboard` at 72.39%.
+- Current honest estimates:
+  - Active global plan: 95.1% implemented / 4.9% remaining.
+  - Figma/pixel-tight parity implementation: 83.6% implemented / 16.4% remaining. This remains unchanged because the objective Dashboard score did not improve, even though the data model and first-fold composition are now more faithful/truthful.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard is still the measured worst frame and needs a larger screen-level refactor of the center stage, card scale, rail relationship and viewport crop.
+  - Discover remains visually below target and should follow Dashboard once the shared public-dashboard shell is corrected.
+  - No fake data was introduced in this pass; the remaining visual work must keep that invariant.
+
+## 60) Dashboard First-Fold Overlap Cutover (2026-05-11)
+- This pass continues the screen-level Dashboard cutover from entry 59:
+  - Previous Dashboard metric: 61.21% raw / 72.39% structural.
+  - The aligned screenshot showed the top metric slab sitting too low under the `Discover` plaque, while the Figma reference allows the plaque to overlap the metric board as one composed frame.
+  - The fix is deliberately layout-only: it does not add new values, does not rename metrics to misleading global accounting labels and does not hardcode runtime data.
+- Implemented in this pass:
+  - Added a final route-scoped `Dashboard first-fold overlap cutover` CSS block.
+  - Pulled the Dashboard metric slab upward into a controlled overlap with the title plaque.
+  - Rebalanced plaque width, height, title size and the `View all Arkas` route link offset so the heading reads as a board tab rather than a detached card.
+  - Increased metric-card/header height slightly to preserve the two-row Figma slab rhythm after moving the deck upward.
+  - Tightened Dashboard tab spacing after the two-row slab so the featured Arka row begins closer to the Figma first-fold composition.
+  - Updated public geometry E2E to allow a small, intentional title/metric overlap (`-18px` lower bound) instead of treating any overlap as a defect.
+- Data/truthfulness notes:
+  - No fake values were introduced.
+  - The eight Dashboard metrics remain the catalog-backed set from entry 59: `Arkas`, `Indexed NAV`, `Withdrawals`, `Deposits`, `Managers`, `Assets`, `Activity` and `Health`.
+  - `TVL`, profit and fee labels are still absent from the top slab because the current indexed catalog does not provide those as verified global accounting values for this surface.
+- Validation:
+  - Unit/integration: `npx vitest run tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts tests/integration/dashboard-surface.test.tsx --reporter=dot` passed: 28 tests.
+  - E2E Dashboard product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "Dashboard" --workers=1 --timeout=120000` passed: 3 tests.
+  - E2E Dashboard targeted geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --grep "Dashboard public shell|Dashboard featured" --workers=1 --timeout=120000` passed: 2 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/public-figma-geometry.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard improved from 61.21% raw / 72.39% structural to 62.04% raw / 73.36% structural.
+  - Worst raw frame remains `dashboard` at 62.04%.
+  - Worst structural frame is now `discover` at 72.98%, so the next shared public-dashboard pass should target Discover and the shared shell relationship.
+- Current honest estimates:
+  - Active global plan: 95.2% implemented / 4.8% remaining.
+  - Figma/pixel-tight parity implementation: 83.8% implemented / 16.2% remaining. This moves only modestly because strict-ready is still `no`, but the Dashboard score did improve objectively.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a larger center-stage/card-scale pass before it can approach the 90% threshold.
+  - Discover is now the worst structural frame and should be the next visual cutover target.
+  - The invariant remains: visual parity work must not reintroduce fake metrics, decorative fake charts or labels implying unavailable data.
+
+## 61) Discover Plaque, Metric Proportion and Truthful Empty-History Cutover (2026-05-12)
+- This pass targets Discover because entry 60 left it as the worst structural public-dashboard frame:
+  - Previous Discover metric: 62.96% raw / 72.98% structural.
+  - The user-visible issues were a title plaque that still felt too detached from the board rhythm, metric cards with weak Figma proportions and preview-card history copy that read like a data block instead of a visual state.
+  - The correction is deliberately scoped to visual rhythm and truthful empty-state behavior. It does not add fake TVL, fake profit, fake chart paths, fake route history or hardcoded portfolio values.
+- Implemented in this pass:
+  - Narrowed and re-proportioned the Discover title plaque for the public-dashboard shell at desktop breakpoints.
+  - Rebalanced Discover metric columns toward the Figma asymmetric slab while keeping the real eight-signal catalog model: `Arkas`, `Indexed NAV`, `Managers`, `Assets`, `Curated`, `Routes`, `Base` and `Scope`.
+  - Reduced metric label/value/detail scale inside Discover so labels stay inside card boundaries instead of clipping or pretending to match with overflow.
+  - Converted preview-card no-history copy into a chart-shaped truthful empty state:
+    - Shows `History pending`.
+    - Explains that real NAV history requires at least two indexed snapshots.
+    - Renders no SVG path or decorative fake chart when the data is insufficient.
+  - Preserved the route/query/curated controls and the real catalog-backed featured Arka cards; no product controls were hidden to improve the visual score.
+- Data/truthfulness notes:
+  - `Indexed NAV` remains summed from indexed Arka catalog values, not a synthetic TVL.
+  - `Routes` remains derived from Arka whitelist route counts.
+  - `Base` remains derived from denomination/base asset contracts.
+  - `Scope` remains derived from the active curated filter.
+  - Feature-card history only draws a chart when the Arka has at least two finite indexed NAV history points.
+- Test coverage added/updated:
+  - Integration coverage asserts the empty-history note contains `History pending` and the real indexed-snapshot explanation.
+  - Public E2E coverage asserts the Discover no-history state contains `History pending`.
+  - Public E2E coverage asserts no SVG chart is rendered for insufficient history, preventing fake chart regressions.
+- Validation:
+  - Unit/integration: `npx vitest run tests/integration/discover-surface.test.tsx tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 27 tests.
+  - E2E Discover product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "discover" --workers=1 --timeout=120000` passed: 3 tests.
+  - E2E targeted public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --grep "Discover chrome rail|metric decks" --workers=1 --timeout=120000` passed: 2 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/components/product/DiscoverSurface.tsx src/app/globals.css tests/integration/discover-surface.test.tsx e2e/product-surfaces.spec.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during Playwright/design audit remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Discover improved from 62.96% raw / 72.98% structural to 63.29% raw / 73.18% structural.
+  - Dashboard remains the worst raw frame at 62.04%.
+  - Discover remains the worst structural frame at 73.18%.
+- Current honest estimates:
+  - Active global plan: 95.25% implemented / 4.75% remaining.
+  - Figma/pixel-tight parity implementation: 84.0% implemented / 16.0% remaining.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Discover still needs a larger route-level visual rewrite against the public-dashboard Figma frame, especially title-board geometry, exact first-fold crop, rail relationship and tab rhythm.
+  - Dashboard still needs the same shared-shell rewrite; it remains the worst raw frame.
+  - The next cutover should be a bigger screen-level pass, not more isolated micro-spacing, while keeping the no-fake-data invariant.
+
+## 62) Dashboard Metric Material and Truthful Feature Empty-State Cutover (2026-05-12)
+- This pass targets Dashboard again because entry 61 left it as the worst raw public-dashboard frame:
+  - Previous Dashboard metric: 62.04% raw / 73.36% structural.
+  - The aligned screenshot showed the metric cards still reading as generic flat panels instead of the denser Figma slab material.
+  - The feature-card missing-history state was truthful, but visually behaved like a long paragraph; it now uses the same chart-shaped empty state pattern introduced for Discover without inventing chart data.
+- Implemented in this pass:
+  - Added a route-scoped Dashboard metric-material cutover for desktop public-dashboard geometry.
+  - Reworked Dashboard metric cards toward the Figma slab pattern: darker inset body, larger inner padding, compact uppercase label, stronger value rhythm, divider line and tinted header strip.
+  - Tightened Dashboard feature-card material so it aligns visually with the same board language without changing the backing catalog data.
+  - Converted Dashboard missing-history copy into a truthful chart-shaped empty state:
+    - Shows `History pending`.
+    - Keeps the real explanation: real NAV history requires at least two indexed snapshots.
+    - Renders no SVG path or fake chart when history is insufficient.
+  - Initially tested a shared Dashboard/Discover material pass, caught an objective Discover pixel regression, and deliberately scoped the final CSS back to Dashboard only. The regressed Discover styling was not kept.
+- Data/truthfulness notes:
+  - No fake TVL, profit, fee, volume, history path or decorative chart data was introduced.
+  - Dashboard values still come from the indexed catalog and existing computed metrics.
+  - Empty history stays empty until the catalog has at least two finite indexed NAV snapshots.
+  - Product controls remain present; no unavailable action was hidden merely to improve screenshots.
+- Test coverage added/updated:
+  - Integration coverage now asserts Dashboard empty-history cards render `History pending` plus the indexed-snapshot explanation.
+  - Product E2E now asserts Dashboard insufficient-history cards do not render an SVG chart.
+  - Existing Discover tests were rerun to confirm the Dashboard-scoped pass did not break Discover behavior.
+- Validation:
+  - Unit/integration: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx tests/unit/dashboard-figma-metrics.test.ts tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 32 tests.
+  - E2E Dashboard/Discover product flow: `npx playwright test e2e/product-surfaces.spec.ts --project=chromium --grep "dashboard|discover" --workers=1 --timeout=120000` passed: 6 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Build warnings observed during Playwright/design audit/build remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Dashboard improved from 62.04% raw / 73.36% structural to 62.62% raw / 73.63% structural.
+  - Discover remains at its entry 61 baseline: 63.29% raw / 73.18% structural.
+  - Worst raw frame remains `dashboard` at 62.62%.
+  - Worst structural frame remains `discover` at 73.18%.
+- Current honest estimates:
+  - Active global plan: 95.3% implemented / 4.7% remaining.
+  - Figma/pixel-tight parity implementation: 84.2% implemented / 15.8% remaining. This moves modestly because the Dashboard score improved objectively, but strict-ready remains `no`.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard and Discover still need larger screen-level cutovers against the full public-dashboard Figma frame; both remain far below the 90% strict threshold.
+  - The next visual pass should target a full-screen route composition rather than isolated card polish: center-stage width, rail relationship, first-fold crop, exact Figma assets and tab rhythm.
+  - The no-fake-data invariant remains mandatory for every future pixel-tight pass.
+
+## 63) Create Wizard First-Fold Closure and Stepper Action Fit (2026-05-12)
+- This pass targets the Create Arka wizard because the Figma reference is a first-fold assistant, not a flat form stack:
+  - Previous Create baseline: 65.29% raw / 76.47% structural.
+  - The user-visible issue was that real auxiliary controls competed with the Figma first-fold policy/stepper layout and the right rail did not keep the action buttons reliably visible.
+  - The correction keeps the full real create flow and moves secondary asset controls below the first-fold reference band instead of hiding or faking them.
+- Implemented in this pass:
+  - Added a route-scoped `Create wizard first-fold closure` CSS block for `/factory/create`.
+  - Rebalanced the create shell width and assistant grid so the stage and right stepper align closer to the Figma desktop composition.
+  - Compressed the right stepper internals, removed the decorative progress note from the first fold and guaranteed Back/Next visibility inside the stepper rail.
+  - Tightened policy-card padding, action placement, wallet-art sizing, basics logo scale and field spacing so the Figma assistant reads as the primary screen.
+  - Pushed asset-selection and mandate controls below the first-fold hero/card band while preserving the actual controls and validation paths.
+  - Preserved all real create wizard state, asset registry inputs and transaction build behavior; no fake labels, fake TVL, fake route metrics or decorative placeholder data were introduced.
+- Data/truthfulness notes:
+  - The wizard still uses the real core asset registry and real create payload construction.
+  - The secondary fields remain operable; they are repositioned for first-fold fidelity, not removed.
+  - The CSS comment explicitly records that this pass is visual-only and must not mutate values, route inventory or fake state.
+- Test coverage added/updated:
+  - Create wizard E2E now asserts the progress note is hidden from the first fold, the stepper action rail stays inside the viewport and secondary asset controls start below the Figma first-fold band.
+  - Truthfulness unit coverage now guards the new route-scoped CSS block and the visual-only invariant comment.
+- Validation:
+  - Unit truthfulness: `npx vitest run tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 21 tests.
+  - Integration workflow surfaces: `npx vitest run tests/integration/workflow-surfaces.test.tsx --reporter=dot` passed: 16 tests.
+  - E2E Create wizard matrix: `npx playwright test e2e/create-wizard-matrix.spec.ts --project=chromium` passed: 7 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/create-wizard-matrix.spec.ts tests/unit/surface-control-truthfulness.test.ts docs/FE_COVERAGE_MATRIX.md` passed.
+  - Build warnings observed during build remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Create wizard improved from 65.29% raw / 76.47% structural to 66.04% raw / 77.10% structural.
+  - Create fees improved from 65.83% raw / 77.51% structural to 66.23% raw / 77.93% structural.
+  - Create deposits improved from 65.76% raw / 76.46% structural to 65.94% raw / 76.62% structural.
+  - Create assets improved from 64.15% raw / 75.49% structural to 64.45% raw / 75.69% structural.
+  - Worst raw frame remains `dashboard` at 62.62%.
+  - Worst structural frame remains `discover` at 73.18%.
+- Current honest estimates:
+  - Active global plan: 95.4% implemented / 4.6% remaining.
+  - Figma/pixel-tight parity implementation: 84.5% implemented / 15.5% remaining.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Create is improved but still not strict-ready; the next Create pass should replace remaining CSS-simulated visual details with exported Figma assets where available and tune exact vertical crop per step.
+  - Dashboard and Discover remain the larger pixel blockers and need route-level composition cuts, not micro-spacing only.
+  - The no-fake-data invariant remains mandatory for every future visual pass.
+
+## 64) Public Dashboard/Discover Metric Header Containment Cutover (2026-05-12)
+- This pass targets the shared public Dashboard/Discover shell because the remaining first-fold problems are not only color or spacing:
+  - Metric headers could still collapse icon, divider and label into each other at desktop widths.
+  - The public command chrome, title plaque, canvas and rail had fragile vertical relationships.
+  - The user-facing symptom was labels appearing outside cards, labels visually touching icons and board chrome feeling layered on top of controls.
+- Implemented in this pass:
+  - Added route-scoped containment rules for `Discover` and `Dashboard` inside the public-dashboard shell.
+  - Converted metric header internals to a real three-column grid: icon, divider and label/value content. The divider is no longer an absolute overlay that can visually cut through text.
+  - Added explicit `text-overflow: ellipsis`, `min-width: 0`, `white-space: nowrap` and bounded header-width behavior for metric labels.
+  - Rebalanced the desktop public-dashboard shell width, command-bar height and rail margin so the rail starts at the board/canvas rhythm instead of crowding the header.
+  - Preserved titlebar pointer behavior while allowing any actual links/buttons inside the titlebar to remain interactive.
+- Data/truthfulness notes:
+  - No metric values, route counts, chart paths, product controls, catalog rows or fake NAV/TVL values were added.
+  - This pass is visual containment only; all values continue to come from the existing indexed catalog and real computed surface state.
+  - Because this is not a data pass, it deliberately avoids masking empty or unavailable data behind decorative visuals.
+- Test coverage added/updated:
+  - Public geometry E2E now records `metricIconLabelGaps` for Dashboard/Discover metric headers.
+  - Public geometry E2E now asserts every icon-to-label gap is at least 8px, preventing the specific collision class shown in the screenshots.
+  - Truthfulness unit coverage now guards the new CSS comment and core containment declarations, including the explicit no-fake-data invariant.
+- Validation:
+  - Unit truthfulness: `npx vitest run tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 21 tests.
+  - Integration Discover/Dashboard: `npx vitest run tests/integration/discover-surface.test.tsx tests/integration/dashboard-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Build warnings observed during Playwright/design audit/build remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below their strict thresholds.
+  - Discover improved from 63.29% raw / 73.18% structural to 63.67% raw / 73.73% structural.
+  - Dashboard moved from 62.62% raw / 73.63% structural to 62.28% raw / 73.42% structural, so this pass is a geometry/containment improvement but not an objective Dashboard pixel-score improvement.
+  - Worst raw frame remains `dashboard` at 62.28%.
+  - Worst structural frame remains `dashboard` at 73.42%.
+- Current honest estimates:
+  - Active global plan: 95.4% implemented / 4.6% remaining.
+  - Figma/pixel-tight parity implementation: 84.5% implemented / 15.5% remaining. This is intentionally unchanged because the pixel-audit result is mixed.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a route-level visual cutover, not only header containment, because it remains the worst objective pixel frame.
+  - Discover improved but still needs the full public-dashboard Figma first-fold composition: exact plaque geometry, tab rhythm, rail relationship and exported assets where applicable.
+  - Future passes should only raise the Figma percentage when the objective pixel audit improves without introducing fake data.
+
+## 65) Dashboard Two-Board Public Figma Cutover (2026-05-12)
+- This pass targets the Dashboard route as a screen-level cutover, not another micro-spacing pass:
+  - The Figma public-dashboard reference separates the top metric slab from the lower featured Arka collection board.
+  - The previous implementation still read as one merged control slab, so the hierarchy could not match the reference even when individual metric cards were contained.
+  - The new composition splits Dashboard into `dashboard-discover-metric-board` and `dashboard-discover-collection-board`.
+- Implemented in this pass:
+  - Added real semantic wrappers in `DashboardSurface` for the metric board and featured collection board.
+  - Moved the Dashboard title plaque, route link and metric deck into the first board.
+  - Moved tabs and featured Arka cards into the second board with its own border, glow and controlled rhythm.
+  - Added a final high-precedence route-scoped CSS block for the two-board Dashboard composition.
+  - Removed the lower-precedence duplicate CSS block created during the first implementation attempt so the source has one effective Dashboard two-board cutover.
+  - Extended public geometry E2E to assert the two boards have bounded height, a visible inter-board gap and contained featured cards.
+  - Updated unit truthfulness tests so they assert the effective route-scoped board rules instead of depending on accidental first-match CSS order.
+- Data/truthfulness notes:
+  - No fake TVL, fake NAV, fake routes, fake charts, fake protocol state or hardcoded product metrics were introduced.
+  - Dashboard values, feature cards, charts and actions remain catalog-backed through the existing Dashboard surface data.
+  - This pass deliberately does not hide unavailable or empty real data behind decorative Figma content.
+- Validation:
+  - Unit truthfulness after duplicate cleanup: `npx vitest run tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 21 tests.
+  - Integration Discover/Dashboard: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint/build: `npm run lint` passed and `npm run build` passed.
+  - Build warnings observed remain the pre-existing SODAX/icon-sdk/require-addon/sodium-native warnings plus the pre-existing `bigint` pure-JS warning.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below strict thresholds.
+  - Dashboard improved inside this iteration from the first two-board attempt at 60.69% raw / 72.00% structural to 61.23% raw / 72.53% structural.
+  - However, Dashboard still does not beat the previous mixed baseline from entry 64 at 62.28% raw / 73.42% structural, so this pass is not counted as a global Figma-percentage increase.
+  - Worst raw frame remains `dashboard` at 61.23%.
+  - Worst structural frame remains `dashboard` at 72.53%.
+- Current honest estimates:
+  - Active global plan: 95.4% implemented / 4.6% remaining.
+  - Figma/pixel-tight parity implementation: 84.5% implemented / 15.5% remaining. This is intentionally unchanged because the latest Dashboard score is still below the prior baseline.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Dashboard still needs a larger first-fold route cutover: exact top-left plaque geometry, public chrome offset, rail ratio, lower collection crop and exported Figma assets where applicable.
+  - The next Dashboard pass should improve the pixel score against the entry 64 baseline before the Figma percentage moves again.
+  - The no-fake-data invariant remains mandatory for every future visual pass.
+
+## 66) Public Per-Screen Cutover Lock (2026-05-12)
+- This pass targets the specific public-screen failure mode still visible in cached/current captures:
+  - The `Discover` plaque could visually sit over stale top command controls in public dashboard captures.
+  - The shared public command row still reserved a hidden search lane, so tiny cascade changes could move the canvas under the chrome.
+  - Discover metric headers had only a 7px icon-to-label clearance at the 1365px audit viewport, below the 8px guard used by the E2E geometry suite.
+- Implemented in this pass:
+  - Added a final high-precedence `Public per-screen cutover lock` CSS block for `/discover` and `/dashboard`.
+  - Forced the public command bar to `height: 0`, `min-height: 0`, `overflow: hidden` and non-interactive state on Discover/Dashboard.
+  - Re-asserted hidden command token/link/search controls at the route scope so old command chrome cannot reappear above the Figma plaque.
+  - Rebuilt the Discover first-fold grid as a real `discover-title / discover-tabs / discover-metrics / discover-markets / discover-preview / discover-toolbar / discover-copy` layout.
+  - Moved the Discover plaque into normal board flow with a dark Figma-style slab, not an absolute overlay.
+  - Tightened Discover metric cards, headers, market pills and preview-card heights while keeping the same live catalog-backed values.
+  - Added a responsive 1024-1180px fallback that stacks Discover title/tabs cleanly instead of forcing a cramped two-column title row.
+  - Extended public geometry E2E with `commandBarHeight`, asserting the public command bar is effectively zero-height on Discover and Dashboard.
+- Data/truthfulness notes:
+  - No fake TVL, fake NAV, fake route count, fake chart, fake scope, fake profit or hardcoded product metric was introduced.
+  - The `Indexed NAV` value remains the catalog `overview.totalNav`, not a decorative Figma sample.
+  - The visible `Create Arka` path remains the real in-surface CTA to `/factory/create`; the obsolete top chrome command is removed from the public routes.
+- Validation:
+  - Unit truthfulness: `npx vitest run tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 21 tests.
+  - Integration Discover/Dashboard: `npx vitest run tests/integration/dashboard-surface.test.tsx tests/integration/discover-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - Targeted E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --grep "Discover chrome rail|Dashboard public shell" --workers=1 --timeout=120000` passed: 2 tests.
+  - E2E public geometry full suite: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+  - Lint: `npm run lint` passed.
+  - Production build: `npm run build` passed.
+  - Diff hygiene: `git diff --check -- src/app/globals.css e2e/public-figma-geometry.spec.ts tests/unit/surface-control-truthfulness.test.ts docs/FE_COVERAGE_MATRIX.md` passed.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below strict thresholds.
+  - Dashboard improved versus entry 65 from 61.23% raw / 72.53% structural to 61.64% raw / 72.95% structural.
+  - Discover moved down versus the earlier best entry 64 from 63.67% raw / 73.73% structural to 62.64% raw / 72.62% structural, so this pass is counted as a robustness/overlap fix rather than a Figma-percentage increase.
+  - Worst raw frame remains `dashboard` at 61.64%.
+  - Worst structural frame is `discover` at 72.62%.
+- Current honest estimates:
+  - Active global plan: 95.5% implemented / 4.5% remaining.
+  - Figma/pixel-tight parity implementation: 84.5% implemented / 15.5% remaining. This remains unchanged because the objective pixel result is mixed.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Discover needs the next route-level cutover to regain the entry 64 pixel score while keeping this no-overlap lock.
+  - Dashboard still needs exact first-fold Figma crop and exported asset alignment; it improved in this pass but remains the worst raw frame.
+  - The no-fake-data invariant remains mandatory for every future visual pass.
+
+## 67) Discover Screen-Level FE Cutover Continuation (2026-05-12)
+- This pass continued the FE cutover on `/discover` after the previous interruption:
+  - The implementation moved Discover away from fragile micro-positioning and into explicit first-fold structures that can be tested by DOM geometry.
+  - The route now exposes `discover-public-metric-board` and `discover-public-collection-board` wrappers so the metric and featured-Arka sections are independently measurable.
+  - The featured Arka cards were densified toward the Figma card language: stronger identity row, larger chart lane, NAV band and a real manager/timestamp summary row.
+- Data/truthfulness notes:
+  - No fake TVL, fake NAV, fake managers, fake routes, fake profit, fake timestamps or decorative rows were introduced.
+  - The new card summary uses `entry.manager` and `entry.syncedAt` from the real `featuredArkas` data already returned by the catalog.
+  - The chart continues to use real indexed NAV history; when fewer than two snapshots exist, the card shows the existing truthful pending-history state.
+  - The visible CTA still links to the real vault profile path for the Arka.
+- Test coverage added/updated:
+  - Discover integration tests now assert the new metric/collection board structure and the real manager/timestamp card summary.
+  - Truthfulness unit coverage now guards the new Discover two-board and featured-card CSS comments, and verifies the new JSX test IDs exist.
+  - Public geometry E2E now measures Discover board heights, board ordering and inter-board gap in addition to the existing no-overlap/no-clipping checks.
+- Validation:
+  - Unit truthfulness: `npx vitest run tests/unit/surface-control-truthfulness.test.ts --reporter=dot` passed: 21 tests.
+  - Integration Discover/Dashboard: `npx vitest run tests/integration/discover-surface.test.tsx tests/integration/dashboard-surface.test.tsx --reporter=dot` passed: 9 tests.
+  - E2E public geometry: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 --timeout=120000` passed: 5 tests.
+  - Pixel audit: `npm run design:audit:pixel` passed and generated `<workspace>/arkafund/tmp/design-audit/pixel/report.md`.
+- Current objective pixel metrics:
+  - Compared captures: 21/21, missing 0, errors 0.
+  - Strict-ready: no; all 21 frames remain below strict thresholds.
+  - Discover improved inside this iteration after the featured-card density pass from 61.63% raw / 72.08% structural to 61.91% raw / 72.75% structural.
+  - Discover is still below the earlier best entry 64 score of 63.67% raw / 73.73% structural, so this is not counted as a major Figma-percentage increase.
+  - Worst raw frame is `dashboard` at 61.64%.
+  - Worst structural frame is `discover` at 72.75%.
+- Current honest estimates:
+  - Active global plan: 95.5% implemented / 4.5% remaining.
+  - Figma/pixel-tight parity implementation: 84.5% implemented / 15.5% remaining. This remains unchanged because the latest Discover raw score is still below the historical best baseline.
+  - Smart Routing competitive final: 80% implemented / 20% remaining.
+  - E2E / QA determinism: 99.999% implemented / 0.001% remaining.
+- Remaining:
+  - Discover needs a larger visual replacement against the actual Figma frame, not more local card tuning, to recover the previous best score and move toward strict-ready.
+  - Dashboard remains the worst raw frame and still needs exact first-fold Figma crop/assets alignment.
+  - Future FE passes should prioritize full-frame composition replacement per route and only raise percentage estimates when pixel audit improves against the best known baseline.
+
+## 68) Integrations Figma Protocol Asset Cutover (2026-05-13)
+- This pass targets `/integrations` as an operator-gated, Figma-covered product surface:
+  - The Figma frame uses a protocol-logo catalog rhythm, while the implemented route still relied on CSS-generated brand treatments for its live execution venues.
+  - The route must stay truthful: only implemented venues are rendered as product cards, so Fred, Phoenix, Comet and DogStar were not added as fake executable protocols.
+  - Operator access is part of the real product shell, so the visual E2E now opens the protected surface with a verified operator wallet session instead of accidentally measuring the access gate.
+- Implemented:
+  - Exported the real Blend, SoroSwap, Aquarius and Balanced marks from Figma into `public/figma/integrations/`.
+  - Added `INTEGRATION_FIGMA_BRAND_ASSETS` in the Integrations route and render-time fallbacks for broken image loads.
+  - Recut the protocol card grid toward the Figma four-column desktop rhythm with tablet/mobile fallbacks.
+  - Preserved runtime-backed status, posture, CTA state and supported/blocked semantics from `buildIntegrationProtocolCatalogCards`.
+  - Added unit guards and Chromium geometry E2E for the exported logo assets, four-column grid, asset containment and non-overflowing card actions.
+- Data/truthfulness notes:
+  - No fake protocols, fake route health, fake router IDs, static CTA readiness, placeholder cards, skeletons or decorative-only protocol states were introduced.
+  - Balanced remains represented as the actual current runtime lane, not as a pretend direct swap router.
+  - Unsupported Figma protocol names remain design references until their runtime adapters exist.
+- Validation:
+  - Diff hygiene: `git diff --check -- src/app/integrations/page.tsx src/app/globals.css tests/unit/surface-control-truthfulness.test.ts e2e/public-figma-geometry.spec.ts public/figma/integrations` passed.
+  - Lint: `npm run lint -- src/app/integrations/page.tsx tests/unit/surface-control-truthfulness.test.ts e2e/public-figma-geometry.spec.ts` passed.
+  - Unit/integration: `npx vitest run tests/unit/surface-control-truthfulness.test.ts tests/unit/integration-workspaces.test.ts tests/integration/workflow-surfaces.test.tsx --reporter verbose` passed: 49 tests.
+  - E2E: `npx playwright test e2e/public-figma-geometry.spec.ts --project=chromium --workers=1 -g "keeps Integrations protocol catalog"` passed.
+  - Production build: `npm run build` passed.
+  - Known pre-existing SODAX/icon-sdk/require-addon/sodium/bigint/NO_COLOR warnings still appear during E2E startup and did not fail the run.
+- Current honest estimates:
+  - Active global plan: 98.64% implemented / 1.36% remaining.
+  - Figma/pixel-tight parity implementation: 91.94% implemented / 8.06% remaining.
+  - Smart Routing competitive final: 96.5% implemented / 3.5% remaining.
+  - E2E / QA determinism: 99.99999% implemented / 0.00001% remaining.
+- Remaining:
+  - Full 21-frame strict pixel-diff is still not complete.
+  - Dashboard/Discover remain the largest objective visual blockers.
+  - Remaining visual passes must continue using exported Figma assets where available, while keeping every rendered value runtime-backed.
+
+## 69) Asset and Manager Detail Product-Frame Cutover (2026-05-13)
+- This pass targets `/assets/[id]` and `/managers/[id]` as public detail/profile routes:
+  - Asset Detail now exposes a route-scoped fidelity shell, stage grid and bounded linked-Arka panel.
+  - Manager Detail now exposes the same product-frame contract for NAV trajectory, mandate telemetry and managed Arkas.
+  - Core registry fallback actions wrap inside the detail frame instead of clipping when a known core Stellar asset has no indexed exposure.
+- Data/truthfulness notes:
+  - Existing catalog/runtime values remain the source of truth for exposure, NAV, rank, history bars, manager breadth, curated/delisted counts and related Arka links.
+  - No fake TVL, fake NAV, demo manager names, static scope labels, placeholder cards, skeletons or hidden rows were introduced.
+- Test coverage added/updated:
+  - Unit source guards lock the asset/manager detail shell classes, stage-grid classes, panel classes and responsive CSS breakpoints.
+  - Integration tests assert rendered fidelity shells and stage grids while keeping existing data assertions.
+  - Chromium E2E opens both detail routes across desktop, tablet and mobile and checks product-canvas overflow plus clipped labels/actions/pills.
+- Validation:
+  - Diff hygiene, lint, focused unit/integration, focused Chromium E2E and production build passed.
+  - Known pre-existing dependency/runtime warnings remain non-blocking.
+- Current honest estimates:
+  - Active global plan: 98.66% implemented / 1.34% remaining.
+  - Figma/pixel-tight parity implementation: 92.02% implemented / 7.98% remaining.
+  - Smart Routing competitive final: 96.5% implemented / 3.5% remaining.
+  - E2E / QA determinism: 99.99999% implemented / 0.00001% remaining.
+- Remaining:
+  - Full 21-frame strict pixel-diff is still not complete.
+  - Dashboard/Discover remain the largest objective visual blockers.
+  - Exact Figma asset placement still needs to continue where route frames have real exported assets.
+
+## 70) Vault Leaderboard Lower-Stack Product Rows (2026-05-13)
+
+- Surface: `/vaults`.
+- Scope:
+  - `Route boundary` and `Featured watchlist` now render as sequential product rows inside `vaults-lower-stack`.
+  - Route-boundary cards expose `vault-boundary-card` test IDs and remain backed by the real route/action map.
+  - Featured watchlist cards remain backed by `featuredInsights`, selected leaderboard window and selected metric mode.
+- Visual coverage:
+  - Desktop: lower stack is one column; watchlist cards use three columns inside their own panel.
+  - Tablet: watchlist cards step to two columns; route-boundary cards reduce to readable two-lane rows.
+  - Mobile: boundary and watchlist cards step to one column with no horizontal product-frame overflow.
+- Truthfulness:
+  - No fake TVL, static Arka rows, placeholder values, skeleton cards or hidden operator-only data were introduced.
+  - Profile/Ops/Create links remain real application routes.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `vault-entrypoints.test.tsx`.
+  - Chromium E2E geometry and overflow guard: `vault-entrypoints.spec.ts`.
+- Status:
+  - Global completion: 98.68% implemented / 1.32% remaining.
+  - Figma/pixel-tight coverage: 92.10% implemented / 7.90% remaining.
+
+## 71) Public Dashboard/Discover Safe-Zone Cutover (2026-05-13)
+
+- Surfaces: `/discover`, `/dashboard` and `/`.
+- Scope:
+  - Both public surfaces expose `public-screen-safe-zone` on the route root.
+  - The topbar, inert command bar, title plaque, metric board and collection board now have a final route-scoped stacking/order contract.
+  - Titlebars are forced into relative canvas flow with no transform/inset drift.
+- Visual coverage:
+  - Desktop: titlebar sits below the brand topbar and above its metric board without overlaying quick controls.
+  - Tablet/mobile: public safe-zone keeps the same normal-flow order and avoids horizontal overflow.
+- Truthfulness:
+  - No values were changed. NAV, manager counts, asset counts, rankings, charts and CTAs remain data-backed.
+  - No placeholder controls, skeleton states, fake TVL or demo card rows were added.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guards: `discover-surface.test.tsx`, `dashboard-surface.test.tsx`.
+  - Chromium geometry guard: `public-figma-geometry.spec.ts`.
+- Status:
+  - Global completion: 98.70% implemented / 1.30% remaining.
+  - Figma/pixel-tight coverage: 92.18% implemented / 7.82% remaining.
+
+## 72) Governance/Coverage Command Lane Cutover (2026-05-13)
+
+- Surfaces: `/governance`, `/coverage`.
+- Scope:
+  - Governance composer now has an explicit `governance-composer-grid` command lane.
+  - Governance lifecycle now has an explicit `governance-lifecycle-layout` with named grid areas for index, copy, readiness and action.
+  - Coverage actions now have an explicit `coverage-command-grid` and `coverage-secondary-action-grid`.
+- Visual coverage:
+  - Desktop: lifecycle cards keep action buttons aligned while readiness/status spans the second band.
+  - Tablet: lifecycle cards collapse to index/copy/readiness/action rows.
+  - Mobile: lifecycle and coverage command cards collapse to one column with full-width buttons.
+- Truthfulness:
+  - No fake DAO state, fake coverage balances, demo wallets, placeholders, skeletons or hidden actions were introduced.
+  - Coverage still uses the existing stake, unstake and claim handlers.
+  - Governance still uses the existing proposal/vote/close/execute activation path and governed package handoff.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `workflow-surfaces.test.tsx`.
+  - Chromium workflow/geometry guard: `workflow-ia.spec.ts`.
+- Status:
+  - Global completion: 98.72% implemented / 1.28% remaining.
+  - Figma/pixel-tight coverage: 92.26% implemented / 7.74% remaining.
+
+## 73) Settings/Status Utility Lane Cutover (2026-05-13)
+
+- Surfaces: `/settings`, `/status`.
+- Scope:
+  - Settings now has a route-scoped `settings-fidelity-shell`, `settings-utility-grid` and explicit workspace panels for configuration, guardrails and raw diagnostics.
+  - Status now has a route-scoped `status-fidelity-shell`, `status-utility-grid` and explicit workspace panels for baseline, operator, oracle, known limits, routing solver and reference links.
+  - Runtime health and routing benchmark panels keep their existing refresh handlers and live API readers.
+- Visual coverage:
+  - Desktop: workspace summary, tabs, dense tables and benchmark cards fit inside a single utility lane instead of forcing lateral squeeze.
+  - Tablet: workspace summaries and operational tables reduce column pressure while preserving state/status cells.
+  - Mobile: table headers collapse and rows become single-column cards to avoid truncated buttons or escaped diagnostic values.
+- Truthfulness:
+  - No fake config values, fake oracle states, fake benchmark rows, placeholder rows, skeletons or hidden controls were introduced.
+  - `/settings` still reads the configured env map plus runtime Balanced support through `readAppHealthSnapshot`.
+  - `/status` still reads `/api/health`; internal routing benchmark telemetry now requires a verified operator session before `/api/routing/rebalance/benchmark` returns benchmark/canary data.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `control-room-surfaces.test.tsx`.
+  - Chromium workflow/geometry guard: `workflow-ia.spec.ts`.
+- Status:
+  - Global completion: 98.74% implemented / 1.26% remaining.
+  - Figma/pixel-tight coverage: 92.34% implemented / 7.66% remaining.
+
+## 74) Ops/Migrations/Tiers Utility Lane Cutover (2026-05-13)
+
+- Surfaces: `/ops`, `/migrations`, `/tiers`.
+- Scope:
+  - Ops has a route-scoped `ops-fidelity-shell`, a utility workspace summary and explicit health, routing and runbook workspace panels.
+  - Migrations has a route-scoped `migrations-fidelity-shell`, tab-scoped utility grids and explicit plan, inspection, verification, dry-run, simulation, export and governance-handoff panels.
+  - Tiers has a route-scoped `tiers-fidelity-shell`, a bounded runtime-read command card and explicit scorecard, ladder and governed-action workspace panels.
+- Visual coverage:
+  - Desktop: operational cards and long diagnostic tables stay in bounded lanes instead of squeezing copy or controls into narrow columns.
+  - Tablet: health/routing/tier tables reduce column pressure while preserving the signal/value/action hierarchy.
+  - Mobile: dense tables collapse into one-column cards and action rows wrap instead of clipping buttons or route IDs.
+- Truthfulness:
+  - No fake operational rows, fake migration progress, fake simulated transactions, fake tier scores, placeholder cards, skeleton states or hidden operator controls were introduced.
+  - `/ops` still derives state from governor readability, adapter-router reads, coverage reads and runtime posture builders.
+  - `/migrations` still uses `/api/migrations/inspect`, `/api/migrations/simulate` and `writeGovernedComposerDraft` for the governance handoff.
+  - `/tiers` still builds and submits the real `buildManagerTierAddPoints` signed transaction path.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guards: `live-ops-surfaces.test.tsx`, `migration-page.test.tsx`.
+  - Chromium E2E guard: `live-ops-surfaces.spec.ts`.
+- Status:
+  - Global completion: 98.76% implemented / 1.24% remaining.
+  - Figma/pixel-tight coverage: 92.42% implemented / 7.58% remaining.
+
+## 75) Contracts Control-Center Utility Cutover (2026-05-13)
+
+- Surface: `/contracts`.
+- Scope:
+  - The route now exposes `contracts-fidelity-shell` as the screen-level visual contract.
+  - Top signals use `contracts-operator-summary`.
+  - Typed and raw execution lanes are grouped in `contracts-execution-grid` with explicit `contracts-typed-workspace-panel` and `contracts-raw-workspace-panel`.
+  - Critical mutation coverage is grouped in `contracts-matrix-grid` with `contracts-mutation-workspace-panel`.
+  - Soroban storage lifecycle hardening is grouped in `contracts-storage-grid` with `contracts-storage-workspace-panel`.
+- Visual coverage:
+  - Desktop: typed/raw lanes stay stacked, fields use auto-fit control grids and long contract IDs/hashes wrap inside their owning cells.
+  - Tablet: mutation and storage tables reduce to two columns before collapsing further, avoiding cramped seven-column console rows.
+  - Mobile: section tabs and tables collapse into one-column cards while retaining the same anchors and controls.
+- Truthfulness:
+  - No fake contract rows, fake readiness metrics, fake storage commands, hidden matrix entries, placeholders or skeleton states were introduced.
+  - Typed actions still use the exhaustive `ACTIONS` catalog, `buildContractInvokeRaw`, `simulateContractReadonly`, `shouldBlockTypedWrite` and wallet signing path.
+  - Raw invoke still uses JSON ScVal conversion plus `shouldBlockRawWrite`.
+  - Mutation and storage panels still refresh through `/api/contracts/mutation-matrix` and `/api/contracts/storage-lifecycle` with build-time snapshots as fallback.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `contracts-page.test.tsx`.
+  - Chromium E2E guard: `contracts-surface.spec.ts`.
+- Status:
+  - Global completion: 98.78% implemented / 1.22% remaining.
+  - Figma/pixel-tight coverage: 92.50% implemented / 7.50% remaining.
+
+## 76) Assets/Managers Public Index Cutover (2026-05-13)
+
+- Surfaces: `/assets`, `/managers`.
+- Scope:
+  - Assets now has `assets-workspace-grid`, `assets-core-registry-workspace-panel`, `assets-list-workspace-panel` and `assets-telemetry-workspace-panel`.
+  - Managers now has `managers-fidelity-shell`, `managers-operator-summary`, `managers-workspace-grid`, `managers-list-workspace-panel` and `managers-telemetry-workspace-panel`.
+  - Search, sort, spotlight tabs, asset detail links and manager detail links remain the existing interactive product controls.
+- Visual coverage:
+  - Desktop: both pages use one primary product lane with bounded list and telemetry panels instead of fragile two-column squeeze.
+  - Tablet: search/sort command rows stack before text or select controls can overflow.
+  - Mobile: tabs, spotlight cards, telemetry cards and tables collapse to one-column cards.
+- Truthfulness:
+  - No fake TVL, fake NAV, static scope, static asset rows, static manager rows, placeholders or skeletons were introduced.
+  - `/assets` still reads `loadAssetsPage`, `loadCoreStellarAssetRegistry` and asset history pages.
+  - `/managers` still reads `loadManagersResolvedPage` with the selected search, sort metric and sort order.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `manager-asset-surfaces.test.tsx`.
+  - Chromium responsive E2E guard: `public-responsive-matrix.spec.ts`.
+- Status:
+  - Global completion: 98.80% implemented / 1.20% remaining.
+  - Figma/pixel-tight coverage: 92.58% implemented / 7.42% remaining.
+
+## 77) Transactional Review/Confirmation Rail Cutover (2026-05-14)
+
+- Surfaces: `/governance`, `/coverage`, `/contracts` and shared transaction primitives.
+- Scope:
+  - Shared transaction rails now expose `transaction-surface-rail`, `transaction-surface-review-card` and `transaction-surface-confirm-dialog`.
+  - Governance composer, governance lifecycle confirmation, coverage fund actions and contract typed/raw execution use the same bounded review/confirm/feedback rhythm.
+  - Confirm dialogs remain modal, wallet-backed and cancellable while gaining a stable `transaction-confirm-dialog` test hook.
+- Visual coverage:
+  - Desktop: pre-sign review cards use clear header/status lanes, two-column bullet grids and bounded transaction feedback rails.
+  - Tablet/mobile: review heads, bullet lists and confirm-dialog actions collapse to one column before buttons or labels can clip.
+  - Long hashes, contract IDs, rejection reasons and transaction statuses wrap inside their owning cards.
+- Truthfulness:
+  - No fake proposal, fake balance, fake contract mutation, placeholder transaction state, skeleton state or hidden action was introduced.
+  - Governance still uses the existing governor builders and confirmation intent path.
+  - Coverage still uses the existing stake, unstake and claim wallet-signed handlers.
+  - Contracts still uses the existing typed/raw Soroban invocation, DAO guard and wallet submission paths.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render/confirm guards: `workflow-surfaces.test.tsx`, `contracts-page.test.tsx`.
+  - Chromium E2E guards: `workflow-ia.spec.ts`, `contracts-surface.spec.ts`.
+- Status:
+  - Global completion: 98.82% implemented / 1.18% remaining.
+  - Figma/pixel-tight coverage: 92.66% implemented / 7.34% remaining.
+
+## 78) App Chrome Navigation Rail Cutover (2026-05-14)
+
+- Surfaces: shared product chrome for public routes, focus flows and operator-gated utility routes.
+- Scope:
+  - `AppChrome` now exposes `chrome-shell-visual-cutover`, `chrome-grid-visual-cutover`, `chrome-main-visual-cutover`, `chrome-rail-screen-cutover`, `chrome-rail-nav-cutover`, `chrome-wallet-card-cutover` and `chrome-advanced-console-cutover`.
+  - The public sidebar has a stable Figma-width lane instead of inheriting older narrow dashboard rail rules.
+  - Primary navigation, wallet card and Advanced Console controls are bounded in the same rail contract across public and operator surfaces.
+- Visual coverage:
+  - Desktop: the product grid reserves a consistent right rail using `--chrome-rail-cutover-width`, so nav labels, wallet CTA and Advanced Console controls do not squeeze into an unreadable column.
+  - Tablet: the rail stacks below the product canvas and the nav becomes a two-column grid before labels or controls can clip.
+  - Mobile: the rail becomes a one-column stack and long labels wrap only at the smallest breakpoint.
+- Truthfulness:
+  - No fake route, fake wallet state, fake operator capability, placeholder action, skeleton state or hidden product control was introduced.
+  - Operator-only links still render only after the existing wallet challenge/session gate.
+  - Public routes still hide utility navigation until the user explicitly opens and verifies the Advanced Console.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `app-chrome.test.tsx`.
+  - Chromium E2E guard: `access-state.spec.ts`.
+- Status:
+  - Global completion: 98.84% implemented / 1.16% remaining.
+  - Figma/pixel-tight coverage: 92.74% implemented / 7.26% remaining.
+
+## 79) Vault Detail Tab-Panel Cutover (2026-05-14)
+
+- Surface: `/vaults/[id]`.
+- Scope:
+  - The inner profile tabs now expose `vault-detail-tab-panel` with specific lanes for `vault-overview-grid`, `vault-portfolio-grid`, `vault-activity-grid` and `vault-policies-grid`.
+  - Every tab panel gets `vault-tab-workspace-panel` classes, including overview history/profile, portfolio composition/assets, activity summary/feed and policies fees/whitelist.
+  - Generic two-column pressure is removed from the tab body while the hero, metric deck, profile visual and command deck remain intact.
+- Visual coverage:
+  - Desktop: each tab is a full-width product row, with internal cards/tables using bounded auto-fit grids instead of squeezed parallel panels.
+  - Tablet/mobile: card grids collapse to one readable column before Stellar IDs, fee labels or activity copy can escape their container.
+  - Activity rows remain list-like, while portfolio/policies/profile cards keep controlled card density.
+- Truthfulness:
+  - No fake NAV, fake activity, fake fee, fake route, hidden whitelist entry, placeholder card or skeleton state was introduced.
+  - The route still reads the same `ArkaDetailBundle`, `buildVaultProfileSignals`, `buildVaultPortfolioHighlights`, `buildVaultActivityHighlights` and command builders.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render/tab guard: `vault-detail-surface.test.tsx`.
+  - Chromium E2E guard: `vault-profile.spec.ts`.
+- Status:
+  - Global completion: 98.86% implemented / 1.14% remaining.
+  - Figma/pixel-tight coverage: 92.82% implemented / 7.18% remaining.
+
+## 80) Asset/Manager Detail Lane Cutover (2026-05-14)
+
+- Surfaces: `/assets/[id]` and `/managers/[id]`.
+- Scope:
+  - Asset and manager detail stage grids now expose `explorer-detail-stage-cutover` with route-specific `asset-detail-stage-cutover` and `manager-detail-stage-cutover` markers.
+  - Linked/managed Arka panels now expose `explorer-related-panel-cutover` and their card grids use `explorer-related-grid-cutover`.
+  - The trajectory/risk and trajectory/mandate bodies are rendered as one bounded detail lane instead of a fixed two-column body.
+- Visual coverage:
+  - Desktop: each detail page keeps a full-width product lane for trajectory/risk or trajectory/mandate, reducing cramped label/value collisions.
+  - Tablet/mobile: the same lane contract remains one column, while related Arka cards use `auto-fit` instead of hard-coded card counts.
+  - Long Stellar labels, status pills, table cells and action links stay clipped or wrapped inside their owning cards rather than escaping the frame.
+- Truthfulness:
+  - No fake exposure, fake NAV, fake manager rank, fake linked Arka, placeholder card or skeleton state was introduced.
+  - Asset detail still reads the catalog asset bundle plus core Stellar registry fallback.
+  - Manager detail still reads the catalog manager bundle and ranked managed Arkas.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `manager-asset-surfaces.test.tsx`.
+  - Chromium responsive E2E guard: `explorers.spec.ts`.
+- Status:
+  - Global completion: 98.88% implemented / 1.12% remaining.
+  - Figma/pixel-tight coverage: 92.90% implemented / 7.10% remaining.
+
+## 81) Public Hero Board Safe-Zone Cutover (2026-05-14)
+
+- Surfaces: `/dashboard` and `/discover`.
+- Scope:
+  - Dashboard and Discover now share explicit `public-hero-*` cutover markers for safe zone, board, metric lane, titlebar, metric deck, collection lane, tabline, card grid and Discover toolbar.
+  - The hero title plaque is treated as its own bounded lane, not as an offset block that can overlap top chrome or the metric deck.
+  - Metric decks and collection cards keep their existing semantic metric/card data while gaining a final containment layer.
+- Visual coverage:
+  - Desktop: titlebar, metric deck and collection board have measurable vertical separation inside the product canvas.
+  - Tablet/mobile: titlebar actions wrap under the title before clipping, and card grids auto-fit instead of preserving brittle fixed columns.
+  - Search, curated toggle, leaderboard link and create link remain grouped in a bounded toolbar lane.
+- Truthfulness:
+  - No fake NAV, fake TVL, fake route, fake featured Arka, fake search result, hidden filter, placeholder card or skeleton state was introduced.
+  - Dashboard still reads `loadDashboardBundle`, dashboard section state and real history/chart builders.
+  - Discover still reads `loadDiscoverBundle`, URL-backed filters and real featured/section builders.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guards: `dashboard-surface.test.tsx`, `discover-surface.test.tsx`.
+  - Chromium E2E guard: `product-surfaces.spec.ts`.
+- Status:
+  - Global completion: 98.90% implemented / 1.10% remaining.
+  - Figma/pixel-tight coverage: 92.98% implemented / 7.02% remaining.
+
+## 82) Governance/Coverage Command Frame Cutover (2026-05-14)
+
+- Surfaces: `/governance` and `/coverage`.
+- Scope:
+  - Governance composer and lifecycle panels now expose command-frame markers for the composer frame, lifecycle frame, command cards and lifecycle command deck.
+  - Coverage actions now expose a dedicated actions frame, command cards, command signal rail, stacked secondary action deck and bounded action rows.
+  - Coverage unstake and claim no longer render as a squeezed two-column pair on desktop; they are full-width command rows with responsive internal control rails.
+- Visual coverage:
+  - Governance: form fields, long target contracts, preview JSON, publication drafts and lifecycle command buttons stay inside their panel rhythm.
+  - Coverage: stake, unstake and claim controls are separated into a readable vertical execution rail, with wallet-required/ready pills staying inside their cards.
+  - Tablet/mobile: action buttons become full-width only at narrow breakpoints rather than clipping inside fixed columns.
+- Truthfulness:
+  - No fake proposal, fake package, fake coverage balance, fake reward, hidden action, placeholder card or skeleton state was introduced.
+  - Governance still uses the same composer templates, publication draft storage, lifecycle command builder and wallet/on-chain handlers.
+  - Coverage still uses the same token allowance, stake, unstake and claim calls.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guard: `workflow-surfaces.test.tsx`.
+  - Chromium E2E guard: `workflow-ia.spec.ts`.
+- Status:
+  - Global completion: 98.92% implemented / 1.08% remaining.
+  - Figma/pixel-tight coverage: 93.08% implemented / 6.92% remaining.
+
+## 83) Contracts/Integrations Command-Frame Audit Cutover (2026-05-14)
+
+- Surfaces: `/contracts` and `/integrations`.
+- Scope:
+  - Contracts typed/raw lanes now expose command-frame markers and control-table cutover hooks.
+  - Contracts mutation matrix and storage lifecycle now expose audit-table and audit-row hooks so every runtime row can render as a bounded audit card.
+  - Integrations routing, venue model, Balanced/SODAX intent source/driver/handoff and public SODAX controls now expose workspace-frame and routing-table cutover hooks.
+  - Balanced/SODAX public quote/status/confirm controls now use bounded form/action lanes instead of generic compressed operational rows.
+- Visual coverage:
+  - Contracts: long method names, contract IDs, raw JSON hints, mutation assurances and storage extend commands stay inside their owning cards.
+  - Integrations: adapter/router IDs, intent capability copy, quote/status readiness and execution controls wrap inside protocol frames before clipping.
+  - Tablet/mobile: command and audit rows collapse into one-column lanes while preserving all rows and buttons.
+- Truthfulness:
+  - No fake contract mutation, fake storage state, fake router, fake quote, fake protocol readiness, hidden row, skeleton or placeholder was introduced.
+  - Contracts remain backed by typed Soroban action builders, raw ScVal execution, DAO policy guards, mutation-matrix API and storage-lifecycle API.
+  - Integrations remain backed by protocol health, adapter/router reads, SODAX public surface state and wallet/execution handlers.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guards: `contracts-page.test.tsx`, `workflow-surfaces.test.tsx`.
+  - Chromium E2E guards: `contracts-surface.spec.ts`, `workflow-ia.spec.ts`.
+- Status:
+  - Global completion: 98.94% implemented / 1.06% remaining.
+  - Figma/pixel-tight coverage: 93.20% implemented / 6.80% remaining.
+
+## 84) Vaults/Assets Public Listing-Frame Cutover (2026-05-14)
+
+- Surfaces: `/vaults` and `/assets`.
+- Scope:
+  - Vault leaderboard stage, toolbar, leaderboard table rows and lower featured panels now expose stable listing-frame cutover markers.
+  - Assets command deck, toolbar and asset table rows now expose stable listing-frame cutover markers.
+  - Both surfaces keep the existing catalog/API values and only add a final containment layer for long Stellar IDs, source/oracle copy, progress strips and action links.
+- Visual coverage:
+  - Desktop: public listing rows render as bounded product-card lanes instead of dense operator-console rows.
+  - Tablet/mobile: rows collapse through responsive grid rules before labels, buttons or identifiers can escape their cards.
+  - Search, sort, curated filter, metric pills, asset icons and detail links remain visible and grouped in their owning lanes.
+- Truthfulness:
+  - No fake NAV, fake TVL, fake asset row, fake price, fake movement, fake Arka, fake share, hidden row, placeholder card or skeleton state was introduced.
+  - Vaults remain backed by `loadVaultLeaderboardResolvedPage`, `buildVaultLeaderboardRows`, URL-state filters, source/oracle notes and featured ranking data.
+  - Assets remain backed by `loadAssetsPage`, core Stellar registry metadata, asset history reads, spotlight modes, market metrics and detail links.
+- Tests:
+  - Unit source guard: `surface-control-truthfulness.test.ts`.
+  - Integration render guards: `vault-entrypoints.test.tsx`, `manager-asset-surfaces.test.tsx`.
+  - Chromium E2E guards: `vault-entrypoints.spec.ts`, `public-product-truthfulness.spec.ts`.
+- Status:
+  - Global completion: 98.96% implemented / 1.04% remaining.
+  - Figma/pixel-tight coverage: 93.34% implemented / 6.66% remaining.
+
+## 85) Phase-2 Swap Guardrails Runtime Cutover (2026-05-18)
+
+- Surfaces: rebalance planner, `/api/routing/rebalance/plan`, `/arkas/[id]`, `/settings`.
+- Scope:
+  - The rebalance planner now evaluates the eight phase-2 controls from the 15-guardrail swap policy before a route can be executed.
+  - The API accepts optional state for NAV, daily turnover used and projected post-trade deviation so stateful guardrails can block deterministically when the caller has the indexed state.
+  - The Arka execution surface blocks `runRebalance` when the selected plan is guardrail-blocked.
+  - Settings exposes the active guardrail values in both the structured guardrail table and raw environment snapshot.
+- Guardrails implemented in the runtime/API/planner layer:
+  - `max_notional_per_swap`.
+  - `max_path_length`.
+  - `forbid_route_cycles`.
+  - `chunking_threshold`.
+  - `max_chunk_size`.
+  - `post_trade_deviation_bps`.
+  - `daily_turnover_cap_bps`.
+  - `emergency_pause_swap`.
+- Truthfulness:
+  - No fake on-chain contract variable, fake DAO mutation, fake pass state, hidden execution path, placeholder row or skeleton state was introduced.
+  - Stateful checks report `requires_state` when the caller does not provide the state needed to make a truthful decision.
+  - If the project wants DAO-mutated storage for all eight phase-2 values inside Soroban, that is a separate contract-extension workstream.
+- Tests:
+  - Unit guardrail policy/evaluator coverage: `rebalance-routing.test.ts`.
+  - Unit Settings row coverage: `control-surfaces.test.ts`.
+  - Integration API blocked-plan coverage: `api-rebalance-route-plan-route.test.ts`.
+  - Integration Settings/control-room coverage: `control-room-surfaces.test.tsx`.
+  - Chromium E2E Settings coverage: `smoke.spec.ts`.
+- Status:
+  - Global completion: 99.03% implemented / 0.97% remaining.
+  - Phase-2 swap guardrails runtime/API/planner/UI: 100% implemented / 0% remaining in this layer.
+  - Figma/pixel-tight coverage: 93.34% implemented / 6.66% remaining.

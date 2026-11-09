@@ -30,20 +30,18 @@ fn integration_claim_all_round_trips_multiple_grants() {
     let treasury = Address::generate(&env);
     let beneficiary = Address::generate(&env);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(&env, &token_id);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(&env, &token_id);
+
     token.mint(&treasury, &1_000);
 
-    let vesting_id = env.register_contract(None, ArkaVesting);
+    let vesting_id = env.register(ArkaVesting, (&admin, &token_id,));
     let vesting = ArkaVestingClient::new(&env, &vesting_id);
-    vesting.init(&admin, &token_id);
+
     token.approve(&treasury, &vesting_id, &700);
 
     let grant_a = vesting.create_grant(

@@ -282,3 +282,12 @@ test("history helpers expose ordered series for Arka, asset, and manager views",
     ["2000", "2500"],
   );
 });
+
+for(const reserve of ['40','100'])test('aggregate managed USD excludes fixed reserves '+reserve,()=>{
+ const usdc='CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75',entry=fixtureArkas()[0],available=String(100n-BigInt(reserve));
+ entry.denominationContract=usdc;entry.whitelistContracts=[usdc];entry.nav=available;
+ entry.assets=[{...entry.assets[0],assetContract:usdc,liquidBalance:'100',reservedWithdrawalBalance:reserve,netManagedAmount:available,collateralAmount:'0',debtAmount:'0',netPositionValue:'0',marketIds:[]}];
+ const asset=buildSnapshot([entry],[],entry.syncedAt).assets[0];
+ assert.equal(asset.liquidBalance,'100');assert.equal(asset.reservedWithdrawalBalance,reserve);
+ assert.equal(asset.netManagedAmount,available);assert.equal(asset.netManagedUsdEstimate,available);
+});

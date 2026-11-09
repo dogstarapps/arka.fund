@@ -122,6 +122,13 @@ export interface Client {
   is_auto_allowed: ({venue}: {venue: string}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
   /**
+   * Construct and simulate a is_exit_allowed transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Deprecation drains existing credit positions; emergency disable stops
+   * external calls. Neither transition removes accounting or native claims.
+   */
+  is_exit_allowed: ({venue}: {venue: string}, options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
+
+  /**
    * Construct and simulate a set_venue_status transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
   set_venue_status: ({caller, venue, status}: {caller: string, venue: string, status: u32}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
@@ -149,6 +156,8 @@ export interface Client {
 }
 export class Client extends ContractClient {
   static async deploy<T = Client>(
+        /** Constructor/Initialization Args for the contract's `__constructor` method */
+        {admin, governor, expires_at}: {admin: string, governor: Option<string>, expires_at: u64},
     /** Options for initializing a Client as well as for calling a method, with extras specific to deploying. */
     options: MethodOptions &
       Omit<ContractClientOptions, "contractId"> & {
@@ -160,7 +169,7 @@ export class Client extends ContractClient {
         format?: "hex" | "base64";
       }
   ): Promise<AssembledTransaction<T>> {
-    return ContractClient.deploy(null, options)
+    return ContractClient.deploy({admin, governor, expires_at}, options)
   }
   constructor(public readonly options: ContractClientOptions) {
     super(
@@ -177,10 +186,12 @@ export class Client extends ContractClient {
         "AAAAAAAAAAAAAAAMdmVudWVfY29uZmlnAAAAAQAAAAAAAAAFdmVudWUAAAAAAAATAAAAAQAAA+gAAAfQAAAAC1ZlbnVlQ29uZmlnAA==",
         "AAAAAAAAAAAAAAANZGlzYWJsZV92ZW51ZQAAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFdmVudWUAAAAAAAATAAAAAA==",
         "AAAAAAAAAAAAAAANaXNfY29uZmlndXJlZAAAAAAAAAEAAAAAAAAABXZlbnVlAAAAAAAAEwAAAAEAAAAB",
+        "AAAAAAAAAAAAAAANX19jb25zdHJ1Y3RvcgAAAAAAAAMAAAAAAAAABWFkbWluAAAAAAAAEwAAAAAAAAAIZ292ZXJub3IAAAPoAAAAEwAAAAAAAAAKZXhwaXJlc19hdAAAAAAABgAAAAA=",
         "AAAAAQAAAAAAAAAAAAAAC1ZlbnVlQ29uZmlnAAAAAAMAAAAAAAAABnN0YXR1cwAAAAAABAAAAAAAAAAKdXBkYXRlZF9hdAAAAAAABgAAAAAAAAAKdXBkYXRlZF9ieQAAAAAAEw==",
         "AAAAAAAAAAAAAAAObGFzdF93YXNtX2hhc2gAAAAAAAAAAAABAAAD6AAAA+4AAAAg",
         "AAAAAAAAAAAAAAAPYm9vdHN0cmFwX2FkbWluAAAAAAAAAAABAAAD6AAAABM=",
         "AAAAAAAAAAAAAAAPaXNfYXV0b19hbGxvd2VkAAAAAAEAAAAAAAAABXZlbnVlAAAAAAAAEwAAAAEAAAAB",
+        "AAAAAAAAAI1EZXByZWNhdGlvbiBkcmFpbnMgZXhpc3RpbmcgY3JlZGl0IHBvc2l0aW9uczsgZW1lcmdlbmN5IGRpc2FibGUgc3RvcHMKZXh0ZXJuYWwgY2FsbHMuIE5laXRoZXIgdHJhbnNpdGlvbiByZW1vdmVzIGFjY291bnRpbmcgb3IgbmF0aXZlIGNsYWltcy4AAAAAAAAPaXNfZXhpdF9hbGxvd2VkAAAAAAEAAAAAAAAABXZlbnVlAAAAAAAAEwAAAAEAAAAB",
         "AAAAAAAAAAAAAAAQc2V0X3ZlbnVlX3N0YXR1cwAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFdmVudWUAAAAAAAATAAAAAAAAAAZzdGF0dXMAAAAAAAQAAAAA",
         "AAAAAAAAAAAAAAATc2V0X2Jvb3RzdHJhcF9hZG1pbgAAAAADAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAABWFkbWluAAAAAAAAEwAAAAAAAAAKZXhwaXJlc19hdAAAAAAABgAAAAA=",
         "AAAAAAAAAAAAAAAVY2xlYXJfYm9vdHN0cmFwX2FkbWluAAAAAAAAAQAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAA==",
@@ -204,6 +215,7 @@ export class Client extends ContractClient {
         last_wasm_hash: this.txFromJSON<Option<Buffer>>,
         bootstrap_admin: this.txFromJSON<Option<string>>,
         is_auto_allowed: this.txFromJSON<boolean>,
+        is_exit_allowed: this.txFromJSON<boolean>,
         set_venue_status: this.txFromJSON<null>,
         set_bootstrap_admin: this.txFromJSON<null>,
         clear_bootstrap_admin: this.txFromJSON<null>,

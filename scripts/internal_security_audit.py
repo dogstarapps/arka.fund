@@ -30,12 +30,17 @@ AUDIT_SCOPE: dict[str, dict[str, str]] = {
     "adapter-aquarius": {"tier": "high", "area": "AMM adapter"},
     "adapter-soroswap": {"tier": "high", "area": "AMM adapter"},
     "adapter-blend": {"tier": "high", "area": "credit adapter"},
+    "adapter-sushi": {"tier": "high", "area": "Sushi spot adapter candidate; not activated"},
+    "adapter-balanced": {"tier": "high", "area": "deferred cross-chain adapter"},
+    "adapter-phoenix": {"tier": "high", "area": "retained legacy adapter; retired for new routes"},
+    "venue-registry": {"tier": "high", "area": "protocol states and permissions"},
+    "router": {"tier": "high", "area": "route dispatch and allowlists"},
     "locked-arka": {"tier": "high", "area": "governance voting escrow"},
     "arka-token": {"tier": "high", "area": "governance token"},
     "manager-tier": {"tier": "medium", "area": "manager permissions"},
 }
 
-ACTIVE_ADAPTERS = ("adapter-aquarius", "adapter-soroswap", "adapter-phoenix", "adapter-blend")
+REQUIRED_ADAPTERS = ("adapter-aquarius", "adapter-soroswap", "adapter-phoenix", "adapter-blend", "adapter-balanced", "adapter-sushi")
 ALLOW_UNAUTH_MUTATIONS = {"init"}
 ALLOW_REVIEWED_UNAUTH_MUTATIONS = {
     ("arka", "settle_fees"): (
@@ -60,6 +65,8 @@ AUTH_PATTERNS = (
 EXTERNAL_CALL_PATTERNS = (
     "invoke_contract(",
     "try_invoke_contract(",
+    "invoke_contract::<",
+    "try_invoke_contract::<",
 )
 STORAGE_MUTATION_PATTERNS = (
     ".storage().instance().set(",
@@ -351,7 +358,7 @@ def build_findings(contracts: list[ContractAudit]) -> list[Finding]:
     findings: list[Finding] = []
     by_crate = {contract.crate: contract for contract in contracts}
 
-    for crate in ACTIVE_ADAPTERS:
+    for crate in REQUIRED_ADAPTERS:
         contract = by_crate.get(crate)
         if contract is None:
             findings.append(
@@ -360,8 +367,8 @@ def build_findings(contracts: list[ContractAudit]) -> list[Finding]:
                     crate=crate,
                     function="*",
                     line=0,
-                    title="Active adapter missing from audit scope",
-                    detail="The active public adapter is not present in the workspace audit inventory.",
+                    title="Required adapter missing from audit scope",
+                    detail="A launch candidate or retained adapter is missing from the workspace audit inventory.",
                 )
             )
             continue
@@ -464,7 +471,9 @@ def generate_report(
         "generatedAt": iso_now(),
         "rootDir": str(ROOT_DIR),
         "contractsDir": str(contracts_dir),
-        "activePublicSurface": ["Aquarius", "SoroSwap", "Phoenix", "Blend", "Balanced/SODAX"],
+        "retainedProtocolSurface": ["Aquarius", "SoroSwap", "Sushi", "Phoenix (legacy)", "Blend", "Balanced/SODAX (deferred)"],
+        "protocolActivationVerified": False,
+        "analysisLimits": "Lexical lib.rs inventory with local helper closure; not a Rust type-checked cross-module call graph, authorization proof or deployed-state audit.",
         "auditedScope": AUDIT_SCOPE,
         "summary": summary,
         "contracts": [contract.to_dict() for contract in audits],
@@ -513,15 +522,15 @@ def render_markdown(report: dict[str, Any]) -> str:
     else:
         for item in reviewed:
             lines.append(f"- `{item['crate']}::{item['function']}`: {item['reason']}")
-    lines.extend(["", "## Active Surface Check", ""])
+    lines.extend(["", "## Protocol Inventory and Activation", ""])
     lines.append(
-        "- The active mainnet support surface reflected by the release manifest is `SoroSwap`, `Aquarius`, `Phoenix`, `Blend`, and `Balanced/SODAX`."
+        "- This is a source inventory; it does not verify any live protocol activation."
     )
     lines.append(
-        "- `SoroSwap`, `Aquarius`, and `Phoenix` are AMM swap venues with mainnet canary evidence; `Blend` is a governed credit venue; `Balanced/SODAX` is an intent-driver venue, not the legacy AMM-router adapter."
+        "- `SoroSwap`, `Aquarius`, `Sushi`, `Blend`, deferred `Balanced/SODAX` and legacy `Phoenix` remain in review scope. Phoenix is retired from new launch routes; Sushi remains unactivated."
     )
     lines.append(
-        "- `Comet` and the historical Balanced AMM-router lane remain outside the active product surface."
+        "- Reconcile exact roles, addresses, code, states, callers, routes, liquidity and the complete target before activation. Historical canary evidence does not establish current readiness."
     )
     return "\n".join(lines) + "\n"
 

@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance, type FastifyReply } from "fastify";
+import { StrKey } from "@stellar/stellar-sdk";
 import {
   findArka,
   findAsset,
@@ -8,15 +9,21 @@ import {
 import { IdentityUpdateError } from "./identity.js";
 import { CATALOG_OPENAPI_DOCUMENT } from "./openapi/document.js";
 import { CatalogService } from "./service.js";
+import { ManagedCatalogUnavailable } from "./managedTypes.js";
 import type { IdentityUpdateRequest } from "./types.js";
 
 export interface CatalogAppOptions {
   service: CatalogService;
   syncToken?: string;
+  /** Local candidate previews can expose all reads without any mutation endpoint. */
+  readOnly?: boolean;
 }
 
 export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
   const app = Fastify({ logger: false });
+  if (options.readOnly) app.addHook("onRequest", async (request, reply) => {
+    if (!["GET", "HEAD"].includes(request.method)) return reply.code(405).header("allow", "GET, HEAD").send({error: "read_only_candidate"});
+  });
   const dashboardCache = new Map<
     string,
     { expiresAt: number; value: NonNullable<Awaited<ReturnType<CatalogService["dashboardOverview"]>>> }
@@ -315,6 +322,66 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
       order: parseOrder(query.order),
       limit: parseOptionalInt(query.limit),
     });
+  });
+
+  app.get("/v1/arkas/:id/holders", async (request, reply) => {
+    const params = request.params as RequestParams;
+    const query = request.query as RequestQuery;
+    let holders;
+    try { holders = await options.service.arkaHolders(params.id, {
+      offset: parseOptionalInt(query.offset),
+      limit: parseOptionalInt(query.limit),
+    }); } catch (error) {
+      if (error instanceof ManagedCatalogUnavailable) return reply.code(503).header("cache-control", "no-store").send({error: error.code, complete: false});
+      throw error;
+    }
+    if (!holders) {
+      reply.code(404);
+      return { error: "not_found" };
+    }
+    reply.header("cache-control", "public, max-age=5, stale-while-revalidate=30");
+    return holders;
+  });
+
+  app.get("/v1/arkas/:id/managed-position", async (request, reply) => {
+    const {id}=request.params as {id:string},query=request.query as Record<string,unknown>;
+    reply.header("cache-control","no-store");
+    if(Object.keys(query).some(k=>!["owner","view"].includes(k))||(query.view!==undefined&&query.view!=="active")||typeof query.owner!=="string"||!StrKey.isValidEd25519PublicKey(query.owner))
+      return reply.code(400).send({error:"managed_owner_invalid",complete:false});
+    try {
+      const position=await options.service.arkaManagedPosition(id,query.owner,query.view==="active");
+      if(!position)return reply.code(404).send({error:"not_found"});
+      return position;
+    }catch(error){
+      if(error instanceof ManagedCatalogUnavailable)return reply.code(503).send({error:error.code,complete:false});
+      throw error;
+    }
+  });
+
+  app.get("/v1/arkas/:id/withdrawals", async (request, reply) => {
+    const params = request.params as RequestParams, query = request.query as RequestQuery;
+    const filters=request.query as Record<string,unknown>;
+    if(Object.keys(filters).some(k=>!["offset","limit","owner","closed","observationId"].includes(k))||(filters.owner!==undefined&&(typeof filters.owner!=="string"||!StrKey.isValidEd25519PublicKey(filters.owner)))||(filters.closed!==undefined&&filters.closed!=="1")||(filters.observationId!==undefined&&(typeof filters.observationId!=="string"||!/^[a-f0-9]{64}$/.test(filters.observationId))))return reply.code(400).send({error:"withdrawal_query_invalid"});
+    try {
+      const result = await options.service.arkaWithdrawals(params.id, {offset: parseOptionalInt(query.offset), limit: parseOptionalInt(query.limit)}, {owner:filters.owner as string|undefined,closedOnly:filters.closed==="1",observationId:filters.observationId as string|undefined});
+      if (!result) return reply.code(404).send({error: "not_found"});
+      return reply.header("cache-control", "no-store").send(result);
+    } catch (error) {
+      if (error instanceof ManagedCatalogUnavailable) return reply.code(503).send({error: error.code, complete: false});
+      throw error;
+    }
+  });
+  app.get("/v1/arkas/:id/withdrawals/history", async (request, reply) => {
+    const params = request.params as RequestParams;
+    const query = request.query as RequestQuery;
+    try {
+      const records = await options.service.arkaWithdrawalHistory(params.id, {offset: parseOptionalInt(query.offset), limit: parseOptionalInt(query.limit)});
+      if (!records) return reply.code(404).send({error: "not_found"});
+      return reply.header("cache-control", "no-store").send(records);
+    } catch (error) {
+      if (error instanceof ManagedCatalogUnavailable) return reply.code(503).send({error: error.code, complete: false});
+      throw error;
+    }
   });
 
   app.get("/v1/assets", async (request, reply) => {

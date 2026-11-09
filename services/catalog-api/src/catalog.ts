@@ -1,3 +1,4 @@
+import {managedLiquid} from './managedAssets.js';
 import type {
   ArkaAssetExposure,
   ArkaAssetHistoryPoint,
@@ -69,6 +70,8 @@ export function aggregateAssets(
   }>();
 
   for (const arka of arkas) {
+    // Unverified V3 reserves must not inflate aggregate managed assets.
+    if (arka.managedWithdrawals?.status === "unavailable") continue;
     for (const asset of arka.assets) {
       const current = grouped.get(asset.assetContract) ?? {
         managers: new Set<string>(),
@@ -107,6 +110,7 @@ export function aggregateAssets(
         current.entry.netPositionValue,
         asset.netPositionValue,
       );
+      if(asset.reservedWithdrawalBalance!==undefined)current.entry.reservedWithdrawalBalance=addBigIntStrings(current.entry.reservedWithdrawalBalance??"0",asset.reservedWithdrawalBalance);
       current.managers.add(arka.manager);
       grouped.set(asset.assetContract, current);
     }
@@ -151,7 +155,7 @@ export function aggregateManagers(
 }
 
 function valueAssetEntryInUsd(entry: AssetCatalogEntry): string | null {
-  const amount = addBigIntStrings(entry.liquidBalance, entry.netPositionValue);
+  const amount = addBigIntStrings(managedLiquid(entry), entry.netPositionValue);
   if (BigInt(amount) === 0n) return "0";
   const contract = entry.assetContract;
   const identity = resolveAssetIdentity(contract);
@@ -169,9 +173,11 @@ export function buildMetrics(
   totalManagers: number,
   syncedAt: string,
 ): CatalogMetrics {
-  const totalNav = arkas.reduce((accumulator, arka) => accumulator + BigInt(arka.nav), 0n);
+  const totalNav = arkas.reduce((accumulator, arka) => accumulator + BigInt(arka.nav ?? "0"), 0n);
   return {
-    totalArkas: arkas.length + failures.length,
+    totalArkas: new Set([...arkas.map((arka) => arka.arkaId), ...failures.map((failure) => failure.arkaId)]).size,
+    unvaluedArkas: arkas.filter((arka) => arka.nav === null).length,
+    navComplete: arkas.every((arka) => arka.nav !== null) && failures.length === 0,
     indexedArkas: arkas.length,
     failedArkas: failures.length,
     totalManagers,
@@ -657,17 +663,17 @@ function compareUsdEstimates(
   return compareBigIntStrings(left, right) * (order === "asc" ? 1 : -1);
 }
 
-function compareBigIntStrings(left: string, right: string): number {
-  const leftValue = BigInt(left);
-  const rightValue = BigInt(right);
+function compareBigIntStrings(left: string | null, right: string | null): number {
+  const leftValue = BigInt(left ?? "0");
+  const rightValue = BigInt(right ?? "0");
   if (leftValue === rightValue) {
     return 0;
   }
   return leftValue > rightValue ? 1 : -1;
 }
 
-function addBigIntStrings(left: string, right: string): string {
-  return (BigInt(left) + BigInt(right)).toString();
+function addBigIntStrings(left: string | null, right: string | null): string {
+  return (BigInt(left ?? "0") + BigInt(right ?? "0")).toString();
 }
 
 function clampNonNegative(value: number): number {

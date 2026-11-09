@@ -7,7 +7,69 @@
   "auth": [
     [],
     [],
-    [],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "set_manager",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                },
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "init",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                },
+                {
+                  "i32": 0
+                },
+                {
+                  "i32": 0
+                },
+                {
+                  "i32": 0
+                },
+                {
+                  "i32": 0
+                },
+                {
+                  "vec": [
+                    {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                    }
+                  ]
+                },
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
     [],
     [],
     [],
@@ -376,16 +438,7 @@
                           ]
                         },
                         "val": {
-                          "map": [
-                            {
-                              "key": {
-                                "symbol": "contract"
-                              },
-                              "val": {
-                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                              }
-                            }
-                          ]
+                          "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                         }
                       },
                       {
@@ -397,54 +450,31 @@
                           ]
                         },
                         "val": {
-                          "map": [
+                          "vec": [
                             {
-                              "key": {
-                                "symbol": "cumulative_management_shares"
-                              },
-                              "val": {
-                                "i128": "0"
-                              }
+                              "symbol": "c1"
                             },
                             {
-                              "key": {
-                                "symbol": "cumulative_manager_shares"
-                              },
-                              "val": {
-                                "i128": "0"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "cumulative_performance_shares"
-                              },
-                              "val": {
-                                "i128": "0"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "cumulative_protocol_shares"
-                              },
-                              "val": {
-                                "i128": "0"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "high_water_mark"
-                              },
-                              "val": {
-                                "i128": "1000000000"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "last_settlement_ts"
-                              },
-                              "val": {
-                                "u64": "2000"
-                              }
+                              "vec": [
+                                {
+                                  "i128": "0"
+                                },
+                                {
+                                  "i128": "0"
+                                },
+                                {
+                                  "i128": "0"
+                                },
+                                {
+                                  "i128": "0"
+                                },
+                                {
+                                  "i128": "1000000000"
+                                },
+                                {
+                                  "u64": "2000"
+                                }
+                              ]
                             }
                           ]
                         }
@@ -458,38 +488,25 @@
                           ]
                         },
                         "val": {
-                          "map": [
+                          "vec": [
                             {
-                              "key": {
-                                "symbol": "deposit_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
+                              "symbol": "c1"
                             },
                             {
-                              "key": {
-                                "symbol": "mgmt_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "perf_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "redeem_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
+                              "vec": [
+                                {
+                                  "i32": 0
+                                },
+                                {
+                                  "i32": 0
+                                },
+                                {
+                                  "i32": 0
+                                },
+                                {
+                                  "i32": 0
+                                }
+                              ]
                             }
                           ]
                         }
@@ -515,22 +532,19 @@
                           ]
                         },
                         "val": {
-                          "map": [
+                          "vec": [
                             {
-                              "key": {
-                                "symbol": "mgmt_protocol_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
+                              "symbol": "c1"
                             },
                             {
-                              "key": {
-                                "symbol": "perf_protocol_bps"
-                              },
-                              "val": {
-                                "i32": 0
-                              }
+                              "vec": [
+                                {
+                                  "i32": 0
+                                },
+                                {
+                                  "i32": 0
+                                }
+                              ]
                             }
                           ]
                         }
@@ -545,6 +559,18 @@
                         },
                         "val": {
                           "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "symbol": "ShareAccountingVersion"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "u32": 2
                         }
                       },
                       {
@@ -568,62 +594,34 @@
                           ]
                         },
                         "val": {
-                          "map": [
+                          "vec": [
                             {
-                              "key": {
-                                "symbol": "enabled"
-                              },
-                              "val": {
-                                "bool": true
-                              }
+                              "symbol": "c1"
                             },
                             {
-                              "key": {
-                                "symbol": "max_oracle_age_seconds"
-                              },
-                              "val": {
-                                "u64": "60"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "max_price_impact_bps"
-                              },
-                              "val": {
-                                "i32": 500
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "max_slippage_bps"
-                              },
-                              "val": {
-                                "i32": 10000
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "max_trade_size_bps"
-                              },
-                              "val": {
-                                "i32": 10000
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "max_twap_deviation_bps"
-                              },
-                              "val": {
-                                "i32": 10000
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "oracle_checks_enabled"
-                              },
-                              "val": {
-                                "bool": true
-                              }
+                              "vec": [
+                                {
+                                  "bool": true
+                                },
+                                {
+                                  "u64": "60"
+                                },
+                                {
+                                  "i32": 500
+                                },
+                                {
+                                  "i32": 10000
+                                },
+                                {
+                                  "i32": 10000
+                                },
+                                {
+                                  "i32": 10000
+                                },
+                                {
+                                  "bool": true
+                                }
+                              ]
                             }
                           ]
                         }
@@ -651,16 +649,7 @@
                         "val": {
                           "vec": [
                             {
-                              "map": [
-                                {
-                                  "key": {
-                                    "symbol": "contract"
-                                  },
-                                  "val": {
-                                    "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                                  }
-                                }
-                              ]
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                             }
                           ]
                         }
@@ -777,7 +766,7 @@
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
             "key": {
               "ledger_key_nonce": {
-                "nonce": "2032731177588607455"
+                "nonce": "1033654523790656264"
               }
             },
             "durability": "temporary"
@@ -792,7 +781,40 @@
                 "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
                 "key": {
                   "ledger_key_nonce": {
-                    "nonce": "2032731177588607455"
+                    "nonce": "1033654523790656264"
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          6311999
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "4270020994084947596"
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": "4270020994084947596"
                   }
                 },
                 "durability": "temporary",
@@ -873,10 +895,43 @@
       [
         {
           "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "8370022561469687789"
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": "8370022561469687789"
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          6311999
+        ]
+      ],
+      [
+        {
+          "contract_data": {
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4",
             "key": {
               "ledger_key_nonce": {
-                "nonce": "1033654523790656264"
+                "nonce": "2032731177588607455"
               }
             },
             "durability": "temporary"
@@ -891,7 +946,7 @@
                 "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4",
                 "key": {
                   "ledger_key_nonce": {
-                    "nonce": "1033654523790656264"
+                    "nonce": "2032731177588607455"
                   }
                 },
                 "durability": "temporary",

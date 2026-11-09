@@ -114,7 +114,7 @@ function buildDashboardValuation(snapshot: CatalogSnapshot): DashboardValuationS
       navUsdEstimate: 0n,
       arkaCount: 0,
     };
-    current.totalNav += BigInt(arka.nav);
+    current.totalNav += BigInt(arka.nav ?? "0");
     current.arkaCount += 1;
     const navUsdEstimate = arka.economics?.navUsdEstimate;
     current.navUsdEstimate =
@@ -195,7 +195,7 @@ export function buildDashboardComposition(
     : null;
   const items = snapshot.assets
     .map((asset, index) => {
-      const navContribution = addBigIntStrings(asset.liquidBalance, asset.netPositionValue);
+      const navContribution = addBigIntStrings(managedLiquid(asset), asset.netPositionValue);
       return {
         assetContract: asset.assetContract,
         rank: index + 1,
@@ -234,12 +234,12 @@ export function buildArkaPortfolio(
     return null;
   }
   const totalNavContribution = arka.assets.reduce(
-    (accumulator, asset) => addBigIntStrings(accumulator, navContribution(asset.liquidBalance, asset.netPositionValue)),
+    (accumulator, asset) => addBigIntStrings(accumulator, navContribution(managedLiquid(asset), asset.netPositionValue)),
     "0",
   );
   const items = arka.assets
     .map((asset, index) => {
-      const contribution = navContribution(asset.liquidBalance, asset.netPositionValue);
+      const contribution = navContribution(managedLiquid(asset), asset.netPositionValue);
       return {
         assetContract: asset.assetContract,
         rank: index + 1,
@@ -251,7 +251,7 @@ export function buildArkaPortfolio(
         )?.valueUsdEstimate ?? null,
         weightBps: arka.economics?.portfolioWeights.find(
           (weight) => weight.assetContract === asset.assetContract,
-        )?.weightBps ?? bigintRatioBps(contribution, arka.nav),
+        )?.weightBps ?? bigintRatioBps(contribution, arka.nav ?? "0"),
         liquidBalance: asset.liquidBalance,
         collateralAmount: asset.collateralAmount,
         debtAmount: asset.debtAmount,
@@ -403,3 +403,4 @@ function addBigIntStrings(left: string, right: string): string {
 function subtractBigIntStrings(left: string, right: string): string {
   return (BigInt(left) - BigInt(right)).toString();
 }
+import { managedLiquid } from "./managedAssets.js";

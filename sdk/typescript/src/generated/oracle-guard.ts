@@ -42,7 +42,7 @@ export const Errors = {
   6: {message:"InvalidBootstrapAdmin"}
 }
 
-export type DataKey = {tag: "Admin", values: void} | {tag: "Governor", values: void} | {tag: "BootstrapAdminExpiresAt", values: void} | {tag: "Guardian", values: void} | {tag: "GuardianExpiresAt", values: void} | {tag: "Policy", values: readonly [OracleAsset]} | {tag: "ProviderAsset", values: readonly [OracleAsset, string]} | {tag: "Paused", values: readonly [OracleAsset]} | {tag: "LastWasmHash", values: void};
+export type DataKey = {tag: "Admin", values: void} | {tag: "Governor", values: void} | {tag: "BootstrapAdminExpiresAt", values: void} | {tag: "Guardian", values: void} | {tag: "GuardianExpiresAt", values: void} | {tag: "Policy", values: readonly [OracleAsset]} | {tag: "ProviderAsset", values: readonly [OracleAsset, string]} | {tag: "Paused", values: readonly [OracleAsset]} | {tag: "LastWasmHash", values: void} | {tag: "ProviderNormalization", values: readonly [string]};
 
 
 export interface AssetPolicy {
@@ -86,7 +86,24 @@ export interface OraclePriceData {
   timestamp: u64;
 }
 
+
+/**
+ * One explicit conversion leg from a provider's declared quote base to USD.
+ * This is not another independent price confirmation for the priced asset.
+ */
+export interface ProviderNormalization {
+  base_asset: OracleAsset;
+  conversion_asset: OracleAsset;
+  conversion_oracle: string;
+}
+
 export interface Client {
+  /**
+   * Construct and simulate a base transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * All prices exposed by this guard use USD and fourteen decimal places.
+   */
+  base: (options?: MethodOptions) => Promise<AssembledTransaction<OracleAsset>>
+
   /**
    * Construct and simulate a init transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
@@ -101,6 +118,11 @@ export interface Client {
    * Construct and simulate a upgrade transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
   upgrade: ({caller, new_wasm_hash}: {caller: string, new_wasm_hash: Buffer}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
+
+  /**
+   * Construct and simulate a decimals transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  decimals: (options?: MethodOptions) => Promise<AssembledTransaction<u32>>
 
   /**
    * Construct and simulate a guardian transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
@@ -183,6 +205,11 @@ export interface Client {
   bootstrap_admin_active: (options?: MethodOptions) => Promise<AssembledTransaction<boolean>>
 
   /**
+   * Construct and simulate a provider_normalization transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  provider_normalization: ({provider}: {provider: string}, options?: MethodOptions) => Promise<AssembledTransaction<Option<ProviderNormalization>>>
+
+  /**
    * Construct and simulate a stellar_provider_asset transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
   stellar_provider_asset: ({asset, provider}: {asset: string, provider: string}, options?: MethodOptions) => Promise<AssembledTransaction<Option<OracleAsset>>>
@@ -238,6 +265,11 @@ export interface Client {
   set_bootstrap_admin_expiry: ({caller, expires_at}: {caller: string, expires_at: u64}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
+   * Construct and simulate a set_provider_normalization transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  set_provider_normalization: ({caller, provider, normalization}: {caller: string, provider: string, normalization: ProviderNormalization}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
+
+  /**
    * Construct and simulate a set_stellar_provider_asset transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
   set_stellar_provider_asset: ({caller, asset, provider, provider_asset}: {caller: string, asset: string, provider: string, provider_asset: OracleAsset}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
@@ -268,6 +300,11 @@ export interface Client {
   clear_bootstrap_admin_expiry: ({caller}: {caller: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
 
   /**
+   * Construct and simulate a clear_provider_normalization transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  clear_provider_normalization: ({caller, provider}: {caller: string, provider: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
+
+  /**
    * Construct and simulate a clear_stellar_provider_asset transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
   clear_stellar_provider_asset: ({caller, asset, provider}: {caller: string, asset: string, provider: string}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
@@ -275,6 +312,8 @@ export interface Client {
 }
 export class Client extends ContractClient {
   static async deploy<T = Client>(
+        /** Constructor/Initialization Args for the contract's `__constructor` method */
+        {admin}: {admin: string},
     /** Options for initializing a Client as well as for calling a method, with extras specific to deploying. */
     options: MethodOptions &
       Omit<ContractClientOptions, "contractId"> & {
@@ -286,20 +325,23 @@ export class Client extends ContractClient {
         format?: "hex" | "base64";
       }
   ): Promise<AssembledTransaction<T>> {
-    return ContractClient.deploy(null, options)
+    return ContractClient.deploy({admin}, options)
   }
   constructor(public readonly options: ContractClientOptions) {
     super(
-      new ContractSpec([ "AAAAAAAAAAAAAAAEaW5pdAAAAAEAAAAAAAAABWFkbWluAAAAAAAAEwAAAAA=",
+      new ContractSpec([ "AAAAAAAAAEVBbGwgcHJpY2VzIGV4cG9zZWQgYnkgdGhpcyBndWFyZCB1c2UgVVNEIGFuZCBmb3VydGVlbiBkZWNpbWFsIHBsYWNlcy4AAAAAAAAEYmFzZQAAAAAAAAABAAAH0AAAAAtPcmFjbGVBc3NldAA=",
+        "AAAAAAAAAAAAAAAEaW5pdAAAAAEAAAAAAAAABWFkbWluAAAAAAAAEwAAAAA=",
         "AAAAAAAAAAAAAAAFYWRtaW4AAAAAAAAAAAAAAQAAABM=",
         "AAAAAAAAAAAAAAAHdXBncmFkZQAAAAACAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAADW5ld193YXNtX2hhc2gAAAAAAAPuAAAAIAAAAAA=",
         "AAAABAAAAAAAAAAAAAAABUVycm9yAAAAAAAABgAAAAAAAAASQWxyZWFkeUluaXRpYWxpemVkAAAAAAABAAAAAAAAAA5Ob3RJbml0aWFsaXplZAAAAAAAAgAAAAAAAAAMVW5hdXRob3JpemVkAAAAAwAAAAAAAAANSW52YWxpZFBvbGljeQAAAAAAAAQAAAAAAAAAD0ludmFsaWRHdWFyZGlhbgAAAAAFAAAAAAAAABVJbnZhbGlkQm9vdHN0cmFwQWRtaW4AAAAAAAAG",
+        "AAAAAAAAAAAAAAAIZGVjaW1hbHMAAAAAAAAAAQAAAAQ=",
         "AAAAAAAAAAAAAAAIZ3VhcmRpYW4AAAAAAAAAAQAAA+gAAAAT",
         "AAAAAAAAAAAAAAAJbGFzdHByaWNlAAAAAAAAAQAAAAAAAAAFYXNzZXQAAAAAAAfQAAAAC09yYWNsZUFzc2V0AAAAAAEAAAfQAAAAD09yYWNsZVByaWNlRGF0YQA=",
         "AAAAAAAAAAAAAAAJc2V0X2FkbWluAAAAAAAAAgAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAVhZG1pbgAAAAAAABMAAAAA",
-        "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAACQAAAAAAAAAAAAAABUFkbWluAAAAAAAAAAAAAAAAAAAIR292ZXJub3IAAAAAAAAAAAAAABdCb290c3RyYXBBZG1pbkV4cGlyZXNBdAAAAAAAAAAAAAAAAAhHdWFyZGlhbgAAAAAAAAAAAAAAEUd1YXJkaWFuRXhwaXJlc0F0AAAAAAAAAQAAAAAAAAAGUG9saWN5AAAAAAABAAAH0AAAAAtPcmFjbGVBc3NldAAAAAABAAAAAAAAAA1Qcm92aWRlckFzc2V0AAAAAAAAAgAAB9AAAAALT3JhY2xlQXNzZXQAAAAAEwAAAAEAAAAAAAAABlBhdXNlZAAAAAAAAQAAB9AAAAALT3JhY2xlQXNzZXQAAAAAAAAAAAAAAAAMTGFzdFdhc21IYXNo",
+        "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAACgAAAAAAAAAAAAAABUFkbWluAAAAAAAAAAAAAAAAAAAIR292ZXJub3IAAAAAAAAAAAAAABdCb290c3RyYXBBZG1pbkV4cGlyZXNBdAAAAAAAAAAAAAAAAAhHdWFyZGlhbgAAAAAAAAAAAAAAEUd1YXJkaWFuRXhwaXJlc0F0AAAAAAAAAQAAAAAAAAAGUG9saWN5AAAAAAABAAAH0AAAAAtPcmFjbGVBc3NldAAAAAABAAAAAAAAAA1Qcm92aWRlckFzc2V0AAAAAAAAAgAAB9AAAAALT3JhY2xlQXNzZXQAAAAAEwAAAAEAAAAAAAAABlBhdXNlZAAAAAAAAQAAB9AAAAALT3JhY2xlQXNzZXQAAAAAAAAAAAAAAAAMTGFzdFdhc21IYXNoAAAAAQAAAAAAAAAVUHJvdmlkZXJOb3JtYWxpemF0aW9uAAAAAAAAAQAAABM=",
         "AAAAAAAAAAAAAAAMc2V0X2dvdmVybm9yAAAAAgAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAhnb3Zlcm5vcgAAA+gAAAATAAAAAA==",
         "AAAAAAAAAAAAAAAMc2V0X2d1YXJkaWFuAAAAAwAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAhndWFyZGlhbgAAABMAAAAAAAAACmV4cGlyZXNfYXQAAAAAAAYAAAAA",
+        "AAAAAAAAAAAAAAANX19jb25zdHJ1Y3RvcgAAAAAAAAEAAAAAAAAABWFkbWluAAAAAAAAEwAAAAA=",
         "AAAAAQAAAAAAAAAAAAAAC0Fzc2V0UG9saWN5AAAAAAcAAAAAAAAAD2RpdmVyZ2VuY2VfbW9kZQAAAAAEAAAAAAAAAA1oYXNfc2Vjb25kYXJ5AAAAAAAAAQAAAAAAAAARbWF4X2RldmlhdGlvbl9icHMAAAAAAAAEAAAAAAAAAA1tYXhfcHJpY2VfYWdlAAAAAAAABgAAAAAAAAAHcHJpbWFyeQAAAAATAAAAAAAAABFyZXF1aXJlX3NlY29uZGFyeQAAAAAAAAEAAAAAAAAACXNlY29uZGFyeQAAAAAAABM=",
         "AAAAAgAAAAAAAAAAAAAAC09yYWNsZUFzc2V0AAAAAAIAAAABAAAAAAAAAAdTdGVsbGFyAAAAAAEAAAATAAAAAQAAAAAAAAAFT3RoZXIAAAAAAAABAAAAEQ==",
         "AAAAAAAAAAAAAAAOY2xlYXJfZ3VhcmRpYW4AAAAAAAEAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAA=",
@@ -316,8 +358,10 @@ export class Client extends ContractClient {
         "AAAAAAAAAAAAAAAUc3RlbGxhcl9hc3NldF9wb2xpY3kAAAABAAAAAAAAAAVhc3NldAAAAAAAABMAAAABAAAD6AAAB9AAAAALQXNzZXRQb2xpY3kA",
         "AAAAAAAAAAAAAAAVc3ltYm9sX3Byb3ZpZGVyX2Fzc2V0AAAAAAAAAgAAAAAAAAAGc3ltYm9sAAAAAAARAAAAAAAAAAhwcm92aWRlcgAAABMAAAABAAAD6AAAB9AAAAALT3JhY2xlQXNzZXQA",
         "AAAAAAAAAAAAAAAWYm9vdHN0cmFwX2FkbWluX2FjdGl2ZQAAAAAAAAAAAAEAAAAB",
+        "AAAAAAAAAAAAAAAWcHJvdmlkZXJfbm9ybWFsaXphdGlvbgAAAAAAAQAAAAAAAAAIcHJvdmlkZXIAAAATAAAAAQAAA+gAAAfQAAAAFVByb3ZpZGVyTm9ybWFsaXphdGlvbgAAAA==",
         "AAAAAAAAAAAAAAAWc3RlbGxhcl9wcm92aWRlcl9hc3NldAAAAAAAAgAAAAAAAAAFYXNzZXQAAAAAAAATAAAAAAAAAAhwcm92aWRlcgAAABMAAAABAAAD6AAAB9AAAAALT3JhY2xlQXNzZXQA",
         "AAAAAAAAAAAAAAAXc2V0X3N5bWJvbF9hc3NldF9wb2xpY3kAAAAACQAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAZzeW1ib2wAAAAAABEAAAAAAAAAB3ByaW1hcnkAAAAAEwAAAAAAAAAJc2Vjb25kYXJ5AAAAAAAAEwAAAAAAAAANaGFzX3NlY29uZGFyeQAAAAAAAAEAAAAAAAAADW1heF9wcmljZV9hZ2UAAAAAAAAGAAAAAAAAABFtYXhfZGV2aWF0aW9uX2JwcwAAAAAAAAQAAAAAAAAAEXJlcXVpcmVfc2Vjb25kYXJ5AAAAAAAAAQAAAAAAAAAPZGl2ZXJnZW5jZV9tb2RlAAAAAAQAAAAA",
+        "AAAAAQAAAJJPbmUgZXhwbGljaXQgY29udmVyc2lvbiBsZWcgZnJvbSBhIHByb3ZpZGVyJ3MgZGVjbGFyZWQgcXVvdGUgYmFzZSB0byBVU0QuClRoaXMgaXMgbm90IGFub3RoZXIgaW5kZXBlbmRlbnQgcHJpY2UgY29uZmlybWF0aW9uIGZvciB0aGUgcHJpY2VkIGFzc2V0LgAAAAAAAAAAABVQcm92aWRlck5vcm1hbGl6YXRpb24AAAAAAAADAAAAAAAAAApiYXNlX2Fzc2V0AAAAAAfQAAAAC09yYWNsZUFzc2V0AAAAAAAAAAAQY29udmVyc2lvbl9hc3NldAAAB9AAAAALT3JhY2xlQXNzZXQAAAAAAAAAABFjb252ZXJzaW9uX29yYWNsZQAAAAAAABM=",
         "AAAAAAAAAAAAAAAYc2V0X3N0ZWxsYXJfYXNzZXRfcG9saWN5AAAACQAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAVhc3NldAAAAAAAABMAAAAAAAAAB3ByaW1hcnkAAAAAEwAAAAAAAAAJc2Vjb25kYXJ5AAAAAAAAEwAAAAAAAAANaGFzX3NlY29uZGFyeQAAAAAAAAEAAAAAAAAADW1heF9wcmljZV9hZ2UAAAAAAAAGAAAAAAAAABFtYXhfZGV2aWF0aW9uX2JwcwAAAAAAAAQAAAAAAAAAEXJlcXVpcmVfc2Vjb25kYXJ5AAAAAAAAAQAAAAAAAAAPZGl2ZXJnZW5jZV9tb2RlAAAAAAQAAAAA",
         "AAAAAAAAAAAAAAAZY2xlYXJfc3ltYm9sX2Fzc2V0X3BvbGljeQAAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAGc3ltYm9sAAAAAAARAAAAAA==",
         "AAAAAAAAAAAAAAAZcGF1c2Vfc3ltYm9sX2Fzc2V0X3BvbGljeQAAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAGc3ltYm9sAAAAAAARAAAAAA==",
@@ -327,20 +371,24 @@ export class Client extends ContractClient {
         "AAAAAAAAAAAAAAAacGF1c2Vfc3RlbGxhcl9hc3NldF9wb2xpY3kAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFYXNzZXQAAAAAAAATAAAAAA==",
         "AAAAAAAAAAAAAAAacmVzdW1lX3N5bWJvbF9hc3NldF9wb2xpY3kAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAGc3ltYm9sAAAAAAARAAAAAA==",
         "AAAAAAAAAAAAAAAac2V0X2Jvb3RzdHJhcF9hZG1pbl9leHBpcnkAAAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAKZXhwaXJlc19hdAAAAAAABgAAAAA=",
+        "AAAAAAAAAAAAAAAac2V0X3Byb3ZpZGVyX25vcm1hbGl6YXRpb24AAAAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAIcHJvdmlkZXIAAAATAAAAAAAAAA1ub3JtYWxpemF0aW9uAAAAAAAH0AAAABVQcm92aWRlck5vcm1hbGl6YXRpb24AAAAAAAAA",
         "AAAAAAAAAAAAAAAac2V0X3N0ZWxsYXJfcHJvdmlkZXJfYXNzZXQAAAAAAAQAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFYXNzZXQAAAAAAAATAAAAAAAAAAhwcm92aWRlcgAAABMAAAAAAAAADnByb3ZpZGVyX2Fzc2V0AAAAAAfQAAAAC09yYWNsZUFzc2V0AAAAAAA=",
         "AAAAAAAAAAAAAAAac3ltYm9sX2Fzc2V0X3BvbGljeV9wYXVzZWQAAAAAAAEAAAAAAAAABnN5bWJvbAAAAAAAEQAAAAEAAAAB",
         "AAAAAAAAAAAAAAAbY2xlYXJfc3ltYm9sX3Byb3ZpZGVyX2Fzc2V0AAAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAGc3ltYm9sAAAAAAARAAAAAAAAAAhwcm92aWRlcgAAABMAAAAA",
         "AAAAAAAAAAAAAAAbcmVzdW1lX3N0ZWxsYXJfYXNzZXRfcG9saWN5AAAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFYXNzZXQAAAAAAAATAAAAAA==",
         "AAAAAAAAAAAAAAAbc3RlbGxhcl9hc3NldF9wb2xpY3lfcGF1c2VkAAAAAAEAAAAAAAAABWFzc2V0AAAAAAAAEwAAAAEAAAAB",
         "AAAAAAAAAAAAAAAcY2xlYXJfYm9vdHN0cmFwX2FkbWluX2V4cGlyeQAAAAEAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAA=",
+        "AAAAAAAAAAAAAAAcY2xlYXJfcHJvdmlkZXJfbm9ybWFsaXphdGlvbgAAAAIAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAIcHJvdmlkZXIAAAATAAAAAA==",
         "AAAAAAAAAAAAAAAcY2xlYXJfc3RlbGxhcl9wcm92aWRlcl9hc3NldAAAAAMAAAAAAAAABmNhbGxlcgAAAAAAEwAAAAAAAAAFYXNzZXQAAAAAAAATAAAAAAAAAAhwcm92aWRlcgAAABMAAAAA" ]),
       options
     )
   }
   public readonly fromJSON = {
-    init: this.txFromJSON<null>,
+    base: this.txFromJSON<OracleAsset>,
+        init: this.txFromJSON<null>,
         admin: this.txFromJSON<string>,
         upgrade: this.txFromJSON<null>,
+        decimals: this.txFromJSON<u32>,
         guardian: this.txFromJSON<Option<string>>,
         lastprice: this.txFromJSON<OraclePriceData>,
         set_admin: this.txFromJSON<null>,
@@ -357,6 +405,7 @@ export class Client extends ContractClient {
         stellar_asset_policy: this.txFromJSON<Option<AssetPolicy>>,
         symbol_provider_asset: this.txFromJSON<Option<OracleAsset>>,
         bootstrap_admin_active: this.txFromJSON<boolean>,
+        provider_normalization: this.txFromJSON<Option<ProviderNormalization>>,
         stellar_provider_asset: this.txFromJSON<Option<OracleAsset>>,
         set_symbol_asset_policy: this.txFromJSON<null>,
         set_stellar_asset_policy: this.txFromJSON<null>,
@@ -368,12 +417,14 @@ export class Client extends ContractClient {
         pause_stellar_asset_policy: this.txFromJSON<null>,
         resume_symbol_asset_policy: this.txFromJSON<null>,
         set_bootstrap_admin_expiry: this.txFromJSON<null>,
+        set_provider_normalization: this.txFromJSON<null>,
         set_stellar_provider_asset: this.txFromJSON<null>,
         symbol_asset_policy_paused: this.txFromJSON<boolean>,
         clear_symbol_provider_asset: this.txFromJSON<null>,
         resume_stellar_asset_policy: this.txFromJSON<null>,
         stellar_asset_policy_paused: this.txFromJSON<boolean>,
         clear_bootstrap_admin_expiry: this.txFromJSON<null>,
+        clear_provider_normalization: this.txFromJSON<null>,
         clear_stellar_provider_asset: this.txFromJSON<null>
   }
 }

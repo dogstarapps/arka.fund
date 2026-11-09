@@ -47,15 +47,15 @@ fn integration_updates_coverage_policy_through_executor() {
     set_default_ledger(&env);
 
     let admin = Address::generate(&env);
-    let executor_id = env.register_contract(None, GovernanceExecutor);
+    let executor_id = env.register(GovernanceExecutor, (&admin, &4u32, &25u32,));
     let executor = GovernanceExecutorClient::new(&env, &executor_id);
-    executor.init(&admin, &4, &25);
 
-    let fund_id = env.register_contract(None, CoverageFund);
-    let fund = CoverageFundClient::new(&env, &fund_id);
+
     let reserve = Address::generate(&env);
     let boot = Address::generate(&env);
-    fund.init(&admin, &reserve, &boot);
+    let fund_id = env.register(CoverageFund, (&admin, &reserve, &boot,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
+
     fund.set_governor(&admin, &executor_id);
 
     let treasury = Address::generate(&env);
@@ -86,11 +86,11 @@ fn integration_batches_factory_fee_defaults_through_executor() {
     set_default_ledger(&env);
 
     let admin = Address::generate(&env);
-    let executor_id = env.register_contract(None, GovernanceExecutor);
+    let executor_id = env.register(GovernanceExecutor, (&admin, &3u32, &30u32,));
     let executor = GovernanceExecutorClient::new(&env, &executor_id);
-    executor.init(&admin, &3, &30);
 
-    let factory_id = env.register_contract(None, ArkaFactory);
+
+    let factory_id = env.register(ArkaFactory, (&executor_id,));
     let factory = ArkaFactoryClient::new(&env, &factory_id);
     factory.set_governor(&executor_id);
 

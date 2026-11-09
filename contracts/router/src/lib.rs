@@ -66,7 +66,7 @@ impl Router {
         let Some(governor) = env
             .storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -86,7 +86,7 @@ impl Router {
                 }
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -130,7 +130,27 @@ impl Router {
         out_total
     }
 
+    /// None creates an immutable permissionless router with no upgrade owner.
+    pub fn __constructor(env: Env, admin: Option<Address>, governor: Option<Address>, expires_at: u64) {
+        if let Some(admin) = admin {
+            Self::initialize(env, admin, governor, expires_at);
+        } else {
+            assert!(governor.is_none() && expires_at == 0, "invalid_immutable_config");
+        }
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init_upgrade_authority(
+        env: Env,
+        admin: Address,
+        governor: Option<Address>,
+        expires_at: u64,
+    ) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(
         env: Env,
         admin: Address,
         governor: Option<Address>,

@@ -1,4 +1,8 @@
 use super::*;
+mod nav_hotfix;
+mod managed_withdrawals_tests;
+mod managed_portfolio_tests;
+mod managed_routes_tests;
 use adapter_blend::{BlendAdapter, BlendAdapterClient};
 use blend_router_mock::{BlendRouterMock, BlendRouterMockClient};
 use oracle_guard::{OracleGuard, OracleGuardClient};
@@ -50,6 +54,8 @@ struct DummyOracle;
 
 #[contractimpl]
 impl DummyOracle {
+    pub fn base(env: Env) -> OracleAsset { OracleAsset::Other(Symbol::new(&env, "USD")) }
+    pub fn decimals(_env: Env) -> u32 { 14 }
     pub fn set_price(env: Env, asset: Address, price: i128, timestamp: u64) {
         env.storage()
             .instance()
@@ -63,6 +69,9 @@ impl DummyOracle {
         let OracleAsset::Stellar(address) = asset else {
             panic!("unsupported_oracle_asset");
         };
+        let calls_key = (symbol_short!("calls"), address.clone());
+        let calls: u32 = env.storage().instance().get(&calls_key).unwrap_or(0);
+        env.storage().instance().set(&calls_key, &(calls + 1));
         OraclePriceData {
             price: env
                 .storage()
@@ -76,6 +85,13 @@ impl DummyOracle {
                 .unwrap_or(0u64),
         }
     }
+
+    pub fn calls(env: Env, asset: Address) -> u32 {
+        env.storage()
+            .instance()
+            .get(&(symbol_short!("calls"), asset))
+            .unwrap_or(0)
+    }
 }
 
 #[contract]
@@ -83,6 +99,7 @@ struct DummyVenueRegistry;
 
 #[contractimpl]
 impl DummyVenueRegistry {
+    pub fn is_exit_allowed(env: Env, venue: Address) -> bool { Self::is_allowed(env, venue) }
     pub fn set_allowed(env: Env, venue: Address, allowed: bool) {
         env.storage()
             .instance()
@@ -128,6 +145,25 @@ impl DummyBlendAdapter {
     ) -> i128 {
         caller.require_auth();
         amount
+    }
+}
+
+#[contract]
+struct DummyBlendV2Factory;
+
+#[contractimpl]
+impl DummyBlendV2Factory {
+    pub fn set_pool(env: Env, pool: Address, deployed_by_factory: bool) {
+        env.storage()
+            .instance()
+            .set(&(symbol_short!("pool"), pool), &deployed_by_factory);
+    }
+
+    pub fn is_pool(env: Env, pool: Address) -> bool {
+        env.storage()
+            .instance()
+            .get(&(symbol_short!("pool"), pool))
+            .unwrap_or(false)
     }
 }
 
@@ -177,9 +213,10 @@ fn setup_live_blend<'a>(
         &10_000_000i128,
     );
 
-    let adapter_id = env.register_contract(None, BlendAdapter);
+    
+    
+    let adapter_id = env.register(BlendAdapter, (mgr, &router_id,));
     let adapter = BlendAdapterClient::new(env, &adapter_id);
-    adapter.init(mgr, &router_id);
     (oracle_id, adapter_id, router)
 }
 
@@ -208,10 +245,11 @@ fn setup_live_blend_with_oracle_guard<'a>(
     secondary_oracle.set_price(denom, &10_000_000i128, &1_001u64);
     secondary_oracle.set_price(other, &secondary_other_price, &1_001u64);
 
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(env, &guard_id);
+    
+    
     let guard_admin = Address::generate(env);
-    guard.init(&guard_admin);
+    let guard_id = env.register(OracleGuard, (&guard_admin,));
+    let guard = OracleGuardClient::new(env, &guard_id);
     guard.set_stellar_asset_policy(
         &guard_admin,
         denom,
@@ -255,9 +293,10 @@ fn setup_live_blend_with_oracle_guard<'a>(
         &10_000_000i128,
     );
 
-    let adapter_id = env.register_contract(None, BlendAdapter);
+    
+    
+    let adapter_id = env.register(BlendAdapter, (mgr, &router_id,));
     let adapter = BlendAdapterClient::new(env, &adapter_id);
-    adapter.init(mgr, &router_id);
     (
         guard_id,
         adapter_id,
@@ -285,7 +324,8 @@ fn setup_arka_with_fees(
     };
     let wl = vec![env, token_id.clone()];
     let mgr = manager(env);
-    client.init(
+    client.mock_all_auths().set_manager(&mgr, &mgr);
+    client.mock_all_auths().init(
         &token_id,
         &mgmt_bps,
         &perf_bps,
@@ -318,6 +358,41 @@ fn configure_blend_credit_market(
         &true,
         &true,
     );
+    let denomination = client.denomination();
+    configure_blend_borrow_policy(client, mgr, market_id, &denomination.contract);
+    configure_blend_v2_risk_source(client, mgr, adapter, market_id);
+}
+
+fn configure_blend_v2_risk_source(
+    client: &ArkaContractClient<'_>,
+    mgr: &Address,
+    adapter: &Address,
+    market_id: u128,
+) -> Address {
+    let adapter_client = BlendAdapterClient::new(&client.env, adapter);
+    let router = adapter_client.router();
+    let factory_id = client.env.register_contract(None, DummyBlendV2Factory);
+    let factory = DummyBlendV2FactoryClient::new(&client.env, &factory_id);
+    factory.set_pool(&router, &true);
+    client.set_blend_v2_risk_source(mgr, &market_id, &factory_id);
+    factory_id
+}
+
+fn configure_blend_borrow_policy(
+    client: &ArkaContractClient<'_>,
+    mgr: &Address,
+    market_id: u128,
+    asset: &Address,
+) {
+    client.set_credit_borrow_policy(
+        mgr,
+        &CreditProtocol::Blend,
+        &market_id,
+        asset,
+        &1_000_000_000i128,
+        &1_000_000_000i128,
+        &true,
+    );
 }
 
 #[test]
@@ -335,6 +410,94 @@ fn test_init_and_deposit_redeem() {
     assert_eq!(out, 40);
     assert_eq!(client.nav(), 60);
     assert_eq!(client.liquid_balance(&token_id), 60);
+}
+
+#[test]
+fn test_multi_asset_deposits_are_valued_in_arka_denomination() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let other_token_id = env.register_contract(None, DummyToken);
+    let other_asset = Asset {
+        contract: other_token_id.clone(),
+    };
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+
+    client.set_whitelist(&mgr, &vec![&env, denom_id.clone(), other_token_id.clone()]);
+    let oracle_id = env.register_contract(None, DummyOracle);
+    let oracle = DummyOracleClient::new(&env, &oracle_id);
+    oracle.set_price(&denom_id, &2_000_000i128, &950u64);
+    oracle.set_price(&other_token_id, &10_000_000i128, &950u64);
+    client.set_valuation_oracle(&mgr, &oracle_id, &300u64);
+
+    assert_eq!(client.deposit(&user, &denom_asset, &100), 100);
+    assert_eq!(client.deposit(&user, &other_asset, &10), 50);
+    assert_eq!(client.nav(), 150);
+    assert_eq!(client.shares_of(&user), 150);
+
+    assert_eq!(client.redeem(&user, &30), 30);
+    assert_eq!(client.nav(), 120);
+    assert_eq!(client.shares_of(&user), 120);
+}
+
+#[test]
+#[should_panic]
+fn test_multi_asset_deposit_requires_valuation_oracle() {
+    let env = Env::default();
+    let (client, denom_id, mgr, _denom_asset) = setup_arka(&env);
+    let other_token_id = env.register_contract(None, DummyToken);
+    let other_asset = Asset {
+        contract: other_token_id.clone(),
+    };
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_whitelist(&mgr, &vec![&env, denom_id, other_token_id]);
+    client.deposit(&user, &other_asset, &10);
+}
+
+#[test]
+fn test_capital_actions_remain_available_after_blend_supply() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    assert_eq!(client.deposit(&user, &denom_asset, &100), 100);
+    assert_eq!(client.nav(), 1_100);
+    assert_eq!(client.redeem(&user, &50), 50);
+    assert_eq!(client.nav(), 1_050);
+}
+
+#[test]
+fn test_zero_accrual_fees_skip_settlement_on_capital_actions() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, _token_id, _mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+
+    client.deposit(&user, &denom_asset, &1_000);
+    let initial_state = client.fee_state();
+    env.ledger().set_timestamp(2_000);
+
+    client.deposit(&user, &denom_asset, &100);
+    assert_eq!(
+        client.fee_state().last_settlement_ts,
+        initial_state.last_settlement_ts
+    );
+
+    env.ledger().set_timestamp(3_000);
+    client.redeem(&user, &100);
+    assert_eq!(
+        client.fee_state().last_settlement_ts,
+        initial_state.last_settlement_ts
+    );
 }
 
 #[test]
@@ -381,6 +544,263 @@ fn test_share_token_mints_and_burns_with_deposit_and_redeem() {
     assert_eq!(out, 40);
     assert_eq!(client.shares_of(&user), 60);
     assert_eq!(client.liquid_balance(&denom_id), 60);
+}
+
+#[test]
+fn test_transferred_share_tokens_remain_redeemable() {
+    let env = Env::default();
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let share_token = DummyTokenClient::new(&env, &share_token_id);
+    let first_holder = Address::generate(&env);
+    let second_holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&first_holder, &denom_asset, &100);
+    share_token.transfer(&first_holder, &second_holder, &40);
+
+    assert_eq!(client.total_shares(), 100);
+    assert_eq!(client.shares_of(&first_holder), 60);
+    assert_eq!(client.shares_of(&second_holder), 40);
+    assert_eq!(client.redeem(&second_holder, &40), 40);
+    assert_eq!(client.total_shares(), 60);
+    assert_eq!(client.shares_of(&second_holder), 0);
+    assert_eq!(client.nav(), 60);
+}
+
+#[test]
+fn test_legacy_share_migration_is_atomic_and_resets_fee_baseline() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let first_holder = Address::generate(&env);
+    let second_holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&first_holder, &denom_asset, &100);
+    client.deposit(&second_holder, &denom_asset, &100);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+    env.ledger().set_timestamp(2_000);
+
+    client.migrate_share_accounting(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder: first_holder.clone(),
+                balance: 100,
+            },
+            ShareBalanceTarget {
+                holder: second_holder.clone(),
+                balance: 100,
+            },
+        ],
+    );
+
+    assert_eq!(client.share_accounting_version(), 2);
+    assert_eq!(client.shares_of(&first_holder), 100);
+    assert_eq!(client.shares_of(&second_holder), 100);
+    assert_eq!(client.fee_state().last_settlement_ts, 2_000);
+    assert_eq!(client.fee_state().high_water_mark, SHARE_PRICE_SCALE);
+    assert_eq!(client.redeem(&second_holder, &50), 50);
+}
+
+#[test]
+#[should_panic]
+fn test_legacy_share_migration_rejects_ownership_redistribution() {
+    let env = Env::default();
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let first_holder = Address::generate(&env);
+    let second_holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&first_holder, &denom_asset, &100);
+    client.deposit(&second_holder, &denom_asset, &100);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+
+    client.migrate_share_accounting(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder: first_holder,
+                balance: 50,
+            },
+            ShareBalanceTarget {
+                holder: second_holder,
+                balance: 150,
+            },
+        ],
+    );
+}
+
+#[test]
+fn test_legacy_share_migration_can_preserve_transferred_holder_balances() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let share_token = DummyTokenClient::new(&env, &share_token_id);
+    let first_holder = Address::generate(&env);
+    let second_holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&first_holder, &denom_asset, &100);
+    client.deposit(&second_holder, &denom_asset, &100);
+    share_token.transfer(&first_holder, &second_holder, &40);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+
+    let first_before = client.shares_of(&first_holder);
+    let second_before = client.shares_of(&second_holder);
+    let total_before = client.total_shares();
+    let nav_before = client.nav();
+
+    client.migrate_share_accounting(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder: first_holder.clone(),
+                balance: first_before,
+            },
+            ShareBalanceTarget {
+                holder: second_holder.clone(),
+                balance: second_before,
+            },
+        ],
+    );
+
+    assert_eq!(client.share_accounting_version(), 2);
+    assert_eq!(client.shares_of(&first_holder), first_before);
+    assert_eq!(client.shares_of(&second_holder), second_before);
+    assert_eq!(client.total_shares(), total_before);
+    assert_eq!(client.nav(), nav_before);
+    assert_eq!(client.redeem(&second_holder, &40), 40);
+}
+
+#[test]
+#[should_panic]
+fn test_legacy_share_migration_rejects_an_incomplete_holder_set() {
+    let env = Env::default();
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let first_holder = Address::generate(&env);
+    let second_holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&first_holder, &denom_asset, &100);
+    client.deposit(&second_holder, &denom_asset, &100);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+
+    client.migrate_share_accounting(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder: first_holder,
+                balance: 100,
+            },
+        ],
+    );
+}
+
+#[test]
+fn test_legacy_share_reconciliation_removes_declared_unbacked_shares() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let share_token = DummyTokenClient::new(&env, &share_token_id);
+    let holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&holder, &denom_asset, &100);
+    share_token.burn(&holder, &20);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+
+    let nav_before = client.nav();
+    client.reconcile_legacy_shares(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder: holder.clone(),
+                balance: 80,
+            },
+        ],
+        &20,
+    );
+
+    assert_eq!(client.share_accounting_version(), 2);
+    assert_eq!(client.total_shares(), 80);
+    assert_eq!(client.shares_of(&holder), 80);
+    assert_eq!(client.nav(), nav_before);
+}
+
+#[test]
+#[should_panic]
+fn test_legacy_share_reconciliation_rejects_wrong_unbacked_amount() {
+    let env = Env::default();
+    let (client, _denom_id, mgr, denom_asset) = setup_arka(&env);
+    let share_token_id = env.register_contract(None, DummyToken);
+    let share_token = DummyTokenClient::new(&env, &share_token_id);
+    let holder = Address::generate(&env);
+
+    env.mock_all_auths_allowing_non_root_auth();
+    client.set_share_token(&mgr, &share_token_id);
+    client.deposit(&holder, &denom_asset, &100);
+    share_token.burn(&holder, &20);
+    client.set_governor(&mgr, &mgr);
+    env.as_contract(&client.address, || {
+        env.storage()
+            .instance()
+            .remove(&DataKey::ShareAccountingVersion);
+    });
+
+    client.reconcile_legacy_shares(
+        &mgr,
+        &vec![
+            &env,
+            ShareBalanceTarget {
+                holder,
+                balance: 80,
+            },
+        ],
+        &19,
+    );
 }
 
 #[test]
@@ -439,7 +859,7 @@ fn test_performance_fee_uses_high_water_mark_without_double_charging() {
     env.ledger().set_timestamp(1_000);
     let (client, denom_id, mgr, denom_asset) = setup_arka_with_fees(&env, 0, 2_000, 0, 0);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
 
     env.mock_all_auths_allowing_non_root_auth();
@@ -483,7 +903,7 @@ fn test_rebalance_blocks_non_whitelisted_assets() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
     let out_asset = Address::generate(&env);
 
@@ -518,7 +938,7 @@ fn test_rebalance_blocks_disallowed_internal_adapter() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
 
     env.mock_all_auths_allowing_non_root_auth();
@@ -551,7 +971,7 @@ fn test_rebalance_allows_globally_enabled_internal_adapter() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
     let venue_registry_id = env.register_contract(None, DummyVenueRegistry);
     let venue_registry = DummyVenueRegistryClient::new(&env, &venue_registry_id);
@@ -588,7 +1008,7 @@ fn test_rebalance_blocks_globally_disabled_adapter_even_without_local_swap_polic
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
     let venue_registry_id = env.register_contract(None, DummyVenueRegistry);
     let venue_registry = DummyVenueRegistryClient::new(&env, &venue_registry_id);
@@ -625,7 +1045,7 @@ fn test_rebalance_blocks_trade_size_over_policy_cap() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
 
     env.mock_all_auths_allowing_non_root_auth();
@@ -660,7 +1080,7 @@ fn test_rebalance_blocks_stale_swap_oracle_data() {
     env.ledger().set_timestamp(2_000);
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
     let oracle_id = env.register_contract(None, DummyOracle);
     let oracle = DummyOracleClient::new(&env, &oracle_id);
@@ -699,7 +1119,7 @@ fn test_rebalance_blocks_price_impact_over_policy_cap() {
     env.ledger().set_timestamp(2_000);
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
     let user = Address::generate(&env);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, profit_adapter_contract::ProfitAdapter);
     let oracle_id = env.register_contract(None, DummyOracle);
     let oracle = DummyOracleClient::new(&env, &oracle_id);
@@ -818,6 +1238,33 @@ fn test_blend_withdraw_uses_actual_token_delta_when_pool_rounds_down() {
 }
 
 #[test]
+fn test_blend_supply_tracks_the_pool_collateral_amount() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    // The pool stores collateral as shares. A non-unit rate makes the
+    // withdrawable amount one unit lower than the requested supply amount.
+    router.set_reserve(
+        &denom_id,
+        &0u32,
+        &9_000_000u32,
+        &997_500_000_000i128,
+        &1_000_000_000_000i128,
+        &10_000_000i128,
+    );
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    let position = client.blend_position(&0u128, &denom_id).unwrap();
+    assert_eq!(position.collateral_amount, 399);
+}
+
+#[test]
 fn test_blend_borrow_uses_actual_token_delta_without_understating_debt() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
@@ -841,6 +1288,63 @@ fn test_blend_borrow_uses_actual_token_delta_without_understating_debt() {
     assert_eq!(client.liquid_balance(&denom_id), 698);
     assert_eq!(token.balance(&arka_id), 698);
     assert_eq!(client.nav(), 998);
+}
+
+#[test]
+fn test_credit_actions_reconcile_live_blend_share_rounding() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    let arka_id = client.address.clone();
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+    let debt_asset = env.register_contract(None, DummyToken);
+    let debt_token = DummyTokenClient::new(&env, &debt_asset);
+    client.set_whitelist(&mgr, &vec![&env, denom_id.clone(), debt_asset.clone()]);
+    router.set_reserve(
+        &debt_asset,
+        &1u32,
+        &9_000_000u32,
+        &1_000_000_000_000i128,
+        &1_001_000_000_000i128,
+        &10_000_000i128,
+    );
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    // Emulate the pool state after interest accrual: local records from an
+    // older Arka build remain at 400/0 while Blend now holds 401 collateral
+    // units and two debt shares worth 3 units after repayment rounding. The
+    // debt asset has no local Arka position, matching the residual tiny debt
+    // created by the prior accounting implementation.
+    router.set_reserve(
+        &denom_id,
+        &0u32,
+        &9_000_000u32,
+        &1_002_500_000_000i128,
+        &1_001_000_000_000i128,
+        &10_000_000i128,
+    );
+    router.set_collateral(&arka_id, &denom_id, &400);
+    router.set_debt(&arka_id, &debt_asset, &2);
+    debt_token.mint(&arka_id, &3);
+    env.as_contract(&arka_id, || {
+        ArkaContract::add_liquid_balance(&env, &debt_asset, 3)
+    });
+
+    client.credit_repay(&mgr, &CreditProtocol::Blend, &0u128, &debt_asset, &3);
+    assert!(client
+        .credit_position(&CreditProtocol::Blend, &0u128, &debt_asset)
+        .is_none());
+    assert_eq!(client.liquid_balance(&debt_asset), 0);
+
+    client.credit_withdraw(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &401);
+    assert!(client
+        .credit_position(&CreditProtocol::Blend, &0u128, &denom_id)
+        .is_none());
+    assert_eq!(client.liquid_balance(&denom_id), 1_001);
 }
 
 #[test]
@@ -870,6 +1374,7 @@ fn test_blend_supports_multiple_assets_within_whitelist() {
     let oracle = DummyOracleClient::new(&env, &oracle_id);
     oracle.set_price(&denom_id, &10_000_000i128, &123u64);
     oracle.set_price(&other_token_id, &15_000_000i128, &124u64);
+    client.set_valuation_oracle(&mgr, &oracle_id, &DEFAULT_BLEND_MAX_ORACLE_AGE);
     let router_id = env.register_contract(None, BlendRouterMock);
     let router = BlendRouterMockClient::new(&env, &router_id);
     router.set_oracle(&oracle_id);
@@ -889,9 +1394,10 @@ fn test_blend_supports_multiple_assets_within_whitelist() {
         &1_000_000_000_000i128,
         &10_000_000i128,
     );
-    let adapter_id = env.register_contract(None, BlendAdapter);
+    
+    
+    let adapter_id = env.register(BlendAdapter, (&mgr, &router_id,));
     let adapter = BlendAdapterClient::new(&env, &adapter_id);
-    adapter.init(&mgr, &router_id);
     client.deposit(&user, &denom_asset, &1_000);
     configure_blend_credit_market(&client, &mgr, &adapter_id, 7u128);
     client.blend_lend(&mgr, &adapter_id, &7u128, &denom_id, &400);
@@ -903,6 +1409,7 @@ fn test_blend_supports_multiple_assets_within_whitelist() {
         &true,
         &true,
     );
+    configure_blend_borrow_policy(&client, &mgr, 7u128, &other_token_id);
     client.blend_borrow(&mgr, &adapter_id, &7u128, &other_token_id, &200);
 
     let collateral = client.blend_position(&7u128, &denom_id).unwrap();
@@ -918,7 +1425,20 @@ fn test_blend_supports_multiple_assets_within_whitelist() {
 
     let market_value = client.blend_market_value(&7u128).unwrap();
     assert!(market_value.net_value > 0);
-    assert_eq!(client.nav(), 900);
+    // Borrowing moves value from Blend debt into liquid assets; it does not
+    // destroy NAV. Both sides are converted to the Arka denomination.
+    assert_eq!(client.nav(), 1_000);
+
+    let denom_calls_before = oracle.calls(&denom_id);
+    let other_calls_before = oracle.calls(&other_token_id);
+    let status = client.blend_market_status(&7u128).unwrap();
+
+    assert!(!status.risky_actions_blocked);
+    // A market status check prices the denomination once and each other live
+    // position once. Repeating denomination oracle calls grows execution cost
+    // with every borrowed asset and can exhaust Soroban transaction budget.
+    assert_eq!(oracle.calls(&denom_id), denom_calls_before + 1);
+    assert_eq!(oracle.calls(&other_token_id), other_calls_before + 1);
 }
 
 #[test]
@@ -952,6 +1472,7 @@ fn test_oracle_guard_uses_secondary_feed_for_divergent_borrow_asset() {
         &true,
         &true,
     );
+    configure_blend_borrow_policy(&client, &mgr, 9u128, &other_token_id);
     client.blend_borrow(&mgr, &adapter_id, &9u128, &other_token_id, &200);
 
     let debt = client
@@ -998,6 +1519,7 @@ fn test_oracle_guard_fail_closed_blocks_divergent_borrow_asset() {
         &true,
         &true,
     );
+    configure_blend_borrow_policy(&client, &mgr, 10u128, &other_token_id);
     client.blend_borrow(&mgr, &adapter_id, &10u128, &other_token_id, &200);
 }
 
@@ -1193,6 +1715,218 @@ fn test_credit_market_capabilities_block_disallowed_action() {
 }
 
 #[test]
+fn test_credit_borrow_policy_is_governed_readable_and_allows_bounded_borrowing() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.set_credit_borrow_policy(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &denom_id,
+        &75i128,
+        &150i128,
+        &true,
+    );
+
+    let policy = client
+        .credit_borrow_policy(&CreditProtocol::Blend, &0u128, &denom_id)
+        .unwrap();
+    assert_eq!(policy.max_borrow_per_action, 75);
+    assert_eq!(policy.max_debt_for_asset, 150);
+    assert!(policy.enabled);
+
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    let out = client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &75);
+    assert_eq!(out, 75);
+    assert_eq!(
+        client
+            .credit_position(&CreditProtocol::Blend, &0u128, &denom_id)
+            .unwrap()
+            .debt_amount,
+        75
+    );
+}
+
+#[test]
+fn test_verified_blend_v2_source_accepts_permissionless_active_status() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    let source = client.blend_v2_risk_source(&0u128).unwrap();
+    assert_eq!(source.market_id, 0);
+    router.set_pool_status(&1u32);
+
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    assert_eq!(
+        client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &75),
+        75
+    );
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #36)")]
+fn test_credit_borrow_requires_verified_blend_v2_source() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    client.configure_credit_market(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &adapter_id,
+        &true,
+        &true,
+        &true,
+        &true,
+        &true,
+    );
+    client.set_credit_borrow_policy(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &denom_id,
+        &75i128,
+        &150i128,
+        &true,
+    );
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &1);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #37)")]
+fn test_blend_v2_risk_source_rejects_pool_not_deployed_by_factory() {
+    let env = Env::default();
+    let (client, denom_id, mgr, _denom_asset) = setup_arka(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.configure_credit_market(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &adapter_id,
+        &true,
+        &true,
+        &true,
+        &true,
+        &true,
+    );
+    let factory_id = env.register_contract(None, DummyBlendV2Factory);
+    client.set_blend_v2_risk_source(&mgr, &0u128, &factory_id);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #33)")]
+fn test_credit_borrow_requires_explicit_borrow_policy() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    client.configure_credit_market(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &adapter_id,
+        &true,
+        &true,
+        &true,
+        &true,
+        &true,
+    );
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &1);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #34)")]
+fn test_credit_borrow_rejects_amount_over_per_action_limit() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.set_credit_borrow_policy(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &denom_id,
+        &75i128,
+        &150i128,
+        &true,
+    );
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &76);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #34)")]
+fn test_credit_borrow_rejects_debt_over_asset_limit() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.set_credit_borrow_policy(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &denom_id,
+        &100i128,
+        &150i128,
+        &true,
+    );
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+    client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &100);
+
+    client.credit_borrow(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &51);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #35)")]
+fn test_credit_borrow_policy_rejects_invalid_limits() {
+    let env = Env::default();
+    let (client, denom_id, mgr, _denom_asset) = setup_arka(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+
+    client.set_credit_borrow_policy(
+        &mgr,
+        &CreditProtocol::Blend,
+        &0u128,
+        &denom_id,
+        &101i128,
+        &100i128,
+        &true,
+    );
+}
+
+#[test]
 fn test_blend_position_value_uses_live_pool_rates() {
     let env = Env::default();
     let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
@@ -1200,6 +1934,14 @@ fn test_blend_position_value_uses_live_pool_rates() {
     env.mock_all_auths_allowing_non_root_auth();
     let (oracle_id, adapter_id, router) = setup_live_blend(&env, &mgr, &denom_id);
     let oracle = DummyOracleClient::new(&env, &oracle_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.blend_lend(&mgr, &adapter_id, &0u128, &denom_id, &400);
+    client.blend_borrow(&mgr, &adapter_id, &0u128, &denom_id, &100);
+
+    // Accrual changes the value of the existing Blend shares; Arka must show
+    // those live values rather than the amounts recorded at action time.
     router.set_reserve(
         &denom_id,
         &0u32,
@@ -1209,11 +1951,6 @@ fn test_blend_position_value_uses_live_pool_rates() {
         &10_000_000i128,
     );
     oracle.set_price(&denom_id, &10_000_000i128, &456u64);
-
-    client.deposit(&user, &denom_asset, &1_000);
-    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
-    client.blend_lend(&mgr, &adapter_id, &0u128, &denom_id, &400);
-    client.blend_borrow(&mgr, &adapter_id, &0u128, &denom_id, &100);
 
     let position_value = client.blend_position_value(&0u128, &denom_id).unwrap();
     assert_eq!(position_value.collateral_amount, 440);
@@ -1244,6 +1981,70 @@ fn test_blend_market_status_blocks_stale_nav() {
     let status = client.blend_market_status(&0u128).unwrap();
     assert!(status.has_stale_oracle);
     assert!(status.nav_blocked);
+}
+
+#[test]
+fn test_blend_market_status_reads_each_live_oracle_price_once() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+    let oracle = DummyOracleClient::new(&env, &oracle_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    let calls_before = oracle.calls(&denom_id);
+    let status = client.blend_market_status(&0u128).unwrap();
+
+    assert!(status.has_live_pricing);
+    assert_eq!(oracle.calls(&denom_id), calls_before + 1);
+}
+
+
+#[test]
+fn test_supply_only_blend_withdraw_does_not_run_a_debt_health_check() {
+    let env = Env::default();
+    let (client, denom_id, mgr, denom_asset) = setup_arka(&env);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+    let oracle = DummyOracleClient::new(&env, &oracle_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    let calls_before = oracle.calls(&denom_id);
+    client.credit_withdraw(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    assert_eq!(client.liquid_balance(&denom_id), 1_000);
+    // A fee-free Arka does not need a NAV valuation to accrue fees. A
+    // debt-free withdrawal must not query the oracle after pool execution.
+    assert_eq!(oracle.calls(&denom_id), calls_before);
+}
+
+#[test]
+fn test_credit_actions_settle_management_fees_when_enabled() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    let (client, denom_id, mgr, denom_asset) = setup_arka_with_fees(&env, 1_000, 0, 0, 0);
+    let user = Address::generate(&env);
+    env.mock_all_auths_allowing_non_root_auth();
+    let (_oracle_id, adapter_id, _router) = setup_live_blend(&env, &mgr, &denom_id);
+
+    client.deposit(&user, &denom_asset, &1_000);
+    configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
+    env.ledger()
+        .set_timestamp(1_000 + (YEAR_SECONDS as u64 / 2));
+
+    client.credit_supply(&mgr, &CreditProtocol::Blend, &0u128, &denom_id, &400);
+
+    let fee_state = client.fee_state();
+    assert_eq!(fee_state.cumulative_management_shares, 52);
+    assert_eq!(client.shares_of(&mgr), 52);
 }
 
 #[test]
@@ -1348,7 +2149,8 @@ fn test_invalid_fee_bps_rejected() {
     let token_id = env.register_contract(None, DummyToken);
     let wl = vec![&env, token_id.clone()];
     let mgr = manager(&env);
-    client.init(&token_id, &20_000, &0, &0, &0, &wl, &mgr);
+    client.mock_all_auths().set_manager(&mgr, &mgr);
+    client.mock_all_auths().init(&token_id, &20_000, &0, &0, &0, &wl, &mgr);
 }
 
 #[test]
@@ -1382,12 +2184,13 @@ fn test_blend_lend_with_real_adapter_authorizes_pool_submit() {
         &1_000_000_000_000i128,
         &10_000_000i128,
     );
-    let adapter_id = env.register_contract(None, BlendAdapter);
-    let adapter = BlendAdapterClient::new(&env, &adapter_id);
+    
+    
     let user = Address::generate(&env);
     let arka_id = client.address.clone();
     env.mock_all_auths_allowing_non_root_auth();
-    adapter.init(&mgr, &router_id);
+    let adapter_id = env.register(BlendAdapter, (&mgr, &router_id,));
+    let adapter = BlendAdapterClient::new(&env, &adapter_id);
     client.deposit(&user, &denom_asset, &1_000);
     configure_blend_credit_market(&client, &mgr, &adapter_id, 0u128);
     client.blend_lend(&mgr, &adapter_id, &0u128, &denom_id, &400);

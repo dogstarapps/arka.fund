@@ -85,6 +85,7 @@ export interface HumanCreditActionInput extends Omit<HumanBlendActionInput, "ada
 }
 
 export interface HumanRoutingInput {
+  fundId?: string;
   protocol?: RoutingProtocol;
   amount: string;
   decimals?: number;
@@ -331,6 +332,7 @@ export class ArkaWorkflow {
     const decimals = input.decimals ?? 7;
     const amountBase = safeNumber(parseAssetAmount(input.amount, decimals), "amount");
     const request: RoutingPlanRequest = {
+      fundId: input.fundId ? ensureSorobanAddress(input.fundId,"fundId") : undefined,
       requestedProtocol: input.protocol ?? "AUTO",
       amountBase,
       tokenIn: input.tokenIn,
@@ -503,7 +505,7 @@ export class ArkaWorkflow {
   }
 
   private toExecutionStep(input: {
-    protocol: "SOROSWAP" | "AQUARIUS" | "PHOENIX";
+    protocol: "SOROSWAP" | "AQUARIUS" | "PHOENIX" | "SUSHI";
     amountInBase: number;
     minOutBase: number;
     pathAssets: string[];
@@ -514,13 +516,16 @@ export class ArkaWorkflow {
     if (input.protocol !== "SOROSWAP" && input.pathAssets.length !== 2) {
       throw new Error("Vault multi-hop execution is supported only for SoroSwap routes");
     }
+    if(input.protocol==='PHOENIX')throw new Error('Phoenix has been retired from new routes.');
+    if(input.protocol==='SUSHI'&&!input.adapterId&&!this.contracts.adapterSushi)throw new Error('Sushi adapter is not configured.');
     const adapters = {
       SOROSWAP: this.contracts.adapterSoroswap,
       AQUARIUS: this.contracts.adapterAquarius,
       PHOENIX: this.contracts.adapterPhoenix,
+      SUSHI: this.contracts.adapterSushi,
     } as const;
     return {
-      adapter: input.adapterId ?? adapters[input.protocol],
+      adapter: input.adapterId ?? adapters[input.protocol]!,
       router: this.contracts.router,
       poolId: input.poolId ?? 1,
       assetIn: input.pathAssets[0],

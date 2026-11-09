@@ -107,8 +107,8 @@ impl DummyPhoenixPool {
 #[test]
 fn test_execute_swaps_through_phoenix_pool_and_sends_output_to_receiver() {
     let env = Env::default();
-    let id = env.register_contract(None, PhoenixAdapter);
-    let client = PhoenixAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let caller = Address::generate(&env);
     let receiver = Address::generate(&env);
@@ -119,7 +119,8 @@ fn test_execute_swaps_through_phoenix_pool_and_sends_output_to_receiver() {
     let pool = env.register_contract(None, DummyPhoenixPool);
     let pool_client = DummyPhoenixPoolClient::new(&env, &pool);
 
-    client.init(&admin);
+    let id = env.register(PhoenixAdapter, (&admin,));
+    let client = PhoenixAdapterClient::new(&env, &id);
     env.mock_all_auths();
     pool_client.init(&token_out);
     client.set_pool_route(&admin, &1u128, &pool, &token_in, &token_out, &100, &30);
@@ -139,8 +140,8 @@ fn test_execute_swaps_through_phoenix_pool_and_sends_output_to_receiver() {
 #[should_panic]
 fn test_execute_requires_caller_auth() {
     let env = Env::default();
-    let id = env.register_contract(None, PhoenixAdapter);
-    let client = PhoenixAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let caller = Address::generate(&env);
     let receiver = Address::generate(&env);
@@ -148,7 +149,8 @@ fn test_execute_requires_caller_auth() {
     let token_out = env.register_contract(None, DummyToken);
     let pool = env.register_contract(None, DummyPhoenixPool);
 
-    client.init(&admin);
+    let id = env.register(PhoenixAdapter, (&admin,));
+    let client = PhoenixAdapterClient::new(&env, &id);
     client
         .mock_all_auths()
         .set_pool_route(&admin, &1u128, &pool, &token_in, &token_out, &100, &30);
@@ -160,7 +162,7 @@ fn test_execute_requires_caller_auth() {
 #[should_panic(expected = "pool_route_not_set")]
 fn test_execute_requires_pool_route() {
     let env = Env::default();
-    let id = env.register_contract(None, PhoenixAdapter);
+    let id = env.register(PhoenixAdapter, (Address::generate(&env),));
     let client = PhoenixAdapterClient::new(&env, &id);
     env.mock_all_auths();
     client.execute(
@@ -176,15 +178,37 @@ fn test_execute_requires_pool_route() {
 #[should_panic(expected = "only_admin")]
 fn test_pool_route_is_admin_gated() {
     let env = Env::default();
-    let id = env.register_contract(None, PhoenixAdapter);
-    let client = PhoenixAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let caller = Address::generate(&env);
     let pool = Address::generate(&env);
     let token_in = Address::generate(&env);
     let token_out = Address::generate(&env);
 
-    client.init(&admin);
+    let id = env.register(PhoenixAdapter, (&admin,));
+    let client = PhoenixAdapterClient::new(&env, &id);
     env.mock_all_auths();
     client.set_pool_route(&caller, &1u128, &pool, &token_in, &token_out, &100, &30);
+}
+
+
+#[test]
+fn optional_governor_clear_keeps_admin_rotation_and_expiry_enforced() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let replacement = Address::generate(&env);
+    let id = env.register(PhoenixAdapter, (&admin,));
+    let client = PhoenixAdapterClient::new(&env, &id);
+    client.set_governor(&admin, &Some(governor));
+    client.set_governor(&admin, &None);
+    client.set_admin(&admin, &replacement);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    client.set_bootstrap_admin_expiry(&replacement, &1_010u64);
+    env.ledger().set_timestamp(1_020);
+    assert!(client.try_set_governor(&replacement, &Some(replacement.clone())).is_err());
 }

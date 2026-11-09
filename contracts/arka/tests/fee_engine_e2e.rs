@@ -62,7 +62,7 @@ fn fee_engine_end_to_end_settles_performance_and_preserves_fee_ownership_on_rede
     let arka_id = env.register_contract(None, ArkaContract);
     let client = ArkaContractClient::new(&env, &arka_id);
     let token_id = env.register_contract(None, DummyToken);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, ProfitAdapter);
     let manager = Address::generate(&env);
     let treasury = Address::generate(&env);
@@ -73,6 +73,7 @@ fn fee_engine_end_to_end_settles_performance_and_preserves_fee_ownership_on_rede
     };
 
     env.mock_all_auths_allowing_non_root_auth();
+    client.set_manager(&manager, &manager);
     client.init(&token_id, &0, &2_000, &0, &0, &whitelist, &manager);
     client.set_router(&manager, &router_id);
     client.set_protocol_fee_policy(&manager, &treasury, &0, &5_000);

@@ -20,6 +20,7 @@ import {
   type AssetInspection,
   type AssetPolicy,
   type OraclePriceData,
+  type ProviderNormalization,
 } from "../generated/oracle-guard.js";
 
 export const DivergenceMode = {
@@ -80,6 +81,53 @@ export class OracleGuardModule {
   async admin(): Promise<string> {
     const assembled = await this.client.admin(mergeCallOptions(this.config, undefined, true));
     return expectSimulationResult(assembled, "admin");
+  }
+
+  async quoteMetadata(): Promise<{ base: OracleAsset; decimals: number }> {
+    const options = mergeCallOptions(this.config, undefined, true);
+    const base = expectSimulationResult(await this.client.base(options), "base");
+    const decimals = expectSimulationResult(await this.client.decimals(options), "decimals");
+    return { base, decimals };
+  }
+
+  async providerNormalization(provider: string): Promise<ProviderNormalization | null> {
+    return expectSimulationResult(
+      await this.client.provider_normalization(
+        { provider: ensureSorobanAddress(provider, "provider") },
+        mergeCallOptions(this.config, undefined, true),
+      ),
+      "provider_normalization",
+    );
+  }
+
+  buildSetProviderNormalization(
+    caller: string,
+    provider: string,
+    normalization: ProviderNormalization,
+    options?: ArkafundCallOptions,
+  ): Promise<AssembledTransaction<null>> {
+    return this.client.set_provider_normalization(
+      {
+        caller: ensureSorobanAddress(caller, "caller"),
+        provider: ensureSorobanAddress(provider, "provider"),
+        normalization: {
+          ...normalization,
+          conversion_oracle: ensureSorobanAddress(normalization.conversion_oracle, "conversion_oracle"),
+        },
+      },
+      mergeCallOptions(this.config, options),
+    );
+  }
+
+  buildClearProviderNormalization(
+    caller: string,
+    provider: string,
+    options?: ArkafundCallOptions,
+  ): Promise<AssembledTransaction<null>> {
+    return this.client.clear_provider_normalization(
+      { caller: ensureSorobanAddress(caller, "caller"), provider: ensureSorobanAddress(provider, "provider") },
+      mergeCallOptions(this.config, options),
+    );
   }
 
   async setStellarPolicy(

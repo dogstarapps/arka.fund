@@ -628,7 +628,18 @@ impl CoverageFund {
         }
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(env: Env, admin: Address, reserve_token: Address, bootstrap_token: Address) {
+        Self::initialize(env, admin, reserve_token, bootstrap_token);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, reserve_token: Address, bootstrap_token: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, reserve_token: Address, bootstrap_token: Address) {
         let store = env.storage().instance();
         if store.has(&DataKey::Admin) {
             panic_with_error!(&env, Error::AlreadyInitialized);

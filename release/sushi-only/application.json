@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "revision": "R60",
+  "baseRuntimeReleaseId": "37506f89145749947806f59cab91b4ac94c0e62e3780277a59f5e7fdfd84f0db",
+  "network": "Public Global Stellar Network ; September 2015",
+  "mainnetApproved": false,
+  "authority": {
+    "address": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "changed": false,
+    "newCouncil": false
+  },
+  "noah": {
+    "version": 2,
+    "migrate": false,
+    "touch": false
+  },
+  "scope": {
+    "shared": [
+      "governance-executor",
+      "arka-factory",
+      "arka-registry",
+      "venue-registry",
+      "router",
+      "oracle-guard",
+      "adapter-sushi"
+    ],
+    "templates": [
+      "arka",
+      "share-token"
+    ],
+    "protocols": [
+      "Sushi"
+    ],
+    "retirePhoenix": "new managed routes only",
+    "deferred": [
+      "SoroSwap",
+      "Aquarius",
+      "Balanced",
+      "RWA",
+      "Curve"
+    ]
+  },
+  "code": [
+    {
+      "role": "governance-executor",
+      "file": "release/wasm/governance-executor.wasm",
+      "sha256": "7704a9c78fe92431203501be8a387dc45b665bb00a7f30ee90e4a76ebccdc465",
+      "bytes": 17423
+    },
+    {
+      "role": "arka-factory",
+      "file": "release/wasm/arka-factory.wasm",
+      "sha256": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
+      "bytes": 46432
+    },
+    {
+      "role": "arka-registry",
+      "file": "release/wasm/arka-registry.wasm",
+      "sha256": "c6ef013cc807e2519966a3992382939a54c83e73ba662fff602fe0d43db9f1e6",
+      "bytes": 11913
+    },
+    {
+      "role": "venue-registry",
+      "file": "release/wasm/venue-registry.wasm",
+      "sha256": "86e9af8430ed9db3bfed015d3e12e30ee443bdeb0dee9c23ec0e0c6543bc037f",
+      "bytes": 10419
+    },
+    {
+      "role": "router",
+      "file": "release/wasm/router.wasm",
+      "sha256": "0e2317c60464754354c59fe854c73060c28827ea1e05d429078f37b98f85385d",
+      "bytes": 7569
+    },
+    {
+      "role": "oracle-guard",
+      "file": "release/wasm/oracle-guard.wasm",
+      "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+      "bytes": 35258
+    },
+    {
+      "role": "adapter-sushi",
+      "file": "release/wasm/adapter-sushi.wasm",
+      "sha256": "cb0b6341e44d743e03f1f601738b4318843d60b9be1e46638e65e8d04c4cd1e7",
+      "bytes": 10625
+    },
+    {
+      "role": "arka",
+      "file": "release/wasm/arka.wasm",
+      "sha256": "7ea4f823c87d3fd887ea13b51804dd52fee0ba63d12e19e5e264bff6deb7f007",
+      "bytes": 130856
+    },
+    {
+      "role": "share-token",
+      "file": "release/wasm/share-token.wasm",
+      "sha256": "aec9440d24660e82573b4f20bff0cf2d96c821a77c31a705842520bc628b7ad3",
+      "bytes": 11110
+    }
+  ],
+  "creation": {
+    "method": "create_managed_routes",
+    "bootstrapAuxiliaries": false,
+    "allowedAdapterRoles": [
+      "adapter-sushi"
+    ],
+    "borrowEnabled": false
+  },
+  "oracle": {
+    "base": "USD",
+    "decimals": 14,
+    "conversion": "explicit governed one-leg conversion",
+    "relaxAgeOrDivergence": false
+  },
+  "lifecycle": {
+    "initialManualEnabled": false,
+    "autoEnabled": false,
+    "callerInitiallyAllowed": false,
+    "activation": "explicit governed allowlist/caller and manual activation after qualification",
+    "guardian": "disable only",
+    "recovery": "governed timelock; same existing root authority",
+    "pauseDoesNotCancelFixedClaims": true
+  },
+  "target": {
+    "status": "unqualified",
+    "addresses": null,
+    "salts": null,
+    "constructorArguments": null,
+    "templateHash": null,
+    "rpcUrl": null,
+    "catalogUrl": null,
+    "timelock": {
+      "unit": "ledger",
+      "minimumDelay": null,
+      "gracePeriod": null,
+      "legacyRawPolicyMustNotBeCopied": true
+    },
+    "creationFee": {
+      "amountRaw": null,
+      "treasury": null,
+      "lastObservedAmountRaw": "100000000",
+      "replayFixtureAmountRaw": "50000000",
+      "changeAuthorized": false
+    },
+    "liquidityAndTtlEvidence": null
+  },
+  "frontend": {
+    "buildEnv": "frontend-build-env.json",
+    "executionCapabilityCompiled": true,
+    "backendApprovalRequired": true
+  },
+  "backend": {
+    "mainnetApproved": false,
+    "executionEnabled": false,
+    "targetRequiredBeforeApplication": true
+  },
+  "applicationSequence": [
+    "qualify target identities, current liquidity, oracle conversions, TTL and complete index; resolve exact production terms under existing authority",
+    "independent review and exact-source hosted CI; dependency risk disposition",
+    "separate explicit deployment authorization",
+    "create isolated managed scope from pinned code with initial Sushi and caller disabled; no legacy/Noah upgrade",
+    "verify roles, template, code, catalog coverage and frontend/backend release identities; keep execution disabled",
+    "authorize and execute wallet/device canary and activation separately",
+    "enable only qualified Sushi manual routes; verify guardian disable, governed recovery and complete exit"
+  ],
+  "localEvidence": {
+    "financialReplay": "R57",
+    "fixturesAreNotProductionParameters": true,
+    "compiledBrowser": "R58 receipt outside source tree"
+  },
+  "productionAccess": false
+}

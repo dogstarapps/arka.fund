@@ -1,117 +1,103 @@
-name: CI
+name: R16 offline release verification
 
 on:
-  push:
-    branches: [ dev, main ]
   pull_request:
+  push:
+    branches: ['release/**']
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  public-repository-hygiene:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Reject workstation-specific paths
-        run: python3 scripts/check_public_repository_hygiene.py
-
-  catalog-latency:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Verify public NAV API latency
-        run: python3 scripts/check_catalog_latency.py --samples 20 --max-average-ms 200
-
-  build-contracts:
+  application:
     runs-on: ubuntu-latest
     env:
-      RUST_TOOLCHAIN: nightly-2025-11-17
+      ARKA_RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/arka-application-evidence
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+      - name: Guard the production dependency boundary
+        run: node release/dependency-scope.mjs
+      - name: Install exact application dependencies without lifecycle scripts
+        run: |
+          npm ci --prefix apps/web --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+          npm ci --prefix services/catalog-api --ignore-scripts --no-audit --no-fund
+          npm ci --prefix sdk/typescript --ignore-scripts --no-audit --no-fund
+      - name: Install local browser and media test prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          cd apps/web
+          npx --no-install playwright install --with-deps chromium
+      - name: Check public source hygiene and static audit tooling
+        run: |
+          python3 scripts/check_public_repository_hygiene.py
+          python3 -m unittest discover -s scripts/tests -p test_internal_security_audit.py
+          python3 scripts/internal_security_audit.py --strict --report-json "$ARKA_RELEASE_EVIDENCE_DIR/internal-audit.json" --report-md "$ARKA_RELEASE_EVIDENCE_DIR/internal-audit.md"
+      - name: Verify current sources and contained local application checks
+        run: npm run release:check
+      - name: Check dependency advisories
+        if: always()
+        run: |
+          mkdir -p "$ARKA_RELEASE_EVIDENCE_DIR"
+          arka_audit_failed=0
+          npm audit --prefix apps/web --json > "$ARKA_RELEASE_EVIDENCE_DIR/npm-web.json" || arka_audit_failed=1
+          npm audit --prefix services/catalog-api --json > "$ARKA_RELEASE_EVIDENCE_DIR/npm-catalog.json" || arka_audit_failed=1
+          npm audit --prefix sdk/typescript --json > "$ARKA_RELEASE_EVIDENCE_DIR/npm-sdk.json" || arka_audit_failed=1
+          exit "$arka_audit_failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r16-application-evidence
+          path: ${{ runner.temp }}/arka-application-evidence
+          if-no-files-found: error
+
+  contracts:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      CARGO_TARGET_DIR: ${{ runner.temp }}/arka-contract-target
+      ARKA_RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/arka-contract-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2025-11-17
-          target: wasm32-unknown-unknown
-          override: true
-      - name: Cache cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin
-            ~/.cargo/registry
-            ~/.cargo/git
-            contracts/target
-          key: ${{ runner.os }}-cargo-${{ env.RUST_TOOLCHAIN }}-${{ hashFiles('contracts/**/Cargo.lock') }}
-      - name: Run contract tests
+          components: rust-src
+          targets: wasm32v1-none
+      - name: Prepare exact compiler dependencies and optimizer
         run: |
-          cd contracts
-          cargo test --workspace
-      - name: Validate contract API surface
-        run: python3 scripts/contract_api_surface_gate.py --strict
-      - name: Build WASM
-        run: |
-          BUILD_CONTRACT_SET=production bash scripts/build-wasm.sh
-      - name: Run release script tests
-        run: python3 -m unittest discover -s scripts/tests
-      - name: Run internal security audit
-        run: python3 scripts/internal_security_audit.py --strict
-      - name: Validate mainnet manifest
-        run: python3 scripts/validate_mainnet_manifest.py --manifest deployments.mainnet.json --phase postdeploy
-      - name: Run mainnet release gate
-        run: python3 scripts/mainnet_release_gate.py --manifest deployments.mainnet.json
-
-  catalog-api:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: services/catalog-api
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+          cargo fetch --locked --manifest-path contracts/Cargo.toml
+          cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
+          cargo +stable install --locked stellar-cli --version 26.1.0
+          cargo +stable install --locked cargo-audit --version 0.22.2
+          npm ci --prefix release/build-tools --ignore-scripts --no-audit --no-fund
+      - name: Guard the wasm guest dependency boundary
+        run: node release/dependency-scope.mjs --rust
+      - name: Native contract library tests with offline dependency resolution
+        run: cargo test --manifest-path contracts/Cargo.toml --offline --locked --workspace --jobs 2
+      - name: Rebuild all 24 selected artifacts and require identical hashes
+        run: node release/build-contracts.mjs
+      - name: Audit workspace Rust dependencies against current RustSec
+        run: cargo audit --file contracts/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-workspace.json"
+      - name: Audit quote adapter Rust dependencies against current RustSec
+        if: always()
+        run: cargo audit --file release/quote-adapter/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-quote-adapter.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: services/catalog-api/package-lock.json
-      - run: npm ci
-      - run: npm run test:unit
-      - run: npm run test:integration
-
-  typescript-sdk:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: sdk/typescript
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: sdk/typescript/package-lock.json
-      - run: npm ci
-      - run: npm run test:unit
-      - run: npm run test:consumer
-      - run: npm run test:examples
-      - run: npm run docs:api
-      - run: npm run verify:mainnet-preset
-
-  platform-material:
-    runs-on: ubuntu-latest
-    needs: [catalog-api, typescript-sdk]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            services/catalog-api/package-lock.json
-            sdk/typescript/package-lock.json
-      - name: Build catalog OpenAPI source
-        working-directory: services/catalog-api
-        run: npm ci && npm run build
-      - name: Generate SDK reference
-        working-directory: sdk/typescript
-        run: npm ci && npm run docs:api
-      - name: Verify public platform material
-        run: node scripts/verify-docs-site.mjs
+          name: r16-contract-evidence
+          path: ${{ runner.temp }}/arka-contract-evidence
+          if-no-files-found: error

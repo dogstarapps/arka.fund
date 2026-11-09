@@ -94,6 +94,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       const result = results[index];
       if (result.ok) {
         arkas.push(result.value);
+        if (result.value.navUnavailableReason) {
+          failures.push({ arkaId: arkaIds[index], message: result.value.navUnavailableReason, syncedAt });
+        }
         continue;
       }
       failures.push({
@@ -177,7 +180,15 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     };
 
     const manager = await this.readManager(vaultClient, readLegacyState);
-    const nav = await this.readNav(vaultClient, readLegacyState);
+    let nav: bigint | null = null;
+    let navUnavailableReason: string | null = null;
+    try {
+      nav = await this.readNav(vaultClient, readLegacyState);
+      if (typeof nav !== "bigint") throw new Error("NAV result is not an integer");
+    } catch (error) {
+      nav = null;
+      navUnavailableReason = `nav_unavailable: ${errorMessage(error)}`;
+    }
     const denomination = await this.readDenomination(vaultClient, readLegacyState);
     const fees = await this.readFees(vaultClient, readLegacyState);
     const whitelist = await this.readWhitelist(vaultClient, readLegacyState);
@@ -203,14 +214,19 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       whitelist.map((asset) => asset.contract),
       blendMarkets.map((marketId) => marketId.toString()),
       syncedAt,
-    );
+    ).catch((error) => {
+      navUnavailableReason ??= `asset_valuation_unavailable: ${errorMessage(error)}`;
+      nav = null;
+      return [];
+    });
 
     return {
       arkaId,
       manager,
       curated: expectSimulationResult(curatedTx, "is_manager_curated"),
       delisted: expectSimulationResult(delistedTx, "is_delisted"),
-      nav: nav.toString(),
+      nav: nav === null ? null : nav.toString(),
+      navUnavailableReason,
       denominationContract: denomination.contract,
       whitelistContracts: whitelist.map((asset) => asset.contract),
       shareToken: shareToken ?? null,

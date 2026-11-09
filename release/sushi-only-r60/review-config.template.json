@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "mainnetApproved": false,
+  "executionEnabled": false,
+  "network": "Public Global Stellar Network ; September 2015",
+  "endpoint": "https://mainnet.sorobanrpc.com",
+  "factory": "CAOFU5A6D6AM34X2WEVGPCITEFGDNUJLAKAVNKFE2CODYKY6Y4FTJPPB",
+  "registry": "CAVLJHDTMQ5NQ2PZJVVEEBQ3LKCOAPCLHRGY6YS5PEWTRGP2OPLJOI5F",
+  "denomination": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+  "router": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+  "assets": [
+    "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+    "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+  ],
+  "assetSymbols": {
+    "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA": "XLM",
+    "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75": "USDC"
+  },
+  "commercialFeeUsdcRaw": "100000000",
+  "userCapRaw": "10000000",
+  "v3Wasm": "7ea4f823c87d3fd887ea13b51804dd52fee0ba63d12e19e5e264bff6deb7f007",
+  "factoryCodeHash": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
+  "registryCodeHash": "c6ef013cc807e2519966a3992382939a54c83e73ba662fff602fe0d43db9f1e6",
+  "templateHash": null,
+  "legacyCodeHashes": [
+    "3cbd888c32f0d411b867143c4c78ac30e2f84a3a3b9c1948d869e6ac0bcdfd07"
+  ],
+  "legacyIds": [
+    "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW"
+  ],
+  "preservation": {
+    "noah": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW"
+  },
+  "releaseId": null,
+  "limits": {
+    "calls": 40,
+    "durationMs": 60000,
+    "spacingMs": 800,
+    "responseBytes": 16777216,
+    "totalBytes": 33554432
+  }
+}

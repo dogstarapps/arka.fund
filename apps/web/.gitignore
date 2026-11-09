@@ -1,0 +1,13 @@
+node_modules/
+.next/
+*.tsbuildinfo
+.env*
+!vendor/
+!vendor/stellar-wallets-kit/
+!vendor/stellar-wallets-kit/**
+
+# API operation builders are source directories, not generated build output.
+!src/app/api/factory/create/build/
+!src/app/api/factory/create/build/**
+!src/app/api/intents/balanced/build/
+!src/app/api/intents/balanced/build/**

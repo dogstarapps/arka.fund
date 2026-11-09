@@ -18,7 +18,7 @@ fn fee_engine_live_path_validates_management_and_performance_with_real_token_tra
     let arka = ArkaContractClient::new(&env, &arka_id);
     let token_id = env.register_contract(None, TestToken);
     let token = test_token::TestTokenClient::new(&env, &token_id);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, TestProfitAdapter);
     let adapter = test_profit_adapter::TestProfitAdapterClient::new(&env, &adapter_id);
 
@@ -37,6 +37,7 @@ fn fee_engine_live_path_validates_management_and_performance_with_real_token_tra
 
     adapter.init(&manager, &router_id, &token_id, &80i128);
 
+    arka.set_manager(&manager, &manager);
     arka.init(
         &token_id, &1_000i32, &2_000i32, &0i32, &0i32, &whitelist, &manager,
     );

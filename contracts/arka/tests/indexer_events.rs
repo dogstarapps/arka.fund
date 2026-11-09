@@ -32,6 +32,7 @@ fn configuration_changes_emit_provider_ready_events() {
     let whitelist_updated = vec![&env, denom_token.clone(), secondary_token.clone()];
 
     env.mock_all_auths_allowing_non_root_auth();
+    client.set_manager(&manager, &manager);
     client.init(
         &denom_token,
         &100,

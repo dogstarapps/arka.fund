@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "origin": "release/r4-import.json",
+  "revision": "R60",
+  "mainnetApproved": false,
+  "noah": {
+    "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
+    "version": 2,
+    "migrate": false
+  },
+  "contracts": [
+    {
+      "role": "adapter-balanced",
+      "file": "release/wasm/adapter-balanced.wasm",
+      "sha256": "ca71ad64b4acec3f26689bf2c60ecb9da728027e0a2db574f091d2a136acd18f",
+      "bytes": 7004
+    },
+    {
+      "role": "adapter-phoenix",
+      "file": "release/wasm/adapter-phoenix.wasm",
+      "sha256": "efb45a8d525432a676ad254f0592b596c1d55e35a0c09f40bcaab14301a1170b",
+      "bytes": 10192
+    },
+    {
+      "role": "arka-registry",
+      "file": "release/wasm/arka-registry.wasm",
+      "sha256": "c6ef013cc807e2519966a3992382939a54c83e73ba662fff602fe0d43db9f1e6",
+      "bytes": 11913
+    },
+    {
+      "role": "arka-vesting",
+      "file": "release/wasm/arka-vesting.wasm",
+      "sha256": "1d1f4ffbe31234340856ca938b8d987b524b259b6a190edd663245fffb522490",
+      "bytes": 13834
+    },
+    {
+      "role": "coverage-vault",
+      "file": "release/wasm/coverage-vault.wasm",
+      "sha256": "b29832eead390c23947255f6e24c2434ed8612550d96f405e5a8b76f2e900ca4",
+      "bytes": 11165
+    },
+    {
+      "role": "emissions-controller",
+      "file": "release/wasm/emissions-controller.wasm",
+      "sha256": "e5e940d6c6e4d5a05985d64e1ef8eaca487a29f486ea5fc1b34a78a2112c7639",
+      "bytes": 13294
+    },
+    {
+      "role": "governance-token",
+      "file": "release/wasm/governance-token.wasm",
+      "sha256": "4630abc3f55833d31935e98a93a65594de3eb4f6f599d0ae0babf93597c6dda8",
+      "bytes": 6169
+    },
+    {
+      "role": "manager-tier",
+      "file": "release/wasm/manager-tier.wasm",
+      "sha256": "016fd547a07bd776a104c9399bffff03d1c7d76402ecd830db6f3b82b6b3c577",
+      "bytes": 10028
+    },
+    {
+      "role": "oracle-guard",
+      "file": "release/wasm/oracle-guard.wasm",
+      "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+      "bytes": 35258
+    },
+    {
+      "role": "venue-registry",
+      "file": "release/wasm/venue-registry.wasm",
+      "sha256": "86e9af8430ed9db3bfed015d3e12e30ee443bdeb0dee9c23ec0e0c6543bc037f",
+      "bytes": 10419
+    },
+    {
+      "role": "share-token",
+      "file": "release/wasm/share-token.wasm",
+      "sha256": "aec9440d24660e82573b4f20bff0cf2d96c821a77c31a705842520bc628b7ad3",
+      "bytes": 11110
+    },
+    {
+      "role": "router",
+      "file": "release/wasm/router.wasm",
+      "sha256": "0e2317c60464754354c59fe854c73060c28827ea1e05d429078f37b98f85385d",
+      "bytes": 7569
+    },
+    {
+      "role": "adapter-aquarius",
+      "file": "release/wasm/adapter-aquarius.wasm",
+      "sha256": "26d3e1a46401fdaf00cb8393c4ac0695d9994ce5dff83f030670de97ceea5e0a",
+      "bytes": 13588
+    },
+    {
+      "role": "adapter-blend",
+      "file": "release/wasm/adapter-blend.wasm",
+      "sha256": "8a80916e5411b17ee8ff77835ff71e9b53a71bae5e586e8eb854feec75bb3f76",
+      "bytes": 9554
+    },
+    {
+      "role": "adapter-soroswap",
+      "file": "release/wasm/adapter-soroswap.wasm",
+      "sha256": "d5ac1f76d9578bcefc4c9815532b642a704561f1b25282eb86598f9a3033592d",
+      "bytes": 10527
+    },
+    {
+      "role": "claims-manager",
+      "file": "release/wasm/claims-manager.wasm",
+      "sha256": "db803f64c43af6454888272dce57ab2ec29068c1626afbfc36fcc914d30bb67d",
+      "bytes": 20665
+    },
+    {
+      "role": "coverage-fund",
+      "file": "release/wasm/coverage-fund.wasm",
+      "sha256": "1dfcb49d5c2b2b7496db7f45cb82517108f1007499b1f942727918d0d0472a63",
+      "bytes": 45959
+    },
+    {
+      "role": "governance-executor",
+      "file": "release/wasm/governance-executor.wasm",
+      "sha256": "7704a9c78fe92431203501be8a387dc45b665bb00a7f30ee90e4a76ebccdc465",
+      "bytes": 17423
+    },
+    {
+      "role": "arka-token",
+      "file": "release/wasm/arka-token.wasm",
+      "sha256": "bb191b43b2e46362450253721fb57e812c3ba06d7a6d9994ccafbe84c4fd6a57",
+      "bytes": 11812
+    },
+    {
+      "role": "locked-arka",
+      "file": "release/wasm/locked-arka.wasm",
+      "sha256": "a75899f574fd405b6174828ec6ea8d06c705cb93bd9e812d409cb1fe068e0e08",
+      "bytes": 19924
+    },
+    {
+      "role": "arka",
+      "file": "release/wasm/arka.wasm",
+      "sha256": "7ea4f823c87d3fd887ea13b51804dd52fee0ba63d12e19e5e264bff6deb7f007",
+      "bytes": 130856
+    },
+    {
+      "role": "arka-factory",
+      "file": "release/wasm/arka-factory.wasm",
+      "sha256": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
+      "bytes": 46432
+    },
+    {
+      "role": "xlm-normalizer",
+      "file": "release/wasm/xlm-normalizer.wasm",
+      "sha256": "1ac56c4b3a91b83f843b0dced9053ebab15a3f490365dfbcd7d479b90b49d9a4",
+      "bytes": 9918
+    },
+    {
+      "role": "adapter-sushi",
+      "file": "release/wasm/adapter-sushi.wasm",
+      "sha256": "cb0b6341e44d743e03f1f601738b4318843d60b9be1e46638e65e8d04c4cd1e7",
+      "bytes": 10625
+    }
+  ],
+  "launch": {
+    "retired": [
+      "adapter-phoenix"
+    ],
+    "candidate": [
+      "adapter-sushi"
+    ],
+    "activation": "R27 typed governed Sushi construction and complete local exit validated. Sushi stays unactivated; exact current target/governance/index, current admission/liquidity, device/canary, dependency policy, independent review and deployment authorization remain pending. Noah remains V2."
+  }
+}

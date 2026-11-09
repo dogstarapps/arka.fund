@@ -16,6 +16,7 @@ pub enum DataKey {
     BootstrapAdminExpiresAt,
     LastWasmHash,
     Operation(BytesN<32>),
+    DeploymentOperation(BytesN<32>),
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -61,6 +62,58 @@ pub struct QueuedOperation {
     pub expires_at: u32,
     pub status: OperationStatus,
     pub actions: Vec<GovernanceAction>,
+}
+
+/// A reviewed creation in the executor's own deployment namespace. The exact
+/// code, salt and constructor arguments are fixed when it is scheduled.
+#[derive(Clone)]
+#[contracttype]
+pub struct ContractDeployment {
+    pub wasm_hash: BytesN<32>,
+    pub salt: BytesN<32>,
+    pub constructor_args: Vec<Val>,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct QueuedDeployment {
+    pub operation_id: BytesN<32>,
+    pub scheduled_by: Address,
+    pub scheduled_at: u32,
+    pub ready_at: u32,
+    pub expires_at: u32,
+    pub status: OperationStatus,
+    pub deployment: ContractDeployment,
+}
+
+// Keep existing call records and their ABI unchanged. Both typed records use
+// the same ID namespace, authorization and execution lifecycle.
+enum ScheduledOperation {
+    Calls(QueuedOperation),
+    Deployment(QueuedDeployment),
+}
+
+impl ScheduledOperation {
+    fn status(&self) -> OperationStatus {
+        match self {
+            Self::Calls(op) => op.status.clone(),
+            Self::Deployment(op) => op.status.clone(),
+        }
+    }
+
+    fn window(&self) -> (u32, u32) {
+        match self {
+            Self::Calls(op) => (op.ready_at, op.expires_at),
+            Self::Deployment(op) => (op.ready_at, op.expires_at),
+        }
+    }
+
+    fn set_status(&mut self, status: OperationStatus) {
+        match self {
+            Self::Calls(op) => op.status = status,
+            Self::Deployment(op) => op.status = status,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -116,7 +169,7 @@ impl GovernanceExecutor {
         if let Some(governor) = env
             .storage()
             .persistent()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         {
             if *caller != governor {
                 panic_with_error!(env, Error::Unauthorized);
@@ -135,7 +188,7 @@ impl GovernanceExecutor {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -161,7 +214,7 @@ impl GovernanceExecutor {
         let Some(governor) = env
             .storage()
             .persistent()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -188,15 +241,54 @@ impl GovernanceExecutor {
         DataKey::Operation(operation_id.clone())
     }
 
-    fn read_operation(env: &Env, operation_id: &BytesN<32>) -> QueuedOperation {
-        match env
-            .storage()
-            .persistent()
-            .get::<DataKey, QueuedOperation>(&Self::operation_key(operation_id))
-        {
-            Some(operation) => operation,
-            None => panic_with_error!(env, Error::OperationMissing),
+    fn find_operation(env: &Env, operation_id: &BytesN<32>) -> Option<ScheduledOperation> {
+        Self::operation(env.clone(), operation_id.clone())
+            .map(ScheduledOperation::Calls)
+            .or_else(|| {
+                Self::deployment_operation(env.clone(), operation_id.clone())
+                    .map(ScheduledOperation::Deployment)
+            })
+    }
+
+    fn read_operation(env: &Env, operation_id: &BytesN<32>) -> ScheduledOperation {
+        Self::find_operation(env, operation_id)
+            .unwrap_or_else(|| panic_with_error!(env, Error::OperationMissing))
+    }
+
+    fn store_operation(env: &Env, operation_id: &BytesN<32>, operation: &ScheduledOperation) {
+        match operation {
+            ScheduledOperation::Calls(op) => env
+                .storage()
+                .persistent()
+                .set(&Self::operation_key(operation_id), op),
+            ScheduledOperation::Deployment(op) => env
+                .storage()
+                .persistent()
+                .set(&DataKey::DeploymentOperation(operation_id.clone()), op),
         }
+    }
+
+    fn require_unused_id(env: &Env, operation_id: &BytesN<32>) {
+        if Self::find_operation(env, operation_id).is_some() {
+            panic_with_error!(env, Error::OperationExists);
+        }
+    }
+
+    fn require_pending(env: &Env, status: OperationStatus) {
+        match status {
+            OperationStatus::Pending => {}
+            OperationStatus::Executed => panic_with_error!(env, Error::OperationAlreadyExecuted),
+            OperationStatus::Cancelled => panic_with_error!(env, Error::OperationCancelled),
+        }
+    }
+
+    fn scheduling_window(env: &Env) -> (u32, u32, u32) {
+        let now = env.ledger().sequence();
+        let store = env.storage().persistent();
+        let min_delay: u32 = store.get(&DataKey::MinDelay).unwrap_or(0);
+        let grace_period: u32 = store.get(&DataKey::GracePeriod).unwrap_or(0);
+        let ready_at = now.saturating_add(min_delay);
+        (now, ready_at, ready_at.saturating_add(grace_period))
     }
 
     fn authorize_current_contract_call(
@@ -216,7 +308,18 @@ impl GovernanceExecutor {
         env.authorize_as_current_contract(vec![env, auth]);
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(env: Env, admin: Address, min_delay: u32, grace_period: u32) {
+        Self::initialize(env, admin, min_delay, grace_period);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, min_delay: u32, grace_period: u32) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, min_delay: u32, grace_period: u32) {
         Self::require_positive_window(&env, min_delay);
         Self::require_positive_window(&env, grace_period);
         let store = env.storage().persistent();
@@ -323,18 +426,14 @@ impl GovernanceExecutor {
         }
         let key = Self::operation_key(&operation_id);
         let store = env.storage().persistent();
-        if store.has(&key) {
-            panic_with_error!(&env, Error::OperationExists);
-        }
-        let now = env.ledger().sequence();
-        let min_delay: u32 = store.get(&DataKey::MinDelay).unwrap_or(0);
-        let grace_period: u32 = store.get(&DataKey::GracePeriod).unwrap_or(0);
+        Self::require_unused_id(&env, &operation_id);
+        let (now, ready_at, expires_at) = Self::scheduling_window(&env);
         let operation = QueuedOperation {
             operation_id: operation_id.clone(),
             scheduled_by: caller,
             scheduled_at: now,
-            ready_at: now.saturating_add(min_delay),
-            expires_at: now.saturating_add(min_delay).saturating_add(grace_period),
+            ready_at,
+            expires_at,
             status: OperationStatus::Pending,
             actions,
         };
@@ -344,58 +443,136 @@ impl GovernanceExecutor {
         operation
     }
 
+    pub fn schedule_deployment(
+        env: Env,
+        caller: Address,
+        operation_id: BytesN<32>,
+        deployment: ContractDeployment,
+    ) -> QueuedDeployment {
+        Self::require_scheduler_auth(&env, &caller);
+        Self::require_unused_id(&env, &operation_id);
+        let (scheduled_at, ready_at, expires_at) = Self::scheduling_window(&env);
+        let operation = QueuedDeployment {
+            operation_id: operation_id.clone(),
+            scheduled_by: caller,
+            scheduled_at,
+            ready_at,
+            expires_at,
+            status: OperationStatus::Pending,
+            deployment,
+        };
+        Self::store_operation(
+            &env,
+            &operation_id,
+            &ScheduledOperation::Deployment(operation.clone()),
+        );
+        env.events()
+            .publish((symbol_short!("scheddep"), operation_id), operation.clone());
+        operation
+    }
+
+    // Preserve the legacy return type. Deployment cancellation has its own
+    // typed return, while both paths use the same transition implementation.
     pub fn cancel(env: Env, caller: Address, operation_id: BytesN<32>) -> QueuedOperation {
         Self::require_scheduler_auth(&env, &caller);
-        let mut operation = Self::read_operation(&env, &operation_id);
-        match operation.status {
-            OperationStatus::Pending => {}
-            OperationStatus::Executed => panic_with_error!(&env, Error::OperationAlreadyExecuted),
-            OperationStatus::Cancelled => panic_with_error!(&env, Error::OperationCancelled),
+        let operation = Self::operation(env.clone(), operation_id.clone())
+            .unwrap_or_else(|| panic_with_error!(&env, Error::OperationMissing));
+        match Self::cancel_operation(&env, &operation_id, ScheduledOperation::Calls(operation)) {
+            ScheduledOperation::Calls(op) => op,
+            ScheduledOperation::Deployment(_) => unreachable!(),
         }
-        operation.status = OperationStatus::Cancelled;
-        env.storage()
-            .persistent()
-            .set(&Self::operation_key(&operation_id), &operation);
-        env.events()
-            .publish((symbol_short!("cancel"), operation_id), operation.clone());
+    }
+
+    pub fn cancel_deployment(
+        env: Env,
+        caller: Address,
+        operation_id: BytesN<32>,
+    ) -> QueuedDeployment {
+        Self::require_scheduler_auth(&env, &caller);
+        let operation = Self::deployment_operation(env.clone(), operation_id.clone())
+            .unwrap_or_else(|| panic_with_error!(&env, Error::OperationMissing));
+        match Self::cancel_operation(
+            &env,
+            &operation_id,
+            ScheduledOperation::Deployment(operation),
+        ) {
+            ScheduledOperation::Deployment(op) => op,
+            ScheduledOperation::Calls(_) => unreachable!(),
+        }
+    }
+
+    fn cancel_operation(
+        env: &Env,
+        operation_id: &BytesN<32>,
+        mut operation: ScheduledOperation,
+    ) -> ScheduledOperation {
+        Self::require_pending(env, operation.status());
+        operation.set_status(OperationStatus::Cancelled);
+        Self::store_operation(env, operation_id, &operation);
+        match &operation {
+            ScheduledOperation::Calls(op) => env
+                .events()
+                .publish((symbol_short!("cancel"), operation_id.clone()), op.clone()),
+            ScheduledOperation::Deployment(op) => env.events().publish(
+                (symbol_short!("canceldep"), operation_id.clone()),
+                op.clone(),
+            ),
+        }
         operation
     }
 
     pub fn execute(env: Env, operation_id: BytesN<32>) -> ExecutionReceipt {
         let mut operation = Self::read_operation(&env, &operation_id);
-        match operation.status {
-            OperationStatus::Pending => {}
-            OperationStatus::Executed => panic_with_error!(&env, Error::OperationAlreadyExecuted),
-            OperationStatus::Cancelled => panic_with_error!(&env, Error::OperationCancelled),
-        }
+        Self::require_pending(&env, operation.status());
 
         let now = env.ledger().sequence();
-        if now < operation.ready_at {
+        let (ready_at, expires_at) = operation.window();
+        if now < ready_at {
             panic_with_error!(&env, Error::OperationNotReady);
         }
-        if now > operation.expires_at {
+        if now > expires_at {
             panic_with_error!(&env, Error::OperationExpired);
         }
 
-        operation.status = OperationStatus::Executed;
-        env.storage()
-            .persistent()
-            .set(&Self::operation_key(&operation_id), &operation);
-
-        for action in operation.actions.iter() {
-            Self::authorize_current_contract_call(
-                &env,
-                &action.contract_id,
-                &action.function,
-                &action.args,
-            );
-            let _ = env.invoke_contract::<Val>(&action.contract_id, &action.function, action.args);
-        }
+        operation.set_status(OperationStatus::Executed);
+        Self::store_operation(&env, &operation_id, &operation);
+        let action_count = match operation {
+            ScheduledOperation::Calls(operation) => {
+                for action in operation.actions.iter() {
+                    Self::authorize_current_contract_call(
+                        &env,
+                        &action.contract_id,
+                        &action.function,
+                        &action.args,
+                    );
+                    let _ = env.invoke_contract::<Val>(
+                        &action.contract_id,
+                        &action.function,
+                        action.args,
+                    );
+                }
+                operation.actions.len()
+            }
+            ScheduledOperation::Deployment(operation) => {
+                let deployment = operation.deployment;
+                let deployer = env.deployer().with_current_contract(deployment.salt);
+                Self::authorize_current_contract_call(
+                    &env,
+                    &deployer.deployed_address(),
+                    &Symbol::new(&env, "__constructor"),
+                    &deployment.constructor_args,
+                );
+                let address = deployer.deploy_v2(deployment.wasm_hash, deployment.constructor_args);
+                env.events()
+                    .publish((symbol_short!("deployed"), operation_id.clone()), address);
+                1
+            }
+        };
 
         let receipt = ExecutionReceipt {
             operation_id: operation_id.clone(),
             executed_at: now,
-            action_count: operation.actions.len(),
+            action_count,
         };
         env.events()
             .publish((symbol_short!("exec"), operation_id), receipt.clone());
@@ -413,15 +590,30 @@ impl GovernanceExecutor {
     }
 
     pub fn current_operation_status(env: Env, operation_id: BytesN<32>) -> Option<OperationStatus> {
-        Self::operation(env, operation_id).map(|operation| operation.status)
+        Self::find_operation(&env, &operation_id).map(|operation| operation.status())
+    }
+
+    pub fn deployment_operation(env: Env, operation_id: BytesN<32>) -> Option<QueuedDeployment> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::DeploymentOperation(operation_id))
+    }
+
+    pub fn deployment_address(env: Env, operation_id: BytesN<32>) -> Option<Address> {
+        Self::deployment_operation(env.clone(), operation_id).map(|operation| {
+            env.deployer()
+                .with_current_contract(operation.deployment.salt)
+                .deployed_address()
+        })
     }
 
     pub fn is_ready(env: Env, operation_id: BytesN<32>) -> bool {
-        match Self::operation(env.clone(), operation_id) {
+        match Self::find_operation(&env, &operation_id) {
             Some(operation) => {
-                matches!(operation.status, OperationStatus::Pending)
-                    && env.ledger().sequence() >= operation.ready_at
-                    && env.ledger().sequence() <= operation.expires_at
+                let (ready_at, expires_at) = operation.window();
+                matches!(operation.status(), OperationStatus::Pending)
+                    && env.ledger().sequence() >= ready_at
+                    && env.ledger().sequence() <= expires_at
             }
             None => false,
         }

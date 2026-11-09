@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { chunkContractIds, StaticActivityReader } from "../../src/index.js";
+import {
+  chunkContractIds,
+  parseDepositEventPayload,
+  StaticActivityReader,
+} from "../../src/index.js";
 import type { ArkaCatalogEntry } from "../../src/index.js";
 
 const arkas: ArkaCatalogEntry[] = [
@@ -78,5 +82,35 @@ test("chunkContractIds respects the Stellar RPC filter limit", () => {
   assert.deepEqual(
     chunkContractIds(["C1", "C2", "C3", "C4", "C5", "C6"]),
     [["C1", "C2", "C3", "C4", "C5"], ["C6"]],
+  );
+});
+
+test("legacy deposit events retain the Arka denomination", () => {
+  assert.deepEqual(
+    parseDepositEventPayload(
+      ["GUSER", 30_000_000n, 29_000_000n],
+      "CDENOMINATION",
+    ),
+    {
+      user: "GUSER",
+      assetContract: "CDENOMINATION",
+      amount: "30000000",
+      shares: "29000000",
+    },
+  );
+});
+
+test("multi-asset deposit events retain the deposited asset", () => {
+  assert.deepEqual(
+    parseDepositEventPayload(
+      ["GUSER", "CUSDC", 30_000_000n, 29_000_000n],
+      "CXLM",
+    ),
+    {
+      user: "GUSER",
+      assetContract: "CUSDC",
+      amount: "30000000",
+      shares: "29000000",
+    },
   );
 });

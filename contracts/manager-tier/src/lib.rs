@@ -141,7 +141,30 @@ impl ManagerTier {
         }
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(
+        env: Env,
+        admin: Address,
+        tier1_threshold: i128,
+        tier2_threshold: i128,
+        tier3_threshold: i128,
+    ) {
+        Self::initialize(env, admin, tier1_threshold, tier2_threshold, tier3_threshold);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(
+        env: Env,
+        admin: Address,
+        tier1_threshold: i128,
+        tier2_threshold: i128,
+        tier3_threshold: i128,
+    ) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(
         env: Env,
         admin: Address,
         tier1_threshold: i128,

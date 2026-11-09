@@ -55,7 +55,7 @@ impl ShareToken {
         let governor: Address = env
             .storage()
             .instance()
-            .get(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
             .expect("governor_not_set");
         assert!(*caller == governor, "only_governor");
         caller.require_auth();
@@ -71,7 +71,7 @@ impl ShareToken {
                 }
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -96,13 +96,40 @@ impl ShareToken {
         }
     }
 
+    /// Explicitly choose immutable shares or an expiring upgrade authority.
+    pub fn __constructor(env: Env, admin: Address, upgrade_admin: Option<Address>, governor: Option<Address>, expires_at: u64) {
+        if let Some(upgrade_admin) = upgrade_admin {
+            Self::initialize_upgradeable(env, admin, upgrade_admin, governor, expires_at);
+        } else {
+            assert!(governor.is_none() && expires_at == 0, "invalid_immutable_config");
+            Self::initialize(env, admin);
+        }
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address) {
         let store = env.storage().instance();
         assert!(!store.has(&DataKey::Admin), "already_init");
         store.set(&DataKey::Admin, &admin);
     }
 
+    #[allow(unused_variables)]
     pub fn init_with_upgrade_authority(
+        env: Env,
+        admin: Address,
+        upgrade_admin: Address,
+        governor: Option<Address>,
+        expires_at: u64,
+    ) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize_upgradeable(
         env: Env,
         admin: Address,
         upgrade_admin: Address,
@@ -202,6 +229,8 @@ impl ShareToken {
         env.storage().persistent().set(&key, &next);
         store.remove(&key);
         Self::bump_persistent_key(&env, &key);
+        env.events()
+            .publish((symbol_short!("mint"), to), amount);
     }
 
     pub fn burn(env: Env, from: Address, amount: i128) {
@@ -221,11 +250,15 @@ impl ShareToken {
         if next == 0 {
             env.storage().persistent().remove(&key);
             store.remove(&key);
+            env.events()
+                .publish((symbol_short!("burn"), from), amount);
             return;
         }
         env.storage().persistent().set(&key, &next);
         store.remove(&key);
         Self::bump_persistent_key(&env, &key);
+        env.events()
+            .publish((symbol_short!("burn"), from), amount);
     }
 
     pub fn approve(
@@ -243,11 +276,19 @@ impl ShareToken {
         if amount == 0 {
             env.storage().persistent().remove(&key);
             store.remove(&key);
+            env.events().publish(
+                (symbol_short!("approve"), owner, spender),
+                (amount, expiration_ledger),
+            );
             return;
         }
         env.storage().persistent().set(&key, &amount);
         store.remove(&key);
         Self::bump_persistent_key(&env, &key);
+        env.events().publish(
+            (symbol_short!("approve"), owner, spender),
+            (amount, expiration_ledger),
+        );
     }
 
     pub fn allowance(env: Env, owner: Address, spender: Address) -> i128 {
@@ -356,6 +397,8 @@ impl ShareToken {
         env.storage().persistent().set(&tkey, &next_to);
         store.remove(&tkey);
         Self::bump_persistent_key(env, &tkey);
+        env.events()
+            .publish((symbol_short!("transfer"), from, to), amount);
     }
 }
 

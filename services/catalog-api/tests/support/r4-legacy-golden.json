@@ -1,0 +1,1377 @@
+{
+  "scope": "Synthetic R4 API baseline; no production history",
+  "responses": [
+    {
+      "url": "/v1/arkas?limit=100",
+      "status": 200,
+      "body": {
+        "total": 2,
+        "offset": 0,
+        "limit": 100,
+        "items": [
+          {
+            "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "curated": false,
+            "delisted": false,
+            "nav": "500000000",
+            "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "whitelistContracts": [
+              "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+            ],
+            "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+            "fees": {
+              "mgmtBps": 0,
+              "perfBps": 0,
+              "depositBps": 0,
+              "redeemBps": 0
+            },
+            "assets": [
+              {
+                "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "isDenomination": true,
+                "liquidBalance": "500000000",
+                "collateralAmount": "0",
+                "debtAmount": "0",
+                "netManagedAmount": "500000000",
+                "netPositionValue": "0",
+                "marketIds": [],
+                "syncedAt": "2026-10-16T10:01:40.000Z"
+              }
+            ],
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "economics": {
+              "denominationAsset": {
+                "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "symbol": null,
+                "label": null,
+                "decimals": 7,
+                "usdPegged": false
+              },
+              "denominationPrice": null,
+              "navDenomination": "500000000",
+              "navUsdEstimate": null,
+              "sharePrice": null,
+              "returns": {
+                "1d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "7d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "30d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "1y": {
+                  "amount": null,
+                  "bps": null
+                },
+                "all": {
+                  "amount": null,
+                  "bps": null
+                }
+              },
+              "pnl": {
+                "amount": null,
+                "bps": null
+              },
+              "volume": {
+                "amount": null,
+                "bps": null
+              },
+              "flows": {
+                "depositVolume": null,
+                "redeemVolume": null,
+                "netUserFlow": null,
+                "activeUsers": null
+              },
+              "fees": {
+                "mgmtBps": 0,
+                "perfBps": 0,
+                "depositBps": 0,
+                "redeemBps": 0
+              },
+              "portfolioWeights": [
+                {
+                  "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                  "weightBps": 10000,
+                  "valueDenomination": "500000000",
+                  "valueUsdEstimate": null
+                }
+              ],
+              "oracleStatus": "missing_price",
+              "valuationSource": "unavailable",
+              "missingPriceReasons": [
+                "asset_price_missing_price"
+              ]
+            },
+            "rank": 1,
+            "identity": {
+              "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+              "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+              "displayName": "Legacy Arka · local fixture",
+              "description": "Preserved local fixture description",
+              "strategy": "Original strategy",
+              "riskDisclosure": "No real assets. Test data only.",
+              "targetReturn": null,
+              "avatarUrl": null,
+              "websiteUrl": "https://arka.fund/",
+              "socialUrl": null,
+              "trustState": "unverified",
+              "updatedAt": "2026-10-16T10:00:00.000Z",
+              "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+            }
+          },
+          {
+            "arkaId": "CALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBNOTY",
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "curated": false,
+            "delisted": false,
+            "nav": "1000000000",
+            "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "whitelistContracts": [
+              "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+            ],
+            "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+            "fees": {
+              "mgmtBps": 0,
+              "perfBps": 0,
+              "depositBps": 0,
+              "redeemBps": 0
+            },
+            "assets": [
+              {
+                "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "isDenomination": true,
+                "liquidBalance": "1000000000",
+                "collateralAmount": "0",
+                "debtAmount": "0",
+                "netManagedAmount": "1000000000",
+                "netPositionValue": "0",
+                "marketIds": [],
+                "syncedAt": "2026-10-16T10:01:40.000Z"
+              }
+            ],
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "economics": {
+              "denominationAsset": {
+                "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "symbol": null,
+                "label": null,
+                "decimals": 7,
+                "usdPegged": false
+              },
+              "denominationPrice": null,
+              "navDenomination": "1000000000",
+              "navUsdEstimate": null,
+              "sharePrice": null,
+              "returns": {
+                "1d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "7d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "30d": {
+                  "amount": null,
+                  "bps": null
+                },
+                "1y": {
+                  "amount": null,
+                  "bps": null
+                },
+                "all": {
+                  "amount": null,
+                  "bps": null
+                }
+              },
+              "pnl": {
+                "amount": null,
+                "bps": null
+              },
+              "volume": {
+                "amount": null,
+                "bps": null
+              },
+              "flows": {
+                "depositVolume": null,
+                "redeemVolume": null,
+                "netUserFlow": null,
+                "activeUsers": null
+              },
+              "fees": {
+                "mgmtBps": 0,
+                "perfBps": 0,
+                "depositBps": 0,
+                "redeemBps": 0
+              },
+              "portfolioWeights": [
+                {
+                  "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                  "weightBps": 10000,
+                  "valueDenomination": "1000000000",
+                  "valueUsdEstimate": null
+                }
+              ],
+              "oracleStatus": "missing_price",
+              "valuationSource": "unavailable",
+              "missingPriceReasons": [
+                "asset_price_missing_price"
+              ]
+            },
+            "rank": 2,
+            "identity": {
+              "arkaId": "CALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBNOTY",
+              "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+              "displayName": "Managed V3 Arka · local fixture",
+              "description": "Preserved local fixture description",
+              "strategy": "Original strategy",
+              "riskDisclosure": "No real assets. Test data only.",
+              "targetReturn": null,
+              "avatarUrl": null,
+              "websiteUrl": "https://arka.fund/",
+              "socialUrl": null,
+              "trustState": "unverified",
+              "updatedAt": "2026-10-16T10:00:00.000Z",
+              "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/managers",
+      "status": 200,
+      "body": {
+        "total": 1,
+        "offset": 0,
+        "limit": 25,
+        "items": [
+          {
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "arkaCount": 2,
+            "curatedArkaCount": 0,
+            "delistedArkaCount": 0,
+            "totalNav": "1500000000",
+            "totalNavUsdEstimate": null,
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "rank": 1,
+            "identity": {
+              "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+              "displayName": "Fixture manager",
+              "description": "Preserved local fixture description",
+              "strategy": "Original strategy",
+              "riskDisclosure": "No real assets. Test data only.",
+              "targetReturn": null,
+              "avatarUrl": null,
+              "websiteUrl": "https://arka.fund/",
+              "socialUrl": null,
+              "trustState": "unverified",
+              "updatedAt": "2026-10-16T10:00:00.000Z",
+              "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/assets",
+      "status": 200,
+      "body": {
+        "total": 1,
+        "offset": 0,
+        "limit": 25,
+        "items": [
+          {
+            "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "identity": {
+              "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+              "symbol": null,
+              "label": null,
+              "decimals": 7,
+              "usdPegged": false
+            },
+            "price": null,
+            "arkaCount": 2,
+            "managerCount": 1,
+            "denominationArkaCount": 2,
+            "liquidBalance": "1500000000",
+            "collateralAmount": "0",
+            "debtAmount": "0",
+            "netManagedAmount": "1500000000",
+            "netPositionValue": "0",
+            "netManagedUsdEstimate": null,
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "rank": 1
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/metrics",
+      "status": 200,
+      "body": {
+        "totalArkas": 2,
+        "unvaluedArkas": 0,
+        "navComplete": true,
+        "indexedArkas": 2,
+        "failedArkas": 0,
+        "totalManagers": 1,
+        "curatedArkas": 0,
+        "delistedArkas": 0,
+        "totalAssets": 1,
+        "totalNav": "1500000000",
+        "syncedAt": "2026-10-16T10:01:40.000Z"
+      }
+    },
+    {
+      "url": "/v1/history",
+      "status": 200,
+      "body": {
+        "total": 3,
+        "offset": 0,
+        "limit": 3,
+        "items": [
+          {
+            "schemaVersion": 3,
+            "syncedAt": "2026-10-14T10:00:00.000Z",
+            "metrics": {
+              "totalArkas": 2,
+              "unvaluedArkas": 0,
+              "navComplete": true,
+              "indexedArkas": 2,
+              "failedArkas": 0,
+              "totalManagers": 1,
+              "curatedArkas": 0,
+              "delistedArkas": 0,
+              "totalAssets": 1,
+              "totalNav": "1500000000",
+              "syncedAt": "2026-10-14T10:00:00.000Z"
+            },
+            "arkas": [
+              {
+                "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "500000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "500000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "500000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-14T10:00:00.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-14T10:00:00.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "500000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "500000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              },
+              {
+                "arkaId": "CALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBNOTY",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "1000000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "1000000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "1000000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-14T10:00:00.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-14T10:00:00.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "1000000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "1000000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              }
+            ],
+            "assets": [
+              {
+                "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "identity": {
+                  "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                  "symbol": null,
+                  "label": null,
+                  "decimals": 7,
+                  "usdPegged": false
+                },
+                "price": null,
+                "arkaCount": 2,
+                "managerCount": 1,
+                "denominationArkaCount": 2,
+                "liquidBalance": "1500000000",
+                "collateralAmount": "0",
+                "debtAmount": "0",
+                "netManagedAmount": "1500000000",
+                "netPositionValue": "0",
+                "netManagedUsdEstimate": null,
+                "syncedAt": "2026-10-14T10:00:00.000Z"
+              }
+            ],
+            "managers": [
+              {
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "arkaCount": 2,
+                "curatedArkaCount": 0,
+                "delistedArkaCount": 0,
+                "totalNav": "1500000000",
+                "totalNavUsdEstimate": null,
+                "syncedAt": "2026-10-14T10:00:00.000Z"
+              }
+            ],
+            "assetPrices": [],
+            "failures": []
+          },
+          {
+            "schemaVersion": 3,
+            "syncedAt": "2026-10-15T10:00:00.000Z",
+            "metrics": {
+              "totalArkas": 2,
+              "unvaluedArkas": 0,
+              "navComplete": true,
+              "indexedArkas": 2,
+              "failedArkas": 0,
+              "totalManagers": 1,
+              "curatedArkas": 0,
+              "delistedArkas": 0,
+              "totalAssets": 1,
+              "totalNav": "1500000000",
+              "syncedAt": "2026-10-15T10:00:00.000Z"
+            },
+            "arkas": [
+              {
+                "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "500000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "500000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "500000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-15T10:00:00.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-15T10:00:00.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "500000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "500000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              },
+              {
+                "arkaId": "CALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBNOTY",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "1000000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "1000000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "1000000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-15T10:00:00.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-15T10:00:00.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "1000000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "1000000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              }
+            ],
+            "assets": [
+              {
+                "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "identity": {
+                  "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                  "symbol": null,
+                  "label": null,
+                  "decimals": 7,
+                  "usdPegged": false
+                },
+                "price": null,
+                "arkaCount": 2,
+                "managerCount": 1,
+                "denominationArkaCount": 2,
+                "liquidBalance": "1500000000",
+                "collateralAmount": "0",
+                "debtAmount": "0",
+                "netManagedAmount": "1500000000",
+                "netPositionValue": "0",
+                "netManagedUsdEstimate": null,
+                "syncedAt": "2026-10-15T10:00:00.000Z"
+              }
+            ],
+            "managers": [
+              {
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "arkaCount": 2,
+                "curatedArkaCount": 0,
+                "delistedArkaCount": 0,
+                "totalNav": "1500000000",
+                "totalNavUsdEstimate": null,
+                "syncedAt": "2026-10-15T10:00:00.000Z"
+              }
+            ],
+            "assetPrices": [],
+            "failures": []
+          },
+          {
+            "schemaVersion": 3,
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "metrics": {
+              "totalArkas": 2,
+              "unvaluedArkas": 0,
+              "navComplete": true,
+              "indexedArkas": 2,
+              "failedArkas": 0,
+              "totalManagers": 1,
+              "curatedArkas": 0,
+              "delistedArkas": 0,
+              "totalAssets": 1,
+              "totalNav": "1500000000",
+              "syncedAt": "2026-10-16T10:01:40.000Z"
+            },
+            "arkas": [
+              {
+                "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "500000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "500000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "500000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-16T10:01:40.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-16T10:01:40.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "500000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "500000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              },
+              {
+                "arkaId": "CALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBNOTY",
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "curated": false,
+                "delisted": false,
+                "nav": "1000000000",
+                "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "whitelistContracts": [
+                  "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+                ],
+                "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+                "fees": {
+                  "mgmtBps": 0,
+                  "perfBps": 0,
+                  "depositBps": 0,
+                  "redeemBps": 0
+                },
+                "assets": [
+                  {
+                    "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "isDenomination": true,
+                    "liquidBalance": "1000000000",
+                    "collateralAmount": "0",
+                    "debtAmount": "0",
+                    "netManagedAmount": "1000000000",
+                    "netPositionValue": "0",
+                    "marketIds": [],
+                    "syncedAt": "2026-10-16T10:01:40.000Z"
+                  }
+                ],
+                "syncedAt": "2026-10-16T10:01:40.000Z",
+                "economics": {
+                  "denominationAsset": {
+                    "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                    "symbol": null,
+                    "label": null,
+                    "decimals": 7,
+                    "usdPegged": false
+                  },
+                  "denominationPrice": null,
+                  "navDenomination": "1000000000",
+                  "navUsdEstimate": null,
+                  "sharePrice": null,
+                  "returns": {
+                    "1d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "7d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "30d": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "1y": {
+                      "amount": null,
+                      "bps": null
+                    },
+                    "all": {
+                      "amount": null,
+                      "bps": null
+                    }
+                  },
+                  "pnl": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "volume": {
+                    "amount": null,
+                    "bps": null
+                  },
+                  "flows": {
+                    "depositVolume": null,
+                    "redeemVolume": null,
+                    "netUserFlow": null,
+                    "activeUsers": null
+                  },
+                  "fees": {
+                    "mgmtBps": 0,
+                    "perfBps": 0,
+                    "depositBps": 0,
+                    "redeemBps": 0
+                  },
+                  "portfolioWeights": [
+                    {
+                      "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                      "weightBps": 10000,
+                      "valueDenomination": "1000000000",
+                      "valueUsdEstimate": null
+                    }
+                  ],
+                  "oracleStatus": "missing_price",
+                  "valuationSource": "unavailable",
+                  "missingPriceReasons": [
+                    "asset_price_missing_price"
+                  ]
+                }
+              }
+            ],
+            "assets": [
+              {
+                "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                "identity": {
+                  "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+                  "symbol": null,
+                  "label": null,
+                  "decimals": 7,
+                  "usdPegged": false
+                },
+                "price": null,
+                "arkaCount": 2,
+                "managerCount": 1,
+                "denominationArkaCount": 2,
+                "liquidBalance": "1500000000",
+                "collateralAmount": "0",
+                "debtAmount": "0",
+                "netManagedAmount": "1500000000",
+                "netPositionValue": "0",
+                "netManagedUsdEstimate": null,
+                "syncedAt": "2026-10-16T10:01:40.000Z"
+              }
+            ],
+            "managers": [
+              {
+                "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+                "arkaCount": 2,
+                "curatedArkaCount": 0,
+                "delistedArkaCount": 0,
+                "totalNav": "1500000000",
+                "totalNavUsdEstimate": null,
+                "syncedAt": "2026-10-16T10:01:40.000Z"
+              }
+            ],
+            "assetPrices": [],
+            "failures": []
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+      "status": 200,
+      "body": {
+        "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+        "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+        "curated": false,
+        "delisted": false,
+        "nav": "500000000",
+        "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+        "whitelistContracts": [
+          "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2"
+        ],
+        "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+        "fees": {
+          "mgmtBps": 0,
+          "perfBps": 0,
+          "depositBps": 0,
+          "redeemBps": 0
+        },
+        "assets": [
+          {
+            "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "isDenomination": true,
+            "liquidBalance": "500000000",
+            "collateralAmount": "0",
+            "debtAmount": "0",
+            "netManagedAmount": "500000000",
+            "netPositionValue": "0",
+            "marketIds": [],
+            "syncedAt": "2026-10-16T10:01:40.000Z"
+          }
+        ],
+        "syncedAt": "2026-10-16T10:01:40.000Z",
+        "economics": {
+          "denominationAsset": {
+            "contract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "symbol": null,
+            "label": null,
+            "decimals": 7,
+            "usdPegged": false
+          },
+          "denominationPrice": null,
+          "navDenomination": "500000000",
+          "navUsdEstimate": null,
+          "sharePrice": null,
+          "returns": {
+            "1d": {
+              "amount": null,
+              "bps": null
+            },
+            "7d": {
+              "amount": null,
+              "bps": null
+            },
+            "30d": {
+              "amount": null,
+              "bps": null
+            },
+            "1y": {
+              "amount": null,
+              "bps": null
+            },
+            "all": {
+              "amount": null,
+              "bps": null
+            }
+          },
+          "pnl": {
+            "amount": null,
+            "bps": null
+          },
+          "volume": {
+            "amount": null,
+            "bps": null
+          },
+          "flows": {
+            "depositVolume": null,
+            "redeemVolume": null,
+            "netUserFlow": null,
+            "activeUsers": null
+          },
+          "fees": {
+            "mgmtBps": 0,
+            "perfBps": 0,
+            "depositBps": 0,
+            "redeemBps": 0
+          },
+          "portfolioWeights": [
+            {
+              "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+              "weightBps": 10000,
+              "valueDenomination": "500000000",
+              "valueUsdEstimate": null
+            }
+          ],
+          "oracleStatus": "missing_price",
+          "valuationSource": "unavailable",
+          "missingPriceReasons": [
+            "asset_price_missing_price"
+          ]
+        },
+        "identity": {
+          "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+          "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+          "displayName": "Legacy Arka · local fixture",
+          "description": "Preserved local fixture description",
+          "strategy": "Original strategy",
+          "riskDisclosure": "No real assets. Test data only.",
+          "targetReturn": null,
+          "avatarUrl": null,
+          "websiteUrl": "https://arka.fund/",
+          "socialUrl": null,
+          "trustState": "unverified",
+          "updatedAt": "2026-10-16T10:00:00.000Z",
+          "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+        }
+      }
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637/identity",
+      "status": 200,
+      "body": {
+        "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+        "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+        "displayName": "Legacy Arka · local fixture",
+        "description": "Preserved local fixture description",
+        "strategy": "Original strategy",
+        "riskDisclosure": "No real assets. Test data only.",
+        "targetReturn": null,
+        "avatarUrl": null,
+        "websiteUrl": "https://arka.fund/",
+        "socialUrl": null,
+        "trustState": "unverified",
+        "updatedAt": "2026-10-16T10:00:00.000Z",
+        "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+      }
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637/holders",
+      "status": 200,
+      "body": {
+        "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+        "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+        "totalShares": "500000000",
+        "indexedAt": "2026-10-16T10:00:00.000Z",
+        "complete": true,
+        "coverageFromLedger": 1,
+        "coverageToLedger": 100,
+        "total": 1,
+        "offset": 0,
+        "limit": 25,
+        "items": [
+          {
+            "holder": "GALBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMFQWCYLBMKWB",
+            "shares": "500000000",
+            "ownershipBps": 10000,
+            "firstSeenLedger": 1,
+            "lastActivityLedger": 100
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637/portfolio",
+      "status": 200,
+      "body": {
+        "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+        "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+        "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+        "denominationContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+        "syncedAt": "2026-10-16T10:01:40.000Z",
+        "nav": "500000000",
+        "totalNavContribution": "500000000",
+        "totalNavUsdEstimate": null,
+        "items": [
+          {
+            "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+            "rank": 1,
+            "isDenomination": true,
+            "marketIds": [],
+            "navContribution": "500000000",
+            "valueUsdEstimate": null,
+            "weightBps": 10000,
+            "liquidBalance": "500000000",
+            "collateralAmount": "0",
+            "debtAmount": "0",
+            "netPositionValue": "0"
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637/assets",
+      "status": 200,
+      "body": [
+        {
+          "assetContract": "CALROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROBL2",
+          "isDenomination": true,
+          "liquidBalance": "500000000",
+          "collateralAmount": "0",
+          "debtAmount": "0",
+          "netManagedAmount": "500000000",
+          "netPositionValue": "0",
+          "marketIds": [],
+          "syncedAt": "2026-10-16T10:01:40.000Z"
+        }
+      ]
+    },
+    {
+      "url": "/v1/arkas/CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637/history",
+      "status": 200,
+      "body": {
+        "total": 3,
+        "offset": 0,
+        "limit": 3,
+        "items": [
+          {
+            "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+            "syncedAt": "2026-10-14T10:00:00.000Z",
+            "nav": "500000000",
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "curated": false,
+            "delisted": false,
+            "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+            "rank": 1
+          },
+          {
+            "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+            "syncedAt": "2026-10-15T10:00:00.000Z",
+            "nav": "500000000",
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "curated": false,
+            "delisted": false,
+            "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+            "rank": 1
+          },
+          {
+            "arkaId": "CAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRK637",
+            "syncedAt": "2026-10-16T10:01:40.000Z",
+            "nav": "500000000",
+            "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+            "curated": false,
+            "delisted": false,
+            "shareToken": "CAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBQGAYDAMBRQDC",
+            "rank": 1
+          }
+        ]
+      }
+    },
+    {
+      "url": "/v1/managers/GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G/identity",
+      "status": 200,
+      "body": {
+        "manager": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G",
+        "displayName": "Fixture manager",
+        "description": "Preserved local fixture description",
+        "strategy": "Original strategy",
+        "riskDisclosure": "No real assets. Test data only.",
+        "targetReturn": null,
+        "avatarUrl": null,
+        "websiteUrl": "https://arka.fund/",
+        "socialUrl": null,
+        "trustState": "unverified",
+        "updatedAt": "2026-10-16T10:00:00.000Z",
+        "updatedBy": "GAKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRL26G"
+      }
+    }
+  ]
+}

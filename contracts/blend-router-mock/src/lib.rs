@@ -15,6 +15,7 @@ pub enum DataKey {
     ReserveAssets,
     WithdrawHaircut(Address),
     BorrowHaircut(Address),
+    PoolStatus,
 }
 
 #[derive(Clone)]
@@ -97,6 +98,16 @@ pub struct BlendRouterMock;
 
 #[contractimpl]
 impl BlendRouterMock {
+    const RATE_SCALE: i128 = 1_000_000_000_000;
+
+    fn div_ceil(numerator: i128, denominator: i128) -> i128 {
+        if numerator == 0 {
+            0
+        } else {
+            ((numerator - 1) / denominator) + 1
+        }
+    }
+
     fn authorize_transfer(env: &Env, token: &Address, from: &Address, to: &Address, amount: i128) {
         let args = vec![
             env,
@@ -143,6 +154,26 @@ impl BlendRouterMock {
 
     fn read_haircut(env: &Env, key: DataKey) -> i128 {
         env.storage().instance().get(&key).unwrap_or(0)
+    }
+
+    fn to_b_tokens_down(env: &Env, asset: &Address, amount: i128) -> i128 {
+        let reserve = Self::read_reserve(env, asset);
+        (amount * Self::RATE_SCALE) / reserve.data.b_rate
+    }
+
+    fn to_b_tokens_up(env: &Env, asset: &Address, amount: i128) -> i128 {
+        let reserve = Self::read_reserve(env, asset);
+        Self::div_ceil(amount * Self::RATE_SCALE, reserve.data.b_rate)
+    }
+
+    fn to_d_tokens_down(env: &Env, asset: &Address, amount: i128) -> i128 {
+        let reserve = Self::read_reserve(env, asset);
+        (amount * Self::RATE_SCALE) / reserve.data.d_rate
+    }
+
+    fn to_d_tokens_up(env: &Env, asset: &Address, amount: i128) -> i128 {
+        let reserve = Self::read_reserve(env, asset);
+        Self::div_ceil(amount * Self::RATE_SCALE, reserve.data.d_rate)
     }
 
     fn read_reserve(env: &Env, asset: &Address) -> Reserve {
@@ -193,6 +224,18 @@ impl BlendRouterMock {
         env.storage()
             .instance()
             .set(&DataKey::BorrowHaircut(asset), &amount);
+    }
+
+    pub fn set_collateral(env: Env, owner: Address, asset: Address, amount: i128) {
+        Self::write_collateral(&env, &owner, &asset, amount);
+    }
+
+    pub fn set_debt(env: Env, owner: Address, asset: Address, amount: i128) {
+        Self::write_debt(&env, &owner, &asset, amount);
+    }
+
+    pub fn set_pool_status(env: Env, status: u32) {
+        env.storage().instance().set(&DataKey::PoolStatus, &status);
     }
 
     pub fn set_reserve(
@@ -282,22 +325,32 @@ impl BlendRouterMock {
                     ];
                     let _ =
                         env.invoke_contract::<()>(&req.address, &symbol_short!("transfer"), args);
-                    let next = Self::read_collateral(&env, &from, &req.address) + req.amount;
+                    let next = Self::read_collateral(&env, &from, &req.address)
+                        + Self::to_b_tokens_down(&env, &req.address, req.amount);
                     Self::write_collateral(&env, &from, &req.address, next);
                     last_out = req.amount;
                 }
                 3 => {
                     let collateral = Self::read_collateral(&env, &from, &req.address);
-                    if collateral < req.amount {
-                        panic_with_error!(&env, Error::InsufficientCollateral);
+                    let mut b_tokens_to_burn = Self::to_b_tokens_up(&env, &req.address, req.amount);
+                    let mut tokens_out = req.amount;
+                    if b_tokens_to_burn > collateral {
+                        b_tokens_to_burn = collateral;
+                        let reserve = Self::read_reserve(&env, &req.address);
+                        tokens_out = (collateral * reserve.data.b_rate) / Self::RATE_SCALE;
                     }
                     let haircut =
                         Self::read_haircut(&env, DataKey::WithdrawHaircut(req.address.clone()));
-                    let transfer_amount = req.amount - haircut;
+                    let transfer_amount = tokens_out - haircut;
                     if transfer_amount <= 0 {
                         panic_with_error!(&env, Error::AmountZero);
                     }
-                    Self::write_collateral(&env, &from, &req.address, collateral - req.amount);
+                    Self::write_collateral(
+                        &env,
+                        &from,
+                        &req.address,
+                        collateral - b_tokens_to_burn,
+                    );
                     Self::authorize_transfer(&env, &req.address, &router, &to, transfer_amount);
                     let args = vec![
                         &env,
@@ -310,7 +363,8 @@ impl BlendRouterMock {
                     last_out = transfer_amount;
                 }
                 4 => {
-                    let next = Self::read_debt(&env, &from, &req.address) + req.amount;
+                    let next = Self::read_debt(&env, &from, &req.address)
+                        + Self::to_d_tokens_up(&env, &req.address, req.amount);
                     Self::write_debt(&env, &from, &req.address, next);
                     let haircut =
                         Self::read_haircut(&env, DataKey::BorrowHaircut(req.address.clone()));
@@ -331,9 +385,12 @@ impl BlendRouterMock {
                 }
                 5 => {
                     let debt = Self::read_debt(&env, &from, &req.address);
-                    if debt < req.amount {
-                        panic_with_error!(&env, Error::InsufficientDebt);
-                    }
+                    let d_tokens_to_burn = Self::to_d_tokens_down(&env, &req.address, req.amount);
+                    let debt_after_repay = if d_tokens_to_burn > debt {
+                        0
+                    } else {
+                        debt - d_tokens_to_burn
+                    };
                     let args = vec![
                         &env,
                         spender.clone().into_val(&env),
@@ -342,7 +399,7 @@ impl BlendRouterMock {
                     ];
                     let _ =
                         env.invoke_contract::<()>(&req.address, &symbol_short!("transfer"), args);
-                    Self::write_debt(&env, &from, &req.address, debt - req.amount);
+                    Self::write_debt(&env, &from, &req.address, debt_after_repay);
                     last_out = req.amount;
                 }
                 _ => panic_with_error!(&env, Error::UnsupportedRequest),
@@ -391,12 +448,28 @@ impl BlendRouterMock {
                 .instance()
                 .get(&DataKey::Oracle)
                 .unwrap_or(env.current_contract_address()),
-            status: 0,
+            status: env
+                .storage()
+                .instance()
+                .get(&DataKey::PoolStatus)
+                .unwrap_or(0),
         }
     }
 
     pub fn get_reserve(env: Env, asset: Address) -> Reserve {
         Self::read_reserve(&env, &asset)
+    }
+
+    // Native test double only: mirror the public Blend getter already used by
+    // the accepted P29 financial WASM. No lending policy or contract is changed.
+    pub fn get_reserve_list(env: Env) -> Vec<Address> {
+        let assets: Vec<Address> = env.storage().instance()
+            .get(&DataKey::ReserveAssets).unwrap_or(Vec::new(&env));
+        let mut indexed = Map::<u32, Address>::new(&env);
+        for asset in assets { indexed.set(Self::read_reserve(&env, &asset).config.index, asset); }
+        let mut result = Vec::new(&env);
+        for (index, asset) in indexed { assert_eq!(index, result.len()); result.push_back(asset); }
+        result
     }
 
     pub fn get_positions(env: Env, address: Address) -> Positions {

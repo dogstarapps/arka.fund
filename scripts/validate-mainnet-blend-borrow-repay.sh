@@ -54,7 +54,7 @@ POOL_FACTORY="${BLEND_POOL_FACTORY:-CDSYOAVXFY7SM5S64IZPPPYB4GVGGLMQVFREPSQQEZVI
 POOL="${BLEND_POOL:-CAJJZSGMMM3PD7N33TAPHGBUGTB43OC73HVIK2L2G6BNGGGYOSSYBXBD}"
 MARKET_ID="${BLEND_CANARY_MARKET_ID:-1}"
 # The Fixed XLM-USDC pool requires at least 5 oracle-base units of collateral
-# to open a debt position. Ten XLM keeps this isolated canary above that floor.
+# to open a debt position. 50 XLM keeps this isolated canary above that floor.
 DEPOSIT_AMOUNT="${BLEND_CANARY_DEPOSIT_AMOUNT:-100000000}"
 BORROW_AMOUNT="${BLEND_CANARY_BORROW_AMOUNT:-1000000}"
 MAX_BORROW_PER_ACTION="${BLEND_CANARY_MAX_BORROW_PER_ACTION:-2000000}"
@@ -77,8 +77,6 @@ ARTIFACT_DIR="$WORK_DIR/artifacts"
 EVIDENCE_FILE="${BLEND_CANARY_EVIDENCE_FILE:-$ROOT_DIR/deployments/evidence/mainnet-blend-borrow-repay-canary-$RUN_ID.json}"
 STATE_FILE="$WORK_DIR/state.json"
 CANARY_KEY_DIR="$WORK_DIR/canary-key"
-CANARY_IDENTITY="${BLEND_CANARY_IDENTITY:-blend-borrow-$RUN_ID}"
-REUSE_FUNDED_CANARY="${BLEND_CANARY_REUSE_FUNDED_ACCOUNT:-false}"
 
 mkdir -p "$WORK_DIR" "$ARTIFACT_DIR" "$(dirname "$EVIDENCE_FILE")"
 
@@ -97,32 +95,10 @@ read_scalar() {
 }
 
 native_balance_stroops() {
-  local account="$1" response attempt
-  # Horizon indexes a just-created account asynchronously. Do not turn that
-  # short propagation window into a false canary failure.
-  for attempt in $(seq 1 12); do
-    if response="$(curl -fsS "https://horizon.stellar.org/accounts/$account")"; then
-      jq -r '.balances[] | select(.asset_type == "native") | .balance' <<<"$response" \
-        | awk -F. '{ fraction = $2 "0000000"; print ($1 * 10000000) + substr(fraction, 1, 7) }'
-      return 0
-    fi
-    sleep 1
-  done
-  echo "Unable to determine native XLM balance for $account after Horizon propagation." >&2
-  return 1
-}
-
-wait_for_account_closure() {
-  local account="$1" status attempt
-  for attempt in $(seq 1 12); do
-    status="$(curl -sS -o /dev/null -w '%{http_code}' "https://horizon.stellar.org/accounts/$account")"
-    if [[ "$status" == "404" ]]; then
-      return 0
-    fi
-    sleep 1
-  done
-  echo "Canary account did not close after account merge; retaining its recovery key." >&2
-  return 1
+  local account="$1"
+  curl -fsS "https://horizon.stellar.org/accounts/$account" \
+    | jq -r '.balances[] | select(.asset_type == "native") | .balance' \
+    | awk -F. '{ fraction = $2 "0000000"; print ($1 * 10000000) + substr(fraction, 1, 7) }'
 }
 
 assert_canary_budget() {
@@ -132,10 +108,7 @@ assert_canary_budget() {
     echo "Unable to determine the administrator's native XLM balance." >&2
     exit 1
   fi
-  required="$MIN_ADMIN_RESERVE_STROOPS"
-  if [[ "$REUSE_FUNDED_CANARY" != "true" ]]; then
-    required="$((required + CANARY_BUDGET_STROOPS))"
-  fi
+  required="$((CANARY_BUDGET_STROOPS + MIN_ADMIN_RESERVE_STROOPS))"
   if (( CANARY_BUDGET_STROOPS < DEPOSIT_AMOUNT )); then
     echo "Canary budget must cover the isolated collateral amount." >&2
     exit 1
@@ -154,32 +127,22 @@ assert_canary_budget() {
 create_canary_account() {
   mkdir -p "$CANARY_KEY_DIR"
   chmod 700 "$CANARY_KEY_DIR"
-  if [[ "$REUSE_FUNDED_CANARY" == "true" ]]; then
-    CANARY_SECRET="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys secret "$CANARY_IDENTITY")"
-    CANARY_ADDRESS="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys public-key "$CANARY_IDENTITY")"
-    CANARY_ACCOUNT_FUNDED=1
-  else
-    # Store the identity before the account is funded. The secret is then
-    # recoverable only from this 0700 local directory during cleanup.
-    stellar -q --config-dir "$CANARY_KEY_DIR" keys generate "$CANARY_IDENTITY" >/dev/null
-    CANARY_SECRET="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys secret "$CANARY_IDENTITY")"
-    CANARY_ADDRESS="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys public-key "$CANARY_IDENTITY")"
-  fi
+  CANARY_SECRET="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys generate "blend-borrow-$RUN_ID" --as-secret)"
+  CANARY_ADDRESS="$(stellar -q --config-dir "$CANARY_KEY_DIR" keys public-key "blend-borrow-$RUN_ID")"
   [[ "$CANARY_SECRET" =~ ^S && "$CANARY_ADDRESS" =~ ^G ]] || {
     echo "Unable to generate an isolated Blend canary identity." >&2
     exit 1
   }
 
-  if [[ "$REUSE_FUNDED_CANARY" != "true" ]]; then
-    stellar -q tx new create-account \
-      --source-account "$ADMIN_SECRET" \
-      --destination "$CANARY_ADDRESS" \
-      --starting-balance "$CANARY_BUDGET_STROOPS" \
-      --inclusion-fee "$INCLUSION_FEE" \
-      --rpc-url "$RPC_URL" \
-      --network-passphrase "$NETWORK_PASSPHRASE" >/dev/null
-    CANARY_ACCOUNT_FUNDED=1
-  fi
+  stellar tx new create-account \
+    --source-account "$ADMIN_SECRET" \
+    --destination "$CANARY_ADDRESS" \
+    --starting-balance "$CANARY_BUDGET_STROOPS" \
+    --inclusion-fee "$INCLUSION_FEE" \
+    --rpc-url "$RPC_URL" \
+    --network-passphrase "$NETWORK_PASSPHRASE" \
+    | stellar tx send --rpc-url "$RPC_URL" --network-passphrase "$NETWORK_PASSPHRASE" >/dev/null
+  CANARY_ACCOUNT_FUNDED=1
 
   local balance
   balance="$(native_balance_stroops "$CANARY_ADDRESS")"
@@ -191,15 +154,13 @@ create_canary_account() {
 
 close_canary_account() {
   [[ "$CANARY_ACCOUNT_FUNDED" -eq 1 && -n "$CANARY_SECRET" ]] || return 0
-  stellar -q tx new account-merge \
+  stellar tx new account-merge \
     --source-account "$CANARY_SECRET" \
     --account "$ADMIN" \
     --inclusion-fee "$INCLUSION_FEE" \
     --rpc-url "$RPC_URL" \
-    --network-passphrase "$NETWORK_PASSPHRASE" >/dev/null
-  if ! wait_for_account_closure "$CANARY_ADDRESS"; then
-    return 1
-  fi
+    --network-passphrase "$NETWORK_PASSPHRASE" \
+    | stellar tx send --rpc-url "$RPC_URL" --network-passphrase "$NETWORK_PASSPHRASE" >/dev/null
   CANARY_ACCOUNT_FUNDED=0
   rm -rf "$CANARY_KEY_DIR"
 }
@@ -435,7 +396,7 @@ invoke_send "$ARKA_ID" init \
   --whitelist_contracts "[\"$XLM\",\"$USDC\"]" \
   --manager "$CANARY_ADDRESS" >/dev/null
 
-echo "5/8 Fund canary with 10 XLM and no third-party capital"
+echo "5/8 Fund canary with 50 XLM and no third-party capital"
 CURRENT_LEDGER="$(curl -fsS "$RPC_URL" -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"getLatestLedger"}' | jq -r '.result.sequence')"
 APPROVAL_EXPIRATION="$((CURRENT_LEDGER + 10000))"
 invoke_send "$XLM" approve --from "$CANARY_ADDRESS" --spender "$ARKA_ID" --amount "$DEPOSIT_AMOUNT" --expiration_ledger "$APPROVAL_EXPIRATION" >/dev/null

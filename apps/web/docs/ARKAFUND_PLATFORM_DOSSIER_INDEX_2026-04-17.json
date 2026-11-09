@@ -1,0 +1,179 @@
+{
+  "document": {
+    "id": "arkafund-platform-dossier",
+    "version_date": "2026-04-17",
+    "status": "canonical_consolidated",
+    "markdown_path": "docs/ARKAFUND_PLATFORM_DOSSIER_2026-04-17.md"
+  },
+  "sources": {
+    "contracts_repo_docs": [
+      "../arkafund/docs/ARCHITECTURE.md",
+      "../arkafund/docs/TOKENOMICS.md",
+      "../arkafund/docs/PLATFORM_TOKENS_AND_TOKENOMICS_2026-04-11.md",
+      "../arkafund/docs/GOVERNANCE.md",
+      "../arkafund/docs/ORACLE_GUARD.md",
+      "../arkafund/docs/SECURITY.md",
+      "../arkafund/docs/SWAP_GUARDRAILS_DAO_2026-04-10.md",
+      "../arkafund/docs/COVERAGE.md",
+      "../arkafund/docs/CLAIMS.md",
+      "../arkafund/docs/FEES.md",
+      "../arkafund/docs/REGISTRY_AND_INDEXING_PLAN.md",
+      "../arkafund/docs/INTERNAL_SECURITY_AUDIT_PLAN.md",
+      "../arkafund/docs/STORAGE_LIFECYCLE.md",
+      "../arkafund/deployments.testnet.json"
+    ],
+    "dapp_docs_and_runtime": [
+      "docs/STATUS.md",
+      "docs/FE_COVERAGE_MATRIX.md",
+      "docs/CONTRACTS_SECURITY_AUDIT.md",
+      "docs/DAPP_GUIDE.md",
+      "src/lib/runtime/oracleCutoverGate.ts",
+      "src/lib/runtime/balancedAutoSurfaceGate.ts",
+      "src/lib/runtime/leaderboardSource.ts"
+    ]
+  },
+  "domains": [
+    {
+      "key": "vault_core",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/deployments.testnet.json",
+        "docs/STATUS.md"
+      ]
+    },
+    {
+      "key": "governance_foundation",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/docs/GOVERNANCE.md",
+        "../arkafund/deployments.testnet.json#validatedModules.governanceFoundation"
+      ]
+    },
+    {
+      "key": "tokenomics_foundation",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/docs/TOKENOMICS.md",
+        "../arkafund/docs/PLATFORM_TOKENS_AND_TOKENOMICS_2026-04-11.md",
+        "../arkafund/deployments.testnet.json#validatedModules.tokenomicsFoundation"
+      ]
+    },
+    {
+      "key": "oracle_safety",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/docs/ORACLE_GUARD.md",
+        "../arkafund/deployments.testnet.json#validatedModules.oracleSafety",
+        "src/lib/runtime/oracleCutoverGate.ts"
+      ]
+    },
+    {
+      "key": "coverage_and_claims",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/docs/COVERAGE.md",
+        "../arkafund/docs/CLAIMS.md",
+        "../arkafund/deployments.testnet.json#validatedModules.coverageClaims"
+      ]
+    },
+    {
+      "key": "fee_engine",
+      "status": "complete_testnet_validated",
+      "evidence": [
+        "../arkafund/docs/FEES.md",
+        "../arkafund/deployments.testnet.json#validatedModules.feeEngine"
+      ]
+    },
+    {
+      "key": "balanced_auto_surface",
+      "status": "partial",
+      "evidence": [
+        "../arkafund/docs/BALANCED_OFFICIAL_SURFACE_2026-04-07.md",
+        "../arkafund/docs/BALANCED_READINESS.md",
+        "src/lib/runtime/balancedAutoSurfaceGate.ts",
+        "docs/STATUS.md"
+      ],
+      "notes": "Quote/status/confirm surface exists; AUTO admission remains gated by readiness."
+    },
+    {
+      "key": "smart_routing_v2",
+      "status": "partial",
+      "evidence": [
+        "../arkafund/docs/PROTOCOL_EXPANSION_AND_ROUTER_V2_2026-04-07.md",
+        "../arkafund/docs/EXECUTION_VENUES_AND_INTENT_ROUTING_PLAN_2026-04-07.md",
+        "docs/STATUS.md"
+      ],
+      "notes": "Multi-hop and scoring are implemented; full global multi-venue optimization remains open."
+    },
+    {
+      "key": "frontend_contract_coverage",
+      "status": "partial",
+      "evidence": [
+        "docs/FE_COVERAGE_MATRIX.md",
+        "docs/STATUS.md"
+      ],
+      "notes": "Coverage is broad but not formally closed as exhaustive 100%."
+    },
+    {
+      "key": "wallet_backed_e2e_mutation_matrix",
+      "status": "partial",
+      "evidence": [
+        "docs/FE_COVERAGE_MATRIX.md",
+        "docs/CONTRACTS_SECURITY_AUDIT.md"
+      ]
+    },
+    {
+      "key": "internal_contract_security_audit",
+      "status": "active_with_evidence",
+      "evidence": [
+        "../arkafund/docs/INTERNAL_SECURITY_AUDIT_PLAN.md",
+        "docs/CONTRACTS_SECURITY_AUDIT.md"
+      ]
+    },
+    {
+      "key": "storage_lifecycle_hardening",
+      "status": "implemented_with_runbook",
+      "evidence": [
+        "../arkafund/docs/STORAGE_LIFECYCLE.md",
+        "docs/CONTRACTS_SECURITY_AUDIT.md",
+        "docs/STATUS.md"
+      ]
+    },
+    {
+      "key": "mainnet_oracle_cutover_manifest",
+      "status": "pending",
+      "evidence": [
+        "src/lib/runtime/oracleCutoverGate.ts",
+        "docs/STATUS.md"
+      ],
+      "notes": "No committed deployments.mainnet.json in current workspace."
+    },
+    {
+      "key": "third_party_protocol_onboarding_governed",
+      "status": "deferred",
+      "evidence": [
+        "../arkafund/docs/EXECUTION_RUNBOOK.md"
+      ]
+    }
+  ],
+  "oracle_runtime_resolution": {
+    "manifest_source_priority": [
+      "deployments.<network>.json validated modules",
+      "env fallback"
+    ],
+    "env_keys": [
+      "ARKAFUND_ORACLE_PROVIDER_MAINNET",
+      "ARKAFUND_ORACLE_PROVIDER_TESTNET",
+      "ARKAFUND_ORACLE_PROVIDER_PRIMARY_MAINNET",
+      "ARKAFUND_ORACLE_PROVIDER_SECONDARY_MAINNET",
+      "ARKAFUND_ORACLE_PROVIDER_PRIMARY_TESTNET",
+      "ARKAFUND_ORACLE_PROVIDER_SECONDARY_TESTNET",
+      "NEXT_PUBLIC_ORACLE_PROVIDER_MAINNET",
+      "NEXT_PUBLIC_ORACLE_PROVIDER_TESTNET"
+    ]
+  },
+  "release_truth_policy": {
+    "do_not_label_100_percent_if_partial_exists": true,
+    "mainnet_live_requires_explicit_manifest_and_gate_ready": true
+  }
+}

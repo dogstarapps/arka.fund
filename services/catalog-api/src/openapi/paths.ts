@@ -218,6 +218,49 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       responses: { "200": response("Paginated activity.", schemaRef("ActivityPage")) },
     },
   },
+  "/v1/arkas/{id}/holders": {
+    get: {
+      tags: ["Arkas"],
+      summary: "List current Arka investors",
+      operationId: "getArkaHolders",
+      description:
+        "Returns current share-token balances discovered from indexed contract activity and verified against the Arka contract.",
+      parameters: [idParameter("id", "Arka contract ID."), ...pagination],
+      responses: {
+        "200": response("Paginated current investors.", schemaRef("ArkaHolderPage")),
+        "404": errorResponses["404"],
+      },
+    },
+  },
+  "/v1/arkas/{id}/managed-position": {
+    get: {
+      tags: ["Arkas"], summary: "Read one owner's reconciled V3 position",
+      operationId: "getArkaManagedPosition",
+      description: "One immutable observation, exact integer units, owner-filtered requests, freshness and deposit capability. Public lookup never authorizes signing. Unavailable data is not zero.",
+      parameters: [idParameter("id", "Arka contract ID."), {name:"owner",in:"query",required:true,schema:{type:"string"}}, {name:"view",in:"query",description:"active returns all live obligations and a closed-history count/paid aggregate; full historical rows remain available through pinned pagination.",schema:{type:"string",enum:["active"]}}],
+      responses: {"200":response("Verified owner position.",{type:"object",additionalProperties:true}),
+        "400":response("Invalid public owner.",schemaRef("Error")),...errorResponses},
+    },
+  },
+  "/v1/arkas/{id}/withdrawals": {
+    get: {
+      tags: ["Arkas"],
+      summary: "Read verified V3 withdrawal requests",
+      operationId: "getArkaManagedWithdrawals",
+      description: "V3 only. Returns fixed reserved claims separately from still-invested pending shares. Unavailable data is a 503, not a zero balance.",
+      parameters: [idParameter("id", "Arka contract ID."), ...pagination, {name:"owner",in:"query",schema:{type:"string"}}, {name:"closed",in:"query",schema:{type:"string",enum:["1"]}}, {name:"observationId",in:"query",description:"Pins all pages to one immutable observation.",schema:{type:"string",pattern:"^[a-f0-9]{64}$"}}],
+      responses: {"200": response("Paginated V3 requests with original owners and observation ledger.", {type: "object", additionalProperties: true}), ...errorResponses},
+    },
+  },
+  "/v1/arkas/{id}/withdrawals/history": {
+    get: {
+      tags: ["History"],
+      summary: "Read immutable V3 indexing observations",
+      operationId: "getArkaManagedWithdrawalHistory",
+      parameters: [idParameter("id", "Arka contract ID."), ...pagination],
+      responses: {"200": response("Paginated preserved observations. No on-chain execution is performed.", {type: "object", additionalProperties: true}), ...errorResponses},
+    },
+  },
   "/v1/assets": {
     get: {
       tags: ["Assets"],

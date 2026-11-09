@@ -12,6 +12,7 @@ members = [
     "adapter-aquarius",
     "adapter-soroswap",
     "adapter-phoenix",
+    "adapter-sushi",
     "adapter-balanced",
     "adapter-blend",
     "blend-router-mock",
@@ -41,3 +42,10 @@ soroban-sdk = { version = "23.0.0" }
 [profile.release]
 # Production contract arithmetic must trap rather than wrap on overflow.
 overflow-checks = true
+# Keep production WASM below Soroban's upload resource ceiling and make
+# release artifacts reproducible across local and CI builds.
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

@@ -358,7 +358,18 @@ impl ClaimsManager {
         )
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(env: Env, admin: Address, reserve_token: Address, treasury: Option<Address>) {
+        Self::initialize(env, admin, reserve_token, treasury);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, reserve_token: Address, treasury: Option<Address>) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, reserve_token: Address, treasury: Option<Address>) {
         let store = env.storage().persistent();
         if store.has(&DataKey::Admin) {
             panic_with_error!(&env, Error::AlreadyInitialized);

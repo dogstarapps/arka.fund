@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server';export const dynamic='force-dynamic';export async function POST(){return NextResponse.json({error:'Snapshot-only candidate. Direct RPC and all transaction submission are disabled.'},{status:403});}

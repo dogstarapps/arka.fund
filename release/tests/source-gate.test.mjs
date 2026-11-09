@@ -1,0 +1,11 @@
+import test from'node:test';import assert from'node:assert/strict';import fs from'node:fs';import{fileURLToPath}from'node:url';import{verifySources,inspectTargetEvidence}from'../source-gate.mjs';
+const root=fileURLToPath(new URL('../../',import.meta.url)),manifest=()=>JSON.parse(fs.readFileSync(root+'release/source-manifest.json'));
+test('protocol activation/deactivation and the real-wallet canary remain explicit mainnet gates',()=>{const p=JSON.parse(fs.readFileSync(root+'release/mainnet-pending.json'));assert.equal(p.mainnetApproved,false);assert.equal(p.noah.version,2);for(const id of['protocol-activation-deactivation','wallet-device-and-canary'])assert.equal(p.pending.find(item=>item.id===id)?.status,'pending');});
+test('reviewed sources bind all code, dependencies and the Noah V2 identity',()=>assert.equal(verifySources(root,manifest()).mainnetApproved,false));
+test('source drift is rejected',()=>{const m=manifest();m.files[0].sha256='0'.repeat(64);assert.throws(()=>verifySources(root,m),/RELEASE_SOURCE_CHANGED/);});
+test('omitted files cannot bypass release verification',()=>{const m=manifest();m.files=m.files.slice(1);assert.throws(()=>verifySources(root,m),/RELEASE_INVENTORY_CHANGED/);});
+test('a replacement release identifier cannot borrow reviewed evidence',()=>{const m=manifest();m.releaseId='0'.repeat(64);assert.throws(()=>verifySources(root,m),/RELEASE_ID_CHANGED/);});
+test('Noah cannot be promoted through a release flag',()=>{const m=manifest();m.noah.version=3;assert.throws(()=>verifySources(root,m),/NOAH_VERSION/);});
+test('a dated RAM replay cannot establish current mainnet readiness',()=>assert.throws(()=>inspectTargetEvidence({mode:'retained-ram-snapshot'},manifest()),/AUTHORIZED_READ/));
+test('current timestamps alone cannot approve a target',()=>{const m=manifest();assert.throws(()=>inspectTargetEvidence({mode:'authorized-live-read',capturedAt:new Date().toISOString(),releaseId:m.releaseId,network:'Public Global Stellar Network ; September 2015',noahVersion:2},m),/TARGET_CHECK_MISSING/);});
+test('stale target evidence is rejected even when its fields claim success',()=>{const m=manifest();assert.throws(()=>inspectTargetEvidence({mode:'authorized-live-read',capturedAt:'2026-01-01T00:00:00Z',releaseId:m.releaseId},m),/CURRENT_TARGET/);});

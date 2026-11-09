@@ -216,7 +216,11 @@ function mapRpcEvent(
     return null;
   }
 
-  if (topic === "deposit" && Array.isArray(value) && value.length >= 3) {
+  if (topic === "deposit") {
+    const deposit = parseDepositEventPayload(value, arka.denominationContract);
+    if (!deposit) {
+      return null;
+    }
     return {
       eventId: event.id,
       cursor: event.id,
@@ -229,11 +233,11 @@ function mapRpcEvent(
       transactionIndex: event.transactionIndex,
       operationIndex: event.operationIndex,
       inSuccessfulContractCall: event.inSuccessfulContractCall,
-      user: nativeToString(value[0]),
-      assetContract: arka.denominationContract,
+      user: deposit.user,
+      assetContract: deposit.assetContract,
       marketId: null,
-      amount: nativeBigIntToString(value[1]),
-      shares: nativeBigIntToString(value[2]),
+      amount: deposit.amount,
+      shares: deposit.shares,
       netOut: null,
       stepCount: null,
     };
@@ -313,6 +317,27 @@ function mapRpcEvent(
   }
 
   return null;
+}
+
+export function parseDepositEventPayload(
+  value: unknown,
+  denominationContract: string | null,
+): Pick<ActivityEntry, "user" | "assetContract" | "amount" | "shares"> | null {
+  if (!Array.isArray(value) || value.length < 3) {
+    return null;
+  }
+
+  // Events before the multi-asset accounting upgrade used
+  // (user, amount, shares). New events use (user, asset, amount, shares).
+  const hasExplicitAsset = value.length >= 4;
+  return {
+    user: nativeToString(value[0]),
+    assetContract: hasExplicitAsset
+      ? nativeToString(value[1])
+      : denominationContract,
+    amount: nativeBigIntToString(value[hasExplicitAsset ? 2 : 1]),
+    shares: nativeBigIntToString(value[hasExplicitAsset ? 3 : 2]),
+  };
 }
 
 function compareActivityEntries(

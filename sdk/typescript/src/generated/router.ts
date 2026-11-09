@@ -114,6 +114,8 @@ export interface Client {
 }
 export class Client extends ContractClient {
   static async deploy<T = Client>(
+        /** Constructor/Initialization Args for the contract's `__constructor` method */
+        {admin, governor, expires_at}: {admin: Option<string>, governor: Option<string>, expires_at: u64},
     /** Options for initializing a Client as well as for calling a method, with extras specific to deploying. */
     options: MethodOptions &
       Omit<ContractClientOptions, "contractId"> & {
@@ -125,7 +127,7 @@ export class Client extends ContractClient {
         format?: "hex" | "base64";
       }
   ): Promise<AssembledTransaction<T>> {
-    return ContractClient.deploy(null, options)
+    return ContractClient.deploy({admin, governor, expires_at}, options)
   }
   constructor(public readonly options: ContractClientOptions) {
     super(
@@ -137,6 +139,7 @@ export class Client extends ContractClient {
         "AAAAAQAAAAAAAAAAAAAACFN3YXBTdGVwAAAABQAAAAAAAAAHYWRhcHRlcgAAAAATAAAAAAAAAAlhbW91bnRfaW4AAAAAAAALAAAAAAAAAAlhc3NldF9vdXQAAAAAAAfQAAAABUFzc2V0AAAAAAAAAAAAAAdtaW5fb3V0AAAAAAsAAAAAAAAAB3Bvb2xfaWQAAAAACg==",
         "AAAAAAAAAAAAAAALZXhlY3V0ZV9mb3IAAAAAAwAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAhyZWNlaXZlcgAAABMAAAAAAAAABXN0ZXBzAAAAAAAD6gAAB9AAAAAIU3dhcFN0ZXAAAAABAAAACw==",
         "AAAAAAAAAAAAAAAMc2V0X2dvdmVybm9yAAAAAgAAAAAAAAAGY2FsbGVyAAAAAAATAAAAAAAAAAhnb3Zlcm5vcgAAA+gAAAATAAAAAA==",
+        "AAAAAAAAAEZOb25lIGNyZWF0ZXMgYW4gaW1tdXRhYmxlIHBlcm1pc3Npb25sZXNzIHJvdXRlciB3aXRoIG5vIHVwZ3JhZGUgb3duZXIuAAAAAAANX19jb25zdHJ1Y3RvcgAAAAAAAAMAAAAAAAAABWFkbWluAAAAAAAD6AAAABMAAAAAAAAACGdvdmVybm9yAAAD6AAAABMAAAAAAAAACmV4cGlyZXNfYXQAAAAAAAYAAAAA",
         "AAAAAAAAAAAAAAAObGFzdF93YXNtX2hhc2gAAAAAAAAAAAABAAAD6AAAA+4AAAAg",
         "AAAAAAAAAAAAAAAPYm9vdHN0cmFwX2FkbWluAAAAAAAAAAABAAAD6AAAABM=",
         "AAAAAAAAAAAAAAATc2V0X2Jvb3RzdHJhcF9hZG1pbgAAAAADAAAAAAAAAAZjYWxsZXIAAAAAABMAAAAAAAAABWFkbWluAAAAAAAAEwAAAAAAAAAKZXhwaXJlc19hdAAAAAAABgAAAAA=",

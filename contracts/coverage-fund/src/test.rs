@@ -67,15 +67,16 @@ fn setup() -> (
     let env = Env::default();
     let reserve_token_id = env.register_contract(None, MockToken);
     let bootstrap_token_id = env.register_contract(None, MockToken);
-    let fund_id = env.register_contract(None, CoverageFund);
-    let fund = CoverageFundClient::new(&env, &fund_id);
+    
+    
     let reserve_token = MockTokenClient::new(&env, &reserve_token_id);
     let bootstrap_token = MockTokenClient::new(&env, &bootstrap_token_id);
     let admin = Address::generate(&env);
     let staker = Address::generate(&env);
     let treasury = Address::generate(&env);
     env.mock_all_auths();
-    fund.init(&admin, &reserve_token_id, &bootstrap_token_id);
+    let fund_id = env.register(CoverageFund, (&admin, &reserve_token_id, &bootstrap_token_id,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
     (
         env,
         fund_id,

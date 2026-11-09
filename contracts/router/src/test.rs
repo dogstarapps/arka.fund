@@ -21,7 +21,7 @@ impl DummyAdapter {
 #[test]
 fn test_execute_accumulates_step_outputs() {
     let env = Env::default();
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let client = RouterClient::new(&env, &router_id);
     // Register dummy adapter
     let adapter_id = env.register_contract(None, DummyAdapter);
@@ -58,11 +58,31 @@ fn test_execute_accumulates_step_outputs() {
 fn test_bootstrap_admin_cannot_extend_expiry() {
     let env = Env::default();
     env.ledger().set_timestamp(1_000);
-    let router_id = env.register_contract(None, Router);
-    let client = RouterClient::new(&env, &router_id);
+    
+    
     let admin = Address::generate(&env);
 
     env.mock_all_auths();
-    client.init_upgrade_authority(&admin, &None, &2_000);
+    let router_id = env.register(Router, (&Some((admin).clone()), &None::<Address>, &2_000u64,));
+    let client = RouterClient::new(&env, &router_id);
     client.set_bootstrap_admin(&admin, &admin, &2_001);
+}
+
+
+#[test]
+fn optional_governor_clear_does_not_recreate_retired_bootstrap_authority() {
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let id = env.register(Router, (&Some(admin.clone()), &None::<Address>, &2_000u64));
+    let client = RouterClient::new(&env, &id);
+    client.set_governor(&admin, &None);
+    assert!(client.try_clear_bootstrap_admin(&admin).is_err());
+    client.set_governor(&admin, &Some(governor.clone()));
+    client.clear_bootstrap_admin(&governor);
+    client.set_governor(&governor, &None);
+    assert_eq!(client.bootstrap_admin(), None);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
 }

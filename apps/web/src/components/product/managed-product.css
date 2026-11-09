@@ -1,0 +1,109 @@
+/* Local managed product: inherit Arka's palette and components. */
+.managed-product { --managed-panel-padding: 24px; gap: 16px; }
+.managed-product > .surface-panel { min-width: 0; padding: var(--managed-panel-padding); }
+.managed-product > .surface-panel:not(details) { display: grid; gap: 16px; }
+.managed-product h1, .managed-product h2, .managed-product h3, .managed-product p { margin: 0; }
+.managed-product h1 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.15; }
+.managed-product h2 { font-size: 1.25rem; }
+.managed-product h3 { font-size: 1rem; }
+.managed-product p { line-height: 1.65; }
+.managed-product .surface-eyebrow { display: block; margin: 0; }
+.managed-product > .managed-product-header { gap: 12px; }
+.managed-product-header > p { max-width: 65ch; }
+.managed-product-header .surface-entry-actions { margin-top: 4px; }
+.managed-product .surface-entry-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.managed-product .surface-button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin: 0; white-space: normal; text-align: center; }
+.managed-product > .ops-alert { margin: 0; padding: 16px var(--managed-panel-padding); }
+.managed-wallet-context { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.managed-wallet-context > div { min-width: 0; }
+.managed-wallet-context .managed-contract { margin: 8px 0 0; }
+.managed-wallet-context > .surface-button { flex-shrink: 0; }
+.managed-product > .managed-position { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; }
+.managed-position > div { display: grid; min-width: 0; gap: 8px; }
+.managed-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; }
+.managed-position .managed-metrics { margin-top: 12px; }
+.managed-metrics span { display: flex; flex-direction: column; gap: 8px; font-size: .85rem; color: var(--text-muted, #bcb2d0); }
+.managed-metrics strong { font-size: 1.15rem; color: var(--text-primary, #f4effc); overflow-wrap: anywhere; }
+.managed-request-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin: 0; }
+.managed-product details.surface-panel > summary { min-height: 44px; align-content: center; }
+.managed-product details.surface-panel .managed-request-form { margin-top: 16px; }
+.managed-product summary { cursor: pointer; }
+.managed-request-form label { display: flex; flex: 1 1 220px; flex-direction: column; min-width: 0; gap: 8px; }
+.managed-request-form input, .managed-request-form select { height: 44px; min-height: 44px; box-sizing: border-box; width: 100%; }
+.managed-contract { display: block; overflow-wrap: anywhere; font-size: .8rem; margin: 16px 0; }
+.managed-withdrawal-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; border-top: 1px solid #9983c13a; padding: 20px 0 4px; }
+.managed-withdrawal-row > div:first-child { display: grid; min-width: 0; gap: 8px; }
+.managed-review { border-color: #b8fb4b !important; }
+.managed-instant { display: grid; gap: 12px; border-top: 1px solid #9983c13a; padding-top: 16px; }
+.managed-instant > .surface-button { justify-self: start; }
+.managed-keeper details p { font-size: .8rem; overflow-wrap: anywhere; }
+.managed-product small, .managed-product .surface-note { color: #c1b6cf; }
+/* Shared public navigation; authorization for operator tools is unchanged. */
+.managed-platform-navigation > summary { padding: 14px 16px; border-top: 1px solid var(--surface-border); font-size: .8rem; }
+/* Creation only: one compact summary, then a replacement review. */
+.managed-create { max-width: 940px; }
+.managed-create > .managed-create-header { display: grid; gap: 8px; padding: 8px 16px; }
+.managed-create h1 { font-size: clamp(1.55rem, 2.3vw, 1.9rem); }
+.managed-create .managed-create-assets { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.managed-create-assets > div { display: grid; align-content: start; gap: 6px; min-width: 0; }
+.managed-create-assets strong { font-size: 1.08rem; overflow-wrap: anywhere; }
+.managed-create-label { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; min-height: 32px; color: var(--text-soft); font-size: .85rem; }
+.managed-create-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px 24px; margin: 0; }
+.managed-create-facts > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--surface-border); }
+.managed-create-facts dt { color: var(--text-soft); font-size: .85rem; }
+.managed-create-facts dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.managed-create .surface-note { font-size: .85rem; }
+.managed-create-exits { display: grid; gap: 8px; padding: 16px; background: var(--surface-panel-soft); border: 1px solid var(--surface-border); }
+.managed-create-exits-heading { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
+.managed-create-exits h2, .managed-create .managed-review h2 { font-size: 1.05rem; }
+.managed-help-link { padding: 8px 0; min-height: 44px; background: none; border: 0; font: inherit; font-size: .85rem; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.managed-help-icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; background: var(--surface-panel-soft); border: 1px solid var(--surface-border-strong); border-radius: 50%; color: var(--text-strong); font: inherit; cursor: pointer; }
+.managed-help-dialog { width: min(560px,calc(100vw - 32px)); max-height: calc(100dvh - 48px); overflow: auto; padding: 24px; border: 1px solid var(--surface-border-strong); background: var(--surface-panel); color: var(--text-strong); box-shadow: var(--surface-shadow); }
+.managed-help-dialog::backdrop { background: rgba(10,5,25,.72); }
+.managed-help-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.managed-help-heading h2 { margin: 0; font-size: 1.15rem; }
+.managed-help-heading form { margin: 0; }
+.managed-help-content { display: grid; gap: 16px; margin-top: 20px; }
+.managed-help-content p { line-height: 1.6; }
+.managed-create-terms { display: grid; gap: 10px; margin: 0; padding-left: 20px; font-size: .9rem; line-height: 1.6; }
+.managed-create-technical { font-size: .85rem; }
+.managed-create-technical > summary { min-height: 44px; align-content: center; color: var(--text-soft); }
+.managed-create-technical[open] { display: grid; gap: 16px; }
+.managed-create-address { display: grid; justify-items: start; gap: 6px; }
+.managed-create-address .managed-contract { margin: 0; }
+.managed-create-address button { background: none; border: 0; padding: 8px 0; min-height: 44px; font: inherit; cursor: pointer; }
+.managed-create-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--surface-border); padding-top: 16px; }
+.managed-create-actions > p { max-width: 32ch; }
+.managed-create-review-context, .managed-create-signing { display: grid; gap: 8px; overflow-wrap: anywhere; font-size: .9rem; }
+.managed-create-signing { background: var(--surface-panel-soft); padding: 16px; }
+.managed-create-signing .managed-contract { margin: 0; }
+@media (pointer: coarse) { .managed-help-icon { width: 44px; height: 44px; } }
+@media (max-width: 600px) {
+ .managed-create-label { min-height: 44px; }
+ .managed-create-facts > div { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px; }
+ .managed-create-facts dt { min-height: 3.4em; }
+ .managed-create-facts dd { text-align: left; }
+ .managed-create-actions { align-items: stretch; flex-direction: column; }
+ .managed-create-actions > p { max-width: none; }
+ .managed-create-actions > button { width: 100%; }
+ .managed-help-dialog { padding: 20px; }
+ .managed-help-heading { align-items: flex-start; gap: 12px; }
+}
+@media (max-width: 360px) { .managed-create .managed-create-assets { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 700px) {
+  .managed-product { --managed-panel-padding: 20px; }
+  .managed-metrics { gap: 18px; }
+  .managed-product > .managed-position { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .managed-position > .surface-button { width: 100%; }
+  .managed-wallet-context, .managed-withdrawal-row { align-items: stretch; flex-direction: column; gap: 16px; }
+  .managed-wallet-context > .surface-button { align-self: flex-start; }
+  .managed-request-form { align-items: stretch; flex-direction: column; }
+  .managed-request-form label { flex: auto; }
+  .managed-platform-navigation > summary { padding: 12px; }
+  .managed-platform-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .managed-platform-links .chrome-rail-link { min-width: 0; min-height: 44px; padding: 10px 12px; font-size: .8rem; }
+}
+@media (max-width: 480px) {
+  .managed-metrics { grid-template-columns: minmax(0, 1fr); }
+  .managed-product-header .surface-entry-actions > .surface-button { flex: 1 1 100%; }
+}

@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "revision": "R60",
+  "candidate": "R60",
+  "baseCandidate": "R58",
+  "baseCommit": "12158f4aa694075ec8628f2a545000fc926ec828",
+  "date": "2026-11-05",
+  "mainnetApproved": false,
+  "noah": {
+    "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
+    "version": 2,
+    "migrate": false,
+    "targetedReadsThisRevision": 0
+  },
+  "scope": "Sushi-only concrete application plan, HTTPS managed catalog proxy and empty new-registry initialization",
+  "existingProductionApprovalReevaluated": false,
+  "existingProductionApprovalRevoked": false,
+  "pending": [
+    {
+      "id": "development-dependency-advisory",
+      "status": "pending",
+      "category": "release-policy-and-upstream",
+      "closure": "Current exact candidate: all copies development-only; no affected production lock node, no affected Next NFT reference or known compiled marker. Actual lint/docs do not reach the described level-2 mechanism; native V8 positive controls detect it. Advisory stays open by version and published range discrepancy. Strict full audits still fail. Close with a supported compatible upstream fix and validation, or an independently reviewed explicit release-risk/policy decision. Neither is applied."
+    },
+    {
+      "id": "rust-dependency-advisories",
+      "status": "pending",
+      "category": "release-policy-and-upstream",
+      "closure": "Five fresh graphs: affected crypto-bigint 0.5.5 in native hosts, absent from both normal/build guest graphs. Reviewed host23/P29 ECDSA entry points use public verification/recovery inputs; no signing-secret flow identified in these paths. Not a constant-time proof or validator-host qualification. Three raw lock audits remain failing. Need supported upstream migration and requalification, or an independently reviewed explicit native-tooling risk decision. No waiver or suppression is applied."
+    },
+    {
+      "id": "wallet-device-and-canary",
+      "status": "pending",
+      "category": "target-operational-validation",
+      "closure": "Chrome Freighter isConnected responded to a local public availability probe only; no address, permission, account approval or signature was requested. The fresh 58-case local cryptographic matrix is separate. Actual wallet/device authorization/signing, hardware/multisignature authorities and an explicitly authorized submitted canary remain open."
+    },
+    {
+      "id": "protocol-activation-deactivation",
+      "status": "pending",
+      "category": "target-operational-validation",
+      "closure": "Reconcile actual destination code/roles/constructors, real governor/council/guardian, fund-specific allowlists/callers and factory template digests. Validate current liquidity, resources, history/index and wallet/canary with separate authorization, then independent review and explicit deployment/activation approval. Local references do not supply real target addresses. R31-03 is closed locally by R32; removal never revives retired bootstrap and must account for the remaining authorities. R42 mantiene las pruebas locales anteriores por identidad: Sushi/SoroSwap/Aquarius siguen requiriendo cualificación del destino; no se activa ni desactiva nada.",
+      "localR56Evidence": "New guard conversion proven locally; production configuration and activation are pending under the existing authority."
+    },
+    {
+      "id": "current-target-identity-and-index",
+      "status": "pending",
+      "category": "target-operational-validation",
+      "closure": "Validar con autorización aplicable las identidades/historia completa del destino, retención, RPC, configuración y operación de backups. R38 pasa restauración10002generaciones/continuación10003 y32770solicitudes; hay costes proporcionales al historial,4096obligaciones activas y presupuestos de holders. Esos ensayos no califican producción."
+    },
+    {
+      "id": "current-budget-and-admission",
+      "status": "pending",
+      "category": "target-operational-validation",
+      "closure": "Métricas frescas R38 del WASM seleccionado de R37: CPU declarada máxima39176318, memoria medida máxima11587617bytes; Arka130856/131072bytes. Sólo Arka difiere de R35. Siguen sin cualificar upload/setup/TTL/restore/inclusión, firmas reales, presupuesto operativo y liquidez actuales del destino. Los textos heredados R34/unchanged24 no describen el candidato R37."
+    },
+    {
+      "id": "hosted-ci",
+      "status": "pending",
+      "category": "release-policy-and-validation",
+      "closure": "R47 frontend1368/0/57,72 additional cases and local release/build/types/browser receipts at closeout. No hosted CI or publication; advisories remain open."
+    },
+    {
+      "id": "independent-audit",
+      "status": "pending",
+      "category": "independent-review",
+      "closure": "R46-01 corrected in R47; R44-01 and earlier corrections retained. Review the exact candidate, retained Arka return ABI/client compatibility and both advisories independently. No auditor contacted or sending."
+    },
+    {
+      "id": "deployment-authorization",
+      "status": "pending",
+      "category": "authorization",
+      "closure": "Explicit approval of the final plan and target before production signatures, submissions, updates or financial automation; Noah stays V2."
+    }
+  ],
+  "nextLocalPending": {
+    "id": "application-policy-and-hosting-qualification",
+    "localStep": "Review remaining managed withdrawal/portfolio production terms; resolve actual template digest and creation ledger only after separate authorized application; qualify API/preview hosting, positive TTL metadata, current dependencies, hosted CI and independent review before wallets/canary/activation.",
+    "applicationDefectOpen": false
+  },
+  "currentLocalAudit": {
+    "report": "docs/ORACLE_NORMALIZATION_R56.md",
+    "closedLocal": [
+      "R31-01",
+      "R31-02",
+      "R31-03",
+      "R31-04",
+      "R33-01",
+      "R33-02",
+      "R36-01",
+      "R36-02",
+      "R38-01",
+      "R38-02",
+      "R40-01",
+      "R40-02",
+      "R42-01",
+      "R42-02",
+      "R44-01",
+      "R46-01",
+      "R55-01"
+    ],
+    "openApplicationFindings": [],
+    "retainedOpenAdvisories": [
+      "R14-07",
+      "R14-09"
+    ],
+    "allApplicationFindingsClosed": true,
+    "allInternalFindingsClosed": false,
+    "scope": "Guard normalization remediation and affected path checks; older broader evidence retained by identity"
+  },
+  "contractsChanged": 1,
+  "selectedWasmChanged": 1,
+  "selectedWasmUnchanged": 23,
+  "dependenciesChanged": 0,
+  "signaturesCreated": 9,
+  "signaturesCreatedThisRevision": 0,
+  "transactionsSubmitted": 0,
+  "productionAccess": true,
+  "productionReadsThisRevision": 1,
+  "productionWrites": 0,
+  "externalAuditSent": false,
+  "candidateCommit": null,
+  "authority": {
+    "address": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "source": "B1 current Admin/Governor/Guardian + explicit user instruction to retain existing authority",
+    "changed": false,
+    "replaceAuthority": false,
+    "newCouncil": false,
+    "signerThresholdsOrCustodyRead": false,
+    "localRepresentative": "GBIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVCUKRKFIVDV3D",
+    "localKeysGenerated": false
+  },
+  "localOracleNormalization": {
+    "closedFinding": "R55-01",
+    "guardWasm": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+    "canonicalBase": "USD",
+    "decimals": 14,
+    "explicitOneLegConversion": true,
+    "frozenR55AquariusCapture": true,
+    "historicalSushiSoroFixtures": true,
+    "financialSteps": 464,
+    "rustTests": 318,
+    "governedConfigurationValidated": true
+  },
+  "localSignatureIncident": {
+    "signaturesCreated": 9,
+    "kind": "ephemeral local test signatures created unintentionally by the old test harness",
+    "realWallets": 0,
+    "submittedTransactions": 0,
+    "disclosed": true,
+    "harnessRemediated": true,
+    "positiveSigningTestsNotAuthorizedOrRunAgain": true
+  },
+  "baseReleaseId": "d1fb398904d8c22e112b1bdc864dae03ea6c214eebd2bac313b4ac4381ed87ad",
+  "auditRevision": "R56-remediation",
+  "retainedPriorEvidence": {
+    "baseline": "R47",
+    "sourceReleaseId": "d1fb398904d8c22e112b1bdc864dae03ea6c214eebd2bac313b4ac4381ed87ad",
+    "metadataFile": "../release-r47/release/mainnet-pending.json",
+    "scope": "Historical broader qualification only; changed OracleGuard is validated freshly in R56, and 23 unchanged WASM identities are checked."
+  },
+  "runtimeCandidate": "R56 plus new-registry constructor initialization",
+  "newSignaturesThisRevision": 0,
+  "historicalR56SignatureIncidentPreserved": true,
+  "productionWritesThisRevision": 0,
+  "productionAccessMode": "one authorized contract-code read; all planning/builds/replays local",
+  "selectedWasmChangedThisRevision": 1,
+  "selectedWasmUnchangedThisRevision": 23,
+  "sourceFindingsClosedThisRevision": [
+    "R60-01",
+    "R60-02"
+  ]
+}

@@ -1,0 +1,1193 @@
+{
+  "schema": 1,
+  "revision": "R56-remediation",
+  "date": "2026-11-05",
+  "candidate": "R56",
+  "baseCandidate": "R47",
+  "baseCommit": "12158f4aa694075ec8628f2a545000fc926ec828",
+  "baseReleaseId": "d1fb398904d8c22e112b1bdc864dae03ea6c214eebd2bac313b4ac4381ed87ad",
+  "mainnetApproved": false,
+  "noahVersion": 2,
+  "productionAccess": false,
+  "realWallets": 0,
+  "signaturesCreated": 9,
+  "transactionsSubmitted": 0,
+  "externalAuditSent": false,
+  "scope": "Remediation of R55-01, explicit one-leg oracle quote normalization and its contract/client/financial regression checks; not a new exhaustive platform or production audit.",
+  "findings": [
+    {
+      "id": "R14-01",
+      "severity": "high",
+      "status": "fixed-validated-local",
+      "title": "Catalog follow-redirects 1.16.1 advisory",
+      "fix": "Pinned 1.16.2, minimal lock update, separate exact-lock installation; current catalog full/production npm audits clean.",
+      "evidence": "dependency-audits-accepted/summary.json"
+    },
+    {
+      "id": "R14-02",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Creation could continue after its review or factory changed while the wallet was pending",
+      "fix": "Bind owner, factory and exact review through async prepare/sign/pre-submit/result stages.",
+      "evidence": "accepted-suite/web-tests.json"
+    },
+    {
+      "id": "R14-03",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Generic SDK submitted a returned wallet body and trusted a different RPC hash",
+      "fix": "Compare network-domain transaction body hash, require a decorated signature and reconcile the exact RPC returned hash before polling. Signer-set and consensus verification are not implied.",
+      "evidence": "accepted-suite/sdk-unit.log"
+    },
+    {
+      "id": "R14-04",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "Pending recovery receipts could be overwritten or removed by a late result",
+      "fix": "Refuse replacing a different pending ID; clear only the matching receipt; pre-wire context rejection cleans only its own unsubmitted intent. Malformed or inaccessible stored recovery data is preserved and blocks the write with a controlled UI error.",
+      "evidence": "accepted-suite/web-tests.json"
+    },
+    {
+      "id": "R14-05",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "Factory constructor and initialization metadata still named an obsolete vault WASM",
+      "fix": "Reconcile selected hash/bytes/roles/source pins and enforce them independently of regenerating the manifest.",
+      "evidence": "accepted-suite-controller.log"
+    },
+    {
+      "id": "R14-06",
+      "severity": "moderate-tooling",
+      "status": "fixed-validated-local",
+      "title": "Static inventory missed generic Rust external invocations and described obsolete activation",
+      "fix": "Recognize typed invoke/try-invoke forms, include Sushi/lifecycle/retained adapters, label source inventory accurately. Preserve and manually triage all 24 current reviews; do not suppress them.",
+      "evidence": "internal-audit-final.json"
+    },
+    {
+      "id": "R14-07",
+      "severity": "moderate",
+      "status": "open-development-tooling",
+      "title": "minimatch development dependency advisory",
+      "details": "R19 freshly checks current consumer releases and upstream manifests. TypeDoc 0.28.20 still needs ^10.2.5; ESLint 9/10, eslintrc/config-array and latest typescript-estree still need old minimatch. No compatible published fix in the reviewed chain. Need a maintained compatible consumer supporting fixed >=11.0.1 or official backport, then real lint/docs and full audits. No shim, private fork, tool removal, forced major or waiver applied. Raw audits remain red: 14 web + 2 SDK affected dev nodes.",
+      "closure": "A maintained consumer release/backport compatible with minimatch >=11.0.1, validated with real lint/docs and full audits, or a separately justified policy decision. The observed preprocessing coverage and production boundary guard do not close the advisory.",
+      "evidence": [
+        "compatibility-analysis.json",
+        "npm-registry-review.json",
+        "npm-audits/summary.json",
+        "tooling/summary.json"
+      ]
+    },
+    {
+      "id": "R14-08",
+      "severity": "launch-blocker",
+      "status": "fixed-validated-local",
+      "title": "First-time creator needed allowance; the existing fee digest binding was misdescribed",
+      "details": "Correction to R14: managed_template_digest already binds fee token, exact amount and treasury. Routed creation now charges by atomic direct transfer under the manager creation authorization, with zero allowance. The client preserves the reviewed digest and exact fee when preparing against a refreshed profile. Existing non-routed creation remains allowance based.",
+      "evidence": [
+        "creation-vm-r3/summary.json",
+        "native-workspace-r2/run.json",
+        "review-tests.log",
+        "application-suite-r3/web-tests.json"
+      ],
+      "fix": "Keep existing create_managed_routes ABI, a single wallet confirmation, no fee-approval transaction, no automatic deposit, no extra planner or financial retry. Missing creator configuration does not block withdrawal profiles.",
+      "limit": "Host-enforced source-account auth and native MockAuth are separate from the 58 real ephemeral Ed25519 cases. Real Freighter fee authorization and consensus remain unqualified."
+    },
+    {
+      "id": "R14-09",
+      "severity": "dependency-review",
+      "status": "open-native-host-dependency",
+      "title": "One RustSec vulnerability remains in both SDK host/test lock scopes",
+      "details": "R19 freshly reviews SDK 23.5.3, hosts 23.0.2/29.0.2/30.0.0 and current host master. They retain old RustCrypto chains; fixed crypto-bigint >=0.7.6 cannot satisfy current ^0.5. Need a supported upstream host/SDK migration and requalification, or a separately authorized independent native-tooling risk decision. Raw workspace, quote-adapter and R18 P29 host audits remain red; guest normal/build graphs exclude the affected crate. No Rust lock/guest/WASM change or local crypto patch.",
+      "closure": "A compatible upstream host/RustCrypto integration and requalification, or an explicit independently reviewed risk decision for native tooling exposure. Manual public-verification input review and absence from guest graphs do not repair the vulnerable library or qualify the production validator host.",
+      "evidence": [
+        "compatibility-analysis.json",
+        "crate-registry-review.json",
+        "upstream-review.json",
+        "rustsec/summary.json"
+      ]
+    },
+    {
+      "id": "R15-01",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Creation preparation could renew reviewed template and fee terms",
+      "fix": "Include templateHash and exact creationFee in the checked draft. Backend, client ABI verifier and UI compare them before signing; contract digest rejects changed token, amount or treasury. Balance is checked without allowance.",
+      "evidence": [
+        "review-tests.log",
+        "creation-vm-r3/summary.json",
+        "application-suite-r3/web-tests.json"
+      ]
+    },
+    {
+      "id": "R15-02",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "Active creation action was inside contextual help and could coexist with legacy creation",
+      "fix": "Render the approved creator as the primary review flow, invalidate checked drafts synchronously when context changes, and disable/remove legacy creation when the new creator flag is selected. Preview stays contextual; receipt recovery stays visible when execution is disabled.",
+      "evidence": "application-suite-r3/web-tests.json"
+    },
+    {
+      "id": "R16-01",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "CI stopped collecting npm evidence after the first failing workspace",
+      "fix": "Collect all three full audit JSON reports even after a failure, then return a failing status. Keep both raw RustSec audits and the mainnet gate unchanged. Add Node production and wasm guest exposure guards as supplements, not audit replacements.",
+      "evidence": [
+        "ci-and-scope-tests-r2.log",
+        "release/tests/ci-configuration.test.mjs"
+      ],
+      "limit": "Actual Bash collector behavior was tested with a fake npm executable. Hosted CI has not run or been published."
+    },
+    {
+      "id": "R20-01",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Catalog subtracted fixed withdrawal reserves twice",
+      "fix": "The contract already removes settlements from liquid_balance. Preserve its available cash and net managed amount; reconstruct gross accounted catalog cash once as available + reserve. Check physical denomination balance >= available + fixed reserves in the source and review backend. Preserve immutable owner/request/queue reconciliation and no-zero fallback. Aggregate managed USD estimates use the existing available-cash helper so fixed claims are not counted as managed assets.",
+      "evidence": [
+        "docs/CATALOG_REVIEW_BRIDGE_R20.md",
+        "services/catalog-api/tests/unit/managed-queue-reconciliation.test.ts",
+        "services/catalog-api/tests/review/catalog.test.mjs",
+        "apps/web/tests/integration/factory-mainnet-vm.test.tsx"
+      ],
+      "limit": "Frozen local actual-WASM replay; not current target, consensus or real-wallet qualification."
+    },
+    {
+      "id": "R21-01",
+      "severity": "low-configuration",
+      "status": "fixed-validated-local",
+      "title": "Compiled local proxy configuration rejected legitimate loopback reads",
+      "details": "The local build preset omitted the managed read-only flag required by the proxy. Next 15.5.28 also normalizes 127.0.0.1 to localhost in NextRequest.url, causing the exact URL/Host guard to reject valid requests.",
+      "fix": "Set both required read-only build flags and use the existing Next skipMiddlewareUrlNormalize configuration to preserve the original URL. Keep proxy Host/Origin/backend validation unchanged. Exercise native NextRequest, valid HTTPS/loopback and rejected changed hosts/origins.",
+      "evidence": [
+        "apps/web/tests/unit/release-review-proxy.test.ts",
+        "docs/COHERENT_RELEASE_R21.md",
+        "browser-final/result.json"
+      ],
+      "limit": "Local candidate configuration defect; production impact is not established. No new API exception, financial heuristic, dependency or contract change."
+    },
+    {
+      "id": "R31-01",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Overlapping catalog syncs can publish older snapshot after newer",
+      "scope": "availability/catalog-coherence",
+      "source": "services/catalog-api/src/service.ts",
+      "evidence": "docs/INTERNAL_AUDIT_R31.md",
+      "introducedInThisAudit": false
+    },
+    {
+      "id": "R31-02",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "Concurrent identity updates lose an acknowledged profile",
+      "scope": "metadata-integrity",
+      "source": "services/catalog-api/src/service.ts",
+      "evidence": "docs/INTERNAL_AUDIT_R31.md",
+      "verificationDoubleExplicit": true
+    },
+    {
+      "id": "R31-03",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Optional Governor/Guardian Void decoded as Address blocks scheduling, factory registration and disable",
+      "scope": "conditional-configuration-availability",
+      "sources": [
+        "contracts/adapter-aquarius/src/lib.rs",
+        "contracts/adapter-balanced/src/lib.rs",
+        "contracts/adapter-blend/src/lib.rs",
+        "contracts/adapter-phoenix/src/lib.rs",
+        "contracts/adapter-soroswap/src/lib.rs",
+        "contracts/arka-registry/src/lib.rs",
+        "contracts/arka-token/src/lib.rs",
+        "contracts/arka-vesting/src/lib.rs",
+        "contracts/emissions-controller/src/lib.rs",
+        "contracts/governance-executor/src/lib.rs",
+        "contracts/governance-token/src/lib.rs",
+        "contracts/oracle-guard/src/lib.rs",
+        "contracts/router/src/lib.rs",
+        "contracts/share-token/src/lib.rs",
+        "contracts/venue-registry/src/lib.rs"
+      ],
+      "actualWasmReproduced": true,
+      "financialLossDemonstrated": false,
+      "closure": "Thirty-eight compatible optional-role reads across 15 contracts. 300 native tests including 15 new regressions, 24 identical ABI specs, generated TS bindings match, all24 selected WASM reproduced, current-WASM optional roles (53 steps), registry-None complete exit (192), three-venue governed lifecycle (250) and full Sushi/SoroSwap/Aquarius cycles pass. No ABI/storage/setter/role policy/dependency change.",
+      "evidence": "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md"
+    },
+    {
+      "id": "R31-04",
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "title": "Full local check opted four jobs into signing by default",
+      "scope": "local-release-tooling",
+      "source": "release/check-local.mjs",
+      "evidence": "docs/INTERNAL_AUDIT_R31.md",
+      "regressionCommandsCapturedOnly": true,
+      "signaturesCreated": 0
+    },
+    {
+      "id": "R33-01",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Catalog commits generation 10001 which its own readers, backup and next commit reject",
+      "scope": "availability",
+      "financialLossDemonstrated": false,
+      "productionIncidentConfirmed": false,
+      "evidence": "docs/CATALOG_CONTINUITY_R35.md",
+      "additionalEvidence": [
+        "idle-generations-result.json"
+      ],
+      "introducedByR32": false,
+      "remediated": true,
+      "closure": "Actual commits/read/restart through 10001/10002 and restored append10003; 10002 byte-identical objects; real compiled source/store/API sync over two 10001-generation repositories; full backup/new-process restoration and paid catch-up. Preserves checksums, chain/root/ledger validation, v1 bytes, no overwrite, all old objects and earlier seals. Frozen previously unreadable R33 tip is recovered without modification."
+    },
+    {
+      "id": "R33-02",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Cancelled queue prefix blocks instant redemption and product forbids the zero-share progress needed for recovery",
+      "scope": "withdrawal-availability",
+      "financialLossDemonstrated": false,
+      "productionIncidentConfirmed": false,
+      "evidence": "docs/QUEUE_PROGRESS_R34.md",
+      "additionalEvidence": [
+        "backend-maintenance-result.json",
+        "dapp-maintenance-result.json"
+      ],
+      "introducedByR32": false,
+      "remediated": true,
+      "closure": "Constant-time instant-cash cursor normalization only with no pending investor; same bounded manual settlement permits proven closed-prefix progress through backend/dapp. Current native WASM, eight integrated scenarios, full three-venue exits, roles, unit/build/ABI/binding qualification. Fixed claims/FIFO/rollback/fee/recheck preserved."
+    },
+    {
+      "id": "R36-01",
+      "priority": 2,
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Lifetime count of 32769 terminal withdrawal requests makes managed catalog and position unavailable",
+      "scope": "catalog-and-withdrawal-availability",
+      "source": "services/catalog-api/src/managedSource.ts",
+      "line": 55,
+      "additionalSources": [
+        {
+          "source": "services/catalog-api/src/managedHistory.ts",
+          "line": 21
+        },
+        {
+          "source": "services/catalog-api/src/managedProjection.ts",
+          "line": 14
+        },
+        {
+          "source": "apps/web/src/lib/managedCatalog.ts",
+          "line": 28
+        }
+      ],
+      "evidence": "lifetime-boundary-result.json",
+      "financialLossDemonstrated": false,
+      "productionIncidentConfirmed": false,
+      "introducedByR35": false,
+      "remediated": true,
+      "closure": "R37; docs/FINDINGS_R37.md and sealed findings-r37 evidence"
+    },
+    {
+      "id": "R36-02",
+      "priority": 2,
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "title": "Review rejects a zero-payout dust return that the actual selected WASM safely uses to advance the queue",
+      "scope": "withdrawal-review-availability",
+      "source": "services/catalog-api/review/core.mjs",
+      "line": 95,
+      "additionalSources": [
+        {
+          "source": "apps/web/src/lib/managedWithdrawalOperations.ts",
+          "line": 20
+        },
+        {
+          "source": "contracts/arka/src/managed_withdrawals.rs",
+          "line": 728
+        }
+      ],
+      "evidence": "dust-progress-result.json",
+      "financialLossDemonstrated": false,
+      "productionIncidentConfirmed": false,
+      "introducedByR35": false,
+      "remediated": true,
+      "closure": "R37; docs/FINDINGS_R37.md and sealed findings-r37 evidence"
+    },
+    {
+      "id": "R38-01",
+      "priority": 2,
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "category": "frontend-usability",
+      "introducedBy": "R37",
+      "title": "El refresco remonta y cierra el historial paginado",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 142,
+      "relatedFile": "apps/web/src/components/product/ManagedWithdrawalHistory.tsx",
+      "relatedLine": 8,
+      "trigger": "Historial abierto en offset25; llega la siguiente observación en el poll de10segundos",
+      "observed": "La key contiene observationId; se desmontan details y estado de página. La consulta vuelve a quedar cerrada y pierde su posición.",
+      "impact": "Interrumpe la navegación por historial. No modifica derechos, reservas ni contratos.",
+      "closure": "Conservar la sesión de lectura fijada mientras se navega, con reinicio seguro al cambiar fund/owner/code; comprobar polling, lectura tardía y actualización explícita sin mezclar páginas de observaciones distintas.",
+      "evidence": "apps/web/tests/integration/withdrawal-history-refresh.test.tsx",
+      "fix": "Open session pinned to immutable history metadata; refresh on close/reopen, boundary reset on fund/owner/code and late-read rejection."
+    },
+    {
+      "id": "R38-02",
+      "priority": 2,
+      "severity": "low",
+      "status": "fixed-validated-local",
+      "category": "frontend-state-correctness",
+      "introducedBy": "R37 active-only response interacting with the prior watched-request notice",
+      "title": "Una solicitud cerrada puede conservar el aviso de pendiente",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 118,
+      "relatedFile": "apps/web/src/lib/managedProduct.ts",
+      "relatedLine": 66,
+      "trigger": "La solicitud observada se paga/cierra y deja de aparecer en requestsScope=active",
+      "observed": "withdrawalProgressNotice devuelve null y currentNotice reutiliza el aviso previo de solicitud/pendiente, mientras el agregado histórico ya registra el cobro.",
+      "impact": "Estado de interfaz engañoso después de un pago o cierre. No se reproduce otra transferencia ni pérdida de fondos.",
+      "closure": "Al desaparecer del índice activo completo, retirar el aviso de pendiente o resolver esa solicitud con historia verificada. No inferir pago/cancelación de una ausencia o de un agregado; validar pago, cancelación, residuo, auto-payout y cambio de propietario.",
+      "evidence": "apps/web/tests/integration/withdrawal-history-refresh.test.tsx",
+      "fix": "Neutral absent-request notice only with complete nontruncated active view; no paid/cancelled inference or extra lookup."
+    },
+    {
+      "id": "R40-01",
+      "severity": "moderate",
+      "priority": 2,
+      "category": "frontend-read-coherence-and-availability",
+      "status": "fixed-validated-local",
+      "title": "Una lectura superada puede reemplazar el estado o error de una lectura más reciente",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "lines": [
+        48,
+        78
+      ],
+      "scope": [
+        "ManagedFundSurface",
+        "ManagedPortfolioSurface"
+      ],
+      "introducedByR39": false,
+      "preExistingInR37": true,
+      "trigger": "Mismo fondo/owner; dos lecturas periódicas o manuales solapadas terminan fuera de orden.",
+      "observed": [
+        "Posición reconciliada del ledger102 reemplazada por el ledger101 al completar tarde la lectura anterior.",
+        "Un error anterior vuelve a marcar unavailable y deshabilita acciones después de una respuesta nueva correcta.",
+        "La cartera vuelve al resultado anterior vacío y oculta la posición nueva verificada."
+      ],
+      "cause": "El fondo comprueba sólo id/wallet/owner; la cartera sólo si el controller de la sesión está abortado. Ninguna de las dos selecciona la lectura vigente entre solicitudes del mismo contexto.",
+      "impact": "Retroceso de importes/derechos presentados y disponibilidad de controles de interfaz. No hay pérdida, doble cobro ni autorización financiera saltada demostrados.",
+      "evidence": "apps/web/tests/integration/managed-read-coherence.test.tsx",
+      "closure": "Corrected and validated locally in R41; see docs/READ_COHERENCE_R41.md. No production incident or financial loss established.",
+      "canCloseLocally": true,
+      "requiresContractOrProtocolChange": false,
+      "fix": "Per-view request identity accepts only latest started read success/error within the current session; cleanup invalidates fund reads and aborts portfolio sessions."
+    },
+    {
+      "id": "R40-02",
+      "severity": "low",
+      "priority": 2,
+      "category": "frontend-deposit-input-lifecycle",
+      "status": "fixed-validated-local",
+      "title": "Initial passive reset can erase deposit input after mount without a confirmation reset",
+      "file": "apps/web/tests/integration/managed-product-ui.test.tsx",
+      "line": 27,
+      "observed": "El botón Review authorization queda deshabilitado y el DOM de fallo muestra el importe vacío. La suite completa falla ese caso; ocho ejecuciones aisladas pasan.",
+      "priorR39FocusedFailure": true,
+      "applicationRuntimeDefectConfirmed": true,
+      "rootCauseUnproven": false,
+      "evidence": [
+        "apps/web/tests/integration/deposit-reset-lifecycle.test.tsx",
+        "deposit-trace/run-5.jsonl",
+        "deposit-trace-after-summary.json"
+      ],
+      "closure": "Corrected and validated locally in R41; see docs/READ_COHERENCE_R41.md. No production incident or financial loss established.",
+      "canCloseLocally": true,
+      "requiresProductionAccess": false,
+      "fix": "Initial state remains empty without a mount reset. Apply amount/error/quote clearing before commit only when the confirmed-deposit reset changes; preserve selected asset/tolerance."
+    },
+    {
+      "id": "R42-01",
+      "severity": "low",
+      "priority": 3,
+      "category": "frontend-error-lifecycle",
+      "status": "fixed-validated-local",
+      "title": "El error de refresco posterior a una confirmación persiste tras una lectura recuperada",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 117,
+      "relatedLines": [
+        82,
+        85,
+        112
+      ],
+      "introducedByR41": false,
+      "preExistingInR39": true,
+      "trigger": "La operación simulada termina correctamente; la lectura vigente posterior falla; el siguiente polling obtiene datos correctos.",
+      "cause": "load guarda loadError y lanza el error actual. El catch de confirm lo duplica en error de operación. Un éxito posterior limpia loadError/ledgerUnavailable, pero no error.",
+      "impact": "Alerta obsoleta en la vista recuperada. Se muestran datos actuales y los controles vuelven a estar disponibles. No se demuestra fallo de contrato, pérdida o salto de autorización.",
+      "financialSafetyRegressionDemonstrated": false,
+      "currentReadOrOperationSafetyBypassDemonstrated": false,
+      "evidence": "apps/web/tests/integration/managed-receipt-errors.test.tsx",
+      "closure": "Corrected in R43, with targeted/full/frontend/build/browser receipts required for final closure.",
+      "requiresContractOrProtocolChange": false,
+      "canCloseLocally": true,
+      "fix": "Post-confirmation load rejection is handled by the existing loadError/ledgerUnavailable state; it cannot become an operation error. Current read failure blocks until recovery; genuine operation errors persist."
+    },
+    {
+      "id": "R42-02",
+      "severity": "low",
+      "priority": 3,
+      "category": "frontend-receipt-context-isolation",
+      "status": "fixed-validated-local",
+      "title": "Un fallo tardío al consultar el recibo de otro owner se muestra en la vista nueva",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 126,
+      "relatedLines": [
+        120,
+        121
+      ],
+      "introducedByR41": false,
+      "preExistingInR39": true,
+      "trigger": "Consulta de confirmación del owner A pendiente; la vista cambia al owner B; la consulta anterior rechaza.",
+      "cause": "El resultado correcto de receipt comprueba id/wallet/owner, pero su catch publica el error sin comprobar contexto.",
+      "impact": "Mensaje de error de A en la vista de B. El recibo de A se conserva, el de B no se modifica y no se ejecuta ninguna operación financiera.",
+      "financialSafetyRegressionDemonstrated": false,
+      "receiptDeletedOrResubmitted": false,
+      "evidence": "apps/web/tests/integration/managed-receipt-errors.test.tsx",
+      "closure": "Corrected in R43, with targeted/full/frontend/build/browser receipts required for final closure.",
+      "requiresContractOrProtocolChange": false,
+      "canCloseLocally": true,
+      "fix": "Existing context object is stable per fund/wallet/owner session; receipt success/error require the selected object and owner=wallet, including A→B→A. Matching receipt and no-resend guards preserved."
+    },
+    {
+      "id": "R44-01",
+      "severity": "low",
+      "priority": 3,
+      "status": "fixed-validated-local",
+      "category": "frontend-readonly-review-context",
+      "title": "Una comprobación de transacción de la vista anterior publica su resultado o error tras cambiar de cuenta o fondo",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 96,
+      "introducedByR43": false,
+      "preExistingInR41": true,
+      "branchByteIdenticalSinceR39": true,
+      "trigger": "Con ejecución deshabilitada, iniciar Check transaction y cambiar de cuenta o fondo antes de completarse la preparación.",
+      "cause": "La rama de confirm para Check transaction publica setNotice/setError tras await checkGeneralAction sin comprobar que siga vigente la sesión seleccionada.",
+      "impact": "Mensaje de comisión de A en la vista B o rechazo Wallet changed de A en B. Es una consulta; no se invoca el ejecutor, se firma, reenvía o altera un recibo. No se demuestra pérdida ni bypass financiero.",
+      "realAdapterProof": "El adaptador y validador reales aceptan un envelope sin firmas dirigido al fondo A; tras cambiar a B, aparece su comisión de0.7654321 XLM en B. Si cambia la cuenta, el adaptador rechaza correctamente Wallet changed, pero el catch publica ese rechazo anterior en la vista nueva. Sólo respuestas HTTP y lectores de clave pública son dobles.",
+      "evidence": "apps/web/tests/integration/mainnet-check-context.test.tsx",
+      "desiredBehaviorAssertionsFail": true,
+      "notIncludedInPositivePassTotal": true,
+      "financialSafetyRegressionDemonstrated": false,
+      "canCloseLocally": true,
+      "requiresContractOrProtocolChange": false,
+      "closure": "R45 binds both Check transaction outcomes to the existing session identity. Twenty actual unsigned-adapter regression cases, complete frontend and local release/build/browser receipts qualify the new candidate.",
+      "fix": "Capture context.current once; publish success/error only while it remains that same object. Preserve current errors, same-session polling, existing entry guards and unconditional busy release.",
+      "regressionCases": 20
+    },
+    {
+      "id": "R46-01",
+      "severity": "low",
+      "priority": 3,
+      "status": "fixed-validated-local",
+      "category": "frontend-manager-quote-context",
+      "title": "Una cotización del gestor cuyo componente se desmontó abre una revisión en el contexto nuevo",
+      "file": "apps/web/src/components/product/ManagedProductSurface.tsx",
+      "line": 201,
+      "introducedByR45": false,
+      "reproducedInR43": true,
+      "managerFunctionByteIdenticalSinceR39": false,
+      "trigger": "Iniciar Review asset change en A, cambiar de cuenta o fondo mientras el GET quote está pendiente y recibir después la cotización original válida; también A→B→A.",
+      "cause": "ManagerPortfolioSwap compara su ref local con la selección tras el await, pero no invalida la llamada al desmontarse. El ref de la instancia antigua conserva A y onReview sigue siendo el setter del padre que continúa montado.",
+      "impact": "Se abre Review before signing con ASSET_A/importe/mínimo de la instancia anterior. En el cambio de cuenta puede reaparecer una propuesta del gestor anterior cuando sus herramientas ya no están visibles. No se invoca automáticamente Check transaction, el ejecutor o una firma; no se demuestra transferencia, pérdida o salto de autorización.",
+      "proofBoundary": "Componente y adaptador generalPortfolioQuote reales con HTTP y modelos de fondos/direcciones sintéticos. Cambio de wallet por wallet:pubkey-changed dentro del mismo padre; cambio de fondo mediante useParams/rerender. No es una comprobación del router Next en producción ni una ejecución financiera posterior.",
+      "evidence": "apps/web/tests/integration/manager-quote-lifecycle.test.tsx",
+      "desiredBehaviorFailuresPerCandidate": 4,
+      "positiveControls": 2,
+      "financialLossOrAuthorizationBypassDemonstrated": false,
+      "canCloseLocally": true,
+      "requiresContractOrProtocolChange": false,
+      "closure": "R47 adds the existing mounted/selection pattern before publishing a manager quote or error; mounted cleanup cannot open a review in the new parent session.22 actual-adapter cases, full frontend and release/build/browser receipts validate the fix.",
+      "affectedBaseFunctionByteIdenticalSinceR39": true,
+      "fix": "One mounted ref and effect cleanup; success/error require mounted plus the unchanged existing selection. Loading cleanup only updates the current mounted component. No new business state, retry, planner or protocol.",
+      "regressionCases": 22
+    },
+    {
+      "id": "R55-01",
+      "severity": "moderate",
+      "status": "fixed-validated-local",
+      "remediated": true,
+      "closure": "R56 explicit conversion, scale/age/pause checks, immutable prior evidence"
+    }
+  ],
+  "coverage": [
+    {
+      "area": "Vault accounting, fees and withdrawals",
+      "files": [
+        "contracts/arka/src/lib.rs",
+        "contracts/arka/src/managed_withdrawals.rs",
+        "contracts/arka/src/managed_routes.rs",
+        "contracts/arka/src/test/managed_routes_tests.rs"
+      ],
+      "checks": "Protected deposits/minimum shares; fee dilution and ownership; escrow, FIFO/cutoff/cancel lock, reserve exclusion, contract-only lot planning, exact-input caps and final tails; claims when valuation is unavailable.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Current selected-WASM P29 full exit and UI/backend replay use frozen Sushi state with synthetic funding/oracle/governance/admission/index/wallet/wire. No current market depth or consensus proof."
+    },
+    {
+      "area": "Factory, initialization and upgrades",
+      "files": [
+        "contracts/arka-factory/src/lib.rs",
+        "contracts/arka-factory/src/managed_routes_creation.rs",
+        "contracts/share-token/src/lib.rs",
+        "release/artifact-bindings.mjs"
+      ],
+      "checks": "Manager/salt/asset/template binding, constructor-only auxiliary initialization, atomic vault initialization, exact pinned code and governance/bootstrap expiry; creation fee consumption.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Actual wallet/device approval, current target factory/settings/index and consensus remain unqualified. The old R14 fee-approval sentence was stale: R15 fixed routed creation with atomic direct transfer and existing digest binding."
+    },
+    {
+      "area": "Routing and protocol lifecycle",
+      "files": [
+        "contracts/router/src/lib.rs",
+        "contracts/venue-registry/src/lib.rs",
+        "contracts/adapter-sushi/src/lib.rs",
+        "contracts/adapter-aquarius/src/lib.rs",
+        "contracts/adapter-soroswap/src/lib.rs",
+        "contracts/adapter-blend/src/lib.rs",
+        "contracts/adapter-phoenix/src/lib.rs",
+        "contracts/adapter-balanced/src/lib.rs"
+      ],
+      "checks": "0/1/2/3 state/action and guardian permissions, exact directional bindings, caller admission, receiver and token deltas, dust/allowance preservation, debt and credit exits. Legacy/deferred code retained.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Phoenix retired only for new routes; no legacy upgrades. Balanced complete cross-chain intent/settlement/refund remains unqualified. Current launch addresses/code/pools/callers/depth remain unverified."
+    },
+    {
+      "area": "Coverage, claims, governance and legacy tokenomics",
+      "files": [
+        "contracts/coverage-vault/src/lib.rs",
+        "contracts/coverage-fund/src/lib.rs",
+        "contracts/claims-manager/src/lib.rs",
+        "contracts/governance-executor/src/lib.rs",
+        "contracts/locked-arka/src/lib.rs",
+        "contracts/arka-token/src/lib.rs",
+        "contracts/arka-vesting/src/lib.rs",
+        "contracts/emissions-controller/src/lib.rs",
+        "contracts/manager-tier/src/lib.rs",
+        "contracts/governance-token/src/lib.rs"
+      ],
+      "checks": "Role/expiry gates, approved incident state, reserve/staker-loss accounting, queued operation execution, lock/vote sequence fence, vesting/emission conservation and claim-to-fixed-beneficiary; dynamic storage migration/TTL.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Governance remains trusted, including upgrades, emergency policy, claim recipients and treasury configuration. Economic adequacy of reserve coverage and deployed permissions are not established by local unit tests."
+    },
+    {
+      "area": "Oracle and asset valuation",
+      "files": [
+        "contracts/oracle-guard/src/lib.rs",
+        "services/catalog-api/src/oraclePrices.ts",
+        "services/catalog-api/src/managedAssets.ts"
+      ],
+      "checks": "Freshness, decimals, divergence/fallback/confirmation, guardian pause, reserve exclusion and explicit unavailable valuation.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "No live feed, issuer eligibility, RWA transferability or current price/depth validation."
+    },
+    {
+      "area": "Backend/index/archive and read/preparation boundary",
+      "files": [
+        "services/catalog-api/src/managedProjection.ts",
+        "services/catalog-api/src/managedIndexer.ts",
+        "services/catalog-api/src/managedHistory.ts",
+        "services/catalog-api/src/managedStore.ts",
+        "services/catalog-api/src/identity.ts",
+        "services/catalog-api/review/core.mjs",
+        "services/catalog-api/review/runtime.mjs",
+        "services/catalog-api/review/service.mjs",
+        "services/catalog-api/review/archive.mjs"
+      ],
+      "checks": "Complete creation/holder/request history, immutable owner-specific observations, escrow/reserve reconciliation, monotonic rights, authenticated metadata, exact unsigned ABI/auth/resources/fees, archive integrity, pre-submit recheck, GET/Host/origin rules and pacing.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Local actual contract events/getters on the frozen capture. Header/metadata/sequence/event transport and wallet/verifier/wire/receipt remain fixture boundaries. No current target or consensus qualification."
+    },
+    {
+      "area": "Dapp, wallet transport and SDK",
+      "files": [
+        "apps/web/src/components/product/MainnetCreationExecution.tsx",
+        "apps/web/src/components/product/ManagedProductSurface.tsx",
+        "apps/web/src/lib/managedProduct.ts",
+        "apps/web/src/lib/managedWalletFlow.ts",
+        "apps/web/src/lib/mainnetExecution.ts",
+        "apps/web/src/lib/mainnetWalletConnector.ts",
+        "sdk/typescript/src/core/rpc.ts",
+        "sdk/typescript/src/core/signing.ts",
+        "sdk/typescript/src/core/wallet.ts"
+      ],
+      "checks": "Default execution denial, owner/factory/review continuity, exact returned envelope and receipt identity, one write without automatic retry, durable public receipt before wire, conditional cleanup, creation without auto-deposit, errors without false zero holdings.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Public isConnected does not validate account approval/device signing. Cross-tab storage checks prevent observed overwrite/late cleanup but are not a distributed lock. SDK body/hash checks do not authenticate signer-set authority or consensus; wallet/wire doubles remain explicit."
+    },
+    {
+      "area": "Release, CI and dependencies",
+      "files": [
+        ".github/workflows/ci.yml",
+        "release/source-gate.mjs",
+        "release/source-inventory.mjs",
+        "scripts/internal_security_audit.py",
+        "scripts/check_public_repository_hygiene.py"
+      ],
+      "checks": "Exact source/lock/WASM identity, current pinned constructor metadata, source omissions/drift, contained ephemeral keys, no live health/deploy invocation, read-only GitHub permissions and separated compiler/evidence output.",
+      "evidence": "R31 manual differential and critical-path review; R28 native/application/build evidence retained only for identical sources and locks. Details and limits: docs/INTERNAL_AUDIT_R31.md.",
+      "limit": "Hosted CI not run or pushed; strict full npm audit remains red for minimatch development dependency chains. Lexical lib.rs scanner is not a type-checked cross-module authorization analysis; manual review and native/economic tests supply separate evidence."
+    }
+  ],
+  "retainedCoverageBoundary": "Financial/governance/Rust/backend/SDK evidence retained by exact identity. Fresh R43 validates actual dapp components, full frontend, new Next build/types, release checks and compiled loopback browser.",
+  "freshValidation": {
+    "rustTests": 318,
+    "fullFinancialSteps": 464,
+    "additionalNormalizationScenarioSteps": 14,
+    "sdkUnitTests": 34,
+    "sdkSkipped": 1,
+    "backendOracleTests": 7,
+    "positiveSignatureTests": "not rerun; five positive cases must remain skipped",
+    "frontend": "Source and dependency identity retained from R47; no web source or imports of the changed SDK module",
+    "releaseNonSigningTestsReceipt": "../artifacts/oracle-normalization-r56-20261105/release-verified-checks.json",
+    "signatureDenialTests": 8,
+    "positiveSignatureCasesSkipped": 5
+  },
+  "dependencies": {
+    "locks": [
+      {
+        "path": "apps/web/package-lock.json",
+        "sha256": "ed988053304c7bcad0283867482928b6b737f77282796c96e427d98863484d01",
+        "unchangedFromR27": true
+      },
+      {
+        "path": "services/catalog-api/package-lock.json",
+        "sha256": "7c3c97a1dcd57948ebc70b30f0f2fa28d36936a97b6e3515580d1df47184ac2d",
+        "unchangedFromR27": true
+      },
+      {
+        "path": "sdk/typescript/package-lock.json",
+        "sha256": "7ee6e753f5724dbafc61bba3b1358126820677b6f4ebfb710660ac175ed4b5c8",
+        "unchangedFromR27": true
+      },
+      {
+        "path": "release/build-tools/package-lock.json",
+        "sha256": "c547eda4e133d162f0e83532e601ff42631eefd2c3c868fe0ba20ec61dd34f9a",
+        "unchangedFromR27": true
+      },
+      {
+        "path": "contracts/Cargo.lock",
+        "sha256": "19bafc5f81c89f37924b2a61cf7dda763b22701c3f2e346a7924b52d125332ac",
+        "unchangedFromR27": true
+      },
+      {
+        "path": "release/quote-adapter/Cargo.lock",
+        "sha256": "91dabc8f95425f242d6443187c31bbef1c1378196eaa98a1c4dd35f5d4b793ae",
+        "unchangedFromR27": true
+      }
+    ],
+    "latestExposureAssessment": "R23 retained by exact lock identity",
+    "rawAdvisoryAuditsRefreshed": false,
+    "rawAdvisoryAuditsClean": false,
+    "riskAccepted": false,
+    "overridesOrPatchesApplied": false,
+    "openFindings": [
+      "R14-07",
+      "R14-09"
+    ]
+  },
+  "operationalLimits": [
+    "One writable catalog process per data directory",
+    "RPC/catalog observations are a trust boundary, not consensus proofs",
+    "No new wallet/device/cryptographic-signature qualification",
+    "Current target, market liquidity, authorities, hosted CI and independent review not validated",
+    "Clearing the last governor after bootstrap retirement does not create a recovery authority; no admin revival or backdoor",
+    "Queue cross-layer frame/header/sequence and index delivery are local doubles; current target consensus/index are not qualified",
+    "Full-chain verification has linear I/O and a visited-hash set; legacy JSON v1 restore memory scales with archive size. Actual target storage/RAM/recovery time remain to be qualified."
+  ],
+  "reviewScope": {
+    "subject": "new-local-candidate",
+    "candidate": "R47",
+    "existingProductionApprovalReevaluated": false,
+    "existingProductionApprovalRevoked": false,
+    "confirmedNewProductionIncident": false
+  },
+  "report": "docs/ORACLE_NORMALIZATION_R56.md",
+  "manualTriage": [
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "quote_deposit",
+      "line": 3498,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Quote uses current accounting/fee preview and valuation; no transfer, approval or fee mint.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "shares_of",
+      "line": 4233,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Read of configured share-token balance or legacy balance; no ownership mutation.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "preview_fee_settlement",
+      "line": 4275,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "nav",
+      "line": 4313,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "blend_position_value",
+      "line": 4343,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "blend_position_values",
+      "line": 4351,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "blend_market_value",
+      "line": 4361,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "blend_health_factor",
+      "line": 4365,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "blend_market_status",
+      "line": 4381,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "credit_position_value",
+      "line": 4451,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "credit_position_values",
+      "line": 4464,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "credit_market_value",
+      "line": 4480,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "credit_health_factor",
+      "line": 4490,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "arka",
+      "function": "credit_market_status",
+      "line": 4510,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/arka/src/lib.rs",
+      "sourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "priorSourceSha256": "6f4be83afdd074aca69bb8f4cb4750acec74df4d8f75d1c3d29ddfd63ac3fa04",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Valuation, position/market health or fee preview over governed dependencies; no order execution, debt creation, payout or new permission. Getter failure blocks valuation; live feed identities/freshness remain target gates.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "claims-manager",
+      "function": "execute_incident",
+      "line": 614,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/claims-manager/src/lib.rs",
+      "sourceSha256": "c181c0ca5484d93ba44ceca3f0a1964540ca0331d665f9ff6edfb2a8b5180cc5",
+      "priorSourceSha256": "c181c0ca5484d93ba44ceca3f0a1964540ca0331d665f9ff6edfb2a8b5180cc5",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Execution consumes a previously policy-approved incident, fixed recipient and payout split; a public executor cannot approve or edit it. Repeated execution rejects Executed state; configured reserve-token/vault/fund and treasury allowance remain governance trust dependencies.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "governance-executor",
+      "function": "execute",
+      "line": 523,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/governance-executor/src/lib.rs",
+      "sourceSha256": "186efa8745fcb8e35c059c3becc0c521a044476c0889f29be880ee1ff78e06fc",
+      "priorSourceSha256": "46fee44a0da1e3cc3c7c355fc6a6dd8fcbed5a2d3af83e646a92f041c38125fb",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Public execution only consumes a scheduler-authenticated immutable queued call or deployment. One ID namespace; delay/grace/status checked before execution. Status set before external work; host atomic rollback on failure. Constructor auth binds predicted address, __constructor and exact stored args. No caller-supplied action replacement. Governance trust, scheduler expiry and deployed authority remain target checks.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "adapter-sushi",
+      "function": "is_caller",
+      "line": 78,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/adapter-sushi/src/lib.rs",
+      "sourceSha256": "8232ab78429da8a1554f9a05b97a2d0e499f50b137b8338ab9521e2e2c1ea63c",
+      "priorSourceSha256": "8232ab78429da8a1554f9a05b97a2d0e499f50b137b8338ab9521e2e2c1ea63c",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Getter extends the TTL of an existing permission or immutable route only. It cannot grant callers, retarget routes or transfer tokens. Setters remain admin authenticated.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "adapter-sushi",
+      "function": "pool_route",
+      "line": 88,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/adapter-sushi/src/lib.rs",
+      "sourceSha256": "8232ab78429da8a1554f9a05b97a2d0e499f50b137b8338ab9521e2e2c1ea63c",
+      "priorSourceSha256": "8232ab78429da8a1554f9a05b97a2d0e499f50b137b8338ab9521e2e2c1ea63c",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Getter extends the TTL of an existing permission or immutable route only. It cannot grant callers, retarget routes or transfer tokens. Setters remain admin authenticated.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "locked-arka",
+      "function": "__constructor",
+      "line": 421,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/locked-arka/src/lib.rs",
+      "sourceSha256": "be0706d87c6faf59c9f60e8ffb10ac723ab7b3ecade42484ada56f607094b5f8",
+      "priorSourceSha256": "be0706d87c6faf59c9f60e8ffb10ac723ab7b3ecade42484ada56f607094b5f8",
+      "disposition": "retained-R31-triage-identical-source",
+      "reason": "Atomic constructor invokes configured token decimals and stores initial configuration. Legacy init rejects; there is no separately callable open initialization path. This does not validate the intended token deployment.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "oracle-guard",
+      "function": "inspect_stellar",
+      "line": 438,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/oracle-guard/src/lib.rs",
+      "sourceSha256": "3460fea9c646c3d6dd8969f409e21fffd9e2a90d45ec4afacb5eb6d5e9146e80",
+      "priorSourceSha256": "764aa73fa7bf1156d48c583cbeb1a5540694b81a8d0176c4fa82a1be10688ce9",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Inspection/price read over governed feeds and policy. Read-through migration/TTL may write the same policy to persistent storage; no caller-selected policy change, token transfer or role grant. Stale/invalid/divergent feeds fail closed per configuration.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "oracle-guard",
+      "function": "inspect_symbol",
+      "line": 442,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/oracle-guard/src/lib.rs",
+      "sourceSha256": "3460fea9c646c3d6dd8969f409e21fffd9e2a90d45ec4afacb5eb6d5e9146e80",
+      "priorSourceSha256": "764aa73fa7bf1156d48c583cbeb1a5540694b81a8d0176c4fa82a1be10688ce9",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Inspection/price read over governed feeds and policy. Read-through migration/TTL may write the same policy to persistent storage; no caller-selected policy change, token transfer or role grant. Stale/invalid/divergent feeds fail closed per configuration.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "oracle-guard",
+      "function": "lastprice",
+      "line": 446,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/oracle-guard/src/lib.rs",
+      "sourceSha256": "3460fea9c646c3d6dd8969f409e21fffd9e2a90d45ec4afacb5eb6d5e9146e80",
+      "priorSourceSha256": "764aa73fa7bf1156d48c583cbeb1a5540694b81a8d0176c4fa82a1be10688ce9",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Inspection/price read over governed feeds and policy. Read-through migration/TTL may write the same policy to persistent storage; no caller-selected policy change, token transfer or role grant. Stale/invalid/divergent feeds fail closed per configuration.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "router",
+      "function": "execute",
+      "line": 229,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/router/src/lib.rs",
+      "sourceSha256": "38ee0d88ca00f501cbcad3580d4476f9603a306735006511094c3988a09a3553",
+      "priorSourceSha256": "7fdbd0f360ff080c7d1c74cf499bad4a080b98914ff615334fd91e3e71328857",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Permissionless dispatch is deliberate, not the authorization boundary. It holds no portfolio, cannot forge the caller authorization and delegates to the chosen adapter. Vault binds exact approved routes/adapters; Sushi authenticates and allowlists caller, fixes receiver and checks exact deltas. A future unsafe adapter is not made safe by this router.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    },
+    {
+      "severity": "review",
+      "crate": "router",
+      "function": "execute_for",
+      "line": 233,
+      "title": "Mutating or external entrypoint without explicit auth marker",
+      "detail": "This entrypoint mutates storage or invokes another contract without a local `require_auth` marker. It may still be safe, but it needs manual review.",
+      "source": "contracts/router/src/lib.rs",
+      "sourceSha256": "38ee0d88ca00f501cbcad3580d4476f9603a306735006511094c3988a09a3553",
+      "priorSourceSha256": "7fdbd0f360ff080c7d1c74cf499bad4a080b98914ff615334fd91e3e71328857",
+      "disposition": "R32-compatible-role-read-delta-reviewed-with-native-and-WASM-guards",
+      "reason": "Permissionless dispatch is deliberate, not the authorization boundary. It holds no portfolio, cannot forge the caller authorization and delegates to the chosen adapter. Vault binds exact approved routes/adapters; Sushi authenticates and allowlists caller, fixes receiver and checks exact deltas. A future unsafe adapter is not made safe by this router.",
+      "evidence": [
+        "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+        "docs/INTERNAL_AUDIT_R31.md"
+      ]
+    }
+  ],
+  "staticSummary": {
+    "contractsAnalyzed": 27,
+    "workspaceMembers": 27,
+    "publicEntrypoints": 654,
+    "privilegedEntrypoints": 291,
+    "externalCallEntrypoints": 85,
+    "highFindings": 0,
+    "reviewFindings": 24,
+    "missingSources": []
+  },
+  "retainedValidation": {
+    "candidate": "R37-R46",
+    "baseCommit": "a4bf1a8296487543ec183fed32ac606b2833e015",
+    "R37Seal": "../artifacts/findings-r37-20261104/closeout.json",
+    "R41Seal": "../artifacts/read-coherence-r41-20261104/closeout.json",
+    "R42Seal": "../artifacts/reaudit-r42-20261104/closeout.json",
+    "scope": "Contracts/24 WASM/backend/SDK/routing/six locks retained only by exact unchanged source identities.303 Rust cases and710 actual-WASM financial/governance steps retained, not reexecuted. Modified dapp requires its own fresh R47 build.",
+    "R43Seal": "../artifacts/receipt-errors-r43-20261104/closeout.json",
+    "R44Seal": "../artifacts/reaudit-r44-20261105/closeout.json",
+    "R45Seal": "../artifacts/check-context-r45-20261105/closeout.json",
+    "R46Seal": "../artifacts/reaudit-r46-20261105/closeout.json"
+  },
+  "auditRevision": "R56-remediation",
+  "provenance": {
+    "lifetimeRequestLimitPresentInLocalR4Commit": "faa6fab",
+    "dustReturnPresentInLocalR4Commit": "faa6fab",
+    "strictPositiveSettlementReviewPresentInCommit": "8e01562",
+    "R34AddsClosedPrefixExceptionButDoesNotCoverDust": true,
+    "productionVersionOrIncidentNotObserved": true
+  },
+  "reauditEvidence": "docs/MANAGER_QUOTE_R47.md",
+  "openApplicationFindings": [],
+  "openDependencyFindings": [
+    "R14-07",
+    "R14-09"
+  ],
+  "retainedPriorFreshValidation": {
+    "focusedWeb": 22,
+    "newRegressionCases": 22,
+    "additionalCases": 72,
+    "web": 1368,
+    "webSkipped": 57,
+    "wideWebValidation": "passed",
+    "allApplicationFindingsClosed": true,
+    "allFindingsClosed": false,
+    "changedSelectedWasm": 0,
+    "unchangedSelectedWasm": 24,
+    "contractsChanged": 0,
+    "backendChanged": 0,
+    "sdkChanged": 0,
+    "dependenciesChanged": 0,
+    "mainnetApproved": false,
+    "realWallets": 0,
+    "signatures": 0,
+    "chainSubmissions": 0,
+    "productionAccess": false
+  },
+  "localSignatureIncident": {
+    "signaturesCreated": 9,
+    "kind": "ephemeral local test signatures created unintentionally by the old test harness",
+    "realWallets": 0,
+    "submittedTransactions": 0,
+    "disclosed": true,
+    "harnessRemediated": true,
+    "positiveSigningTestsNotAuthorizedOrRunAgain": true
+  },
+  "candidateCommit": null
+}

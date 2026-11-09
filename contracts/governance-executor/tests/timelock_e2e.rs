@@ -48,22 +48,23 @@ fn e2e_executor_controls_arka_and_coverage_after_handoff() {
 
     let admin = Address::generate(&env);
     let manager = Address::generate(&env);
-    let executor_id = env.register_contract(None, GovernanceExecutor);
+    let executor_id = env.register(GovernanceExecutor, (&admin, &6u32, &40u32,));
     let executor = GovernanceExecutorClient::new(&env, &executor_id);
-    executor.init(&admin, &6, &40);
+
 
     let arka_id = env.register_contract(None, ArkaContract);
     let arka = ArkaContractClient::new(&env, &arka_id);
     let denom = Address::generate(&env);
     let whitelist = SorobanVec::new(&env);
+    arka.set_manager(&manager,&manager);
     arka.init(&denom, &0, &0, &0, &0, &whitelist, &manager);
     arka.set_governor(&manager, &executor_id);
 
-    let fund_id = env.register_contract(None, CoverageFund);
-    let fund = CoverageFundClient::new(&env, &fund_id);
     let reserve = Address::generate(&env);
     let boot = Address::generate(&env);
-    fund.init(&admin, &reserve, &boot);
+    let fund_id = env.register(CoverageFund, (&admin, &reserve, &boot,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
+
     fund.set_governor(&admin, &executor_id);
 
     let treasury = Address::generate(&env);

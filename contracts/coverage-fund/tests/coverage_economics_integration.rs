@@ -55,11 +55,9 @@ fn integration_claims_both_reward_streams_with_live_premium_routing() {
     let env = Env::default();
     let reserve_token_id = env.register_contract(None, MockToken);
     let bootstrap_token_id = env.register_contract(None, MockToken);
-    let fund_id = env.register_contract(None, CoverageFund);
 
     let reserve_token = MockTokenClient::new(&env, &reserve_token_id);
     let bootstrap_token = MockTokenClient::new(&env, &bootstrap_token_id);
-    let fund = CoverageFundClient::new(&env, &fund_id);
 
     let admin = Address::generate(&env);
     let treasury = Address::generate(&env);
@@ -69,7 +67,9 @@ fn integration_claims_both_reward_streams_with_live_premium_routing() {
 
     env.mock_all_auths();
 
-    fund.init(&admin, &reserve_token_id, &bootstrap_token_id);
+    let fund_id = env.register(CoverageFund, (&admin, &reserve_token_id, &bootstrap_token_id,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
+
     fund.set_treasury(&admin, &Some(treasury.clone()));
     fund.set_economics_policy(&admin, &7_000, &500, &1_000);
     fund.set_covered_vault_policy(&admin, &vault, &800, &20_000);

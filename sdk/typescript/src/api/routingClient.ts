@@ -1,10 +1,11 @@
 export const ARKAFUND_ROUTING_MAINNET_URL = "https://app.arka.fund";
 
-export type RoutingProtocol = "AUTO" | "SOROSWAP" | "AQUARIUS" | "PHOENIX" | "BALANCED";
+export type RoutingProtocol = "AUTO" | "SOROSWAP" | "AQUARIUS" | "PHOENIX" | "SUSHI" | "BALANCED";
 export type ExecutableRoutingProtocol = Exclude<RoutingProtocol, "AUTO">;
 
 export interface RoutingPlanRequest {
   requestedProtocol: RoutingProtocol;
+  fundId?: string;
   amountBase: number;
   tokenIn: string;
   tokenOut: string;
@@ -125,6 +126,7 @@ export class RoutingClient {
 
   async plan(request: RoutingPlanRequest): Promise<RoutingPlanResponse> {
     validateRoutingRequest(request);
+    if(request.requestedProtocol==='PHOENIX')throw new Error('Phoenix has been retired from new routes.');
     return this.request<RoutingPlanResponse>("/api/routing/rebalance/plan", {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },

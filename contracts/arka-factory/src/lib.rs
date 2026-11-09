@@ -1,6 +1,9 @@
 #![no_std]
+mod managed_routes_creation;
+pub use managed_routes_creation::{ManagedRouteBinding, ManagedRouteFamily};
 #[cfg(test)]
 use soroban_sdk::testutils::Address as _;
+use soroban_sdk::xdr::ToXdr;
 use soroban_sdk::{
     auth::{ContractContext, InvokerContractAuthEntry, SubContractInvocation},
     contract, contracterror, contractimpl, contracttype, panic_with_error, symbol_short, vec,
@@ -21,6 +24,62 @@ pub struct DefaultSwapRiskPolicy {
 
 #[derive(Clone)]
 #[contracttype]
+pub struct DefaultValuationOracle {
+    pub oracle: Address,
+    pub max_price_age: u64,
+}
+
+/// Wire-compatible with Arka's ManagedPolicy. Configuration is governed and
+/// activated inside creation, before ownership/governance handoff or registration.
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct ManagedPolicy {
+    pub epoch_seconds: u64,
+    pub manager_window: u64,
+    pub min_request_shares: i128,
+    pub buffer_bps: u32,
+    pub blend_market_id: u128,
+    pub blend_adapter: Option<Address>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct ManagedTemplate {
+    pub denomination: Address,
+    pub policy: ManagedPolicy,
+    pub enabled: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct ManagedSpotRoute {
+    pub asset: Address,
+    pub router: Address,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct ManagedPortfolioPolicy {
+    pub routes: Vec<ManagedSpotRoute>,
+    pub instant_cash: bool,
+    pub auto_payout: bool,
+    pub max_slippage_bps: u32,
+    pub cancel_lock_seconds: u64,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub struct ManagedCreateConfig {
+    pub template_hash: BytesN<32>,
+    pub denomination: Address,
+    pub mgmt_bps: i32,
+    pub perf_bps: i32,
+    pub deposit_bps: i32,
+    pub router: Address,
+}
+
+#[derive(Clone)]
+#[contracttype]
 pub enum DataKey {
     Implementation,
     ShareTokenImplementation,
@@ -36,6 +95,7 @@ pub enum DataKey {
     CreationFeeAmount,
     DefaultVenueRegistry,
     DefaultSwapOracle,
+    DefaultValuationOracle,
     DefaultAllowedRouters,
     DefaultAllowedAdapters,
     DefaultSwapRiskPolicy,
@@ -45,6 +105,9 @@ pub enum DataKey {
     BootstrapAdmin,
     BootstrapAdminExpiresAt,
     LastWasmHash,
+    ManagedTemplate,
+    ManagedPortfolioTemplate,
+    ManagedRoutesTemplate,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -55,6 +118,9 @@ pub enum Error {
     Unauthorized = 3,
     InvalidBootstrapAdmin = 4,
     InvalidSwapRiskPolicy = 5,
+    InvalidValuationOracle = 6,
+    ManagedCreationDisabled = 7,
+    InvalidManagedTemplate = 8,
 }
 
 const MAX_BOOTSTRAP_ADMIN_SECONDS: u64 = 365 * 24 * 60 * 60;
@@ -62,8 +128,76 @@ const MAX_BOOTSTRAP_ADMIN_SECONDS: u64 = 365 * 24 * 60 * 60;
 #[contract]
 pub struct ArkaFactory;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct AtomicAuxiliaries {
+    pub oracle_guard: Address,
+    pub venue_registry: Address,
+    pub aquarius_route: Address,
+}
+
 #[contractimpl]
 impl ArkaFactory {
+    /// Create the three constructor-only auxiliary implementations atomically.
+    /// Code identities are fixed; this is not an arbitrary privileged executor.
+    pub fn bootstrap_auxiliaries(
+        env: Env,
+        guard_salt: BytesN<32>,
+        registry_salt: BytesN<32>,
+        route_salt: BytesN<32>,
+        router: Address,
+        expires_at: u64,
+    ) -> AtomicAuxiliaries {
+        Self::require_governor_auth(&env);
+        let governor: Address = env.storage().instance().get(&DataKey::Governor)
+            .unwrap_or_else(|| panic_with_error!(&env, Error::GovernorNotSet));
+        let guard_hash = BytesN::from_array(&env, &[0x56, 0xc3, 0x4c, 0x20, 0x6c, 0x6f, 0xab, 0x4d, 0x0c, 0xb1, 0x5a, 0x0c, 0x51, 0xb5, 0x04, 0xd6, 0xf9, 0x82, 0xd0, 0x49, 0x71, 0xc5, 0xa3, 0x59, 0xec, 0x67, 0xe7, 0xa8, 0xdd, 0x2e, 0x53, 0x89]);
+        let registry_hash = BytesN::from_array(&env, &[0x57, 0x83, 0x7b, 0x47, 0x93, 0x18, 0xbf, 0x08, 0xcd, 0x05, 0x45, 0x28, 0x0b, 0xaf, 0xa0, 0xc0, 0x47, 0x17, 0xaa, 0x4e, 0x1f, 0x25, 0x0a, 0x99, 0xa2, 0x22, 0xa2, 0xbf, 0x65, 0x22, 0x8d, 0x44]);
+        let route_hash = BytesN::from_array(&env, &[0x2f, 0xce, 0x41, 0x21, 0x3e, 0x9c, 0x84, 0x54, 0x58, 0xc8, 0x3f, 0x73, 0x73, 0x97, 0x06, 0xd2, 0x0a, 0x09, 0xdf, 0x68, 0xc8, 0xd7, 0x7d, 0xb2, 0x1b, 0xb0, 0x60, 0xe7, 0xa9, 0xd3, 0xfa, 0x58]);
+        let bootstrap = env.current_contract_address();
+        let guard_deployer = env.deployer().with_address(governor.clone(), guard_salt);
+        // The constructor is below a host create frame. Authorize this exact
+        // one-time constructor call for the factory's temporary admin role.
+        env.authorize_as_current_contract(vec![&env,
+            InvokerContractAuthEntry::Contract(SubContractInvocation {
+                context: ContractContext {
+                    contract: guard_deployer.deployed_address(),
+                    fn_name: Symbol::new(&env, "__constructor"),
+                    args: (bootstrap.clone(),).into_val(&env),
+                },
+                sub_invocations: Vec::new(&env),
+            }),
+        ]);
+        let oracle_guard = guard_deployer.deploy_v2(guard_hash, (bootstrap.clone(),));
+        let venue_registry = env.deployer().with_address(governor.clone(), registry_salt)
+            .deploy_v2(registry_hash, (governor.clone(), Some(governor.clone()), expires_at));
+        let aquarius_route = env.deployer().with_address(governor.clone(), route_salt)
+            .deploy_v2(route_hash, (governor.clone(), router));
+        env.invoke_contract::<()>(&oracle_guard, &Symbol::new(&env, "set_governor"),
+            (bootstrap.clone(), Some(governor.clone())).into_val(&env));
+        env.invoke_contract::<()>(&oracle_guard, &Symbol::new(&env, "set_guardian"),
+            (bootstrap.clone(), governor.clone(), expires_at).into_val(&env));
+        env.invoke_contract::<()>(&oracle_guard, &Symbol::new(&env, "set_admin"),
+            (bootstrap, governor.clone()).into_val(&env));
+        env.invoke_contract::<()>(&venue_registry, &Symbol::new(&env, "set_guardian"),
+            (governor.clone(), Some(governor.clone())).into_val(&env));
+        env.invoke_contract::<()>(&aquarius_route, &Symbol::new(&env, "set_governor"),
+            (governor.clone(), Some(governor)).into_val(&env));
+        AtomicAuxiliaries { oracle_guard, venue_registry, aquarius_route }
+    }
+
+    /// New instances are owned inside the host's atomic create invocation.
+    /// No public post-deployment initialization or implicit deployer privilege.
+    /// A separate governor is supported, but must authorize its assignment.
+    pub fn __constructor(env: Env, governor: Address) {
+        let store = env.storage().instance();
+        if store.has(&DataKey::Governor) {
+            panic_with_error!(&env, Error::Unauthorized);
+        }
+        governor.require_auth();
+        store.set(&DataKey::Governor, &governor);
+    }
+
     fn bump_dynamic_key(env: &Env, key: &DataKey) {
         let max_ttl = env.storage().max_ttl();
         if max_ttl == 0 {
@@ -162,8 +296,22 @@ impl ArkaFactory {
         panic_with_error!(env, Error::Unauthorized);
     }
 
-    fn charge_creation_fee(env: &Env, manager: &Address) {
+    fn charge_creation_fee(env: &Env, manager: &Address, direct: bool) {
         let store = env.storage().instance();
+        if direct {
+            let amount: i128 = store.get(&DataKey::CreationFeeAmount).unwrap_or(0);
+            if amount < 0 { panic_with_error!(env, Error::InvalidManagedTemplate); }
+            if amount > 0 {
+                let treasury: Address = store.get(&DataKey::ProtocolTreasury)
+                    .unwrap_or_else(|| panic_with_error!(env, Error::InvalidManagedTemplate));
+                let token: Address = store.get(&DataKey::CreationFeeToken)
+                    .unwrap_or_else(|| panic_with_error!(env, Error::InvalidManagedTemplate));
+                // The signed routed-template digest binds these exact values.
+                // Charge within creation; no allowance is created or consumed.
+                soroban_sdk::token::TokenClient::new(env, &token).transfer(manager, &treasury, &amount);
+            }
+            return;
+        }
         if let (Some(treasury), Some(fee_token), Some(fee_amount)) = (
             store.get::<DataKey, Address>(&DataKey::ProtocolTreasury),
             store.get::<DataKey, Address>(&DataKey::CreationFeeToken),
@@ -257,6 +405,57 @@ impl ArkaFactory {
         }
     }
 
+    fn deploy_managed_from_key(
+        env: &Env,
+        store: &soroban_sdk::storage::Instance,
+        key: DataKey,
+        salt: &Bytes,
+        manager: &Address,
+    ) -> Option<Address> {
+        #[cfg(test)]
+        {
+            let _ = manager;
+            Self::deploy_contract_from_key(env, store, key, salt)
+        }
+        #[cfg(not(test))]
+        {
+            // Use the authenticated manager's deployment namespace. A legacy
+            // permissionless factory call cannot occupy this address first.
+            let hash: Option<BytesN<32>> = store.get(&key);
+            hash.map(|hash| {
+                env.deployer()
+                    .with_address(manager.clone(), Self::salt_to_bytes32(env, salt))
+                    .deploy_v2(hash, ())
+            })
+        }
+    }
+
+    /// The selected share implementation must implement the explicit constructor
+    /// profile. Legacy share implementations are deliberately incompatible.
+    fn deploy_share(env: &Env, store: &soroban_sdk::storage::Instance, salt: &Bytes,
+        namespace: Option<&Address>, arka: &Address) -> Option<Address> {
+        #[cfg(test)] {
+            let _ = namespace; let _ = arka;
+            Self::deploy_contract_from_key(env, store, DataKey::ShareTokenImplementation, salt)
+        }
+        #[cfg(not(test))] {
+            let hash: Option<BytesN<32>> = store.get(&DataKey::ShareTokenImplementation);
+            hash.map(|hash| {
+                let admin: Option<Address> = store.get(&DataKey::BootstrapAdmin);
+                let expiry: Option<u64> = store.get(&DataKey::BootstrapAdminExpiresAt);
+                let (upgrade_admin, governor, expires_at) = match (admin, expiry) {
+                    (Some(admin), Some(expiry)) => (Some(admin), store.get::<DataKey, Address>(&DataKey::Governor), expiry),
+                    _ => (None, None, 0u64),
+                };
+                let deployer = match namespace {
+                    Some(owner) => env.deployer().with_address(owner.clone(), Self::salt_to_bytes32(env, salt)),
+                    None => env.deployer().with_current_contract(Self::salt_to_bytes32(env, salt)),
+                };
+                deployer.deploy_v2(hash, (arka.clone(), upgrade_admin, governor, expires_at))
+            })
+        }
+    }
+
     fn register_arka(env: &Env, registry: &Address, manager: &Address, arka_addr: &Address) {
         let caller = env.current_contract_address();
         let args = vec![
@@ -280,9 +479,11 @@ impl ArkaFactory {
     // errors are defined at module level
     pub fn set_governor(env: Env, governor: Address) {
         let store = env.storage().instance();
-        if let Some(current) = store.get::<DataKey, Address>(&DataKey::Governor) {
-            current.require_auth();
-        }
+        // This remains a governed handover, never a first-claim initializer.
+        let current: Address = store
+            .get(&DataKey::Governor)
+            .unwrap_or_else(|| panic_with_error!(&env, Error::GovernorNotSet));
+        current.require_auth();
         store.set(&DataKey::Governor, &governor);
     }
 
@@ -419,6 +620,27 @@ impl ArkaFactory {
         env.storage().instance().remove(&DataKey::DefaultSwapOracle);
     }
 
+    pub fn set_default_valuation_oracle(env: Env, oracle: Address, max_price_age: u64) {
+        Self::require_governor_auth(&env);
+        if max_price_age == 0 {
+            panic_with_error!(&env, Error::InvalidValuationOracle);
+        }
+        env.storage().instance().set(
+            &DataKey::DefaultValuationOracle,
+            &DefaultValuationOracle {
+                oracle,
+                max_price_age,
+            },
+        );
+    }
+
+    pub fn clear_default_valuation_oracle(env: Env) {
+        Self::require_governor_auth(&env);
+        env.storage()
+            .instance()
+            .remove(&DataKey::DefaultValuationOracle);
+    }
+
     pub fn set_default_allowed_venues(
         env: Env,
         allowed_routers: Vec<Address>,
@@ -461,8 +683,14 @@ impl ArkaFactory {
         let store = env.storage().instance();
         // Manager must authorize creation for proper indexing
         manager.require_auth();
-        Self::charge_creation_fee(&env, &manager);
+        Self::charge_creation_fee(&env, &manager, false);
         let arka_addr: Address = Self::deploy_arka(&env, &store, &salt);
+
+        // Bind the otherwise uninitialized instance before registering or
+        // publishing it. Any failed reservation rolls back deployment and fee.
+        #[cfg(not(test))]
+        env.invoke_contract::<()>(&arka_addr, &Symbol::new(&env, "set_manager"),
+            (manager.clone(), manager.clone()).into_val(&env));
 
         // Update in-factory simple lists (optional)
         let mut all: Vec<Address> =
@@ -484,6 +712,145 @@ impl ArkaFactory {
         arka_addr
     }
 
+    pub fn set_managed_template(env: Env, caller: Address, template: ManagedTemplate) {
+        Self::require_bootstrap_or_governor_auth(&env, &caller);
+        let p = &template.policy;
+        if p.epoch_seconds < 60
+            || p.epoch_seconds > 86_400
+            || p.manager_window < p.epoch_seconds
+            || p.manager_window > 604_800
+            || p.min_request_shares <= 0
+            || p.buffer_bps > 5_000
+        {
+            panic_with_error!(&env, Error::InvalidManagedTemplate);
+        }
+        env.storage()
+            .instance()
+            .set(&DataKey::ManagedTemplate, &template);
+        env.events()
+            .publish((Symbol::new(&env, "managed_template"),), template);
+    }
+
+    pub fn managed_creation_template(env: Env) -> Option<ManagedTemplate> {
+        env.storage().instance().get(&DataKey::ManagedTemplate)
+    }
+
+    pub fn set_portfolio_template(
+        env: Env,
+        caller: Address,
+        portfolio: Option<ManagedPortfolioPolicy>,
+    ) {
+        Self::require_bootstrap_or_governor_auth(&env, &caller);
+        if let Some(p) = &portfolio {
+            if p.routes.len() > 16 || p.max_slippage_bps > 500 || p.cancel_lock_seconds > 604_800 {
+                panic_with_error!(&env, Error::InvalidManagedTemplate);
+            }
+        }
+        env.storage()
+            .instance()
+            .set(&DataKey::ManagedPortfolioTemplate, &portfolio);
+    }
+
+    pub fn portfolio_creation_template(env: Env) -> Option<ManagedPortfolioPolicy> {
+        env.storage()
+            .instance()
+            .get(&DataKey::ManagedPortfolioTemplate)
+            .unwrap_or(None)
+    }
+
+    pub fn managed_template_digest(env: Env) -> Option<BytesN<32>> {
+        let template = Self::managed_creation_template(env.clone())?;
+        let s = env.storage().instance();
+        let fields: Vec<Val> = vec![
+            &env,
+            template.into_val(&env),
+            s.get::<_, BytesN<32>>(&DataKey::Implementation)
+                .into_val(&env),
+            s.get::<_, BytesN<32>>(&DataKey::ShareTokenImplementation)
+                .into_val(&env),
+            s.get::<_, Address>(&DataKey::Governor).into_val(&env),
+            s.get::<_, Address>(&DataKey::Registry).into_val(&env),
+            s.get::<_, Address>(&DataKey::ProtocolTreasury)
+                .into_val(&env),
+            s.get::<_, i32>(&DataKey::ProtocolMgmtFeeBps).into_val(&env),
+            s.get::<_, i32>(&DataKey::ProtocolPerfFeeBps).into_val(&env),
+            s.get::<_, Address>(&DataKey::CreationFeeToken)
+                .into_val(&env),
+            s.get::<_, i128>(&DataKey::CreationFeeAmount).into_val(&env),
+            s.get::<_, DefaultValuationOracle>(&DataKey::DefaultValuationOracle)
+                .into_val(&env),
+            s.get::<_, Address>(&DataKey::DefaultVenueRegistry)
+                .into_val(&env),
+            s.get::<_, Address>(&DataKey::DefaultSwapOracle)
+                .into_val(&env),
+            s.get::<_, Vec<Address>>(&DataKey::DefaultAllowedRouters)
+                .into_val(&env),
+            s.get::<_, Vec<Address>>(&DataKey::DefaultAllowedAdapters)
+                .into_val(&env),
+            s.get::<_, DefaultSwapRiskPolicy>(&DataKey::DefaultSwapRiskPolicy)
+                .into_val(&env),
+            s.get::<_, Address>(&DataKey::BootstrapAdmin).into_val(&env),
+            s.get::<_, u64>(&DataKey::BootstrapAdminExpiresAt)
+                .into_val(&env),
+            Self::portfolio_creation_template(env.clone()).into_val(&env),
+        ];
+        Some(env.crypto().sha256(&fields.to_xdr(&env)).into())
+    }
+
+    pub fn create_managed(
+        env: Env,
+        salt: Bytes,
+        manager: Address,
+        config: ManagedCreateConfig,
+    ) -> Address {
+        let store = env.storage().instance();
+        let template: ManagedTemplate = store
+            .get(&DataKey::ManagedTemplate)
+            .unwrap_or_else(|| panic_with_error!(&env, Error::ManagedCreationDisabled));
+        if !template.enabled || !store.has(&DataKey::ShareTokenImplementation) {
+            panic_with_error!(&env, Error::ManagedCreationDisabled);
+        }
+        let digest = Self::managed_template_digest(env.clone()).unwrap();
+        let portfolio = Self::portfolio_creation_template(env.clone());
+        if config.template_hash != digest
+            || config.denomination != template.denomination
+            || salt.len() != 32
+            || ((template.policy.blend_adapter.is_some() || portfolio.is_some())
+                && !store.has(&DataKey::DefaultValuationOracle))
+        {
+            panic_with_error!(&env, Error::InvalidManagedTemplate);
+        }
+        // The manager's identity namespaces salts: another creator cannot front-run
+        // a published salt to occupy the intended deployment address.
+        let hash: BytesN<32> = env
+            .crypto()
+            .sha256(&(env.current_contract_address(), manager.clone(), salt).to_xdr(&env))
+            .into();
+        let namespaced_salt = Bytes::from_array(&env, &hash.to_array());
+        let mut whitelist = vec![&env, config.denomination.clone()];
+        if let Some(p) = &portfolio {
+            for r in p.routes.iter() {
+                whitelist.push_back(r.asset);
+            }
+        }
+        Self::create_and_init_internal(
+            env.clone(),
+            namespaced_salt,
+            manager,
+            config.denomination.clone(),
+            config.mgmt_bps,
+            config.perf_bps,
+            config.deposit_bps,
+            0,
+            whitelist,
+            config.router,
+            true,
+            Some(template.policy),
+            portfolio,
+            None,
+        )
+    }
+
     fn create_and_init_internal(
         env: Env,
         salt: Bytes,
@@ -496,20 +863,25 @@ impl ArkaFactory {
         whitelist: Vec<Address>,
         router: Address,
         require_manager_auth: bool,
+        managed_policy: Option<ManagedPolicy>,
+        managed_portfolio: Option<ManagedPortfolioPolicy>,
+        managed_bindings: Option<Vec<ManagedRouteBinding>>,
     ) -> Address {
         let store = env.storage().instance();
         if require_manager_auth {
             manager.require_auth();
         }
-        Self::charge_creation_fee(&env, &manager);
-        let arka_addr: Address = Self::deploy_arka(&env, &store, &salt);
+        Self::charge_creation_fee(&env, &manager, managed_bindings.is_some());
+        let managed = managed_policy.is_some();
+        let arka_addr: Address = if managed {
+            Self::deploy_managed_from_key(&env, &store, DataKey::Implementation, &salt, &manager)
+                .unwrap_or_else(|| panic_with_error!(&env, Error::ImplNotSet))
+        } else {
+            Self::deploy_arka(&env, &store, &salt)
+        };
         let share_token_salt = Self::derive_salt(&env, &salt, 1u8);
-        let share_token_addr = Self::deploy_contract_from_key(
-            &env,
-            &store,
-            DataKey::ShareTokenImplementation,
-            &share_token_salt,
-        );
+        let share_token_addr = Self::deploy_share(&env, &store, &share_token_salt,
+            if managed { Some(&manager) } else { None }, &arka_addr);
 
         #[cfg(not(test))]
         {
@@ -523,6 +895,8 @@ impl ArkaFactory {
             }
 
             // Initialize arka
+            env.invoke_contract::<()>(&arka_addr, &Symbol::new(&env, "set_manager"),
+                (init_manager.clone(), init_manager.clone()).into_val(&env));
             let args_init = vec![
                 &env,
                 denomination.clone().into_val(&env),
@@ -572,6 +946,22 @@ impl ArkaFactory {
                 );
             }
 
+            if let Some(valuation) =
+                store.get::<DataKey, DefaultValuationOracle>(&DataKey::DefaultValuationOracle)
+            {
+                let args_valuation = vec![
+                    &env,
+                    policy_caller.clone().into_val(&env),
+                    valuation.oracle.into_val(&env),
+                    valuation.max_price_age.into_val(&env),
+                ];
+                let _ = env.invoke_contract::<()>(
+                    &arka_addr,
+                    &Symbol::new(&env, "set_valuation_oracle"),
+                    args_valuation,
+                );
+            }
+
             let default_routers: Option<Vec<Address>> = store.get(&DataKey::DefaultAllowedRouters);
             let default_adapters: Option<Vec<Address>> =
                 store.get(&DataKey::DefaultAllowedAdapters);
@@ -613,31 +1003,6 @@ impl ArkaFactory {
             }
 
             if let Some(share_token) = share_token_addr.clone() {
-                if let (Some(upgrade_admin), Some(expires_at)) = (
-                    store.get::<DataKey, Address>(&DataKey::BootstrapAdmin),
-                    store.get::<DataKey, u64>(&DataKey::BootstrapAdminExpiresAt),
-                ) {
-                    let args_tt_init = vec![
-                        &env,
-                        arka_addr.clone().into_val(&env),
-                        upgrade_admin.into_val(&env),
-                        configured_governor.clone().into_val(&env),
-                        expires_at.into_val(&env),
-                    ];
-                    let _ = env.invoke_contract::<()>(
-                        &share_token,
-                        &Symbol::new(&env, "init_with_upgrade_authority"),
-                        args_tt_init,
-                    );
-                } else {
-                    let args_tt_init = vec![&env, arka_addr.clone().into_val(&env)];
-                    let _ = env.invoke_contract::<()>(
-                        &share_token,
-                        &Symbol::new(&env, "init"),
-                        args_tt_init,
-                    );
-                }
-
                 let args_st = vec![
                     &env,
                     policy_caller.clone().into_val(&env),
@@ -667,6 +1032,47 @@ impl ArkaFactory {
                     &Symbol::new(&env, "set_protocol_fee_policy"),
                     args_fee_policy,
                 );
+            }
+
+            // The new mode is configured before the final governor can take over.
+            // Any failure rolls back deployment, share token, fee and registry state.
+            if let Some(policy) = managed_policy {
+                if let Some(adapter) = policy.blend_adapter.clone() {
+                    let args = vec![
+                        &env,
+                        policy_caller.clone().into_val(&env),
+                        vec![&env, Symbol::new(&env, "Blend")].into_val(&env),
+                        policy.blend_market_id.into_val(&env),
+                        adapter.into_val(&env),
+                        true.into_val(&env),
+                        false.into_val(&env),
+                        false.into_val(&env),
+                        true.into_val(&env),
+                        true.into_val(&env),
+                    ];
+                    env.invoke_contract::<()>(
+                        &arka_addr,
+                        &Symbol::new(&env, "configure_credit_market"),
+                        args,
+                    );
+                }
+                let mut args = vec![
+                    &env,
+                    policy_caller.clone().into_val(&env),
+                    policy.into_val(&env),
+                ];
+                let method = if let Some(portfolio) = managed_portfolio {
+                    args.push_back(portfolio.into_val(&env));
+                    if let Some(bindings) = managed_bindings {
+                        args.push_back(bindings.into_val(&env));
+                        "enable_managed_routes"
+                    } else {
+                        "enable_managed_portfolio"
+                    }
+                } else {
+                    "enable_managed_withdrawals"
+                };
+                env.invoke_contract::<()>(&arka_addr, &Symbol::new(&env, method), args);
             }
 
             if !require_manager_auth {
@@ -761,6 +1167,9 @@ impl ArkaFactory {
             whitelist,
             router,
             true,
+            None,
+            None,
+            None,
         )
     }
 
@@ -790,6 +1199,9 @@ impl ArkaFactory {
             whitelist,
             router,
             false,
+            None,
+            None,
+            None,
         );
         Self::dynamic_set(
             &env,
@@ -866,6 +1278,12 @@ impl ArkaFactory {
         env.storage().instance().get(&DataKey::DefaultSwapOracle)
     }
 
+    pub fn get_default_valuation_oracle(env: Env) -> Option<DefaultValuationOracle> {
+        env.storage()
+            .instance()
+            .get(&DataKey::DefaultValuationOracle)
+    }
+
     pub fn get_default_allowed_routers(env: Env) -> Vec<Address> {
         env.storage()
             .instance()
@@ -884,6 +1302,11 @@ impl ArkaFactory {
         env.storage()
             .instance()
             .get(&DataKey::DefaultSwapRiskPolicy)
+    }
+
+    /// Returns the WASM hash used when the factory creates a new Arka.
+    pub fn get_implementation(env: Env) -> Option<BytesN<32>> {
+        env.storage().instance().get(&DataKey::Implementation)
     }
 
     pub fn get_share_token_implementation(env: Env) -> Option<BytesN<32>> {

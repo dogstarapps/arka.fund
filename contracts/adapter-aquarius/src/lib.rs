@@ -70,7 +70,7 @@ impl AquariusAdapter {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -83,7 +83,7 @@ impl AquariusAdapter {
         let governor: Address = env
             .storage()
             .instance()
-            .get(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
             .expect("governor_not_set");
         assert!(*caller == governor, "only_governor");
         caller.require_auth();
@@ -151,7 +151,18 @@ impl AquariusAdapter {
         })
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(env: Env, admin: Address, router: Address) {
+        Self::initialize(env, admin, router);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, router: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, router: Address) {
         let store = env.storage().instance();
         assert!(!store.has(&DataKey::Admin), "already_initialized");
         store.set(&DataKey::Admin, &admin);

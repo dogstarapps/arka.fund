@@ -417,7 +417,34 @@ impl LockedArka {
         }
     }
 
+    // Construction and initialization are one atomic host operation.
+    pub fn __constructor(
+        env: Env,
+        admin: Address,
+        token: Address,
+        min_lock_ledgers: u32,
+        max_lock_ledgers: u32,
+        name: String,
+        symbol: String,
+    ) {
+        Self::initialize(env, admin, token, min_lock_ledgers, max_lock_ledgers, name, symbol);
+    }
+
+    // Retain the legacy ABI, but never expose a second initialization path.
+    #[allow(unused_variables)]
     pub fn init(
+        env: Env,
+        admin: Address,
+        token: Address,
+        min_lock_ledgers: u32,
+        max_lock_ledgers: u32,
+        name: String,
+        symbol: String,
+    ) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(
         env: Env,
         admin: Address,
         token: Address,

@@ -2,16 +2,15 @@ use super::*;
 use soroban_sdk::{testutils::Address as _, Address, Env, String};
 
 fn init_token(env: &Env) -> (Address, ArkaTokenClient<'_>, Address) {
-    let id = env.register_contract(None, ArkaToken);
-    let client = ArkaTokenClient::new(env, &id);
+    
+    
     let admin = Address::generate(env);
-    client.init(
-        &admin,
+    let id = env.register(ArkaToken, (&admin,
         &String::from_str(env, "Arka Token"),
         &String::from_str(env, "ARKA"),
         &7u32,
-        &Some(1_000i128),
-    );
+        &Some(1_000i128),));
+    let client = ArkaTokenClient::new(env, &id);
     (id, client, admin)
 }
 
@@ -61,4 +60,23 @@ fn test_admin_rotation_and_burn() {
     assert_eq!(token.admin(), next_admin);
     assert_eq!(token.balance(&alice), 250);
     assert_eq!(token.total_supply(), 250);
+}
+
+
+#[test]
+fn optional_governor_clear_keeps_admin_rotation_and_expiry_enforced() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let replacement = Address::generate(&env);
+    let id = env.register(ArkaToken, (&admin, &String::from_str(&env,"Arka"), &String::from_str(&env,"ARKA"), &7u32, &None::<i128>));
+    let client = ArkaTokenClient::new(&env, &id);
+    client.set_governor(&admin, &None);
+    client.set_admin(&admin, &replacement);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    client.set_bootstrap_admin_expiry(&replacement, &1_010u64);
+    env.ledger().set_timestamp(1_020);
+    assert!(client.try_set_governor(&replacement, &Some(replacement.clone())).is_err());
 }

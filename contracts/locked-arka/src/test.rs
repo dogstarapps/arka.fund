@@ -49,27 +49,25 @@ fn setup(
     env.mock_all_auths();
     set_default_ledger(env);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(env, &token_id);
+    
+    
     let admin = Address::generate(env);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &String::from_str(env, "Arka Token"),
         &String::from_str(env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(env, &token_id);
 
-    let locked_id = env.register_contract(None, LockedArka);
-    let locked = LockedArkaClient::new(env, &locked_id);
-    locked.init(
-        &admin,
+    
+    
+    let locked_id = env.register(LockedArka, (&admin,
         &token_id,
         &10u32,
         &1_000u32,
         &String::from_str(env, "Locked ARKA"),
-        &String::from_str(env, "lARKA"),
-    );
+        &String::from_str(env, "lARKA"),));
+    let locked = LockedArkaClient::new(env, &locked_id);
 
     let alice = Address::generate(env);
     let bob = Address::generate(env);

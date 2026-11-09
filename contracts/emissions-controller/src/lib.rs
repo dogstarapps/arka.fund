@@ -83,7 +83,7 @@ impl EmissionsController {
         if let Some(governor) = env
             .storage()
             .persistent()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         {
             if *caller == governor {
                 caller.require_auth();
@@ -97,7 +97,7 @@ impl EmissionsController {
         let Some(governor) = env
             .storage()
             .persistent()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -232,7 +232,18 @@ impl EmissionsController {
         let _ = env.invoke_contract::<()>(token, &symbol_short!("transfer"), args);
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, admin: Address, token: Address) {
+        Self::initialize(env, admin, token);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, token: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, token: Address) {
         if env.storage().persistent().has(&DataKey::Admin) {
             panic_with_error!(&env, Error::AlreadyInitialized);
         }
@@ -419,7 +430,7 @@ impl EmissionsController {
     }
 
     pub fn governor(env: Env) -> Option<Address> {
-        env.storage().persistent().get(&DataKey::Governor)
+        env.storage().persistent().get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
     }
 
     pub fn admin(env: Env) -> Address {

@@ -56,13 +56,9 @@ fn e2e_community_reserve_and_manager_first_loss_work_together() {
     let env = Env::default();
     let reserve_token_id = env.register_contract(None, MockToken);
     let bootstrap_token_id = env.register_contract(None, MockToken);
-    let fund_id = env.register_contract(None, CoverageFund);
-    let coverage_vault_id = env.register_contract(None, CoverageVault);
 
     let reserve_token = MockTokenClient::new(&env, &reserve_token_id);
     let bootstrap_token = MockTokenClient::new(&env, &bootstrap_token_id);
-    let fund = CoverageFundClient::new(&env, &fund_id);
-    let manager_vault = CoverageVaultClient::new(&env, &coverage_vault_id);
 
     let admin = Address::generate(&env);
     let treasury = Address::generate(&env);
@@ -73,8 +69,12 @@ fn e2e_community_reserve_and_manager_first_loss_work_together() {
 
     env.mock_all_auths();
 
-    fund.init(&admin, &reserve_token_id, &bootstrap_token_id);
-    manager_vault.init(&manager, &reserve_token_id, &3_000);
+    let fund_id = env.register(CoverageFund, (&admin, &reserve_token_id, &bootstrap_token_id,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
+
+    let coverage_vault_id = env.register(CoverageVault, (&manager, &reserve_token_id, &3_000,));
+    let manager_vault = CoverageVaultClient::new(&env, &coverage_vault_id);
+
     fund.set_treasury(&admin, &Some(treasury.clone()));
     fund.set_economics_policy(&admin, &6_000, &500, &2_500);
     fund.set_covered_vault_policy(&admin, &covered_vault, &1_200, &20_000);

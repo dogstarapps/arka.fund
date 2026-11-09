@@ -57,7 +57,7 @@ impl GovToken {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -70,7 +70,7 @@ impl GovToken {
         let governor: Address = env
             .storage()
             .instance()
-            .get(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
             .expect("governor_not_set");
         assert!(*caller == governor, "only_governor");
         caller.require_auth();
@@ -92,7 +92,18 @@ impl GovToken {
         }
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, admin: Address) {
+        Self::initialize(env, admin);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address) {
         let store = env.storage().instance();
         assert!(
             store.get::<_, Address>(&DataKey::Admin).is_none(),

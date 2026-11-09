@@ -63,10 +63,8 @@ fn setup<'a>(
     env.ledger().set_timestamp(1_000);
     let arka_id = env.register_contract(None, ArkaContract);
     let arka = ArkaContractClient::new(env, &arka_id);
-    let venue_registry_id = env.register_contract(None, VenueRegistry);
-    let venue_registry = VenueRegistryClient::new(env, &venue_registry_id);
     let token_id = env.register_contract(None, DummyToken);
-    let router_id = env.register_contract(None, Router);
+    let router_id = env.register(Router, (None::<Address>, None::<Address>, 0u64));
     let adapter_id = env.register_contract(None, ProfitAdapter);
     let manager = Address::generate(env);
     let admin = Address::generate(env);
@@ -76,7 +74,9 @@ fn setup<'a>(
     };
 
     env.mock_all_auths_allowing_non_root_auth();
-    venue_registry.init(&admin, &Some(manager.clone()), &2_000);
+    let venue_registry_id = env.register(VenueRegistry, (&admin, &Some(manager.clone()), &2_000u64));
+    let venue_registry = VenueRegistryClient::new(env, &venue_registry_id);
+    arka.set_manager(&manager, &manager);
     arka.init(&token_id, &0, &0, &0, &0, &whitelist, &manager);
     arka.set_router(&manager, &router_id);
     arka.set_venue_registry(&manager, &venue_registry_id);

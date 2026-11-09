@@ -1,0 +1,67 @@
+{
+  "at": "2026-11-05",
+  "factory": {
+    "role": "arka-factory",
+    "file": "release/wasm/arka-factory.wasm",
+    "sha256": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
+    "bytes": 46432
+  },
+  "factorySource": {
+    "file": "contracts/arka-factory/src/lib.rs",
+    "sha256": "19563f571dd59b44e733ebac281803dd11185ee6cdf11f2bcd1a2bd4d9f4cb50",
+    "bytes": 49647
+  },
+  "fund": {
+    "role": "arka",
+    "file": "release/wasm/arka.wasm",
+    "sha256": "7ea4f823c87d3fd887ea13b51804dd52fee0ba63d12e19e5e264bff6deb7f007",
+    "bytes": 130856
+  },
+  "pins": {
+    "guard": {
+      "role": "oracle-guard",
+      "file": "release/wasm/oracle-guard.wasm",
+      "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+      "bytes": 35258
+    },
+    "registry": {
+      "role": "venue-registry",
+      "file": "release/wasm/venue-registry.wasm",
+      "sha256": "86e9af8430ed9db3bfed015d3e12e30ee443bdeb0dee9c23ec0e0c6543bc037f",
+      "bytes": 10419
+    },
+    "route": {
+      "role": "adapter-aquarius",
+      "file": "release/wasm/adapter-aquarius.wasm",
+      "sha256": "26d3e1a46401fdaf00cb8393c4ac0695d9994ce5dff83f030670de97ceea5e0a",
+      "bytes": 13588
+    },
+    "share": {
+      "role": "share-token",
+      "file": "release/wasm/share-token.wasm",
+      "sha256": "aec9440d24660e82573b4f20bff0cf2d96c821a77c31a705842520bc628b7ad3",
+      "bytes": 11110
+    }
+  },
+  "requiredShareConstructor": [
+    "admin:Address",
+    "upgrade_admin:Option<Address>",
+    "governor:Option<Address>",
+    "expires_at:u64"
+  ],
+  "legacyInitFallback": false,
+  "guardAuthorization": "Exact selected R56 OracleGuard constructor, controlled by governance under the existing root authority. Legacy bootstrap_auxiliaries is excluded.",
+  "compatibility": "New managed instances only; selected R56 guard adds explicit one-leg quote normalization. Existing authority retained; no legacy or Noah upgrade. Governed constructor path required for changed guard.",
+  "sourceEvidenceSha256": "52ce8abd24ce6f7403fe8061434b3a195b997c068bbf1f02116915d927511657",
+  "revision": "R56",
+  "factoryManagedRoutesSource": {
+    "file": "contracts/arka-factory/src/managed_routes_creation.rs",
+    "sha256": "36a27d07b61c8106258f62bf91cab4ed63073f9919adb88a759783cb55f976c6",
+    "bytes": 4736
+  },
+  "originEvidenceIsHistorical": true,
+  "bootstrapAuxiliaries": {
+    "allowed": false,
+    "reason": "Legacy helper embeds old auxiliary code/constructor choices. R56 shared guard must be created from the exact selected code via governed constructor; no legacy fallback."
+  }
+}

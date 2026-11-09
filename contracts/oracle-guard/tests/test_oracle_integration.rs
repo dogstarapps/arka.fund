@@ -1,16 +1,48 @@
 use oracle_guard::{OracleAsset, OracleGuard, OracleGuardClient};
 use soroban_sdk::{
+    contract, contractimpl, contracttype, IntoVal, Symbol,
     testutils::{Address as _, Ledger as _},
     Address, Env,
 };
 use test_oracle::{TestOracle, TestOracleClient};
+
+// TestOracle is a legacy fixture without SEP-40 unit metadata. This test-only
+// wrapper declares the USD/14 units of injected test prices explicitly.
+#[contract]
+struct QualifiedTestFeed;
+#[contracttype]
+enum FeedKey { Underlying }
+#[contractimpl]
+impl QualifiedTestFeed {
+    pub fn __constructor(env: Env, underlying: Address) {
+        env.storage().instance().set(&FeedKey::Underlying, &underlying);
+    }
+    pub fn base(env: Env) -> OracleAsset { OracleAsset::Other(Symbol::new(&env, "USD")) }
+    pub fn decimals(_env: Env) -> u32 { 14 }
+    pub fn lastprice(env: Env, asset: OracleAsset) -> oracle_guard::OraclePriceData {
+        let underlying: Address = env.storage().instance().get(&FeedKey::Underlying).unwrap();
+        env.invoke_contract(&underlying, &Symbol::new(&env, "lastprice"), soroban_sdk::vec![&env, asset.into_val(&env)])
+    }
+}
 
 fn deploy_test_oracle<'a>(env: &'a Env) -> (Address, Address, TestOracleClient<'a>) {
     let id = env.register_contract(None, TestOracle);
     let client = TestOracleClient::new(env, &id);
     let admin = Address::generate(env);
     client.init(&admin);
-    (id, admin, client)
+    let qualified = env.register(QualifiedTestFeed, (&id,));
+    (qualified, admin, client)
+}
+
+#[test]
+fn legacy_test_oracle_without_metadata_is_not_implicitly_a_usd_feed() {
+    let env=Env::default();env.mock_all_auths();env.ledger().set_timestamp(1000);
+    let admin=Address::generate(&env);let asset=Address::generate(&env);
+    let oracle=env.register(TestOracle,());let client=TestOracleClient::new(&env,&oracle);client.init(&admin);
+    client.set_stellar_price(&admin,&asset,&100_000_000_000_000,&995);
+    let guard_id=env.register(OracleGuard,(&admin,));let guard=OracleGuardClient::new(&env,&guard_id);
+    guard.set_stellar_asset_policy(&admin,&asset,&oracle,&oracle,&false,&120,&300,&false,&0);
+    assert_eq!(guard.inspect_stellar(&asset).price,0);
 }
 
 #[test]
@@ -19,12 +51,12 @@ fn uses_secondary_test_oracle_when_feeds_diverge() {
     env.ledger().set_timestamp(10_000);
     env.mock_all_auths();
 
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let guard_admin = Address::generate(&env);
     let asset = Address::generate(&env);
 
-    guard.init(&guard_admin);
+    let guard_id = env.register(OracleGuard, (&guard_admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     let (primary_id, primary_admin, primary) = deploy_test_oracle(&env);
     let (secondary_id, secondary_admin, secondary) = deploy_test_oracle(&env);
 
@@ -58,12 +90,12 @@ fn fail_closes_when_secondary_confirmation_is_required_and_missing() {
     env.ledger().set_timestamp(20_000);
     env.mock_all_auths();
 
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let guard_admin = Address::generate(&env);
     let asset = Address::generate(&env);
 
-    guard.init(&guard_admin);
+    let guard_id = env.register(OracleGuard, (&guard_admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     let (primary_id, primary_admin, primary) = deploy_test_oracle(&env);
     let (secondary_id, _secondary_admin, _secondary) = deploy_test_oracle(&env);
 

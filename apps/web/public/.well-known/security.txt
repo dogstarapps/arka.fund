@@ -1,0 +1,6 @@
+Contact: https://github.com/dogstarapps/arka.fund/security/advisories/new
+Contact: https://github.com/dogstarapps/arka.fund/issues
+Canonical: https://app.arka.fund/.well-known/security.txt
+Policy: https://github.com/dogstarapps/arka.fund/blob/main/docs/SECURITY.md
+Preferred-Languages: en, es, ca
+Expires: 2027-07-09T00:00:00Z

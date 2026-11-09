@@ -143,5 +143,9 @@ test("FileIdentityStore persists Arka and manager public profile metadata", asyn
 
   const loaded = await store.read();
   assert.equal(loaded.arkas.CARKA?.displayName, "Stellar Growth");
+  assert.equal(loaded.arkas.CARKA?.strategy, null);
+  assert.equal(loaded.arkas.CARKA?.riskDisclosure, null);
+  assert.equal(loaded.arkas.CARKA?.targetReturn, null);
   assert.equal(loaded.managers.GMANAGER?.displayName, "Arka Manager");
+  assert.equal(loaded.managers.GMANAGER?.strategy, null);
 });

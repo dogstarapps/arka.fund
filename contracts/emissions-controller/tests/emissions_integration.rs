@@ -30,20 +30,18 @@ fn integration_release_all_round_trips_multiple_streams() {
     let treasury = Address::generate(&env);
     let recipient = Address::generate(&env);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(&env, &token_id);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(&env, &token_id);
+
     token.mint(&treasury, &1_200);
 
-    let controller_id = env.register_contract(None, EmissionsController);
+    let controller_id = env.register(EmissionsController, (&admin, &token_id,));
     let controller = EmissionsControllerClient::new(&env, &controller_id);
-    controller.init(&admin, &token_id);
+
     token.approve(&treasury, &controller_id, &900);
 
     let stream_a = controller.create_stream(&admin, &treasury, &recipient, &1_000, &1_400, &500);

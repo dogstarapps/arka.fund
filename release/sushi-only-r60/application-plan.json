@@ -1,0 +1,319 @@
+{
+  "schema": 1,
+  "revision": "R60",
+  "status": "local-reviewed-proposal-not-applied",
+  "network": "Public Global Stellar Network ; September 2015",
+  "baseSourceRelease": "R58",
+  "contractBundleId": "a7518e6f5bd424f0f1b3b9d4b63e20c090c34367efe661f87c28e6725b4c8570",
+  "saltNamespace": "arka.fund|mainnet|managed-sushi-only|v1|a7518e6f5bd424f0f1b3b9d4b63e20c090c34367efe661f87c28e6725b4c8570|ROLE",
+  "addressAlgorithm": "SHA256 XDR HashIdPreimageContractId(networkId=SHA256(passphrase), address=creator, salt=SHA256(namespace)); code and constructor pinned separately",
+  "addressesArePredictedNotObserved": true,
+  "authority": {
+    "address": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "newCouncil": false,
+    "changed": false,
+    "guardian": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "readSourceIsPublicAddressOnly": true
+  },
+  "noah": {
+    "version": 2,
+    "upgrade": false,
+    "migrate": false,
+    "read": false
+  },
+  "contracts": [
+    {
+      "role": "governance-executor",
+      "creator": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "address": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "salt": "6f0e2e602f5dfaaf811184a479aca4b9f8128e5bd27342e3dea1d46946f6c455",
+      "codeHash": "7704a9c78fe92431203501be8a387dc45b665bb00a7f30ee90e4a76ebccdc465",
+      "constructorArgs": [
+        "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        86400,
+        604800
+      ]
+    },
+    {
+      "role": "arka-factory",
+      "operationId": "f45521579585d7c6eda59a2800c98975ce76fda5ac3f744b8b88318ad2d7af44",
+      "salt": "690b7eeeb41a21edef3fb3126f8917a2639ae7f9b726adf4fabbdd38a69574f8",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CAOFU5A6D6AM34X2WEVGPCITEFGDNUJLAKAVNKFE2CODYKY6Y4FTJPPB",
+      "codeHash": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+      ]
+    },
+    {
+      "role": "arka-registry",
+      "operationId": "aada70060ef44647670a8b3701fbf5039020abc569f809617f2b0f856ea013d7",
+      "salt": "4db4a836a507632c65bca192af44ac571497c789542d4d7b5aeb4bf8578099fe",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CAVLJHDTMQ5NQ2PZJVVEEBQ3LKCOAPCLHRGY6YS5PEWTRGP2OPLJOI5F",
+      "codeHash": "c6ef013cc807e2519966a3992382939a54c83e73ba662fff602fe0d43db9f1e6",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+      ]
+    },
+    {
+      "role": "venue-registry",
+      "operationId": "a2d8037852af196e57208f500eb0360bde82d0d413da599816e34dc1c2c2f481",
+      "salt": "5dbeba6fca23c94a95eea655aec9d7024151ad696063ca241e0e16bab27ef760",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CDYBEVCCCTTV3GC6WD655ZWNN3ZWHHGEUNOZDNJ3IDPCBCMVP6F6BRIJ",
+      "codeHash": "86e9af8430ed9db3bfed015d3e12e30ee443bdeb0dee9c23ec0e0c6543bc037f",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "1812629132"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAABQAAAABsCoaM"
+      ]
+    },
+    {
+      "role": "router",
+      "operationId": "04ea8c819c4695f3f32b05248e6fcef0f4c668ac148773da2ad4a1448c82d722",
+      "salt": "673d2f89c3e20a67e4c02726f263f244e932cb269971826c589c58020878f240",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "codeHash": "0e2317c60464754354c59fe854c73060c28827ea1e05d429078f37b98f85385d",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "1812629132"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAABQAAAABsCoaM"
+      ]
+    },
+    {
+      "role": "oracle-guard",
+      "operationId": "a30c732cf978ed71f10684d6b8c64a3df403bdd1db84afe94d9a52f0c1e97cf6",
+      "salt": "61d13cdb6689e4baecd7a540bcce2f6f97f8009070420b9c685e47fc890246da",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CCLDVKBR5RSSTWKVEXTRDJMKM2R6OGGP7MT26WBTLZQXGZDR7J6DZNIM",
+      "codeHash": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+      ]
+    },
+    {
+      "role": "adapter-sushi",
+      "operationId": "21fffb5678cca9ed03f1427f02ce6df42365b2a4497876d8278a198708c4ede0",
+      "salt": "2efb7e2bf3bc0128f8f010030885b5244fc041f9c241e19317da38388b9c1148",
+      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+      "address": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
+      "codeHash": "cb0b6341e44d743e03f1f601738b4318843d60b9be1e46638e65e8d04c4cd1e7",
+      "constructorArgs": [
+        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF"
+      ],
+      "constructorArgsXdr": [
+        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAH2qKjDjWz71Dut10ZBTL+vn0NH3viK5Hy92gYqUawX0w=="
+      ]
+    }
+  ],
+  "perFundTemplates": [
+    {
+      "role": "arka",
+      "codeHash": "7ea4f823c87d3fd887ea13b51804dd52fee0ba63d12e19e5e264bff6deb7f007",
+      "bytes": 130856,
+      "address": null,
+      "perFund": true
+    },
+    {
+      "role": "share-token",
+      "codeHash": "aec9440d24660e82573b4f20bff0cf2d96c821a77c31a705842520bc628b7ad3",
+      "bytes": 11110,
+      "address": null,
+      "perFund": true
+    }
+  ],
+  "commercialTerms": {
+    "amountRaw": "100000000",
+    "token": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+    "decimals": 7,
+    "amountUsdc": "10",
+    "treasury": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "changeAuthorized": false
+  },
+  "timelock": {
+    "unit": "ledger",
+    "minimumDelay": 86400,
+    "gracePeriod": 604800,
+    "bytecodeUnitProof": "R60 timelock-unit.json",
+    "valuesPreserved": true,
+    "nominalSecondsPerLedger": 5,
+    "nominalWaitDays": 5,
+    "wallclockDurationGuaranteed": false
+  },
+  "finiteBootstrapExpiryUnixSeconds": 1812629132,
+  "bootstrapRetirement": "Set root governor to existing authority and retire root bootstrap; govern all component construction/configuration; retire component bootstraps before public use.",
+  "external": {
+    "sushiFactory": "CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF",
+    "sushiPool": "CCR2CH4GQVCZHG7CHFVMNANCK45CU5DVKXZIIITDZQAU3CEJZ7RQH2MQ",
+    "xlm": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+    "usdc": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+    "feePpm": 3000,
+    "providers": [
+      {
+        "role": "oracle-primaryProvider",
+        "id": "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+        "source": "oracle dependency"
+      },
+      {
+        "role": "oracle-secondaryProvider",
+        "id": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "source": "oracle dependency"
+      },
+      {
+        "role": "oracle-fiatProvider",
+        "id": "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+        "source": "oracle dependency"
+      }
+    ]
+  },
+  "permissions": {
+    "factoryGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "registryGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "registryRegistrar": "CAOFU5A6D6AM34X2WEVGPCITEFGDNUJLAKAVNKFE2CODYKY6Y4FTJPPB",
+    "routerGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "venueGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "venueGuardian": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+    "oracleAdminAndGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "sushiImmutableAdmin": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "initialVenueStatus": 0,
+    "initialAuto": false,
+    "initialCallers": [],
+    "callerAdmission": "Only a verified newly factory-created managed fund; explicit timelocked set_caller with exact fund identity",
+    "activation": "Separate timelocked set_venue_status(...,1) after target qualification and authorization",
+    "emergencyDisable": "Existing guardian may disable only",
+    "recovery": "Existing authority schedules reactivation through the same executor/timelock",
+    "legacyPhoenix": "No write to existing Phoenix or legacy allowlists; omitted from new managed templates"
+  },
+  "routes": [
+    {
+      "poolId": "1",
+      "direction": "XLM->USDC",
+      "adapter": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
+      "executor": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "venue": "CCR2CH4GQVCZHG7CHFVMNANCK45CU5DVKXZIIITDZQAU3CEJZ7RQH2MQ",
+      "feePpm": 3000
+    },
+    {
+      "poolId": "2",
+      "direction": "USDC->XLM",
+      "adapter": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
+      "executor": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "venue": "CCR2CH4GQVCZHG7CHFVMNANCK45CU5DVKXZIIITDZQAU3CEJZ7RQH2MQ",
+      "feePpm": 3000
+    }
+  ],
+  "ttl": {
+    "units": "ledger",
+    "observedReference": "R59 P29, re-read before application",
+    "minPersistentLedgers": 2073600,
+    "maxLedgers": 3110400,
+    "extendToLedgers": 2073600,
+    "manualReviewBelowRemainingLedgers": 1036800,
+    "keys": "Only selected new code hashes, these seven predicted instances and their persistent configuration. Future child/share keys must be added from actual creation receipts.",
+    "noahAndLegacyExcluded": true,
+    "automaticExtend": false,
+    "automaticRestore": false,
+    "restore": "Separate reviewed explicit operation; split Arka130856-byte code from other entries and price every bounded batch against actual current footprint/network budgets.",
+    "dependencyTtl": "Read current Sushi/token/oracle TTL before activation; do not extend third-party state implicitly."
+  },
+  "financialPolicy": {
+    "status": "not-authorized-for-production",
+    "managedCreationEnabled": false,
+    "productionTemplateHash": null,
+    "doNotCopyAcceleratedR57WithdrawalTerms": true,
+    "needsReviewedValues": [
+      "withdrawal epoch_seconds",
+      "manager_window",
+      "buffer_bps",
+      "min_request_shares",
+      "portfolio max_slippage_bps",
+      "cancel_lock_seconds",
+      "instant_cash",
+      "auto_payout"
+    ],
+    "observedLegacyFactoryDefaultsPreserved": {
+      "valuationMaxPriceAgeSeconds": 3600,
+      "swapOracleMaxAgeSeconds": 900,
+      "maxSlippageBps": 300,
+      "maxPriceImpactBps": 300,
+      "maxTwapDeviationBps": 350,
+      "maxTradeSizeBps": 2500
+    },
+    "oracleGuard": {
+      "maxPriceAgeSeconds": 900,
+      "xlmMaxDeviationBps": 300,
+      "requireXlmSecondary": true,
+      "usdcMaxDeviationBps": 150,
+      "base": "USD",
+      "decimals": 14,
+      "explicitPrimaryUsdcConversion": true
+    },
+    "rehearsedR57Valuation300SecondsRemainsAReferenceNotAnApprovedLaunchSetting": true
+  },
+  "backend": {
+    "proposedApiOrigin": "https://api.arka.fund",
+    "proposedCatalogOrigin": "https://api.arka.fund",
+    "hostnamesProvisioned": false,
+    "reviewListen": "127.0.0.1:3494",
+    "catalogListen": "127.0.0.1:3493",
+    "publicRouting": {
+      "/profile,/discover,/fund,/prepare,...": "review service",
+      "/v1/*,/health": "catalog service"
+    },
+    "operatorSyncEndpointPublic": false,
+    "stateRoot": "/var/lib/arka/sushi-only/CAVLJHDTMQ5NQ2PZJVVEEBQ3LKCOAPCLHRGY6YS5PEWTRGP2OPLJOI5F",
+    "initialLedger": "Actual registry deployment ledger, never copied from the local replay",
+    "mainnetApproved": false,
+    "executionEnabled": false,
+    "creationTemplateHash": "Read after the reviewed financial policy/template is set; no sentinel hash in production"
+  },
+  "frontend": {
+    "proposedPreviewOrigin": "https://preview-sushi.arka.fund",
+    "provisioned": false,
+    "existingAppOrigin": "https://app.arka.fund",
+    "replaceExistingApp": false,
+    "reason": "Managed candidate is validated separately; existing Noah/legacy V2 application remains available. A unified rollout requires explicit legacy coexistence qualification.",
+    "reviewBackendOrigin": "https://api.arka.fund",
+    "catalogBackendOrigin": "https://api.arka.fund",
+    "generalReadOnly": true,
+    "executionBackendGates": false
+  },
+  "sequence": [
+    "Recheck source/selected code, current external identities, oracle units, liquidity, TTL and complete operation budgets",
+    "After separate deployment approval, upload pinned code and create root executor from existing public authority namespace",
+    "Set root governor to the existing authority and retire bootstrap; schedule six pinned component deployments in parallel",
+    "Wait 86400 ledgers and execute constructors; compare all seven exact predicted IDs, code and roles",
+    "Schedule configuration batches; wait the same delay; apply exact fee10/treasury/registrar/routes/oracle normalization and retire component bootstraps, keeping Sushi0/callers false",
+    "Apply only reviewed financial template parameters under governance; read the resulting template digest and set the backend release/profile binding",
+    "Set catalog initial ledger to actual new registry creation; start isolated catalog/review, verify empty/new-fund indexing, backups/restoration and strict TTL metadata",
+    "Build target-host frontend with approved origins/endpoints; publish preview only after authorization; retain existing app/Noah V2",
+    "After independent audit/CI/dependency disposition and explicit wallet/canary/activation approval, admit exact fund callers and manually activate Sushi; validate guardian disable, governed recovery and full exit"
+  ],
+  "productionWrites": 0,
+  "sign": false,
+  "submit": false,
+  "mainnetApproved": false
+}

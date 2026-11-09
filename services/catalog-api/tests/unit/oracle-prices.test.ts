@@ -138,58 +138,17 @@ test("snapshot economics value XLM through OracleGuard and USDC through parity",
     oracleDecimals: 14,
     observedAt: OBSERVED_AT,
   });
-  const xlmArka = {
-    ...arka(XLM, "10000000"),
-    assets: [
-      {
-        assetContract: XLM,
-        isDenomination: true,
-        liquidBalance: "10000000",
-        collateralAmount: "0",
-        debtAmount: "0",
-        netManagedAmount: "10000000",
-        netPositionValue: "0",
-        marketIds: [],
-        syncedAt: OBSERVED_AT,
-      },
-    ],
-  };
-  const usdcArka = {
-    ...arka(USDC, "25000000"),
-    arkaId: `${arka(USDC, "0").arkaId.slice(0, -1)}D`,
-    assets: [
-      {
-        assetContract: USDC,
-        isDenomination: true,
-        liquidBalance: "25000000",
-        collateralAmount: "0",
-        debtAmount: "0",
-        netManagedAmount: "25000000",
-        netPositionValue: "0",
-        marketIds: [],
-        syncedAt: OBSERVED_AT,
-      },
-    ],
-  };
   const snapshot = buildSnapshot(
-    [xlmArka, usdcArka],
+    [arka(XLM, "10000000"), { ...arka(USDC, "25000000"), arkaId: `${arka(USDC, "0").arkaId.slice(0, -1)}D` }],
     [],
     OBSERVED_AT,
     [xlmPrice, usdParityPrice(USDC, OBSERVED_AT)],
   );
-  const indexedXlmArka = snapshot.arkas.find((entry) => entry.denominationContract === XLM);
-  const indexedUsdcArka = snapshot.arkas.find((entry) => entry.denominationContract === USDC);
-  assert.equal(indexedXlmArka?.economics?.navUsdEstimate, "1907918");
-  assert.equal(indexedXlmArka?.economics?.valuationSource, "oracle_verified");
-  assert.equal(indexedUsdcArka?.economics?.navUsdEstimate, "25000000");
-  assert.equal(
-    snapshot.assets.find((asset) => asset.assetContract === XLM)?.netManagedUsdEstimate,
-    "1907918",
-  );
-  assert.equal(
-    snapshot.assets.find((asset) => asset.assetContract === USDC)?.netManagedUsdEstimate,
-    "25000000",
-  );
+  const xlmArka = snapshot.arkas.find((entry) => entry.denominationContract === XLM);
+  const usdcArka = snapshot.arkas.find((entry) => entry.denominationContract === USDC);
+  assert.equal(xlmArka?.economics?.navUsdEstimate, "1907918");
+  assert.equal(xlmArka?.economics?.valuationSource, "oracle_verified");
+  assert.equal(usdcArka?.economics?.navUsdEstimate, "25000000");
 });
 
 test("snapshot economics values each recorded asset instead of treating mixed exposure as denomination units", () => {
@@ -249,6 +208,70 @@ test("snapshot economics values each recorded asset instead of treating mixed ex
     entry.economics?.portfolioWeights.find((item) => item.assetContract === XLM)
       ?.valueUsdEstimate,
     multiplyByOraclePrice("7939803", xlmPrice.priceUsd!, xlmPrice.decimals),
+  );
+});
+
+test("XLM-denominated economics keep Blend position value separate from liquid asset units", () => {
+  const xlmPrice = classifyOracleInspection({
+    assetContract: XLM,
+    inspection: inspection(),
+    policy,
+    paused: false,
+    oracleDecimals: 14,
+    observedAt: OBSERVED_AT,
+  });
+  const noahLikeArka: ArkaCatalogEntry = {
+    ...arka(XLM, "2305129664"),
+    whitelistContracts: [XLM, USDC],
+    assets: [
+      {
+        assetContract: XLM,
+        isDenomination: true,
+        liquidBalance: "700000000",
+        collateralAmount: "0",
+        debtAmount: "0",
+        netManagedAmount: "700000000",
+        netPositionValue: "0",
+        marketIds: [],
+        syncedAt: OBSERVED_AT,
+      },
+      {
+        assetContract: USDC,
+        isDenomination: false,
+        liquidBalance: "290000000",
+        collateralAmount: "10006539",
+        debtAmount: "0",
+        netManagedAmount: "300006539",
+        netPositionValue: "53503303",
+        marketIds: ["1"],
+        syncedAt: OBSERVED_AT,
+      },
+    ],
+  };
+
+  const snapshot = buildSnapshot(
+    [noahLikeArka],
+    [],
+    OBSERVED_AT,
+    [xlmPrice, usdParityPrice(USDC, OBSERVED_AT)],
+  );
+  const entry = snapshot.arkas[0];
+  const expectedUsd = (
+    BigInt(multiplyByOraclePrice("700000000", xlmPrice.priceUsd!, xlmPrice.decimals))
+    + 290_000_000n
+    + BigInt(multiplyByOraclePrice("53503303", xlmPrice.priceUsd!, xlmPrice.decimals))
+  ).toString();
+
+  assert.equal(entry.economics?.navUsdEstimate, expectedUsd);
+  assert.equal(entry.economics?.oracleStatus, "verified");
+  assert.deepEqual(entry.economics?.missingPriceReasons, []);
+  assert.equal(
+    entry.economics?.portfolioWeights.find((item) => item.assetContract === USDC)
+      ?.valueUsdEstimate,
+    (
+      290_000_000n
+      + BigInt(multiplyByOraclePrice("53503303", xlmPrice.priceUsd!, xlmPrice.decimals))
+    ).toString(),
   );
 });
 

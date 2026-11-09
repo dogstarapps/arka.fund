@@ -60,11 +60,12 @@ mod live_router {
 #[test]
 fn test_execute_smoke() {
     let env = Env::default();
-    let id = env.register_contract(None, AquariusAdapter);
-    let client = AquariusAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let router = env.register_contract(None, DummyRouter);
-    client.init(&admin, &router);
+    let id = env.register(AquariusAdapter, (&admin, &router,));
+    let client = AquariusAdapterClient::new(&env, &id);
     assert_eq!(client.router(), router);
     let caller = Address::generate(&env);
     env.mock_all_auths();
@@ -75,11 +76,12 @@ fn test_execute_smoke() {
 #[test]
 fn test_swap_with_tokens_live_signature() {
     let env = Env::default();
-    let id = env.register_contract(None, AquariusAdapter);
-    let client = AquariusAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let router = env.register_contract(None, live_router::DummyLiveRouter);
-    client.init(&admin, &router);
+    let id = env.register(AquariusAdapter, (&admin, &router,));
+    let client = AquariusAdapterClient::new(&env, &id);
     let caller = Address::generate(&env);
     let receiver = Address::generate(&env);
     let token_in = env.register_contract(None, DummyToken);
@@ -103,4 +105,25 @@ fn test_swap_with_tokens_live_signature() {
     assert_eq!(out, 133);
     let routed_out = client.execute(&caller, &5u128, &200i128, &1i128, &receiver);
     assert_eq!(routed_out, 133);
+}
+
+
+#[test]
+fn optional_governor_clear_keeps_admin_rotation_and_expiry_enforced() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let replacement = Address::generate(&env);
+    let id = env.register(AquariusAdapter, (&admin, &Address::generate(&env)));
+    let client = AquariusAdapterClient::new(&env, &id);
+    client.set_governor(&admin, &Some(governor));
+    client.set_governor(&admin, &None);
+    client.set_admin(&admin, &replacement);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    client.set_bootstrap_admin_expiry(&replacement, &1_010u64);
+    env.ledger().set_timestamp(1_020);
+    assert!(client.try_set_governor(&replacement, &Some(replacement.clone())).is_err());
 }

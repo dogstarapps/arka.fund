@@ -8,7 +8,7 @@ import {
   WebhookMonitoringNotifier,
   type MonitoringNotifier,
 } from "./notifier.js";
-import { createActivityReaderFromEnv, createCatalogSyncRunnerFromEnv } from "./runtime.js";
+import { createActivityReaderFromEnv, createCatalogSyncRunnerFromEnv, createHolderReaderFromEnv } from "./runtime.js";
 import { CatalogService } from "./service.js";
 import {
   FileCatalogHistoryStore,
@@ -17,6 +17,7 @@ import {
   FileMonitoringStore,
 } from "./store.js";
 import type { MonitoringThresholds } from "./types.js";
+import {managedCatalogRuntime}from'./managedRuntime.js';
 
 async function main(): Promise<void> {
   const dataFile = process.env.CATALOG_API_DATA_FILE ?? "./var/catalog-snapshot.json";
@@ -42,7 +43,13 @@ async function main(): Promise<void> {
   await mkdir(dirname(monitoringFile), { recursive: true });
   await mkdir(dirname(identityFile), { recursive: true });
 
-  const runner = createCatalogSyncRunnerFromEnv(process.env);
+  const baseRunner = createCatalogSyncRunnerFromEnv(process.env),baseHolders=createHolderReaderFromEnv(process.env);
+  const managed=process.env.CATALOG_API_MANAGED_V3_HASH?managedCatalogRuntime(baseRunner,baseHolders,{
+    rpcUrl:required('CATALOG_API_RPC_URL'),networkPassphrase:required('CATALOG_API_NETWORK_PASSPHRASE'),publicKey:required('CATALOG_API_READ_SOURCE'),
+    stateDirectory:required('CATALOG_API_MANAGED_STATE_DIRECTORY'),registry:required('CATALOG_API_REGISTRY_CONTRACT_ID'),factory:required('CATALOG_API_FACTORY_CONTRACT_ID'),
+    initialLedger:Number(required('CATALOG_API_HOLDER_INITIAL_LEDGER')),v3Hashes:[process.env.CATALOG_API_MANAGED_V3_HASH],legacyHashes:(process.env.CATALOG_API_MANAGED_LEGACY_HASHES??'').split(',').filter(Boolean),
+  }):null;
+  const runner=managed?.runner??baseRunner;
   const service = new CatalogService(
     new FileCatalogStore(dataFile),
     new FileCatalogHistoryStore(historyFile, historyRetentionRuns),
@@ -56,6 +63,8 @@ async function main(): Promise<void> {
       monitoringThresholds: loadMonitoringThresholds(),
       notifier: loadNotifier(),
       activityReader: createActivityReaderFromEnv(process.env),
+      holderReader: managed?.holders??baseHolders,
+      managedWithdrawals:managed?.access,
     },
   );
   const app = createCatalogApp({ service, syncToken });

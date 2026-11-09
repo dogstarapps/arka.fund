@@ -24,6 +24,7 @@ pub struct OraclePriceData {
 enum DataKey {
     Admin,
     Feed(OracleAsset),
+    MockClock,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -143,7 +144,18 @@ impl TestOracle {
     }
 
     pub fn lastprice(env: Env, asset: OracleAsset) -> OraclePriceData {
-        Self::read_price(&env, asset)
+        let mut price=Self::read_price(&env, asset);
+        if env.storage().instance().get::<_,bool>(&DataKey::MockClock).unwrap_or(false) && price.price > 0 {
+            price.timestamp=env.ledger().timestamp();
+        }
+        price
+    }
+
+    /// Explicit LOCAL MOCK MODE. Keeps a fake fixed-price preview usable without
+    /// retaining its admin key. This is NOT evidence of a fresh external feed.
+    pub fn set_mock_clock(env: Env, caller: Address, enabled: bool) {
+        Self::require_admin(&env, &caller);
+        env.storage().instance().set(&DataKey::MockClock,&enabled);
     }
 
     fn require_admin(env: &Env, caller: &Address) {

@@ -27,3 +27,5 @@ export * as oracleGuardContract from "./generated/oracle-guard.js";
 export * as routerContract from "./generated/router.js";
 export * as tokenContract from "./generated/token.js";
 export * as venueRegistryContract from "./generated/venue-registry.js";
+
+export * as sushiAdapterContract from "./generated/adapter-sushi.js";

@@ -1,0 +1,65 @@
+/* One header pattern for every creation step. No flow or financial change. */
+.chrome-shell-create .create-assistant-shell .create-assistant-tabline {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: .5rem 1rem !important;
+  min-height: 0 !important;
+  margin: 0 0 .75rem !important;
+  padding: 0 0 .75rem !important;
+  border-bottom: 1px solid var(--surface-border) !important;
+  box-shadow: none !important;
+}
+.chrome-shell-create .create-assistant-shell .create-assistant-tabline::before,
+.chrome-shell-create .create-assistant-shell .create-assistant-tab::after {
+  display: none !important;
+}
+.chrome-shell-create .create-assistant-shell .create-assistant-tab {
+  flex: 1 1 12rem !important;
+  min-width: 0 !important;
+  width: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: clamp(1.25rem, 2vw, 1.625rem) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -.02em !important;
+  white-space: normal !important;
+}
+.chrome-shell-create .create-assistant-shell .create-assistant-progress-pill {
+  position: static !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  width: auto !important;
+  inline-size: auto !important;
+  height: auto !important;
+  block-size: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: .125rem 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  font-size: .75rem !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--text-muted) !important;
+}
+
+/* Do not distribute spare panel height into the step heading. */
+.chrome-shell-create .create-assistant-shell .create-assistant-canvas {
+  align-content: start !important;
+}
+/* A hidden confirmation must not leave an empty desktop column behind. */
+.chrome-shell-create .create-assistant-shell .create-review-grid:not(:has([data-testid="create-arka-result"])) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}

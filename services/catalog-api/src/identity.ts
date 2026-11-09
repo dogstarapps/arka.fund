@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Keypair } from "@stellar/stellar-sdk";
 import type {
   ArkaCatalogEntry,
@@ -17,10 +18,14 @@ import type {
 
 const IDENTITY_SCHEMA_VERSION = 1;
 const MAX_DISPLAY_NAME_LENGTH = 64;
-const MAX_DESCRIPTION_LENGTH = 220;
+const MAX_DESCRIPTION_LENGTH = 280;
+const MAX_STRATEGY_LENGTH = 2_000;
+const MAX_RISK_DISCLOSURE_LENGTH = 1_200;
+const MAX_TARGET_RETURN_LENGTH = 280;
 const MAX_URL_LENGTH = 220;
 const MAX_NONCE_LENGTH = 96;
 const SIGNATURE_MAX_AGE_MS = 15 * 60 * 1000;
+const SEP_53_PREFIX = Buffer.from("Stellar Signed Message:\n", "utf8");
 
 type IdentityScope = "arka" | "manager";
 
@@ -62,12 +67,38 @@ export function buildIdentityUpdateMessage(input: {
   });
 }
 
+export function createSep53MessageHash(message: string): Buffer {
+  return createHash("sha256")
+    .update(SEP_53_PREFIX)
+    .update(Buffer.from(message, "utf8"))
+    .digest();
+}
+
 export function normalizeIdentityPayload(
   payload: IdentityUpdatePayload,
 ): IdentityUpdatePayload {
   const normalized = {
-    displayName: normalizeOptionalText(payload.displayName, MAX_DISPLAY_NAME_LENGTH),
-    description: normalizeOptionalText(payload.description, MAX_DESCRIPTION_LENGTH),
+    displayName: normalizeOptionalSingleLineText(
+      payload.displayName,
+      MAX_DISPLAY_NAME_LENGTH,
+      "Display name",
+    ),
+    description: normalizeOptionalSingleLineText(
+      payload.description,
+      MAX_DESCRIPTION_LENGTH,
+      "Summary",
+    ),
+    strategy: normalizeOptionalMultilineText(payload.strategy, MAX_STRATEGY_LENGTH, "Strategy"),
+    riskDisclosure: normalizeOptionalMultilineText(
+      payload.riskDisclosure,
+      MAX_RISK_DISCLOSURE_LENGTH,
+      "Risk disclosure",
+    ),
+    targetReturn: normalizeOptionalMultilineText(
+      payload.targetReturn,
+      MAX_TARGET_RETURN_LENGTH,
+      "Target return",
+    ),
     avatarUrl: normalizeOptionalUrl(payload.avatarUrl),
     websiteUrl: normalizeOptionalUrl(payload.websiteUrl),
     socialUrl: normalizeOptionalUrl(payload.socialUrl),
@@ -132,6 +163,9 @@ export function createArkaIdentityMatcher(archive: IdentityArchive) {
       entry.denominationContract ?? "",
       identity?.displayName ?? "",
       identity?.description ?? "",
+      identity?.strategy ?? "",
+      identity?.riskDisclosure ?? "",
+      identity?.targetReturn ?? "",
     ];
     return containsSearch(haystacks, search);
   };
@@ -144,6 +178,9 @@ export function createManagerIdentityMatcher(archive: IdentityArchive) {
       entry.manager,
       identity?.displayName ?? "",
       identity?.description ?? "",
+      identity?.strategy ?? "",
+      identity?.riskDisclosure ?? "",
+      identity?.targetReturn ?? "",
     ];
     return containsSearch(haystacks, search);
   };
@@ -179,6 +216,9 @@ export function upsertArkaIdentityInArchive(input: {
     manager: input.manager,
     displayName: payload.displayName ?? null,
     description: payload.description ?? null,
+    strategy: payload.strategy ?? null,
+    riskDisclosure: payload.riskDisclosure ?? null,
+    targetReturn: payload.targetReturn ?? null,
     avatarUrl: payload.avatarUrl ?? null,
     websiteUrl: payload.websiteUrl ?? null,
     socialUrl: payload.socialUrl ?? null,
@@ -228,6 +268,9 @@ export function upsertManagerIdentityInArchive(input: {
     manager: input.manager,
     displayName: payload.displayName ?? null,
     description: payload.description ?? null,
+    strategy: payload.strategy ?? null,
+    riskDisclosure: payload.riskDisclosure ?? null,
+    targetReturn: payload.targetReturn ?? null,
     avatarUrl: payload.avatarUrl ?? null,
     websiteUrl: payload.websiteUrl ?? null,
     socialUrl: payload.socialUrl ?? null,
@@ -304,9 +347,9 @@ function assertValidSignature(signer: string, message: string, signature: string
   } catch {
     throw new IdentityUpdateError(400, "invalid_signer", "Signer is not a valid Stellar public key.");
   }
-  const messageBytes = Buffer.from(message, "utf8");
+  const messageHash = createSep53MessageHash(message);
   const candidates = decodeSignatureCandidates(signature);
-  if (candidates.some((candidate) => keypair.verify(messageBytes, candidate))) {
+  if (candidates.some((candidate) => keypair.verify(messageHash, candidate))) {
     return;
   }
   throw new IdentityUpdateError(401, "invalid_signature", "Wallet signature could not be verified.");
@@ -388,8 +431,27 @@ function validateArkaIdentity(identity: ArkaIdentityMetadata): ArkaIdentityMetad
   return {
     arkaId: normalizeRequiredText(identity.arkaId, 128, "arkaId"),
     manager: normalizeRequiredText(identity.manager, 128, "manager"),
-    displayName: normalizeOptionalText(identity.displayName, MAX_DISPLAY_NAME_LENGTH),
-    description: normalizeOptionalText(identity.description, MAX_DESCRIPTION_LENGTH),
+    displayName: normalizeOptionalSingleLineText(
+      identity.displayName,
+      MAX_DISPLAY_NAME_LENGTH,
+      "Display name",
+    ),
+    description: normalizeOptionalSingleLineText(
+      identity.description,
+      MAX_DESCRIPTION_LENGTH,
+      "Summary",
+    ),
+    strategy: normalizeOptionalMultilineText(identity.strategy, MAX_STRATEGY_LENGTH, "Strategy"),
+    riskDisclosure: normalizeOptionalMultilineText(
+      identity.riskDisclosure,
+      MAX_RISK_DISCLOSURE_LENGTH,
+      "Risk disclosure",
+    ),
+    targetReturn: normalizeOptionalMultilineText(
+      identity.targetReturn,
+      MAX_TARGET_RETURN_LENGTH,
+      "Target return",
+    ),
     avatarUrl: normalizeOptionalUrl(identity.avatarUrl),
     websiteUrl: normalizeOptionalUrl(identity.websiteUrl),
     socialUrl: normalizeOptionalUrl(identity.socialUrl),
@@ -403,8 +465,27 @@ function validateArkaIdentity(identity: ArkaIdentityMetadata): ArkaIdentityMetad
 function validateManagerIdentity(identity: ManagerIdentityMetadata): ManagerIdentityMetadata {
   return {
     manager: normalizeRequiredText(identity.manager, 128, "manager"),
-    displayName: normalizeOptionalText(identity.displayName, MAX_DISPLAY_NAME_LENGTH),
-    description: normalizeOptionalText(identity.description, MAX_DESCRIPTION_LENGTH),
+    displayName: normalizeOptionalSingleLineText(
+      identity.displayName,
+      MAX_DISPLAY_NAME_LENGTH,
+      "Display name",
+    ),
+    description: normalizeOptionalSingleLineText(
+      identity.description,
+      MAX_DESCRIPTION_LENGTH,
+      "Summary",
+    ),
+    strategy: normalizeOptionalMultilineText(identity.strategy, MAX_STRATEGY_LENGTH, "Strategy"),
+    riskDisclosure: normalizeOptionalMultilineText(
+      identity.riskDisclosure,
+      MAX_RISK_DISCLOSURE_LENGTH,
+      "Risk disclosure",
+    ),
+    targetReturn: normalizeOptionalMultilineText(
+      identity.targetReturn,
+      MAX_TARGET_RETURN_LENGTH,
+      "Target return",
+    ),
     avatarUrl: normalizeOptionalUrl(identity.avatarUrl),
     websiteUrl: normalizeOptionalUrl(identity.websiteUrl),
     socialUrl: normalizeOptionalUrl(identity.socialUrl),
@@ -433,7 +514,11 @@ function normalizeRequiredText(value: unknown, maxLength: number, label: string)
   return normalized.slice(0, maxLength);
 }
 
-function normalizeOptionalText(value: unknown, maxLength: number): string | null {
+function normalizeOptionalSingleLineText(
+  value: unknown,
+  maxLength: number,
+  field: string,
+): string | null {
   if (value === undefined || value === null) {
     return null;
   }
@@ -441,11 +526,50 @@ function normalizeOptionalText(value: unknown, maxLength: number): string | null
     throw new IdentityUpdateError(400, "invalid_text", "Profile text must be a string.");
   }
   const normalized = value.trim().replace(/\s+/g, " ");
-  return normalized ? normalized.slice(0, maxLength) : null;
+  if (!normalized) {
+    return null;
+  }
+  if (normalized.length > maxLength) {
+    throw new IdentityUpdateError(
+      400,
+      "profile_text_too_long",
+      `${field} must not exceed ${maxLength} characters.`,
+    );
+  }
+  return normalized;
+}
+
+function normalizeOptionalMultilineText(
+  value: unknown,
+  maxLength: number,
+  field: string,
+): string | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  if (typeof value !== "string") {
+    throw new IdentityUpdateError(400, "invalid_text", "Profile text must be a string.");
+  }
+  const normalized = value
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized.length > maxLength) {
+    throw new IdentityUpdateError(
+      400,
+      "profile_text_too_long",
+      `${field} must not exceed ${maxLength} characters.`,
+    );
+  }
+  return normalized;
 }
 
 function normalizeOptionalUrl(value: unknown): string | null {
-  const text = normalizeOptionalText(value, MAX_URL_LENGTH);
+  const text = normalizeOptionalSingleLineText(value, MAX_URL_LENGTH, "Profile link");
   if (!text) {
     return null;
   }
@@ -458,7 +582,15 @@ function normalizeOptionalUrl(value: unknown): string | null {
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
     throw new IdentityUpdateError(400, "invalid_url", "Profile links must use http or https.");
   }
-  return parsed.toString().slice(0, MAX_URL_LENGTH);
+  const normalized = parsed.toString();
+  if (normalized.length > MAX_URL_LENGTH) {
+    throw new IdentityUpdateError(
+      400,
+      "profile_text_too_long",
+      `Profile link must not exceed ${MAX_URL_LENGTH} characters.`,
+    );
+  }
+  return normalized;
 }
 
 function normalizeIssuedAt(value: unknown): string {

@@ -1,0 +1,17 @@
+[package]
+name = "arka-usdc-oracle-adapter-isolated"
+version = "0.1.0"
+edition = "2021"
+publish = false
+[workspace]
+[lib]
+crate-type = ["cdylib"]
+[dependencies]
+soroban-sdk = "=23.0.1"
+[profile.release]
+overflow-checks = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

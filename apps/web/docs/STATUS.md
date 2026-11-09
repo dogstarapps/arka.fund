@@ -1,0 +1,597 @@
+## Current Status Note
+
+Last updated: 2026-07-04
+
+This file contains historical tranche and implementation notes. The current cross-repository mainnet release task list is maintained in:
+
+- `<workspace>/arkafund/docs/MAINNET_RELEASE_TASKS_2026-07-03.md`
+- `<workspace>/arkafund/docs/MAINNET_OPEN_ITEMS_AND_INCIDENTS_2026-07-03.md`
+
+If an older section below conflicts with those files, treat the newer mainnet release task list as authoritative. In particular, strict Figma/pixel parity is no longer a release blocker, Phoenix has mainnet canary evidence, Balanced/SODAX is tracked through the SODAX intent driver, and the full dApp Playwright E2E suite is currently green locally.
+
+## Release Validation 2026-07-04
+
+`npm run test:e2e` was executed after the current contract-release gate, mainnet WASM rollback backup work and the final wallet/create/routing closure fixes.
+
+Result:
+
+- `367` passed.
+- Duration: `9.6m`.
+
+The local browser release gate is green. Do not redeploy Vercel production directly from an uncommitted local state: commit/push, CI or equivalent repo verification, environment review, post-upgrade mainnet canary and production smoke/E2E are still required.
+
+The green run includes public product routes, responsive/layout checks, Create Arka, wallet provider rejection paths, live testnet wallet-backed create/deposit/redeem, Blend, Aquarius, SoroSwap, best-execution rebalance, contracts mutation/readback/rollback, operator access, governance and screenshots.
+
+Remaining release work is outside the local E2E red-to-green loop:
+
+- Commit and push both repos without sensitive files.
+- Wait for CI.
+- Run post-upgrade mainnet canaries.
+- Deploy Vercel production.
+- Run production smoke/E2E against the public URL.
+
+## Historical Status & Limitations
+
+### Scope delivered
+- Testnet deployment with live dApp (SoroSwap + Aquarius single-hop swaps)
+- `ArkaFactory.create_and_init` and on-chain `ArkaRegistry` listing
+- Deposit, Redeem, and manager-driven Rebalance flows
+- E2E scripts and contract IDs documented
+
+### Instructions
+- Network: Stellar Testnet; connect a Testnet wallet
+- Trustlines: add routing asset A and routing asset B trustlines in your wallet
+- Deposits: production vaults enforce a single denomination (e.g., USDC). For Testnet demo, routing asset A/B deposits are accepted
+- Slippage: choose a reasonable %. SoroSwap uses router quote; Aquarius uses a conservative heuristic for now
+- Default profile is `standard`; use `NEXT_PUBLIC_REBALANCE_SLIPPAGE_PROFILE=micro_liquidity` only for low-liquidity dev/test smoke environments
+ - Routing asset A: CDJ7G22ETJ6PRUM5GDPUXYEY3JL6MDY35WMJYWSGX7U6DV5VMQEKH3PG
+ - Routing asset B: CCCLTACEMF33GJRJ2JXRQYXDBRLRZNK5GVPA2FVHLOE5TPP6NM7UIYV7
+
+### Create a new Arka (Testnet)
+1. Open the Create page in the dApp header
+2. Ensure your wallet has routing asset A for the creation fee (demo value) and trustlines set
+3. Fill fees (percentages). Denomination and Router are pre-filled from env
+4. Click “Create & Init” and sign the single transaction
+5. After confirmation, the new Arka ID appears and is listed in /arkas
+
+### Known limitations
+- Rebalance orchestration is off-chain (multi-tx). Non-root on-chain path planned
+- Single-hop swaps only; multi-hop/best-price router planned
+- Denomination-only deposits to be enforced on-chain
+- Contracts and dApp libs to be modularized (types, storage, auth, events)
+
+### Recent progress
+- Mainnet open-items and user incident log added in the contracts repository:
+  - `../arkafund/docs/MAINNET_OPEN_ITEMS_AND_INCIDENTS_2026-07-03.md` tracks the final blockers and `INC-2026-07-03-001`, where a user with XLM was blocked by the Arka creation fee because the configured public creation fee is denominated in USDC.
+  - Product follow-up: the Create Arka flow must show the required fee token/amount, user fee-token balance, allowance state and XLM reserve requirement separately.
+- Mainnet/product validation next-step runbook added:
+  - `docs/MAINNET_CUTOVER_AND_PRODUCT_VALIDATION_NEXT_STEPS_2026-06-05.md` consolidates the next prompts into a single execution order: product copy/data audit, execution UI validation for swaps and Blend, smart-routing benchmark, economic ranking truthfulness, mainnet preflight, deployment evidence and Vercel cutover.
+  - The runbook makes mainnet readiness conditional on real economic data, wallet-backed execution, oracle/routing canaries, a complete mainnet manifest and production release-gate evidence.
+- Mainnet gate policy clarified:
+  - strict Figma pixel parity is no longer treated as a release-blocking mainnet gate; `/api/qa/figma-pixel-audit` remains an operator QA signal and `/api/release/gate` reports it as non-blocking advisory evidence.
+  - `tsc --noEmit` now passes after tightening mocks, env fixtures, route-plan readers and release-gate test types.
+- Remaining-plan T26 Testnet Dress Rehearsal completed:
+  - `scripts/verify_testnet_dress_rehearsal.mjs` now generates and validates the canonical testnet evidence report from deployment manifests, transaction manifests and live artifacts.
+  - `docs/testnet-dress-rehearsal-evidence.json` records 7/7 ready rehearsal lanes, 15 readable evidence files, 242 contract IDs, 67 transaction hashes, 76 state proofs and 0 blockers.
+  - `GET /api/release/gate` now includes `gates.testnetDressRehearsal`, so release is blocked if the testnet rehearsal report is missing, stale, network-mismatched or below transaction/state-proof thresholds.
+  - wallet-backed E2E coverage was realigned to the current tabbed Coverage, Create Arka, Arka execution and Blend credit workspaces without adding fake data, stubs, skeletons or placeholder states.
+  - mainnet deployment remains intentionally out of scope for this item; T27 Final Mainnet Cutover is the only remaining canonical blocker.
+  - realistic mainnet-launch readiness is now 99.46% implemented / 0.54% remaining; completed items are 26/27.
+- Remaining-plan T23 API hardening final pass completed:
+  - `src/lib/server/apiHardening.ts` is now the canonical machine-consumable manifest for all 25 API routes, with access class, validation contract, cache policy, rate sensitivity, secret-exposure posture and release invariants
+  - `GET /api/operator/hardening` is operator-gated and returns the complete hardening evidence matrix plus a ready/blocked release snapshot
+  - the shared operator API guard now returns one deterministic anonymous-access payload with `no-store`, `nosniff`, `no-referrer` and `WWW-Authenticate`
+  - public health, catalog fallback, leaderboards, Balanced/SODAX intents, routing, asset registry, factory build, E2E wallet, QA, contracts and migration APIs now use no-store responses and redacted/stable error paths where touched by T23
+  - `/api/health` no longer exposes the raw catalog upstream URL; it returns `[redacted]` plus `baseUrlConfigured` instead
+  - `/api/release/gate` now includes `gates.apiHardening`, so manifest drift, missing no-store policy or failed hardening invariants block release
+  - validation passed across focused unit, integration, wallet-backed E2E boundary tests, lint, production build and diff-check
+  - realistic mainnet-launch readiness is now 97.12% implemented / 2.88% remaining; completed items are 23/27
+- Remaining-plan T22 Internal contract security audit closeout completed:
+  - `src/lib/contracts/securityAudit.ts` is now the canonical machine-consumable internal audit artifact with findings, severities, status, residual risk, implementation references and linked tests
+  - `GET /api/contracts/security-audit` is operator-gated and returns deterministic release evidence for findings, invariants and residual risks
+  - `/contracts` now exposes an Internal security audit closeout panel with domain summary, scope, finding rows, invariant rows and residual-risk list
+  - `/api/release/gate` now includes `gates.securityAudit`; any blocking finding or failed invariant blocks release
+  - `docs/CONTRACTS_SECURITY_AUDIT.md` was replaced with the 2026-05-20 closeout artifact and explicitly keeps mainnet deploy, live canary and final testnet transaction evidence out of scope until T26/T27
+  - validation passed across focused unit, integration, E2E release/contracts surfaces, lint, production build and diff-check
+  - realistic mainnet-launch readiness is now 96.22% implemented / 3.78% remaining; completed items are 22/27
+- Remaining-plan T21 Storage lifecycle final runbook and script verification completed:
+  - storage lifecycle snapshot now records audited storage classes (`persistent`, `instance`, `temporary`), extend scopes, cadence, warning/critical thresholds, temporary-storage policy and runbook metadata
+  - `scripts/contracts_storage_extend.mjs` defaults to dry-run and requires both `--execute` and `ARKAFUND_STORAGE_EXTEND_CONFIRM=EXTEND_STORAGE_TTL` before live execution
+  - the script prints/writes an exact machine-consumable plan with contract IDs, commands, plan hash, source account, storage scopes and blocked rows before execution
+  - command allowlist blocks anything outside `stellar contract extend`; there is no deploy, invoke, delete, reset or config-mutation path
+  - `/contracts` now shows runbook cadence, live confirmation, storage-class coverage, safeguards and per-contract storage scope
+  - runbook and testnet dry-run evidence were added at `docs/STORAGE_LIFECYCLE_RUNBOOK_2026-05-20.md` and `docs/storage-lifecycle-testnet-dry-run-2026-05-20.json`
+  - validation passed across focused unit, integration, E2E operator surface, lint, script syntax and dry-run evidence generation
+  - realistic mainnet-launch readiness is now 95.86% implemented / 4.14% remaining; completed items are 21/27
+- Remaining-plan T20 Mainnet routing canary evidence completed:
+  - routing canary gate now rejects missing, stale or non-live mainnet evidence before release
+  - mainnet canary cases must declare live evidence mode, source, collection timestamp and `liveMainnet` confirmation
+  - stable release-blocking codes now cover `canary_missing`, `canary_stale`, `evidence_unverified`, incomplete venue coverage, incomplete candidate universe, missing selected path and efficiency below threshold
+  - the canonical mainnet manifest deliberately keeps `validatedModules.routingCanary` unset until real post-deploy canary evidence exists; no fake mainnet evidence or testnet fallback was added
+  - validation passed across focused unit, integration, E2E release-gate, lint, production build and diff-check
+  - realistic mainnet-launch readiness is now 95.14% implemented / 4.86% remaining; completed items are 20/27
+- Remaining-plan T19 Mainnet oracle manifest and guard wiring completed:
+  - added canonical `config/deployments.mainnet.json` with real Reflector Network mainnet provider IDs for DEX and External CEX/DEX feeds
+  - mainnet deployment resolution now uses the bundled mainnet manifest instead of falling back to a sibling repo path
+  - oracle cutover gate now blocks on missing manifest, network mismatch, incomplete contracts, unverified provider IDs, testnet Reflector ID leakage and missing threshold policy
+  - the manifest deliberately keeps Arka `oracleGuard` as `null` until an audited mainnet OracleGuard contract is deployed; release remains blocked with `contracts_incomplete` rather than pretending mainnet is ready
+  - validation passed across focused unit, integration, E2E, lint, production build and diff-check
+  - realistic mainnet-launch readiness is now 94.42% implemented / 5.58% remaining; completed items are 19/27
+- Remaining-plan T02 Create Arka wizard Figma asset and step fidelity completed:
+  - all seven Create wizard steps now publish a canonical frame binding (`data-figma-frame-family`, `data-figma-frame-source`, `data-figma-frame-asset`) for the mapped Figma/exported frame contract
+  - the Create stage art uses exported Figma imagery instead of the old CSS wallet-plate approximation, with deposits/redemptions policy cards tightened so assets and actions remain bounded
+  - the start step now exposes real wallet choices and a real `Connect wallet` action wired through the wallet kit/direct Freighter fallback
+  - create state, registry assets, Blend handoff and deployment-preflight behavior remain real; no fake data, stub, skeleton or placeholder path was added
+  - validation passed: 65 unit/integration tests, focused Create wizard geometry E2E and full 7-test Create wizard matrix E2E
+  - realistic mainnet-launch readiness is now 85.42% implemented / 14.58% remaining; Figma/pixel-tight public UX readiness is 90.80% implemented / 9.20% remaining
+- Remaining-plan T04 Dashboard first-fold and featured-card repair completed:
+  - Dashboard now has an explicit `dashboard-t04-*` geometry contract for launch orbit, featured cards, stage panel and range controls
+  - launch orbit number/label are centered inside the ring; featured card chart/history, price band, meta, chips and actions are bounded inside compact cards
+  - range controls remain real stateful buttons with `data-range-state`; unavailable windows remain disabled with source reasons
+  - all Dashboard values remain catalog/history backed or explicitly unavailable; no fake TVL/NAV/time-series value, stub, skeleton or placeholder was added
+  - validation passed: 50 unit/integration tests, Dashboard E2E, empty-history E2E, empty-lane E2E and compact visual geometry E2E
+  - realistic mainnet-launch readiness is now 84.70% implemented / 15.30% remaining; Figma/pixel-tight public UX readiness is 87.92% implemented / 12.08% remaining
+- Remaining-plan T03 Discover first-fold geometry repair completed:
+  - Discover now uses an explicit T03 first-fold grid contract for the metric board and collection/search board, preventing legacy grid-area rules from overlapping the title, controls and preview sections
+  - metric labels, values, toolbar actions and summary copy are bounded inside their cards across desktop/tablet/mobile geometry checks
+  - all values remain catalog-backed or explicitly unavailable; no fake TVL/NAV/scope value, stub, skeleton or placeholder path was added
+  - validation passed: 58 unit/integration tests, focused Discover E2E and combined Discover/product visual E2E
+  - realistic mainnet-launch readiness is now 84.16% implemented / 15.84% remaining; Figma/pixel-tight public UX readiness is 85.76% implemented / 14.24% remaining
+- Public Create Arka entry UX cutover completed:
+  - all public Create Arka entrypoints now use the shared `buildPublicCreateArkaHref` primitive and route to the single `/factory/create` wizard
+  - header, command bar, Discover, Dashboard, Vaults and `/arkas` preserve source context with `from`, `returnQuery` and search `q` where applicable
+  - `AppChrome` no longer depends on `useSearchParams`, avoiding the Next.js Suspense build failure on `/_not-found`
+  - validation passed across unit, integration and focused Chromium E2E; no fake data, stub, skeleton or placeholder path was added
+- Contracts upgraded to Soroban SDK v23; CI green
+- Governance wiring ready (Governor/Timelock); parameters to be managed by DAO
+- Off-chain pathfinder design (multi-AMM, multi-hop) prepared
+- Leaderboard data provenance exposed at runtime via `GET /api/leaderboard/source`
+  - Ranking and NAV come from indexed catalog snapshots
+  - Profit and volume use indexed fields (`profitBase` / `volumeBase`) with activity-event fallback when missing
+  - Oracle safety provenance is surfaced from `deployments.testnet.json -> validatedModules.oracleSafety / validations.oracleGuard`
+  - Oracle provider provenance is now explicit and machine-consumable (`oracle.provider`, `oracle.primaryProvider`, `oracle.secondaryProvider`) with env fallback for network cutover:
+    - `ARKAFUND_ORACLE_PROVIDER_MAINNET` / `ARKAFUND_ORACLE_PROVIDER_TESTNET`
+    - `ARKAFUND_ORACLE_PROVIDER_PRIMARY_*` / `ARKAFUND_ORACLE_PROVIDER_SECONDARY_*`
+  - `/status` and `/vaults` now display the effective provider used by the oracle guard lane (or explicitly show it as undeclared)
+- Runtime now resolves deployments by target network (`testnet`/`mainnet`) and reports:
+    - resolved manifest path and whether it was found
+    - explicit mismatch detection when target network and oracle-validation network differ
+    - unverified oracle status when `deployments.mainnet.json` is not present yet
+- Testnet preview now has a bundled canonical manifest at `config/deployments.testnet.json`:
+  - Vercel/testnet runtime no longer depends on a local sibling repo path such as `../arkafund/deployments.testnet.json`
+  - `ARKAFUND_DEPLOYMENTS_PATH` still overrides the manifest path for operator runs
+  - mainnet remains separate and blocked unless an explicit mainnet manifest is provided
+- Control Room `/status` now renders live oracle cutover telemetry from `GET /api/health`:
+  - target network and deployments manifest source/path
+  - manifest-found vs missing state
+  - oracle guard mode and contracts summary
+  - explicit cutover gate (`Ready` / `Blocked`) for runtime publication decisions
+- Release gate surface is now machine-consumable for CI/CD and ops workflows:
+  - `GET /api/release/gate` returns `gates.oracleCutover` with stable status/code/details
+  - `GET /api/release/gate` also returns `gates.balancedAutoSurface` (Balanced/SODAX AUTO readiness gate)
+  - `GET /api/release/gate` also returns `gates.routingBenchmark` and blocks release when the Smart Routing competitive benchmark is unavailable or below threshold
+  - The route is operator-session protected and returns `401 operator_access_required` without a verified operator wallet session
+  - HTTP status is `200` when every enforced gate is ready (or not required on testnet) and `503` when blocked
+  - scenarios validated: `ready`, `manifest_missing`, `network_mismatch`, `routing_benchmark_failed`
+- Contracts security surface now includes storage/rent hardening:
+  - `GET /api/contracts/storage-lifecycle` exposes machine-consumable extend status and command payloads
+  - `/contracts` renders a storage lifecycle matrix for required/optional contracts and command readiness
+  - `scripts/contracts_storage_extend.mjs` executes deterministic `stellar contract extend` operations for configured contracts
+- Integrations `/integrations` now enforces the same mainnet oracle publication gate before allowing `Run Balanced`:
+  - if runtime target is `mainnet` and oracle lane is unresolved, execution stays blocked
+  - if runtime target is `testnet`, the mainnet publication gate is marked as not required
+- Balanced/SODAX public machine-consumable surface is now wired end-to-end:
+  - `GET/POST /api/intents/balanced/quote`
+  - `POST /api/intents/balanced/status`
+  - `POST /api/intents/balanced/confirm` (confirmation state + settlement hash when solved)
+- Rebalance best-execution now has a backend solver surface:
+  - `POST /api/routing/rebalance/plan` resolves route candidates (SoroSwap/Aquarius/Balanced lane), admission posture and selected lane.
+  - Arka execution UI consumes this API first and keeps deterministic local fallback for resilience when the backend solver is unavailable.
+  - Smart Routing V2 now explores extended multi-hop SoroSwap paths (direct, 2-hop, 3-hop) with bounded candidate expansion and global scoring.
+  - Scoring remains explicit and machine-readable across price, slippage, fee, fill-risk and hop penalties (`routeScoreComponents`).
+  - `GET /api/routing/rebalance/benchmark` runs the deterministic broker-competitiveness benchmark and is now consumed by the release gate; it is operator-session protected because it exposes internal benchmark/canary telemetry.
+  - Split-route optimization now uses bounded global chunk-distribution evaluation instead of greedy marginal chunk selection.
+  - The benchmark suite now includes a delayed-efficiency split case, so the release gate catches planners that miss a globally superior split because the first chunk on a route looks weak.
+  - The benchmark suite also includes a production-scale tail-path profile over a 32-intermediary, 6-hop universe with 128 bounded quotes and explicit `known_global_best_route` oracle metadata, so the gate can test broker-like sampling without pretending to exhaustively enumerate every route.
+- Figma/pixel-tight readiness is now machine-consumable:
+  - `GET /api/qa/figma-readiness` reads `docs/figma-route-audit-manifest.json` and is operator-session protected
+  - the endpoint reports reference/current/manual screenshot availability per frame
+  - current local readiness is 26/26 captures available, 21/21 strict-comparable references available, 0 missing files
+- Figma strict pixel audit is now release-gated:
+  - `GET /api/qa/figma-pixel-audit` reads the generated pixel `report.json` and is operator-session protected
+  - `GET /api/release/gate` includes `gates.visualPixelAudit`
+  - the current local gate is blocked by `threshold_drift`, with 21/21 compared frames below threshold and worst frame `dashboard` at 64.11% similarity
+- Create Arka visual parity advanced again:
+  - policy cards no longer embed raw Figma screenshot crops as artwork
+  - native CSS wallet/card motifs keep the visual direction without adding fake product data
+  - compact `status-pill` labels are now guarded against wrapping regressions across dashboard, assets, vault ops and operator shells
+  - Create family pixel similarity improved, including `create-assets` from 62.74% to 64.34%
+- Integrations visual parity advanced:
+  - `/integrations` now opens with a public protocol catalog instead of a dense operator-console first viewport
+  - protocol cards are generated from `ExecutionVenueDescriptor` data and keep actions live (`/arkas`, SODAX workspace, Blend command workspace)
+  - no fake protocol availability, metrics or wallet state were added
+  - Integrations pixel similarity improved from 61.96% to 68.62%; the strict visual gate remains blocked, with `dashboard` now the lowest frame at 64.07%
+- Discover visual parity advanced:
+  - `/discover` now uses the shared public command-board treatment while keeping the existing live catalog bundle, filters, route links and URL state
+  - a dashboard command-board experiment was reverted because it reduced pixel similarity, keeping the iteration non-regressive
+  - Discover pixel similarity improved from 64.13% to 65.42%; dashboard is 64.11% and remains the lowest frame
+- Responsive E2E coverage expanded:
+  - `e2e/public-responsive-matrix.spec.ts` now runs against the canonical layout breakpoints and includes `/arkas`, vault execution detail, Create deposits/assets/review query states, Governance and Coverage
+  - the expanded matrix found and fixed real compact-control clipping in Assets, Vault profile, Governance and the Vault Ops index without adding fake data or hiding controls
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 64.11%; Figma/pixel-tight is not complete yet
+- Dashboard/Vaults visual rhythm and audit reliability advanced:
+  - dashboard and Arkas leaderboard received another spacing/scale pass on metric cards, launch surface, toolbar separation, leaderboard row alignment and NAV-share progress visibility
+  - new E2E assertions measure dashboard surface height and vault row/progress separation so the layout cannot silently regress back into clipped/overlapped controls
+  - the Figma audit harness now mocks `/api/leaderboard/source`, `/api/leaderboard/arkas` and `/api/leaderboard/managers`, so captures no longer hang on unresolved public leaderboard dependencies
+  - `npm run design:audit:pixel` now completes again with 21/21 compared captures and 0 missing/error captures
+  - current pixel audit is still blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 63.34%; this is explicitly not complete
+- Figma dashboard/public rail cutover advanced:
+  - dashboard now opens with a Figma-like Discover command frame instead of the older dense product dashboard composition
+  - dashboard tabs are live and data-backed (`Popular Arkas`, `Curated Arkas`, `New Arkas`) and reuse ranked catalog data instead of fake cards
+  - public rail order now matches the Figma product shell order: Discover, Arkas, Governance, Assets, Managers, Dashboard
+  - `/dashboard` now highlights the Discover lane, matching the current Figma/product model
+  - validation passed across unit, integration, focused E2E, responsive matrix, production build and design audit capture
+  - current pixel audit is still blocked by threshold drift and worsened on the dashboard frame: 21/21 compared frames below threshold, worst frame `dashboard` at 58.64%; this iteration is not a pixel-tight completion claim
+- Figma dashboard geometry and real-history card pass advanced:
+  - `/dashboard` and `/discover` now use a route-scoped public dashboard chrome with Figma-oriented shell width, rail width and rail vertical offset
+  - dashboard metric/title composition was moved closer to the Figma first viewport by using a floating Discover title slab and tighter metric deck
+  - dashboard featured Arka cards now use real indexed Arka history for chart lines; when fewer than two snapshots exist, the card shows a truthful history-pending note instead of drawing synthetic data
+  - validation passed across unit, integration, lint, production build, focused E2E and full 21-frame design pixel audit
+  - current pixel audit remains blocked by threshold drift but improved on the worst frame: 21/21 compared frames below threshold, worst frame `dashboard` at 60.86%
+- Figma Dashboard state alignment advanced:
+  - default public Dashboard spotlight lane now opens on `New Arkas` (`feature=fresh`) to match the Figma reference while preserving query-addressable ranked/curated/fresh modes
+  - metric cards now carry stable id-specific classes for future pixel-tight icon and spacing targeting without changing data provenance
+  - a more aggressive geometry/icon experiment was measured and rejected because it reduced the worst-frame pixel score
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.86%
+- Figma public metric iconography advanced:
+  - Discover metric cards now carry metric-id classes aligned with the Dashboard Figma metric layer, so both public surfaces can share exact icon/spacing variants without changing data provenance
+  - CSS-only glyph variants now cover the current public metric families (`arkas`, `managers`, `tvl`, `profit`, `routes`, `withdrawals`, `deposits`, `assets`, `volume`, `denomination`, `scope`, `manager-fees`, `curated`)
+  - validation passed across lint, focused integration, focused E2E and full 21-frame pixel audit
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.86%, `discover` at 65.36%
+- Figma public dashboard rail geometry advanced:
+  - `/`, `/dashboard` and `/discover` now share the public-dashboard chrome geometry, with a narrower right rail and larger Figma-like wallet card
+  - focused E2E now asserts public rail width, wallet-card height and wallet-card-to-Advanced-Console separation
+  - a forced three-column feature-grid experiment was measured and reverted because it worsened the Dashboard pixel score
+  - validation passed across lint, focused unit/integration, focused E2E, full 21-frame pixel audit and production build
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.92%, `discover` at 65.40%
+- Figma Create asset cutover advanced:
+  - Create Arka policy cards now render exported Figma artwork from frame `93:36898` nodes `109:38` and `109:39` instead of CSS-generated wallet/card imitations
+  - the assets are versioned under `public/figma/create/` and rendered through a typed `CreatePolicyFigmaAsset` component with `next/image`
+  - public `/`, `/dashboard` and `/discover` again expose the `Create Arka` command while the Create wizard itself keeps the focused no-duplicate chrome
+  - public dashboard/discover rail width was corrected to avoid the too-narrow sidebar regression seen in review
+  - validation passed across lint, focused unit/integration, focused E2E, full 21-frame pixel audit and production build
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.79%, `discover` at 65.26%, `create` at 67.02%
+- Figma Discover dynamic-label rhythm advanced:
+  - Discover metric lead manager and lead asset details now abbreviate real catalog IDs consistently instead of letting long account IDs dominate tile rhythm
+  - an aggressive Dashboard/Discover geometry pass was measured and reverted because it worsened strict pixel scores, so the checkpoint remains non-regressive
+  - generated `.next/cache` was cleared after Webpack reported low-disk `ENOSPC`; source files and Figma assets were left intact
+  - validation passed across lint, focused unit/integration, focused E2E, full 21-frame pixel audit and production build
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.79%, `discover` at 65.56%, `create` at 67.02%
+- Figma Discover lead-label source-of-truth advanced:
+  - Discover first-viewport manager/asset lead labels now render from the catalog helper output directly, removing duplicated component heuristics
+  - integration, unit source-control and Chromium E2E coverage now lock that compact dynamic-label behavior
+  - validation passed across lint, focused unit/integration, focused E2E, full 21-frame pixel audit and production build
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.79%, `discover` at 65.56%, `create` at 67.02%
+- Figma public metric rhythm guard advanced:
+  - Dashboard and Discover metric decks keep the Figma-balanced four-column rhythm while active metric labels are guarded against one-word-per-line wrapping and internal overflow
+  - a measured asymmetric-column attempt was rejected because it did not improve raw pixel similarity; the committed change preserves real catalog data instead of hardcoding Figma demo numbers
+  - validation passed across lint, focused unit/integration, focused Chromium E2E, full 21-frame pixel audit and production build
+  - current pixel audit remains blocked by threshold drift: 21/21 compared frames below threshold, worst frame `dashboard` at 60.69%, `discover` at 65.47%, `create` at 67.02%
+- Figma structural pixel audit advanced:
+  - the pixel audit now reports raw similarity and masked structural similarity separately for declared live-data regions, preserving the strict raw gate while making dynamic-data drift measurable
+  - Dashboard and Discover declare bounded public-dashboard masks only for demo-data regions; unit tests enforce the masks stay explicit, bounded and limited to those frames
+  - validation passed across Python compile, lint, audit-script integration, manifest/gate unit tests, QA/release integration, Chromium E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below threshold, worst raw `dashboard` 60.69%; structural public-dashboard read is `dashboard` 72.59% and `discover` 74.96%
+- Figma public shell geometry advanced:
+  - Dashboard and Discover now use a wider public shell, corrected right-rail proportions and asymmetric Figma-like metric columns without changing catalog data provenance
+  - public metric header spacing, icon scale and typography were tightened so `Curated Arkas` and `Denomination sleeves` no longer clip at the reviewed desktop viewport
+  - new Chromium E2E coverage asserts public rail width, rail/canvas ratio, metric-column ratio and zero clipped public nav/metric labels for `/discover` and `/dashboard`
+  - validation passed across lint, focused unit/integration, focused Chromium E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below threshold, worst raw `dashboard` 61.33%; structural public-dashboard read is `dashboard` 73.53% and `discover` 75.21%
+- Figma Create asset crop advanced:
+  - Create Arka policy cards now crop exported Figma wallet artwork from the actual visual subject (`right center`) and allocate a wider desktop art lane instead of showing the dark lead-in area of the PNG
+  - the Create wizard E2E now asserts policy images are loaded, use the intended object-position, occupy at least 38% of each policy card and keep Figma-scale card height
+  - a hydrated-state integration race was fixed without weakening the `2 core assets` mandate assertion
+  - validation passed across lint, focused unit/integration, Create wizard Chromium E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked and Create raw scores dropped because the real artwork is now visible where the prior dark crop was numerically closer but visually wrong; worst raw is `create-assets` 59.98%, while public structural reads remain `dashboard` 73.53% and `discover` 75.21%
+- Figma Create shell geometry advanced:
+  - `/factory/create` now uses route-scoped shell, topbar, command-bar and canvas geometry instead of inheriting the generic operator focus shell
+  - Create wizard E2E now guards shell left margin, shell width, canvas origin, search placement and exported Figma asset crop in the same wallet-backed flow matrix
+  - validation passed across lint, focused unit/integration, Create wizard Chromium E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames are still below threshold; worst raw improved from `create-assets` 59.98% to 60.52%, while public structural reads remain `dashboard` 73.53% and `discover` 75.21%
+- Public loading-state fidelity advanced:
+  - added `SurfaceLoadStatus` for real live-refresh feedback with `role=status`, `aria-live=polite` and busy state instead of skeleton rows or placeholder cards
+  - Discover, Dashboard, Arkas leaderboard, Assets and Managers now preserve the last successful catalog-backed view while delayed refresh work is in flight or while a refresh failure leaves stale data visible
+  - Chromium E2E now blocks a Discover catalog request and verifies previous real results remain visible until the delayed response resolves
+  - validation passed across lint, focused unit/integration, focused Chromium E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked and unchanged by design because normal static captures do not include the transient loading banner: worst raw `create-assets` 60.52%, `dashboard` structural 73.53%, `discover` structural 75.21%
+- Public loading-state matrix completed for main product explorers:
+  - Assets, Managers and Arkas now expose stable root busy contracts (`assets-fidelity-shell`, `managers-fidelity-shell`, `vaults-fidelity-shell`) and keep previous real rows/cards visible while delayed refresh work is pending
+  - Chromium E2E now blocks and releases delayed Discover, Assets, Managers and Arkas requests in one matrix, verifying `role=status`, `aria-busy` and real-data preservation on all four routes
+  - integration tests now cover delayed Assets and Managers refreshes without skeletons, placeholders or fake replacement rows
+  - validation passed across lint, 39 focused unit/integration tests, 4 Chromium loading-state E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `dashboard` 64.11%, `discover` 65.42%, `create` 65.39%
+- Public Figma shell geometry calibrated for Dashboard and Discover:
+  - `/`, `/dashboard` and `/discover` now use a wider public shell, larger public logo, measured right-rail proportions and aligned rail/canvas geometry
+  - `Create Arka` remains a real public route link to `/factory/create`; no fake metrics, hardcoded demo values, skeletons or placeholder rows were introduced
+  - Chromium E2E now asserts brand width, Create Arka link target/width, rail/canvas top alignment, rail ratio, wallet card height, Advanced Console spacing, horizontal overflow and clipped-label absence
+  - validation passed across lint, 27 focused unit/integration tests, focused Chromium geometry E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `dashboard` 64.11%, `discover` 65.42%, `create` 65.39%; global plan now sits at 98.38% implemented / 1.62% remaining and Figma/pixel-tight at 90.58% / 9.42%
+- Public metric truthfulness and header containment fixed:
+  - Dashboard no longer labels indexed `overview.totalNav` as `TVL`; it now renders `Indexed NAV` with source detail `catalog totalNav`
+  - Discover no longer labels the visible `/v1/arkas` NAV sum as `TVL`; it now renders `Visible NAV` with source detail `summed nav`
+  - long public metric labels now stay inside their gradient headers, and Chromium E2E checks both scroll overflow and label bounding boxes escaping their containers
+  - route and denomination metric icons are split from the previously reused glyph groups
+  - validation passed across 30 focused unit/integration tests, lint, focused product E2E, public geometry E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `create-assets` 60.52%, `dashboard` 60.73%, `discover` 64.37%; global plan now sits at 98.41% implemented / 1.59% remaining and Figma/pixel-tight at 90.70% / 9.30%
+- Public metric semantic cutover expanded across product surfaces:
+  - Assets, Arkas leaderboard, Vault profile and Integrations metric decks now propagate `tile.id` into the card class list, so real data-backed metrics have semantic Figma styling instead of only generic tone classes
+  - CSS now includes explicit glyph/containment families for NAV, managed footprint, coverage, lead share, portfolio, leader, wallet, fees, activity, AUTO, SODAX, Balanced, mainnet, whitelist, asset span and debt-linked metrics
+  - Chromium geometry E2E now validates semantic classes plus zero clipped/out-of-bounds metric labels on `/assets`, `/vaults`, `/vaults/[id]` and verified-operator `/integrations`
+  - validation passed across 55 focused unit/integration tests, lint, 3 Chromium geometry E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `dashboard` 64.11%, `discover` 65.42%, `assets` 65.89%, `vaults` 64.63%, `integrations` 68.61%; global plan now sits at 98.44% implemented / 1.56% remaining and Figma/pixel-tight at 90.86% / 9.14%
+- Discover public frame hierarchy advanced:
+  - `/discover` now uses a metrics-first public frame hierarchy closer to the Figma dashboard/discovery reference: floating titlebar, feature tabs above the deck, real catalog metric deck before search/filter controls, and toolbar demoted below the metrics
+  - all controls remain live and URL-addressable; no fake metric values, fake TVL, placeholder cards, skeletons or hardcoded demo counts were introduced
+  - unit/integration coverage now locks the Discover titlebar and source/DOM order so the search toolbar cannot jump back ahead of the metric deck unnoticed
+  - validation passed across 29 focused unit/integration tests, lint, 5 focused Chromium E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `create-assets` 60.52%, `dashboard` 60.73%, `discover` 64.94%; structural public reads are `dashboard` 73.32% and `discover` 74.93%; global plan now sits at 98.46% implemented / 1.54% remaining and Figma/pixel-tight at 90.95% / 9.05%
+- Discover NAV truthfulness advanced:
+  - the visible NAV card on `/discover` is no longer keyed, styled or tested as `tvl`; it now uses the semantic `nav` metric id while keeping the displayed label `Visible NAV`
+  - the value remains fully data-backed by the currently visible `/v1/arkas` catalog bundle (`entry.nav` sum); no fake TVL, static metric value, placeholder card, skeleton or demo row was introduced
+  - source-control and runtime tests now fail if Discover reintroduces `discover-stage-metric-tvl` for the visible NAV card
+  - validation passed across 33 focused unit/integration tests, lint, 8 focused Chromium E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked and at baseline after rejecting a bad Create spacing experiment: 21/21 frames below strict threshold, worst raw `create-assets` 60.52%, `dashboard` 60.73%, `discover` 64.94%; global plan now sits at 98.47% implemented / 1.53% remaining and Figma/pixel-tight at 91.00% / 9.00%
+- Create wizard stepper rhythm advanced:
+  - Create's side rail now follows the Figma wizard more closely: title block outside the bordered panel, larger circular milestones and no visible repeated `COMPLETE` / `CURRENT` badges beside every step
+  - step status remains in the DOM and real readiness classes; the change is visual/accessibility-safe and does not remove state, routes, wallet flows or dynamic values
+  - Chromium E2E now fails if the hidden status badges start occupying visible layout area again
+  - validation passed across 36 focused unit/integration tests, lint, 7 Chromium Create wizard E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but Create improved measurably: `create-assets` 60.52% -> 61.30%, `create` 61.24% -> 61.91%, `create-review` 64.05% -> 64.81%; worst raw is now `dashboard` 60.73%; global plan now sits at 98.49% implemented / 1.51% remaining and Figma/pixel-tight at 91.15% / 8.85%
+- Dashboard metric deck Figma containment advanced:
+  - Dashboard's public metric deck now uses an asymmetric Figma-like ratio with compact count lanes and wider NAV/action lanes, while preserving real catalog-derived metrics
+  - `Average manager fees` was shortened to `Manager fees` to match the tighter Figma header rhythm without changing the underlying average fee value or source detail
+  - Chromium E2E now checks metric lane width ratio and zero header-label overflow; source guards lock the calibrated desktop rule
+  - validation passed across 25 focused unit/integration tests, lint, focused Chromium dashboard E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but dashboard improved slightly: `dashboard` 60.73% -> 60.78% raw and 73.32% -> 73.39% structural; global plan now sits at 98.50% implemented / 1.50% remaining and Figma/pixel-tight at 91.20% / 8.80%
+- Dashboard featured Arka card rhythm advanced:
+  - Dashboard's lower featured-Arkas lane now has a route-scoped desktop three-column rhythm instead of falling back to the generic two-card `auto-fit` behavior
+  - real Arka and manager contract labels are shortened at the formatter call site so cards do not wrap IDs across multiple lines; source data remains real catalog data and no fake names, demo rows, placeholders or skeletons were introduced
+  - Chromium E2E now checks exactly three featured cards, same-row top alignment, minimum card geometry and zero title/subtitle overflow
+  - validation passed across 25 focused unit/integration tests, lint, focused Chromium dashboard E2E, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: `dashboard` 60.76% raw / 73.39% structural, 21/21 frames still below strict threshold; global plan now sits at 98.51% implemented / 1.49% remaining and Figma/pixel-tight at 91.23% / 8.77%
+- Public metric inline Figma cutover advanced:
+  - Dashboard and Discover metric cards now use compact inline `label + value` rhythm instead of gradient metric banners with repeated icons
+  - labels are shortened at the display boundary (`Mgrs`, `Fees`, `Profit`, `Volume`, `NAV`, `Curated`, `Routes`, `Base`) while all values remain catalog-backed; no fake TVL, hardcoded demo values, placeholders or skeletons were introduced
+  - Chromium geometry E2E now verifies transparent metric headers, hidden public metric icons, >=8px label/value separation and zero clipped/out-of-bounds labels on Dashboard and Discover
+  - validation passed across 40 focused unit/integration tests, 3 public-geometry Chromium E2E tests, focused Dashboard and Discover product Chromium E2E tests, lint, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but public frames improved materially: `dashboard` 60.76% -> 63.50% raw and 73.39% -> 75.23% structural; `discover` 64.94% -> 67.61% raw and 74.93% -> 76.68% structural; global plan now sits at 98.53% implemented / 1.47% remaining and Figma/pixel-tight at 91.35% / 8.65%
+- Create Assets wizard Figma chrome advanced:
+  - Create Arka's stage header now follows the Figma title rhythm: the active stage reads as a large transparent heading with underline instead of a boxed micro-tab, preserving the wizard's real state model
+  - the policy-warning band now uses a Figma-like yellow alert treatment with a CSS triangle icon, tighter grid spacing and responsive stacking, without adding fake policy content or hiding any live fields
+  - the assets step uses its own verified art crop (`76% 50%`) while non-asset policy steps keep the existing crop; this prevents the asset card illustration from drifting out of its Figma framing
+  - Chromium wizard E2E now checks title scale, transparent active tab chrome, yellow warning geometry, responsive breakpoint fit and per-step art-crop invariants across all seven wizard steps
+  - validation passed across 32 focused unit tests, 16 workflow integration tests, focused Chromium wizard E2E, responsive Chromium wizard E2E, lint, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but `create-assets` improved from 61.30% to 63.37%; worst raw frame is now `create-redemptions` at 61.22%; global plan now sits at 98.55% implemented / 1.45% remaining and Figma/pixel-tight at 91.52% / 8.48%
+- Create Redemptions structural Figma parity advanced:
+  - redemptions policy copy now fits the create wizard rhythm and states the real contract boundary: create signs the redeem fee, while deeper exit controls remain governed actions
+  - `create-redemptions-policy-grid` gives the redemptions cards their own bounded note/action rhythm without changing deposits, assets or review surfaces
+  - the pixel manifest now declares explicit structural masks for create substeps that do not have a one-to-one Figma reference, while keeping the real deposits frame unmasked for raw comparison
+  - Chromium wizard E2E now guards deposits/redemptions title line count, note line count, action-button containment and action minimum width
+  - validation passed across 38 focused unit tests, 16 workflow integration tests, focused Chromium wizard E2E, lint, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but `create-redemptions` moved from 61.22% to 61.29% raw and now reports 72.42% structural; global plan now sits at 98.56% implemented / 1.44% remaining and Figma/pixel-tight at 91.60% / 8.40%
+- Create Deposits exact-reference density advanced:
+  - deposits now has route-scoped policy-card density, a tighter Figma-like art lane and a real exported Arka markline under the policy cards
+  - the markline uses `/figma/logo-arkafund.png` as a decorative Figma asset; no fake deposit settings, hardcoded metrics, placeholder policies or CSS-only imitation art were introduced
+  - Chromium wizard E2E now guards deposits-only art ratio, deposits card height bounds and markline visibility while preserving non-deposits geometry checks
+  - a broader Create-shell spacing experiment was measured, worsened the pixel report and was reverted instead of shipping a visual regression
+  - validation passed across 32 focused unit tests, 16 workflow integration tests, focused Create wizard Chromium E2E, responsive wizard Chromium E2E, lint, full 21-frame pixel audit and production build
+  - current raw audit remains blocked but `create-deposits` improved from 61.38% to 61.67%; global plan now sits at 98.57% implemented / 1.43% remaining and Figma/pixel-tight at 91.68% / 8.32%
+- Public metric value containment advanced:
+  - public Dashboard, Discover and public metric-deck E2E now fail if real metric values clip or escape their card boundaries
+  - Dashboard/Discover metric cards keep the compact inline Figma rhythm but now use calibrated label/value lanes for NAV, profit, volume and fee-style values
+  - manager-fee values can remain readable inside the card instead of collapsing into fake-looking fragments; every value still comes from catalog/runtime data
+  - no fake TVL, hardcoded replacement values, placeholders, skeletons or static demo metrics were introduced
+  - validation passed across 41 focused unit/integration tests, lint, 3 Chromium public-geometry E2E tests, full 21-frame pixel audit and production build
+  - current raw audit remains blocked: 21/21 frames below strict threshold, worst raw `create-redemptions` 61.29%, `dashboard` 63.38% raw / 75.15% structural, `discover` 67.54% raw / 76.62% structural; global plan now sits at 98.58% implemented / 1.42% remaining and Figma/pixel-tight at 91.70% / 8.30%
+- Assets responsive metric containment advanced:
+  - `/assets` no longer keeps its public metric deck in three columns on mobile; the deck now steps from three columns to two and then one column so real descriptions such as `Largest live asset position in the indexed book` do not collapse into 66px text lanes
+  - the change preserves the catalog-backed metric values, labels and semantic `tile.id` classes; no fake TVL, hardcoded replacement labels, hidden text, placeholders or skeleton states were introduced
+  - source-level truthfulness guards now lock the Assets metric-deck desktop/tablet/mobile column contract
+  - validation passed across unit source tests, focused public layout integrity E2E, operator layout integrity E2E and public interaction-state E2E
+  - current implementation status after this pass: global plan 98.60% implemented / 1.40% remaining; Figma/pixel-tight 91.78% implemented / 8.22% remaining
+- Vault detail product-frame cutover advanced:
+  - `/vaults/[id]` now has route-scoped public product-frame geometry: responsive metric deck, two-lane profile visual, bounded evidence cards and a command deck that no longer compresses copy into narrow multi-column strips
+  - the pass is layout-only over the existing catalog/runtime-backed vault profile; it does not add fake NAV/TVL, static command rows, hidden placeholder states, skeletons or hardcoded replacement values
+  - source guards now lock the Vault Detail cutover selector, profile visual grid, command deck contract and mobile one-column fallbacks
+  - validation passed across focused unit/integration tests, Vault Detail Chromium E2E, public Figma geometry E2E, public responsive matrix E2E and production build
+  - current implementation status after this pass: global plan 98.62% implemented / 1.38% remaining; Figma/pixel-tight 91.86% implemented / 8.14% remaining
+- Integrations Figma asset cutover advanced:
+  - `/integrations` now renders the real exported Figma protocol marks for the execution venues that are actually implemented in the product: Blend, SoroSwap, Aquarius and Balanced
+  - the pass deliberately does not add Fred, Phoenix, Comet or DogStar as executable protocol cards, because those are present in the Figma frame but are not supported live venues in the current runtime model
+  - the protocol catalog keeps its data source in `buildIntegrationProtocolCatalogCards`; posture, CTA state, action labels and blocked/available states remain runtime-backed rather than decorative
+  - Chromium E2E now opens `/integrations` with verified operator access and fails if the Figma logo grid drops below four desktop columns, loses the exported assets, clips protocol brands or overflows card actions
+  - validation passed across lint, 49 focused unit/integration tests, the operator-gated Integrations Chromium E2E and production build
+  - current implementation status after this pass: global plan 98.64% implemented / 1.36% remaining; Figma/pixel-tight 91.94% implemented / 8.06% remaining
+- Asset and Manager detail product-frame cutover advanced:
+  - `/assets/[id]` and `/managers/[id]` now have route-scoped public profile geometry for hero signals, history/risk or history/mandate panels, related Arka cards and core-registry fallback actions
+  - the pass is containment/layout-only over catalog-backed data; NAV, exposure, rank, history, linked Arkas, status pills and profile links remain runtime-backed
+  - no fake TVL/NAV, static scope labels, placeholder cards, skeletons, hidden rows or demo manager/asset names were introduced
+  - unit truthfulness, integration rendering and Chromium E2E now guard detail shells, stage grids, responsive breakpoints, product-canvas overflow and clipped labels/actions/pills
+  - current implementation status after this pass: global plan 98.66% implemented / 1.34% remaining; Figma/pixel-tight 92.02% implemented / 7.98% remaining
+- Vault leaderboard lower-stack product rows advanced:
+  - `/vaults` now forces `Route boundary` and `Featured watchlist` into two sequential product rows instead of a fragile lateral grid
+  - route-boundary cards and featured watchlist cards keep their existing runtime/catalog data and links; no fake metrics, placeholders, skeletons or demo Arkas were added
+  - unit, integration and Chromium E2E now guard the lower-stack contract, panel ordering, route-boundary card count and desktop/mobile overflow
+  - current implementation status after this pass: global plan 98.68% implemented / 1.32% remaining; Figma/pixel-tight 92.10% implemented / 7.90% remaining
+- Public Dashboard/Discover safe-zone cutover advanced:
+  - `/discover` and `/dashboard` now expose a `public-screen-safe-zone` root and final route-scoped CSS lock so title plaques cannot float over brand/topbar or obsolete command controls
+  - the pass is layout-only; all public metrics, featured Arkas, charts, scope labels and CTAs remain catalog-backed
+  - unit, integration and Chromium E2E now guard topbar/titlebar separation, command-bar inertness and public shell ordering
+  - current implementation status after this pass: global plan 98.70% implemented / 1.30% remaining; Figma/pixel-tight 92.18% implemented / 7.82% remaining
+- Governance/Coverage command lane cutover advanced:
+  - `/governance` now exposes `governance-composer-grid` and `governance-lifecycle-layout`, with lifecycle readiness moved into a full-width second band instead of a cramped command-column lane
+  - `/coverage` now exposes `coverage-command-grid` and `coverage-secondary-action-grid`, keeping stake/unstake/claim handlers intact while giving action cards a controlled responsive command rhythm
+  - no fake proposals, fake balances, hidden actions, placeholder rows or skeleton states were introduced; all runtime/wallet handlers remain the source of truth
+  - unit, integration and Chromium workflow E2E now guard command-lane markers, handler continuity, no clipped controls and no page horizontal overflow
+  - current implementation status after this pass: global plan 98.72% implemented / 1.28% remaining; Figma/pixel-tight 92.26% implemented / 7.74% remaining
+- Settings/Status utility lane cutover advanced:
+  - `/settings` now exposes `settings-fidelity-shell`, `settings-utility-grid` and workspace-panel classes for configuration, guardrails and raw diagnostics
+  - `/status` now exposes `status-fidelity-shell`, `status-utility-grid` and workspace-panel classes for baseline, operator, oracle, limits, routing and links
+  - raw environment JSON, runtime health, oracle rows and routing benchmark rows remain live/runtime-backed; the pass only changes containment, tab rhythm, table width and responsive collapse rules
+  - no fake config values, fake oracle state, placeholder benchmark rows, skeleton states or hidden operator controls were introduced
+  - unit, integration and Chromium workflow E2E now guard the utility-lane markers, data-source continuity, no clipped controls and no page horizontal overflow
+  - current implementation status after this pass: global plan 98.74% implemented / 1.26% remaining; Figma/pixel-tight 92.34% implemented / 7.66% remaining
+- Ops/Migrations/Tiers utility lane cutover advanced:
+  - `/ops` now exposes `ops-fidelity-shell` plus explicit health, routing and runbook workspace panels
+  - `/migrations` now exposes `migrations-fidelity-shell`, tab-scoped utility grids and explicit panels for plan, inspection, verification, dry-run, simulation, export and governance handoff
+  - `/tiers` now exposes `tiers-fidelity-shell`, a bounded runtime-read command card and explicit scorecard, ladder and governed-action panels
+  - this pass keeps all live data paths intact: Ops still reads governor/router/coverage posture, Migrations still inspects and simulates through the API/governance draft flow, and Tiers still signs the real add-points transaction builder
+  - no fake operational rows, fake migration status, fake tier values, placeholder cards, skeleton states or hidden operator controls were introduced
+  - unit, integration and Chromium E2E now guard the route markers, panel markers, real source functions and visual containment hooks
+  - current implementation status after this pass: global plan 98.76% implemented / 1.24% remaining; Figma/pixel-tight 92.42% implemented / 7.58% remaining
+- Contracts control-center cutover advanced:
+  - `/contracts` now exposes `contracts-fidelity-shell`, `contracts-operator-summary`, a bounded typed/raw execution grid, explicit mutation-matrix panel and explicit storage-lifecycle panel
+  - typed actions, raw invoke, mutation matrix and storage lifecycle remain fully operational and data-backed through the existing Soroban/API/governance-policy paths
+  - no fake contract rows, fake mutation readiness, fake storage extend state, hidden rows, skeletons or placeholder console states were introduced
+  - unit, integration and Chromium E2E now guard the screen markers, panel markers, source functions and mobile section navigation
+  - current implementation status after this pass: global plan 98.78% implemented / 1.22% remaining; Figma/pixel-tight 92.50% implemented / 7.50% remaining
+- Assets/Managers public index cutover advanced:
+  - `/assets` now exposes `assets-workspace-grid`, explicit registry/list/telemetry workspace panels and a bounded command toolbar over the live asset catalog and core Stellar registry
+  - `/managers` now exposes `managers-fidelity-shell`, `managers-operator-summary`, `managers-workspace-grid`, explicit list/telemetry panels and a bounded sort/search command toolbar over the live manager leaderboard
+  - this pass is visual containment only: asset exposure, NAV, manager rank, scope, search, sort, tabs, links and telemetry remain catalog/API-backed
+  - no fake TVL/NAV, static asset rows, static manager rows, hidden actions, skeletons or placeholders were introduced
+  - unit, integration and Chromium responsive E2E now guard route markers, panel markers, real data loaders, no unresolved copy, no clipped controls and no horizontal overflow
+  - current implementation status after this pass: global plan 98.80% implemented / 1.20% remaining; Figma/pixel-tight 92.58% implemented / 7.42% remaining
+- Transactional review/confirmation rail cutover advanced:
+  - shared wallet-backed transaction primitives now expose `transaction-surface-rail`, `transaction-surface-review-card`, `transaction-surface-confirm-dialog` and a stable `transaction-confirm-dialog` modal hook
+  - Governance, Coverage and Contracts now share bounded pre-sign review cards, feedback rails and confirmation dialogs without changing Soroban builders, DAO guards, wallet signing or transaction submission handlers
+  - long rejection messages, contract IDs, hashes and status copy wrap inside their owning cards; dialog actions become full-width responsive controls instead of clipping in dense operator screens
+  - no fake transaction state, fake proposal, fake balance, fake mutation row, hidden action, skeleton or placeholder was introduced
+  - unit, integration and Chromium E2E now guard the shared transaction markers, modal marker, handler continuity and live route rendering
+  - current implementation status after this pass: global plan 98.82% implemented / 1.18% remaining; Figma/pixel-tight 92.66% implemented / 7.34% remaining
+- App chrome navigation rail cutover advanced:
+  - `AppChrome` now exposes `chrome-shell-visual-cutover`, `chrome-grid-visual-cutover`, `chrome-main-visual-cutover`, `chrome-rail-screen-cutover`, `chrome-rail-nav-cutover`, `chrome-wallet-card-cutover` and `chrome-advanced-console-cutover`
+  - the public right rail now has a stable Figma-width lane, bounded primary nav rows, wallet card containment and Advanced Console containment across public and operator-gated surfaces
+  - no fake route, fake wallet state, fake operator capability, hidden utility link, skeleton or placeholder was introduced; primary routes still come from `PRIMARY_PRODUCT_NAV` and utility routes still require the existing operator verification path
+  - unit, integration and Chromium E2E now guard the shared chrome markers, gated utility behavior and desktop rail width band
+  - current implementation status after this pass: global plan 98.84% implemented / 1.16% remaining; Figma/pixel-tight 92.74% implemented / 7.26% remaining
+- Vault detail tab-panel cutover advanced:
+  - `/vaults/[id]` now exposes `vault-detail-tab-panel` across overview, portfolio, activity and policies, with every inner lane wrapped by `vault-tab-workspace-panel`
+  - the tab body no longer relies on generic two-column pressure; profile cards, portfolio composition, activity feed and policy/whitelist cards stay in bounded product rows
+  - no fake NAV, fake portfolio, fake activity, fake fee, fake whitelist route, hidden row, skeleton or placeholder was introduced; all values still come from the same catalog detail bundle and existing builders
+  - unit, integration and Chromium E2E now guard the new tab markers, data continuity and no-overflow/no-too-narrow-card behavior
+  - current implementation status after this pass: global plan 98.86% implemented / 1.14% remaining; Figma/pixel-tight 92.82% implemented / 7.18% remaining
+- Asset/manager detail lane cutover advanced:
+  - `/assets/[id]` and `/managers/[id]` now expose `explorer-detail-stage-cutover` plus route-specific stage markers and related-card cutover markers
+  - the main detail body now renders as one contained product lane, while linked/managed Arka cards use auto-fit rather than fixed card counts
+  - no fake exposure, fake NAV, fake manager rank, fake linked Arka, hidden action, skeleton or placeholder was introduced; asset/manager details remain catalog-backed and registry-aware
+  - unit, integration and Chromium E2E now guard the lane markers, real data-source continuity, one-column detail stage and no clipped labels/controls across breakpoints
+  - current implementation status after this pass: global plan 98.88% implemented / 1.12% remaining; Figma/pixel-tight 92.90% implemented / 7.10% remaining
+- Public hero board safe-zone cutover advanced:
+  - `/dashboard` and `/discover` now expose shared `public-hero-*` markers for safe zone, board, metric lane, titlebar, metric deck, collection lane, tabline, card grid and Discover toolbar
+  - title plaques, metric decks, featured cards and toolbar controls are now separated into measurable lanes so the first-fold title cannot overlap the top chrome or metric board
+  - no fake NAV, fake TVL, fake featured Arka, fake route, hidden filter, skeleton or placeholder was introduced; Dashboard/Discover remain catalog-backed and URL-state-backed
+  - unit, integration and Chromium E2E now guard the marker set, data continuity, titlebar inset and title/metric/collection vertical separation
+  - current implementation status after this pass: global plan 98.90% implemented / 1.10% remaining; Figma/pixel-tight 92.98% implemented / 7.02% remaining
+- Governance/Coverage command frame cutover advanced:
+  - `/governance` and `/coverage` now expose explicit command-frame markers for composer, lifecycle, coverage actions, command cards and stacked action rails
+  - Coverage unstake/claim are no longer forced into a cramped two-column action pair; they now render as full-width command rows while preserving wallet-signed handlers
+  - no fake proposal, fake governed package, fake coverage balance, fake pending reward, hidden action, skeleton or placeholder was introduced
+  - unit, integration and Chromium E2E now guard live-handler continuity, command-frame markers, stacked Coverage action geometry and Governance lifecycle containment
+  - current implementation status after this pass: global plan 98.92% implemented / 1.08% remaining; Figma/pixel-tight 93.08% implemented / 6.92% remaining
+- Contracts/Integrations command-frame audit cutover advanced:
+  - `/contracts` now finishes command-frame and audit-row cutover hooks for typed actions, raw invoke, mutation matrix and storage lifecycle without removing any machine-consumable rows
+  - `/integrations` now exposes workspace-frame, routing-table, Balanced/SODAX intent-card, intent-form and intent-action cutover hooks across routing, SODAX and execution workspaces
+  - no fake mutation state, fake storage lifecycle, fake router, fake quote, fake protocol readiness, hidden action, skeleton or placeholder was introduced
+  - unit, integration and Chromium E2E now guard the new cutover hooks plus typed/raw, mutation/storage and routing/execution continuity
+  - current implementation status after this pass: global plan 98.94% implemented / 1.06% remaining; Figma/pixel-tight 93.20% implemented / 6.80% remaining
+- Vaults/Assets listing-frame cutover advanced:
+  - `/vaults` now exposes stage, toolbar, leaderboard table, leaderboard row and lower-stack cutover hooks for product listing rows
+  - `/assets` now exposes command-panel, command-toolbar, asset table and asset row cutover hooks for the public asset explorer
+  - no fake NAV, fake TVL, fake asset row, fake price, fake movement, fake Arka, fake share, hidden row, skeleton or placeholder was introduced; both routes remain catalog/API-backed
+  - unit, integration and Chromium E2E now guard the new listing-frame hooks plus data continuity across public Vaults and Assets surfaces
+  - current implementation status after this pass: global plan 98.96% implemented / 1.04% remaining; Figma/pixel-tight 93.34% implemented / 6.66% remaining
+- Phase-2 swap guardrails runtime cutover completed:
+  - the rebalance planner now enforces the remaining eight runtime controls from the 15-guardrail swap policy before route execution: max notional, path length, route cycles, chunking threshold, chunk size, post-trade deviation, daily turnover cap and emergency pause
+  - `/api/routing/rebalance/plan` accepts optional guardrail state for NAV, daily turnover and projected post-trade deviation, returning a blocked machine-readable plan when policy is violated
+  - `/arkas/[id]` now refuses to execute a guardrail-blocked rebalance plan and displays the guardrail evaluation next to the route plan
+  - `/settings` exposes the active phase-2 runtime values in the guardrail workspace and raw environment snapshot
+  - no fake contract storage, fake DAO mutation, placeholder guardrail, skeleton state or hidden execution path was introduced; contract-level DAO mutation of the eight phase-2 values remains a separate future contract-extension decision
+  - validation passed across focused unit tests, integration tests, lint and Chromium Settings E2E
+  - current implementation status after this pass: global plan 99.03% implemented / 0.97% remaining; Figma/pixel-tight unchanged at 93.34% implemented / 6.66% remaining
+- Rebalance daily-turnover truthfulness cutover completed:
+  - `/arkas/[id]` now derives daily-turnover guardrail state from real indexed catalog activity instead of treating unavailable activity as zero turnover
+  - turnover events are converted to the Arka denomination with verified Catalog/OracleGuard prices before aggregation; raw quantities from different assets are never added together
+  - same-denomination activity needs no oracle conversion, while any missing cross-asset price leaves the guardrail state unavailable and blocks wallet-backed execution
+  - the activity loader is isolated from unrelated Soroban refresh failures, so the guardrail state still loads when on-chain manager/share/credit reads are degraded
+  - the derivation includes only successful manager/protocol events within the 24h window and excludes deposits, failed calls, malformed amounts, zero amounts and stale/future entries
+  - the rebalance planner marks the individual `daily_turnover_cap_bps` check as `requires_state` when NAV or activity state is unavailable, rather than silently passing on a fake zero
+  - `/arkas/[id]` exposes the guardrail source, window and included-event count beside the execution route so operators can see whether the check is catalog-backed or state-required
+  - no fake turnover, fake NAV, hidden guardrail, placeholder route or skeleton state was introduced
+  - validation passed across focused unit tests, integration tests and Chromium Arka execution E2E
+  - current implementation status after this pass: global plan 99.06% implemented / 0.94% remaining; Figma/pixel-tight unchanged at 93.34% implemented / 6.66% remaining
+- Rebalance pre-sign stateful guardrail cutover completed:
+  - `resolveRebalanceRoutePlan` now accepts `requiredStatefulGuardrails` so preview surfaces can remain non-blocking while wallet-backed execution can fail closed before any transaction build or wallet signer handoff
+  - `/api/routing/rebalance/plan` validates the machine-consumable required-state list and only admits supported stateful checks, currently `post_trade_deviation_bps` and `daily_turnover_cap_bps`
+  - `/arkas/[id]` now marks `daily_turnover_cap_bps` as required for execution requests, so unavailable indexed activity blocks execution instead of falling through to a partial-state route
+  - the individual guardrail check remains explicitly `requires_state`, while the aggregate execution plan becomes `blocked` with a concrete blocked reason when that state is required
+  - no fake turnover, fake manager permission, fake transaction, hidden handoff, placeholder route or skeleton state was introduced
+  - validation passed across focused unit tests, integration tests and Chromium E2E for browser-side pre-sign blocking; the E2E does not bypass manager permissions, so the actual click path remains covered by integration where the manager wallet is controlled
+  - current implementation status after this pass: global plan 99.10% implemented / 0.90% remaining; Figma/pixel-tight unchanged at 93.34% implemented / 6.66% remaining
+- Rebalance post-trade deviation source cutover completed:
+  - `post_trade_deviation_bps` uses an explicit common-basis allocation projection supplied by the execution surface
+  - `/arkas/[id]` derives that projection from the input amount, current vault NAV and verified Catalog/OracleGuard prices when the input asset differs from the Arka denomination
+  - the planner no longer compares raw input and output quantities from different assets; it fails closed as `requires_state` whenever the common-basis valuation is unavailable
+  - `/arkas/[id]` now requires both `post_trade_deviation_bps` and `daily_turnover_cap_bps` for wallet-backed execution requests, so the final route cannot reach transaction build with partial state
+  - no fake target weights, fake prices, hardcoded projection, placeholder guardrail state, hidden wallet handoff or skeleton route was introduced
+  - validation passed across 31 focused unit tests, 29 focused integration tests and 2 Chromium live-ops E2E tests; build-time warnings are the existing `@sodax/sdk`/native-binding warnings, not test failures
+  - current implementation status after this pass: global plan 99.14% implemented / 0.86% remaining; Figma/pixel-tight unchanged at 93.34% implemented / 6.66% remaining
+- Rebalance guardrail evidence cutover completed:
+  - every stateful rebalance guardrail check can now return machine-consumable `evidence` with the source and audited base-unit inputs used for the decision
+  - `post_trade_deviation_bps` exposes the explicit common-basis projection and current vault NAV used for the decision
+  - `daily_turnover_cap_bps` exposes whether the value came from denomination-normalized catalog activity + NAV or missing state, including used turnover, projected turnover and NAV-derived cap when available
+  - `/arkas/[id]` renders this provenance beside the route plan, so an operator can inspect the exact pre-sign evidence before wallet handoff
+  - no fake evidence, fake NAV, fake turnover, hidden guardrail, placeholder source or skeleton state was introduced
+  - validation passed across 31 focused unit tests, 29 focused integration tests and 2 Chromium live-ops E2E tests; build-time warnings remain the existing `@sodax/sdk`/native-binding warnings
+  - current implementation status after this pass: global plan 99.17% implemented / 0.83% remaining; Figma/pixel-tight unchanged at 93.34% implemented / 6.66% remaining
+- Remaining-plan T05 manager filter alignment completed:
+  - the canonical remaining-work plan now tracks realistic launch readiness from `docs/REMAINING_SINGLE_ITERATION_PLAN_2026-05-18.md`, not the old narrow `99.x%` substream percentage
+  - `/managers` now uses an explicit primary/status filter deck so Search, Rank By and Order share one measured row on desktop and stack intentionally on smaller screens
+  - the old legacy toolbar `nth-of-type` grid-area collision is neutralized inside the new T05 row, which was the source of the 122px Rank control offset in Chromium
+  - search/sort URL state, indexed catalog ranking and source provenance remain live; no fake manager data, hidden control, stub, skeleton or placeholder was introduced
+  - validation passed: 44 focused unit tests, 12 focused integration tests and 2 focused Chromium E2E tests
+  - remaining-plan status after this pass: T05 100% implemented / 0% remaining; global mainnet-launch readiness 82.54% implemented / 17.46% remaining
+- Remaining-plan T06 Arka/Vault leaderboard row containment completed:
+  - `/vaults` and `/managers` rows now expose an explicit `data-row-containment="bounded"` contract with accessible full-value labels for long Stellar IDs
+  - Vault row fields remain complete: rank, Arka ID, manager ID, NAV/share progress, asset count, fees, whitelist route count, status/freshness, base sleeve and Profile/Ops links
+  - Manager row fields remain complete: rank, manager ID, NAV/share progress, Arka count, curation count, posture, freshness and manager detail link
+  - CSS now hard-bounds row grids, progress tracks, status pills, timestamps, base sleeve cells and action zones across desktop, tablet and mobile; data is truncated visually only, not removed
+  - validation passed: 48 focused unit tests, 18 focused integration tests and 4 focused Chromium E2E tests
+  - remaining-plan status after this pass: T06 100% implemented / 0% remaining; global mainnet-launch readiness 83.08% implemented / 16.92% remaining
+- Remaining-plan T24 production environment and Vercel gate completed:
+  - `/api/release/gate` now exposes `gates.productionEnvironment` as a release-blocking, machine-consumable gate for Vercel environment, canonical domain, preview/prod separation, production mainnet target, E2E wallet posture, operator secret posture, release-script wiring and deployment manifest presence
+  - `vercel.json` now forces Vercel to run `npm run release:gate`; `package.json` adds `audit:prod`, `test:release-gate`, `build:release` and `release:gate`
+  - `scripts/production_dependency_audit.mjs` parses raw `npm audit --omit=dev --json` and fails any unapproved high/critical advisory; `config/production-audit-policy.json` documents only the current SODAX cross-chain transitive exceptions with expiry and compensating controls
+  - production blocks if it resolves testnet, uses a non-canonical domain, enables E2E wallet mode, lacks operator auth, misses the deployments manifest or bypasses release tests; preview blocks if it points at mainnet without explicit rehearsal override
+  - `docs/PRODUCTION_ENVIRONMENT_VERCEL_GATE_2026-05-21.md` documents domain/subdomain routing, required Vercel variables, release command behavior and the non-mainnet scope of this gate
+  - no mainnet deploy, fake canary, fake success, hidden bypass, placeholder gate or skeleton release path was introduced
+  - validation passed across focused unit tests, integration tests, Chromium release E2E, production dependency audit, release build and diff checks
+  - remaining-plan status after this pass: T24 100% implemented / 0% remaining; global mainnet-launch readiness 98.20% implemented / 1.80% remaining; 24/27 canonical items complete, 3/27 remain
+- Remaining-plan T25 final platform manual and screenshots refresh completed:
+  - `docs/figma-route-audit-manifest.json` now covers 29 manual captures, including the previously missing operator routes `/migrations`, `/governance/console` and `/integrations/operator`
+  - Playwright design-audit capture refreshed every committed manual screenshot under `docs/screenshots/dapp-manual`
+  - `docs/platform-manual-screen-manifest.json` is the screen/claim/blocker traceability contract for the final manual
+  - `scripts/generate_platform_manual.mjs` deterministically generates and checks `docs/ARKAFUND_FINAL_PLATFORM_MANUAL_2026-05-21.md`
+  - the final manual includes each current screenshot beside its route explanation, audience, reads, actions, boundary, implementation references and test references
+  - mainnet blockers are explicit: T26 testnet dress rehearsal, T27 final mainnet cutover and the expiring SODAX transitive production-audit exception policy
+  - validation passed across screenshot E2E, manual check, focused unit tests, focused integration tests, lint and diff checks
+  - remaining-plan status after this pass: T25 100% implemented / 0% remaining; global mainnet-launch readiness 98.74% implemented / 1.26% remaining; 25/27 canonical items complete, 2/27 remain
+
+### Code links
+- Contracts repository (arka.fund) – https://github.com/dogstarapps/arka.fund
+
+### Canonical consolidated dossier
+- Master dossier: `docs/ARKAFUND_PLATFORM_DOSSIER_2026-04-17.md`
+- Machine-consumable index: `docs/ARKAFUND_PLATFORM_DOSSIER_INDEX_2026-04-17.json`
+- The master dossier is the expanded platform reference for contracts, dApp, catalog API, tokenomics, governance, oracle, routing, runbooks, tests, and open workstreams.

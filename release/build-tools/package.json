@@ -1,0 +1,8 @@
+{
+  "name": "arka-release-build-tools",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "binaryen": "123.0.0"
+  }
+}

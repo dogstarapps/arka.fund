@@ -102,13 +102,25 @@ impl ArkaRegistry {
     }
 
     // One-time admin initializer
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, admin: Address) {
+        Self::initialize(env, admin);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init_admin(env: Env, admin: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address) {
         let store = env.storage().instance();
         if store.has(&DataKey::Admin) {
             return;
         }
         admin.require_auth();
         store.set(&DataKey::Admin, &admin);
+        Self::dynamic_set(&env, &DataKey::All, &Vec::<Address>::new(&env));
         env.events().publish((EVENT_ADMIN,), admin);
     }
 
@@ -120,7 +132,7 @@ impl ArkaRegistry {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -133,7 +145,7 @@ impl ArkaRegistry {
         let governor: Address = env
             .storage()
             .instance()
-            .get(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
             .expect("governor_not_set");
         if *caller != governor {
             panic!("only_governor");
@@ -148,7 +160,7 @@ impl ArkaRegistry {
             .map(|admin| admin == *caller && !Self::bootstrap_admin_expired(env))
             .unwrap_or(false);
         let is_governor = store
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
             .map(|governor| governor == *caller)
             .unwrap_or(false);
         let is_registrar = store

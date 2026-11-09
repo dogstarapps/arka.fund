@@ -3,7 +3,7 @@
 use soroban_sdk::{
     auth::{ContractContext, InvokerContractAuthEntry, SubContractInvocation},
     contract, contracterror, contractimpl, contracttype, panic_with_error, vec, Address, Env,
-    IntoVal, Symbol, Val,
+    IntoVal, Symbol, Val, Vec,
 };
 
 #[derive(Clone)]
@@ -31,6 +31,18 @@ pub struct TestProfitAdapter;
 
 #[contractimpl]
 impl TestProfitAdapter {
+    /// LOCAL TEST FIXTURE ONLY. A funded 1:1 fake AMM, not a market oracle,
+    /// production exchange or route that can be enabled on real networks.
+    pub fn swap_exact_tokens_for_tokens(env: Env, amount: i128, minimum: i128, path: Vec<Address>, to: Address, deadline: u64) -> Vec<i128> {
+        let _ = Self::profit_token(env.clone()); // Must be initialized.
+        assert!(amount > 0 && minimum > 0 && amount >= minimum && path.len() == 2 && deadline >= env.ledger().timestamp(), "invalid_local_swap");
+        let input=path.get(0).unwrap(); let output=path.get(1).unwrap();
+        assert!(input != output, "same_asset");
+        let me=env.current_contract_address();
+        soroban_sdk::token::Client::new(&env,&input).transfer_from(&me,&to,&me,&amount);
+        Self::invoke_with_contract_auth::<()>(&env,&output,"transfer",vec![&env,me.into_val(&env),to.into_val(&env),amount.into_val(&env)]);
+        vec![&env,amount,amount]
+    }
     pub fn init(
         env: Env,
         admin: Address,

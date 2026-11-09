@@ -1,0 +1,14 @@
+{
+  "units": "ledger",
+  "observedReference": "R59 P29, re-read before application",
+  "minPersistentLedgers": 2073600,
+  "maxLedgers": 3110400,
+  "extendToLedgers": 2073600,
+  "manualReviewBelowRemainingLedgers": 1036800,
+  "keys": "Only selected new code hashes, these seven predicted instances and their persistent configuration. Future child/share keys must be added from actual creation receipts.",
+  "noahAndLegacyExcluded": true,
+  "automaticExtend": false,
+  "automaticRestore": false,
+  "restore": "Separate reviewed explicit operation; split Arka130856-byte code from other entries and price every bounded batch against actual current footprint/network budgets.",
+  "dependencyTtl": "Read current Sushi/token/oracle TTL before activation; do not extend third-party state implicitly."
+}

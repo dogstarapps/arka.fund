@@ -55,6 +55,7 @@ fn management_fee_preview_and_protocol_split_are_exposed_via_public_api() {
     };
 
     env.mock_all_auths_allowing_non_root_auth();
+    client.set_manager(&manager, &manager);
     client.init(&token_id, &1_000, &0, &0, &0, &whitelist, &manager);
     client.set_protocol_fee_policy(&manager, &treasury, &2_500, &0);
     client.deposit(&user, &denom, &1_000);

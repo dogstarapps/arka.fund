@@ -8,7 +8,7 @@ use soroban_sdk::{
 #[should_panic(expected = "only_writer")]
 fn register_requires_authorized_caller() {
     let env = Env::default();
-    let id = env.register_contract(None, ArkaRegistry);
+    let id = { env.mock_all_auths(); env.register(ArkaRegistry, (Address::generate(&env),)) };
     let client = ArkaRegistryClient::new(&env, &id);
     let caller = Address::generate(&env);
     let m = Address::generate(&env);
@@ -20,15 +20,16 @@ fn register_requires_authorized_caller() {
 #[test]
 fn registry_admin_controls_writers_and_listing() {
     let env = Env::default();
-    let id = env.register_contract(None, ArkaRegistry);
-    let client = ArkaRegistryClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let registrar = Address::generate(&env);
     let manager = Address::generate(&env);
     let arka = Address::generate(&env);
 
     env.mock_all_auths();
-    client.init_admin(&admin);
+    let id = env.register(ArkaRegistry, (&admin,));
+    let client = ArkaRegistryClient::new(&env, &id);
     client.set_registrar(&admin, &registrar, &true);
     assert!(client.is_registrar(&registrar));
 
@@ -46,14 +47,15 @@ fn registry_admin_controls_writers_and_listing() {
 #[test]
 fn admin_can_register_legacy_arkas_directly() {
     let env = Env::default();
-    let id = env.register_contract(None, ArkaRegistry);
-    let client = ArkaRegistryClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let manager = Address::generate(&env);
     let arka = Address::generate(&env);
 
     env.mock_all_auths();
-    client.init_admin(&admin);
+    let id = env.register(ArkaRegistry, (&admin,));
+    let client = ArkaRegistryClient::new(&env, &id);
     client.register_admin(&admin, &manager, &arka);
 
     assert_eq!(client.count(), 1);
@@ -63,15 +65,16 @@ fn admin_can_register_legacy_arkas_directly() {
 #[test]
 fn registry_emits_indexer_ready_events() {
     let env = Env::default();
-    let id = env.register_contract(None, ArkaRegistry);
-    let client = ArkaRegistryClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let registrar = Address::generate(&env);
     let manager = Address::generate(&env);
     let arka = Address::generate(&env);
 
     env.mock_all_auths();
-    client.init_admin(&admin);
+    let id = env.register(ArkaRegistry, (&admin,));
+    let client = ArkaRegistryClient::new(&env, &id);
     assert_eq!(
         env.events().all(),
         vec![
@@ -135,4 +138,33 @@ fn registry_emits_indexer_ready_events() {
             )
         ]
     );
+}
+
+
+#[test]
+fn optional_governor_clear_preserves_registrar_and_retired_admin_boundaries() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let registrar = Address::generate(&env);
+    let stranger = Address::generate(&env);
+    let manager = Address::generate(&env);
+    let id = env.register(ArkaRegistry, (&admin,));
+    let client = ArkaRegistryClient::new(&env, &id);
+    client.set_registrar(&admin, &registrar, &true);
+    client.set_governor(&admin, &None);
+    client.register(&registrar, &manager, &Address::generate(&env));
+    client.register(&admin, &manager, &Address::generate(&env));
+    assert_eq!(client.count(), 2);
+    assert!(client.try_register(&stranger, &manager, &Address::generate(&env)).is_err());
+    client.set_governor(&admin, &Some(governor.clone()));
+    client.clear_bootstrap_admin_expiry(&governor);
+    client.set_governor(&governor, &None);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    assert!(client.try_register(&admin, &manager, &Address::generate(&env)).is_err());
+    client.register(&registrar, &manager, &Address::generate(&env));
+    assert_eq!(client.count(), 3);
 }

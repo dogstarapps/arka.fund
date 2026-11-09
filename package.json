@@ -1,0 +1,18 @@
+{
+  "name": "arkafund-release-r4",
+  "version": "0.0.0-private",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "release:verify": "node release/source-gate.mjs",
+    "release:check": "node release/check-local.mjs",
+    "release:browser": "ARKA_RELEASE_NETWORK=loopback node --import ./release/containment.mjs release/browser-check.mjs",
+    "release:contracts": "node release/build-contracts.mjs",
+    "release:signatures": "node release/signature-check.mjs",
+    "release:dependency-scope": "node release/dependency-scope.mjs",
+    "release:dependency-scope:rust": "node release/dependency-scope.mjs --rust"
+  }
+}

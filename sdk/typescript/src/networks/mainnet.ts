@@ -11,7 +11,8 @@ export interface ArkafundContractAddresses {
   adapterAquarius: string;
   adapterBlendFixedXlmUsdc: string;
   adapterBlendYieldBlox: string;
-  adapterPhoenix: string;
+  adapterPhoenix: string; // legacy reads only
+  adapterSushi?: string;
   adapterSoroswap: string;
   oracleGuard: string;
   coverageFund: string;

@@ -38,41 +38,37 @@ fn e2e_governed_tokenomics_flows_release_vesting_emissions_and_lock_votes() {
     let team = Address::generate(&env);
     let ecosystem = Address::generate(&env);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(&env, &token_id);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(&env, &token_id);
+
     token.mint(&treasury, &10_000);
 
-    let executor_id = env.register_contract(None, GovernanceExecutor);
+    let executor_id = env.register(GovernanceExecutor, (&admin, &6u32, &40u32,));
     let executor = GovernanceExecutorClient::new(&env, &executor_id);
-    executor.init(&admin, &6, &40);
 
-    let vesting_id = env.register_contract(None, ArkaVesting);
+
+    let vesting_id = env.register(ArkaVesting, (&admin, &token_id,));
     let vesting = ArkaVestingClient::new(&env, &vesting_id);
-    vesting.init(&admin, &token_id);
+
     vesting.set_governor(&admin, &Some(executor_id.clone()));
 
-    let emissions_id = env.register_contract(None, EmissionsController);
+    let emissions_id = env.register(EmissionsController, (&admin, &token_id,));
     let emissions = EmissionsControllerClient::new(&env, &emissions_id);
-    emissions.init(&admin, &token_id);
+
     emissions.set_governor(&admin, &Some(executor_id.clone()));
 
-    let locked_id = env.register_contract(None, LockedArka);
-    let locked = LockedArkaClient::new(&env, &locked_id);
-    locked.init(
-        &admin,
+    let locked_id = env.register(LockedArka, (&admin,
         &token_id,
         &10u32,
         &500u32,
         &soroban_sdk::String::from_str(&env, "locked ARKA"),
-        &soroban_sdk::String::from_str(&env, "lARKA"),
-    );
+        &soroban_sdk::String::from_str(&env, "lARKA"),));
+    let locked = LockedArkaClient::new(&env, &locked_id);
+
 
     token.approve(&treasury, &vesting_id, &3_000);
     token.approve(&treasury, &emissions_id, &2_400);

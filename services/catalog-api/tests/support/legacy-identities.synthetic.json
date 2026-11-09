@@ -1,0 +1,84 @@
+{
+  "synthetic": true,
+  "observedAt": "2026-10-16T12:00:00.000Z",
+  "counts": {
+    "legacy": 6
+  },
+  "catalogIdentity": {
+    "complete": true
+  },
+  "funds": [
+    {
+      "id": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
+      "catalogIdentity": {
+        "manager": "GAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDENU4",
+        "arkaProfile": {
+          "displayName": "Noah’s Ark"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 0"
+        }
+      }
+    },
+    {
+      "id": "CBXW633PN5XW633PN5XW633PN5XW633PN5XW633PN5XW633PN5XW6LN4",
+      "catalogIdentity": {
+        "manager": "GAZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTHCM6",
+        "arkaProfile": {
+          "displayName": "Synthetic legacy 1"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 1"
+        }
+      }
+    },
+    {
+      "id": "CBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQOBYHA4DQOBYHAGEP",
+      "catalogIdentity": {
+        "manager": "GAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDENU4",
+        "arkaProfile": {
+          "displayName": "Synthetic legacy 2"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 0"
+        }
+      }
+    },
+    {
+      "id": "CBYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXC4LROFYXDJ4N",
+      "catalogIdentity": {
+        "manager": "GAZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTHCM6",
+        "arkaProfile": {
+          "displayName": "Synthetic legacy 3"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 1"
+        }
+      }
+    },
+    {
+      "id": "CBZHE4TSOJZHE4TSOJZHE4TSOJZHE4TSOJZHE4TSOJZHE4TSOJZHEZUK",
+      "catalogIdentity": {
+        "manager": "GAZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDEMRSGIZDENU4",
+        "arkaProfile": {
+          "displayName": "Synthetic legacy 4"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 0"
+        }
+      }
+    },
+    {
+      "id": "CBZXG43TONZXG43TONZXG43TONZXG43TONZXG43TONZXG43TONZXHWMI",
+      "catalogIdentity": {
+        "manager": "GAZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTGMZTHCM6",
+        "arkaProfile": {
+          "displayName": "Synthetic legacy 5"
+        },
+        "managerProfile": {
+          "displayName": "Synthetic manager 1"
+        }
+      }
+    }
+  ]
+}

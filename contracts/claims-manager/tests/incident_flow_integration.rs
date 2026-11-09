@@ -55,14 +55,8 @@ impl MockToken {
 fn integration_executes_full_waterfall_with_treasury_top_up() {
     let env = Env::default();
     let token_id = env.register_contract(None, MockToken);
-    let fund_id = env.register_contract(None, CoverageFund);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let claims_id = env.register_contract(None, ClaimsManager);
 
     let token = MockTokenClient::new(&env, &token_id);
-    let fund = CoverageFundClient::new(&env, &fund_id);
-    let vault = CoverageVaultClient::new(&env, &vault_id);
-    let claims = ClaimsManagerClient::new(&env, &claims_id);
 
     let admin = Address::generate(&env);
     let gov = Address::generate(&env);
@@ -74,10 +68,16 @@ fn integration_executes_full_waterfall_with_treasury_top_up() {
 
     env.mock_all_auths();
 
-    claims.init(&admin, &token_id, &Some(treasury.clone()));
+    let claims_id = env.register(ClaimsManager, (&admin, &token_id, &Some(treasury.clone()),));
+    let claims = ClaimsManagerClient::new(&env, &claims_id);
+
     claims.set_governor(&admin, &gov);
-    fund.init(&admin, &token_id, &token_id);
-    vault.init(&manager, &token_id, &2_000);
+    let fund_id = env.register(CoverageFund, (&admin, &token_id, &token_id,));
+    let fund = CoverageFundClient::new(&env, &fund_id);
+
+    let vault_id = env.register(CoverageVault, (&manager, &token_id, &2_000,));
+    let vault = CoverageVaultClient::new(&env, &vault_id);
+
 
     token.mint(&staker, &300);
     token.mint(&manager, &200);

@@ -1,0 +1,1163 @@
+{
+  "network": "mainnet",
+  "networkPassphrase": "Public Global Stellar Network ; September 2015",
+  "rpcUrl": "https://mainnet.sorobanrpc.com",
+  "source": "arkafund-mainnet-manifest",
+  "generatedAt": "2026-07-04T19:45:00Z",
+  "contracts": {
+    "arkaFactory": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+    "arkaRegistry": "CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY",
+    "router": "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D",
+    "venueRegistry": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+    "adapterAquarius": "CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ",
+    "adapterBlendFixedXlmUsdc": "CBTRFXTMNZ477YG2RTDSUFICQXURNGV6RLEVDOU3XUTXEQERIZHAWBZP",
+    "adapterBlendYieldBlox": "CB2HKKC3Z4H2R4YST2Z2WAE4MHSYFDVMRKDZQX3BTX7O55DJNBNN6VWT",
+    "adapterPhoenix": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+    "adapterSoroswap": "CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI",
+    "oracleGuard": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+    "coverageFund": "CDVPSKOQT5PJABQZYYL3TLYDPF7OE2P2Q7LRL47F5JFUO4BV5HK6BFXA",
+    "claimsManager": "CBECEBUEIWLNNTZPNYIWO2YM2IO4HIMAXGOIZRR47OA2CUVJOMKMNLZY",
+    "managerTier": "CDJ7MR4GDXVXILTMYLAQWEU7DMRKPXNRUONBZ7F7ORMVBA72MAQLUPSD",
+    "arkaToken": "CDXCWYQZCLKS5EP4UFZLXVMNVMXPT33P3PDLGLFYA2FQQW6SZKKH5B5S",
+    "lockedArka": "CAXJQAKJTEICXP3WBHP3YTJ24ZIJXTN5RFXX7OG7VNLE2P42UYOVE3WF",
+    "governanceToken": "CCIAK7PL4EAIEPSYAAFE6BJOMLE27SOWTBFV6VUDGJEMMAT3D42U5CGH",
+    "governanceExecutor": "CCTJRPZP7WDJZAPMJVCKUX6TOOZKKSTEVQ66YP6KZ5N6TCHRXLKTNEAS",
+    "arkaVesting": "CBP5XCBCKV3QM3CRVTJP7TF3DXPB5NBAZ2NMVKACNT2TVQQI4RJGMN3X",
+    "emissionsController": "CCLW4XWGNFXF4C4UAOSEYLKE24T2K65JMZQNNGGUWZAFUL7AYIGB5KFF"
+  },
+  "assets": {
+    "displayCurrency": "USD",
+    "pricingDenomination": "USDC",
+    "contractIds": {
+      "USDC": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "XLM": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+      "EURC": "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
+      "AQUA": "CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK",
+      "XTAR": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
+      "BLND": "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY",
+      "SHX": "CCKCKCPHYVXQD4NECBFJTFSCU2AMSJGCNG4O6K4JVRE2BLPR7WNDBQIQ",
+      "XRF": "CBLLEW7HD2RWATVSMLAGWM4G3WCHSHDJ25ALP4DI6LULV5TU35N2CIZA",
+      "VELO": "CAESLMGW5LYTIEJI7FJHK6SFSWRELLNVX5Q4WR4UZEALMTRWQDBKDPAG",
+      "YBX": "CBRP2VD3CZLEQIQZ4JMBXGA5AC2U6JE26YU5CCIOICIZCVWPGBO2QRUB"
+    },
+    "admittedSymbols": [
+      "USDC",
+      "XLM",
+      "EURC",
+      "AQUA",
+      "XTAR",
+      "BLND",
+      "SHX",
+      "XRF",
+      "VELO",
+      "YBX"
+    ],
+    "tokens": [
+      {
+        "symbol": "USDC",
+        "assetCode": "USDC",
+        "issuer": "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+        "contractId": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, Circle issuer"
+      },
+      {
+        "symbol": "XLM",
+        "assetCode": "XLM",
+        "issuer": null,
+        "contractId": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+        "verified": true,
+        "provenance": "native Stellar asset contract id"
+      },
+      {
+        "symbol": "EURC",
+        "assetCode": "EURC",
+        "issuer": "GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2",
+        "contractId": "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, Circle issuer"
+      },
+      {
+        "symbol": "AQUA",
+        "assetCode": "AQUA",
+        "issuer": "GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA",
+        "contractId": "CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, aqua.network TOML"
+      },
+      {
+        "symbol": "XTAR",
+        "assetCode": "XTAR",
+        "issuer": "GAORYJ3KBDGIM7FFSKVUJHJ5NEFWIRDIAGGBJBJS7TY6ECZS53257IG4",
+        "contractId": "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, dogstarcoin.com TOML"
+      },
+      {
+        "symbol": "BLND",
+        "assetCode": "BLND",
+        "issuer": "GDJEHTBE6ZHUXSWFI642DCGLUOECLHPF3KSXHPXTSTJ7E3JF6MQ5EZYY",
+        "contractId": "CD25MNVTZDL4Y3XBCPCJXGXATV5WUHHOWMYFF4YBEGU5FCPGMYTVG5JY",
+        "verified": true,
+        "provenance": "Blend v1 mainnet deployment docs"
+      },
+      {
+        "symbol": "SHX",
+        "assetCode": "SHX",
+        "issuer": "GDSTRSHXHGJ7ZIVRBXEYE5Q74XUVCUSEKEBR7UCHEUUEK72N7I7KJ6JH",
+        "contractId": "CCKCKCPHYVXQD4NECBFJTFSCU2AMSJGCNG4O6K4JVRE2BLPR7WNDBQIQ",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, stronghold.co TOML"
+      },
+      {
+        "symbol": "XRF",
+        "assetCode": "XRF",
+        "issuer": "GCHI6I3X62ND5XUMWINNNKXS2HPYZWKFQBZZYBSMHJ4MIP2XJXSZTXRF",
+        "contractId": "CBLLEW7HD2RWATVSMLAGWM4G3WCHSHDJ25ALP4DI6LULV5TU35N2CIZA",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, reflector.network TOML"
+      },
+      {
+        "symbol": "VELO",
+        "assetCode": "VELO",
+        "issuer": "GDM4RQUQQUVSKQA7S6EM7XBZP3FCGH4Q7CL6TABQ7B2BEJ5ERARM2M5M",
+        "contractId": "CAESLMGW5LYTIEJI7FJHK6SFSWRELLNVX5Q4WR4UZEALMTRWQDBKDPAG",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, launch allowlist source"
+      },
+      {
+        "symbol": "YBX",
+        "assetCode": "YBX",
+        "issuer": "GBUYYBXWCLT2MOSSHRFCKMEDFOVSCAXNIEW424GLN666OEXHAAWBDYMX",
+        "contractId": "CBRP2VD3CZLEQIQZ4JMBXGA5AC2U6JE26YU5CCIOICIZCVWPGBO2QRUB",
+        "verified": true,
+        "provenance": "stellar-cli asset contract id, YieldBlox launch allowlist source"
+      }
+    ]
+  },
+  "oracle": {
+    "oracleGuard": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+    "primaryProvider": "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+    "secondaryProvider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+    "fiatProvider": "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+    "providerSource": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+    "defaultPolicy": {
+      "mode": "dual_provider_fail_closed",
+      "maxAgeSeconds": 900,
+      "maxDivergenceBps": 300
+    },
+    "providerAssetOverrides": {
+      "USDC": {
+        "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "providerAsset": {
+          "Other": "USDC"
+        }
+      },
+      "XLM": {
+        "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "providerAsset": {
+          "Other": "XLM"
+        }
+      }
+    },
+    "assetPolicies": {
+      "USDC": {
+        "mode": "single_provider_exception",
+        "base": "USDC",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 150
+      },
+      "XLM": {
+        "mode": "dual_provider_fail_closed",
+        "base": "XLM",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 300
+      },
+      "EURC": {
+        "mode": "fiat_provider",
+        "base": "EUR",
+        "quote": "USD",
+        "maxAgeSeconds": 3600,
+        "maxDivergenceBps": 150
+      },
+      "AQUA": {
+        "mode": "dual_provider_fail_closed",
+        "base": "AQUA",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "XTAR": {
+        "mode": "single_provider_exception",
+        "base": "XTAR",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 0
+      },
+      "BLND": {
+        "mode": "dual_provider_fail_closed",
+        "base": "BLND",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "SHX": {
+        "mode": "dual_provider_fail_closed",
+        "base": "SHX",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "XRF": {
+        "mode": "dual_provider_fail_closed",
+        "base": "XRF",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "VELO": {
+        "mode": "dual_provider_fail_closed",
+        "base": "VELO",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 500
+      },
+      "YBX": {
+        "mode": "single_provider_exception",
+        "base": "YBX",
+        "quote": "USD",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 0
+      }
+    }
+  },
+  "launchPolicy": {
+    "creationMode": "paid_permissionless",
+    "creationFee": {
+      "token": "USDC",
+      "tokenContract": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "amount": "100000000",
+      "decimals": 7,
+      "displayAmount": "10.00 USDC",
+      "status": "required_before_public_creation"
+    },
+    "protocolTreasury": {
+      "address": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "mode": "bootstrap_treasury_until_dao_treasury_handoff"
+    },
+    "freeCreation": {
+      "enabled": false,
+      "requiresRegistryV2OrEventIndexer": true,
+      "notes": "Free permissionless creation is deferred until discovery no longer depends on monolithic global registry vectors."
+    },
+    "listingPolicyDocument": "docs/ARKA_LISTING_AND_DISCOVERY_POLICY_2026-06-10.md",
+    "securityReadinessDocument": "docs/MAINNET_DEPLOY_SECURITY_READINESS_2026-06-10.md"
+  },
+  "executionVenues": {
+    "soroswap": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": true,
+      "mainnetCanary": {
+        "validatedAt": "2026-06-12",
+        "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "tx": "f63143010d65e357cff1642c537c9ac69f75f5f0d081fcf124fbe6bd50e3d418",
+        "assetIn": "USDC",
+        "assetOut": "XLM",
+        "amountIn": "500000",
+        "minOut": "2521321",
+        "amountOut": "2587225"
+      },
+      "router": "CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH",
+      "factory": "CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2",
+      "candidatePaths": [
+        {
+          "poolId": 1,
+          "label": "XLM/USDC",
+          "path": [
+            "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+            "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+          ]
+        },
+        {
+          "poolId": 2,
+          "label": "USDC/XLM",
+          "path": [
+            "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+            "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+          ]
+        }
+      ],
+      "status": "manual_canary_passed_pending_auto_governance"
+    },
+    "aquarius": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": true,
+      "mainnetCanary": {
+        "validatedAt": "2026-06-12",
+        "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "tx": "88e042fb4988943830f639f6cb66485d89efed77ed298b1260e81c287b0d9e0a",
+        "assetIn": "USDC",
+        "assetOut": "XLM",
+        "amountIn": "500000",
+        "minOut": "2523000",
+        "amountOut": "2598872",
+        "poolIndex": "b2e02fcfca6c96f8ad5cbd84e7784a777b36d9c96a2459402c4f458462aab7f0"
+      },
+      "router": "CBQDHNBFBZYE4MKPWBSJOPIYLW4SFSXAXUTSXJN76GNKYVYPCKWC6QUK",
+      "poolRoutes": [
+        {
+          "poolId": 2,
+          "label": "USDC/XLM",
+          "tokenIn": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+          "tokenOut": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+          "tokens": [
+            "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+            "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+          ],
+          "poolIndex": "b2e02fcfca6c96f8ad5cbd84e7784a777b36d9c96a2459402c4f458462aab7f0"
+        }
+      ],
+      "status": "manual_canary_passed_pending_auto_governance"
+    },
+    "phoenix": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": true,
+      "mainnetCanary": {
+        "validatedAt": "2026-06-12",
+        "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "tx": "476e4ae93a552540d95f9ec72f9c5a8f174215ed94af32e7ceeffb49bd9c6d65",
+        "assetIn": "USDC",
+        "assetOut": "XLM",
+        "amountIn": "500000",
+        "minOut": "2521321",
+        "amountOut": "2578379"
+      },
+      "poolRoutes": [
+        {
+          "poolId": 1,
+          "label": "XLM/USDC",
+          "pool": "CBHCRSVX3ZZ7EGTSYMKPEFGZNWRVCSESQR3UABET4MIW52N4EVU6BIZX",
+          "tokenIn": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+          "tokenOut": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+          "maxSpreadBps": 100,
+          "maxAllowedFeeBps": 50
+        },
+        {
+          "poolId": 2,
+          "label": "USDC/XLM",
+          "pool": "CBHCRSVX3ZZ7EGTSYMKPEFGZNWRVCSESQR3UABET4MIW52N4EVU6BIZX",
+          "tokenIn": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+          "tokenOut": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
+          "maxSpreadBps": 100,
+          "maxAllowedFeeBps": 50
+        }
+      ],
+      "status": "manual_canary_passed_pending_auto_governance"
+    },
+    "blend": {
+      "autoEnabled": false,
+      "mainnetCanaryPassed": true,
+      "mainnetCanary": {
+        "validatedAt": "2026-06-12T09:23:43Z",
+        "arka": "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "marketId": 1,
+        "asset": "USDC",
+        "amount": "100000",
+        "allowBorrow": false,
+        "allowRepay": false,
+        "configureTx": "90daab046d785aab8547eb9aa4f366737ed5fae7113c0db47ae81600e2dfe60a",
+        "supplyTx": "312352574cda24f3b85bd7b58e4edff9b83bb01189d70b9836786b4ab47af212",
+        "withdrawTx": "e834ff98dc057c0b1407248190b60e7666edb54924adeede90f89e48e9a33ebc",
+        "recoveryWithdrawTx": "10a811a0b93ed80c78289d7d40f0a0cc724744a280b80cf665033734963c02e5",
+        "externalDiagnostics": false,
+        "finalLiquidBalance": "8500000",
+        "finalBlendPosition": null
+      },
+      "markets": [
+        {
+          "marketId": 1,
+          "label": "Fixed XLM-USDC",
+          "pool": "CDVQVKOY2YSXS2IC7KN6MNASSHPAO7UN2UR2ON4OI2SKMFJNVAMDX6DP",
+          "adapterInstance": "adapterBlendFixedXlmUsdc",
+          "externalDiagnostics": false,
+          "canaryPassed": true,
+          "allowedActions": [
+            "supply",
+            "withdraw"
+          ],
+          "disabledActions": [
+            "borrow",
+            "repay"
+          ]
+        },
+        {
+          "marketId": 2,
+          "label": "YieldBlox",
+          "pool": "CBP7NO6F7FRDHSOFQBT2L2UWYIZ2PU76JKVRYAQTG3KZSQLYAOKIF2WB",
+          "adapterInstance": "adapterBlendYieldBlox",
+          "externalDiagnostics": false,
+          "canaryPassed": false,
+          "allowedActions": [],
+          "disabledActions": [
+            "supply",
+            "withdraw",
+            "borrow",
+            "repay"
+          ]
+        }
+      ],
+      "status": "fixed_xlm_usdc_supply_withdraw_canary_passed_borrow_disabled_external_diagnostics_off"
+    },
+    "balancedSodax": {
+      "autoEnabled": true,
+      "mainnetCanaryPassed": true,
+      "mode": "intent_sdk_server_side",
+      "serverDriver": {
+        "quote": true,
+        "build": true,
+        "relay": true,
+        "submit": true,
+        "status": true,
+        "receipt": true,
+        "refund": true,
+        "expiry": true,
+        "walletBacked": true,
+        "productionCanary": true
+      },
+      "status": "ready",
+      "mainnetCanary": {
+        "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+        "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+        "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+        "status": "settled",
+        "evidence": "tmp/mainnet-balanced-sodax-canary.json"
+      }
+    }
+  },
+  "validations": {
+    "mainnetManifest": {
+      "status": "mainnet_manual_release_ready",
+      "contractsDeployed": true,
+      "contractsConfigured": true,
+      "storageLifecycleDryRun": true,
+      "releaseGate": true
+    },
+    "oracleGuard": {
+      "validatedAt": "2026-07-04T19:59:25Z",
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "mode": "oracle_guard",
+      "provider": "Reflector Network",
+      "providers": {
+        "provider": "Reflector Network",
+        "primary": "Reflector DEX Oracle",
+        "secondary": "Reflector External CEX/DEX Oracle",
+        "fiat": "Reflector Fiat Oracle"
+      },
+      "contracts": {
+        "oracleGuard": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+        "primaryOracle": "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+        "secondaryOracle": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "fiatOracle": "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+        "validationAsset": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+      },
+      "thresholds": {
+        "mode": "dual_provider_fail_closed",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 300,
+        "minProviderCount": 2
+      },
+      "providerAssetOverrides": {
+        "USDC": {
+          "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+          "providerAsset": {
+            "Other": "USDC"
+          }
+        },
+        "XLM": {
+          "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+          "providerAsset": {
+            "Other": "XLM"
+          }
+        }
+      },
+      "status": "ready"
+    },
+    "routingCanary": {
+      "network": "mainnet",
+      "validatedAt": "2026-06-13T06:10:10Z",
+      "maxAgeHours": 24,
+      "evidenceMode": "live_mainnet_execution",
+      "requiredVenues": [
+        "SOROSWAP",
+        "AQUARIUS",
+        "PHOENIX"
+      ],
+      "cases": [
+        {
+          "id": "soroswap-usdc-xlm-mainnet",
+          "venue": "SOROSWAP",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2587225",
+          "selectedPath": [
+            "USDC",
+            "SOROSWAP",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-soroswap-swap:f63143010d65e357cff1642c537c9ac69f75f5f0d081fcf124fbe6bd50e3d418",
+            "liveMainnet": true
+          }
+        },
+        {
+          "id": "aquarius-usdc-xlm-mainnet",
+          "venue": "AQUARIUS",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2598872",
+          "selectedPath": [
+            "USDC",
+            "AQUARIUS",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-aquarius-swap:88e042fb4988943830f639f6cb66485d89efed77ed298b1260e81c287b0d9e0a",
+            "liveMainnet": true
+          }
+        },
+        {
+          "id": "phoenix-usdc-xlm-mainnet",
+          "venue": "PHOENIX",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2578379",
+          "selectedPath": [
+            "USDC",
+            "PHOENIX",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-phoenix-swap:476e4ae93a552540d95f9ec72f9c5a8f174215ed94af32e7ceeffb49bd9c6d65",
+            "liveMainnet": true
+          }
+        }
+      ]
+    },
+    "globalVenuePolicy": {
+      "validatedAt": "2026-07-04T19:59:25Z",
+      "network": "mainnet",
+      "contracts": {
+        "venueRegistry": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+        "router": "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D",
+        "adapterSoroswap": "CCEBBWESKR2ZQJ6AKTA2BVSXU6ZNFVLBVPIOULA66IHBMQKIHGKZQYMI",
+        "adapterAquarius": "CAOJRRH3GL7UWTWYXJHHLMMMPD2FMNYLQO4W3DP5MSM27MHQPGTXQUIQ",
+        "adapterPhoenix": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+        "adapterBlendFixedXlmUsdc": "CBTRFXTMNZ477YG2RTDSUFICQXURNGV6RLEVDOU3XUTXEQERIZHAWBZP",
+        "adapterBlendYieldBlox": "CB2HKKC3Z4H2R4YST2Z2WAE4MHSYFDVMRKDZQX3BTX7O55DJNBNN6VWT"
+      },
+      "factoryDefaults": {
+        "venueRegistry": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+        "swapOracle": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+        "swapRiskPolicy": {
+          "enabled": true,
+          "oracleChecksEnabled": true,
+          "maxPriceImpactBps": 300,
+          "maxSlippageBps": 300,
+          "maxTwapDeviationBps": 350,
+          "maxOracleAgeSeconds": 900,
+          "maxTradeSizeBps": 2500
+        }
+      },
+      "status": "ready"
+    },
+    "balancedReadiness": {
+      "validatedAt": "2026-06-12T14:34:00Z",
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "poolId": 1,
+      "adapterBalanced": "",
+      "observedRouter": null,
+      "expectedRouter": null,
+      "poolSupported": true,
+      "pairConfigured": true,
+      "supportStatus": "ready",
+      "readyForDappExecution": true,
+      "laneMode": "sodax_intent_wallet_backed_mainnet_canary",
+      "blockingReasons": [],
+      "mainnetCanary": {
+        "network": "mainnet",
+        "validatedAt": "2026-06-12T14:34:00Z",
+        "venue": "BALANCED",
+        "mode": "sodax_intent_wallet_backed_mainnet_canary",
+        "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+        "tokenIn": "XLM",
+        "tokenOut": "USDC",
+        "amountInBase": "1000000",
+        "quotedAmountBase": "193095",
+        "minOutputAmountBase": "154476",
+        "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+        "stellar": {
+          "submitted": true,
+          "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+          "explorer": "https://stellar.expert/explorer/public/tx/a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc"
+        },
+        "quote": {
+          "ok": true,
+          "provider": "sodax_sdk"
+        },
+        "build": {
+          "ok": true,
+          "provider": "sodax_sdk",
+          "intentHash": "0xe8e4fb6825cdcebf2ba4df916c7470912c2ec2665a8822a332ed2dcb84308a1a",
+          "expiresAt": "2026-06-12T11:32:24.000Z",
+          "refundMode": "cancel_intent"
+        },
+        "relay": {
+          "ok": true,
+          "success": true,
+          "relayChainId": "27",
+          "message": "Transaction registered",
+          "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+          "canonicalIntentPacket": {
+            "srcChainId": "27",
+            "srcTxHash": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+            "srcAddress": "00000012000000018c5dec1c13bc3d86e5229f7a88a2c855ff236083b2af290a8bc160663bf6f563",
+            "status": "executed",
+            "dstChainId": "146",
+            "connectionSequence": "7216",
+            "dstAddress": "60c5681bd1db4e50735c4ca3386005a4ba4937c0",
+            "dstTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+          },
+          "packets": [
+            {
+              "srcChainId": "27",
+              "srcTxHash": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+              "srcAddress": "00000012000000018c5dec1c13bc3d86e5229f7a88a2c855ff236083b2af290a8bc160663bf6f563",
+              "status": "executed",
+              "dstChainId": "146",
+              "connectionSequence": "7216",
+              "dstAddress": "60c5681bd1db4e50735c4ca3386005a4ba4937c0",
+              "dstTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+            }
+          ]
+        },
+        "submit": {
+          "ok": true,
+          "answer": "OK",
+          "solverIntentHash": "0xa024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc"
+        },
+        "status": {
+          "ok": true,
+          "intentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+          "statusCode": 3,
+          "statusLabel": "SOLVED",
+          "terminal": true,
+          "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b"
+        },
+        "receipt": {
+          "ok": true,
+          "receiptState": "settled",
+          "intentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+          "statusLabel": "SOLVED",
+          "terminal": true,
+          "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+          "confirmationTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+          "refundMode": "none"
+        },
+        "refund": {
+          "required": false,
+          "mode": "none",
+          "reason": "Intent settled; no refund path required for this canary."
+        },
+        "passed": true,
+        "statusSummary": "settled",
+        "blockingReason": null,
+        "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b"
+      }
+    },
+    "balancedOfficialSurface": {
+      "validatedAt": "2026-06-12T14:34:00Z",
+      "officialSources": {
+        "app": "https://app.balanced.network",
+        "bundle": "https://app.balanced.network/assets/index-ZEFFd3Oo.js",
+        "stellarPage": "https://balanced.network/stellar/",
+        "swapDocs": "https://docs.sodax.com/developers/packages",
+        "tradeBlog": "https://blog.balanced.network/trade-cross-chain/",
+        "q3Blog": "https://blog.balanced.network/q3-2025/"
+      },
+      "topology": "intent_based",
+      "swapModel": "sodax_intents",
+      "liquidityModel": "legacy_exchange_only",
+      "publicRouterContractId": null,
+      "supportsPublicStellarTestnet": false,
+      "canonicalRouterCutoverPossible": false,
+      "intentAdapter": {
+        "quoteProvider": "sodax",
+        "quoteVisibleInApp": true,
+        "quoteComparableForArka": true,
+        "publicQuoteEndpoint": "sdk:@sodax/sdk::swaps.getQuote",
+        "publicBuildEndpoint": "sdk:@sodax/sdk::swaps.createIntent",
+        "publicRelayEndpoint": "sdk:@sodax/sdk::swaps.submitIntent",
+        "publicSubmitEndpoint": "sdk:@sodax/sdk::swaps.postExecution",
+        "statusSurface": "recent_activity",
+        "publicStatusEndpoint": "sdk:@sodax/sdk::swaps.getStatus",
+        "publicReceiptEndpoint": "sdk:@sodax/sdk::swaps.getSolvedIntentPacket",
+        "publicExpiryEndpoint": "sdk:@sodax/sdk::swaps.getIntent",
+        "publicRefundEndpoint": "sdk:@sodax/sdk::swaps.cancelIntent",
+        "cancellationWindowSeconds": 300
+      },
+      "stellarMainnetAddresses": {
+        "connection": "CDFQDDPUPAM3XPGORHDOEFRNLMKOH3N3X6XTXNLSXJQXIU3RVCM3OPEP",
+        "assetManager": "CCGF33A4CO6D3BXFEKPXVCFCZBK76I3AQOZK6KIKRPAWAZR3632WHCJ3",
+        "xTokenManager": null,
+        "rateLimit": "CB6G3ULISTTBPXUN3BI6ADHQGWJEN7BPQINHL45TCB6TDFM5QWU24HAY"
+      },
+      "findings": [
+        "Official Stellar swaps are powered by SODAX Intents rather than a published Soroban AMM router.",
+        "The public SODAX SDK exposes quote, build, relay, submit, status, receipt, expiry and refund methods.",
+        "Arka mainnet canary proved quote/build/relay/submit/status/settlement by resolving the relay packet destination hash before reading status."
+      ],
+      "appBundleDetected": true
+    },
+    "mainnetSelectiveUpgrade": {
+      "validatedAt": "2026-07-04T18:09:47Z",
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "sourceAccount": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
+      "mode": "selective_upload_upgrade",
+      "uploads": {
+        "arka": {
+          "artifact": "artifacts/arka.wasm",
+          "wasmHash": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+          "tx": "1ae60c3e6669c506fbbe7c30170be179661aad16631fa323bfd4db1b4fa0eef9"
+        },
+        "shareToken": {
+          "artifact": "artifacts/share-token.wasm",
+          "wasmHash": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+          "tx": "0f912c3e462605d0d5f3697cf17fc096faba3d29e52554de46aadee9da57fbcc"
+        },
+        "arkaFactory": {
+          "artifact": "artifacts/arka-factory.wasm",
+          "wasmHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+          "tx": "2c7056917f39c1e6b0c7245be084eadfd2e3aaabd07fd2545db8525599407252"
+        },
+        "adapterPhoenix": {
+          "artifact": "artifacts/adapter-phoenix.wasm",
+          "wasmHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+          "tx": "e2929ef02fa76707f9fc9d68d3ddd94db1ec912c3145458132eaeec2323478c2"
+        },
+        "adapterSoroswap": {
+          "artifact": "artifacts/adapter-soroswap.wasm",
+          "wasmHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
+          "tx": "0e9b2a386619fb9ad0e4f5572af42b5c41a7d8ac753f94902e062f462299df58"
+        }
+      },
+      "activationTxs": {
+        "arkaFactoryUpgrade": "4107fb04822e9fa8e964de3eebdaa1d40a7fffdf5eec7348fc0df02ca76aa7f8",
+        "arkaFactorySetArkaImplementation": "f3e81ec1b02900fc5610364ffc9f35ba2926b3f7a553db5afedc6cd962124749",
+        "arkaFactorySetShareImplementation": "418f6799b39dcaba9b9ad0e950155e2d7c9225335d61cafcee2fdb7e950ad69e",
+        "adapterPhoenixUpgrade": "6b73065de7028e46e0af6db553a570dd6be81d40c8eec862928c5c1517abfd5a",
+        "adapterSoroswapUpgrade": "a655126db725dbfb6904425e0739e5ec294d51fc533d83b089c526f71f2d5361"
+      },
+      "verifiedOnchain": {
+        "arkaFactoryHash": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+        "arkaFactoryShareTokenImplementation": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+        "adapterPhoenixHash": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+        "adapterSoroswapHash": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288"
+      }
+    },
+    "mainnetPostUpgradeCanary": {
+      "validatedAt": "2026-07-04T19:45:00Z",
+      "network": "mainnet",
+      "status": "passed_contract_canaries_indexer_pending",
+      "scope": "post-upgrade create/deposit/redeem, Phoenix route, venue kill-switch, and post-fix Blend supply/withdraw accounting canaries",
+      "remaining": [
+        "indexer/catalog/frontend reflection check",
+        "Vercel production deploy and production smoke/E2E"
+      ],
+      "creationFeeApprovalTx": "c879fc9a8090bfab99ae4caa6702fd4140c5d42b981881865893f24395a60179",
+      "createAndInitTx": "60b47c66391d212a536da594e37cf69280ee62e7703739cc186d019ebf9b9194",
+      "depositApprovalTx": "4275f69fa10a39becf0d501a315972a2c5e3e15f0f892e5a87bdac02c6d3bd74",
+      "depositTx": "8e13e1ae846cf41c0b7f90086b1929dadca35c8d3cd81e04eb147b47922f6b27",
+      "redeemTx": "ae2cf79b693cfd4fa650674195cbbea92751d1a92ca8b9ac53463708ee932646",
+      "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+      "shareToken": "CC2RE6UATO45JGZ4NCV4YHBWBDYHAOSGHEKFPYTV4R4KH5XLUBTNM2BD",
+      "shareTokenHash": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+      "denomination": "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "managerArkasBefore": [
+        "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M"
+      ],
+      "managerArkasAfter": [
+        "CCHNBPXXVSNQPPSD5XO6XLJ4BPXCXECW7AJJEPP5CF23IT6CAJWBIV4M",
+        "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE"
+      ],
+      "finalState": {
+        "sharesOfAdmin": "500000",
+        "shareTokenBalance": "500000",
+        "liquidUsdcBaseUnits": "500000",
+        "navBaseUnits": "500000"
+      },
+      "evidence": "tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
+      "completed": [
+        "post-upgrade factory create and share-token deployment",
+        "post-upgrade USDC deposit and partial redeem",
+        "post-upgrade Phoenix route execution",
+        "post-upgrade Phoenix venue kill-switch disable/re-enable",
+        "post-fix Blend fixed XLM-USDC supply/withdraw accounting canary on fresh Arka"
+      ],
+      "routingCanary": {
+        "evidence": "tmp/mainnet-post-upgrade-routing-canary-2026-07-04.json",
+        "network": "mainnet",
+        "validatedAt": "2026-07-04",
+        "status": "passed",
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "venue": "phoenix",
+        "adapter": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+        "tx": "e2d5b9052dcc8dca40938af630907d601d2cc79c8467c8abd16c90479b59e3b3",
+        "assetIn": "USDC",
+        "assetOut": "XLM",
+        "amountIn": "100000",
+        "minOut": "465000",
+        "amountOut": "471084",
+        "finalState": {
+          "liquidUsdcBaseUnits": "400000",
+          "liquidXlmStroops": "471084"
+        }
+      },
+      "killSwitchCanary": {
+        "evidence": "tmp/mainnet-post-upgrade-kill-switch-canary-2026-07-04.json",
+        "network": "mainnet",
+        "validatedAt": "2026-07-04",
+        "status": "passed",
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "venue": "phoenix",
+        "adapter": "CAZ7S7Z7PHFONWMOA4L3I256LEFDAE6YJCLI6N4UH5FJ7CROFQ2IJMOT",
+        "disableTx": "c4535f90c270278cc9f0e287d053f30d729cab841c796101303e6bf4cb377271",
+        "blockedSimulation": {
+          "status": "passed",
+          "expectedError": "SwapVenueNotAllowed"
+        },
+        "reenableTx": "6141e400079f081467f614be0bb19c92e7f663400251bdbff270a54dc1af0e58",
+        "finalAllowed": true,
+        "finalStatus": "manual_only"
+      },
+      "blendAccountingCanary": {
+        "evidence": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+        "status": "passed",
+        "arka": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+        "shareToken": "CCP3T3PF2Q3RDHJRRSFW7UHSEHFJOEXIQM7NJ4PEXRWSPEP4G62VIJUO",
+        "txs": {
+          "approveCreationFee": "a32b47a1417c045191f0a569c036f218ef5640a1573b9209f8630dda96c2b5c1",
+          "createAndInit": "bd0f9c1cf8d2c562f121e9a339835cbd610f4724422e4bd95c37cb4d849e1374",
+          "approveDeposit": "7812eda408e510e89eb84b759ebe80f373c5b0b762426271cc67dc2f416de383",
+          "deposit": "92b7a35057b9894c522ab6dc1355be1fd1cfcb779e800d95f517a9bb3af8adca",
+          "configureBlendMarket": "3780ce9475fcb1a394780215e56b6d3c99e279ed0429e6c8fe0155d90d824d43",
+          "disableBlendExternalDiagnostics": "031c931952776708edb0fe07e7660a23455fe8cabd88a0faf1bdcd03bf4abb3f",
+          "creditSupply": "b93e5bbcf68f6b04687d88cacacca468c590e856d00a4010e4eef5a532f5fecf",
+          "creditWithdraw": "5f74df2ce454d01d8ca2c9b44dee7f79be46f8ca65655b936ba580087bb953ff"
+        },
+        "accounting": {
+          "internalBefore": "1000000",
+          "actualBefore": "1000000",
+          "internalAfterSupply": "900000",
+          "actualAfterSupply": "900000",
+          "internalAfterWithdraw": "999998",
+          "actualAfterWithdraw": "999998",
+          "matchesAfterWithdraw": true
+        }
+      }
+    },
+    "mainnetArkaAccountingPatch": {
+      "validatedAt": "2026-07-04T19:45:00Z",
+      "network": "mainnet",
+      "status": "passed",
+      "reason": "Blend withdraw can return fewer token base units than requested because of pool share rounding; Arka now credits actual token balance delta for receive actions.",
+      "previousArkaWasmHash": "fbae2cb921c3fec3fc28aff850e89b26356ef3741837d8df09cce30369c4e8b8",
+      "arkaWasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+      "upload": {
+        "artifact": "artifacts/arka.wasm",
+        "wasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+        "tx": "90a20d220d7b330f12864af2a7efd93479aa4d918a1c8f305b22680d37361f3b"
+      },
+      "factoryImplementationUpdate": {
+        "contract": "CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK",
+        "tx": "083378cc16626e3281e321173d59ca71eb58bfca3b4ce9e1026d1aecad786e63"
+      },
+      "upgradedExistingCanary": {
+        "arka": "CBRNPZV73FV7OUS34LA57NHAPBVOEH37V22QLBXSG3UCZ25THBKV2QKE",
+        "tx": "7755642dd4ded9a675ae05059d9493e23a310bcb400b1b343dae38dd7330936a",
+        "lastWasmHash": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701"
+      },
+      "freshBlendCanary": {
+        "evidence": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+        "arka": "CDWJWFXS6IHMKTCJJR6U5DXYHY5FF2GW33JULLSRHHIXZ4ZKW6XTMLS7",
+        "shareToken": "CCP3T3PF2Q3RDHJRRSFW7UHSEHFJOEXIQM7NJ4PEXRWSPEP4G62VIJUO",
+        "txs": {
+          "approveCreationFee": "a32b47a1417c045191f0a569c036f218ef5640a1573b9209f8630dda96c2b5c1",
+          "createAndInit": "bd0f9c1cf8d2c562f121e9a339835cbd610f4724422e4bd95c37cb4d849e1374",
+          "approveDeposit": "7812eda408e510e89eb84b759ebe80f373c5b0b762426271cc67dc2f416de383",
+          "deposit": "92b7a35057b9894c522ab6dc1355be1fd1cfcb779e800d95f517a9bb3af8adca",
+          "configureBlendMarket": "3780ce9475fcb1a394780215e56b6d3c99e279ed0429e6c8fe0155d90d824d43",
+          "disableBlendExternalDiagnostics": "031c931952776708edb0fe07e7660a23455fe8cabd88a0faf1bdcd03bf4abb3f",
+          "creditSupply": "b93e5bbcf68f6b04687d88cacacca468c590e856d00a4010e4eef5a532f5fecf",
+          "creditWithdraw": "5f74df2ce454d01d8ca2c9b44dee7f79be46f8ca65655b936ba580087bb953ff"
+        },
+        "accounting": {
+          "internalBefore": "1000000",
+          "actualBefore": "1000000",
+          "internalAfterSupply": "900000",
+          "actualAfterSupply": "900000",
+          "internalAfterWithdraw": "999998",
+          "actualAfterWithdraw": "999998",
+          "matchesAfterWithdraw": true
+        },
+        "creditWithdrawActualBaseUnits": "99998"
+      }
+    }
+  },
+  "validatedModules": {
+    "oracleSafety": {
+      "network": "mainnet",
+      "rpcUrl": "https://mainnet.sorobanrpc.com",
+      "validatedAt": "2026-07-04T19:59:25Z",
+      "provider": "Reflector Network",
+      "providers": {
+        "provider": "Reflector Network",
+        "primary": "Reflector DEX Oracle",
+        "secondary": "Reflector External CEX/DEX Oracle",
+        "fiat": "Reflector Fiat Oracle"
+      },
+      "contracts": {
+        "oracleGuard": "CDHSFLLDLZ6H5X3ZPRXQ23BVWJWPINWIKJBJPKFW2DLTS4X4V6RR4AZ6",
+        "primaryOracle": "CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M",
+        "secondaryOracle": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+        "fiatOracle": "CBKGPWGKSKZF52CFHMTRR23TBWTPMRDIYZ4O2P5VS65BMHYH4DXMCJZC",
+        "validationAsset": "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA"
+      },
+      "thresholds": {
+        "mode": "dual_provider_fail_closed",
+        "maxAgeSeconds": 900,
+        "maxDivergenceBps": 300,
+        "minProviderCount": 2
+      },
+      "providerAssetOverrides": {
+        "USDC": {
+          "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+          "providerAsset": {
+            "Other": "USDC"
+          }
+        },
+        "XLM": {
+          "provider": "CAFJZQWSED6YAWZU3GWRTOCNPPCGBN32L7QV43XX5LZLFTK6JLN34DLN",
+          "providerAsset": {
+            "Other": "XLM"
+          }
+        }
+      },
+      "checks": {
+        "providerContractFamily": "reflector-mainnet-sep40",
+        "releaseState": "ready"
+      }
+    },
+    "globalVenuePolicy": {
+      "network": "mainnet",
+      "validatedAt": "2026-07-04T19:59:25Z",
+      "contracts": {
+        "venueRegistry": "CAR5IEPAR3HQB6MSLTTMWCFWVEHTXAQ6J3FK5QNCEJS2OLXBUU6UUMYN",
+        "router": "CCZNPW4X62T3RM5L5ND6FEKYMCCC54PBCNOAWJNLCXL2RS66Q7VANX7D"
+      },
+      "checks": {
+        "globalVenueKillSwitch": "ready",
+        "newArkaFactoryDefaults": "ready"
+      }
+    },
+    "balancedExecution": {
+      "autoEnabled": true,
+      "mainnetCanaryPassed": true,
+      "mode": "intent_sdk_server_side",
+      "serverDriver": {
+        "quote": true,
+        "build": true,
+        "relay": true,
+        "submit": true,
+        "status": true,
+        "receipt": true,
+        "refund": true,
+        "expiry": true,
+        "walletBacked": true,
+        "productionCanary": true
+      },
+      "mainnetCanary": {
+        "tx": "a024f2303be2debdf608611c042f0f0e6e86d4d3496386b84df52e80940facdc",
+        "canonicalIntentTxHash": "0x9457f1806dc63f02e0589abdee2085ca79cbb84cdfb27fad8c27eae003cc4a1b",
+        "fillTxHash": "0x59d4cf17a32ed7c4bb70c91c88e498af7f43c12f9fbc924e8d2e8484a907f71b",
+        "status": "settled",
+        "quote": true,
+        "build": true,
+        "relay": true,
+        "submit": true,
+        "statusRead": true,
+        "settled": true,
+        "refundRecovered": false,
+        "refundRequired": false,
+        "evidence": "tmp/mainnet-balanced-sodax-canary.json"
+      },
+      "status": "ready"
+    },
+    "routingCanary": {
+      "network": "mainnet",
+      "validatedAt": "2026-06-13T06:10:10Z",
+      "maxAgeHours": 24,
+      "evidenceMode": "live_mainnet_execution",
+      "requiredVenues": [
+        "SOROSWAP",
+        "AQUARIUS",
+        "PHOENIX"
+      ],
+      "cases": [
+        {
+          "id": "soroswap-usdc-xlm-mainnet",
+          "venue": "SOROSWAP",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2587225",
+          "selectedPath": [
+            "USDC",
+            "SOROSWAP",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-soroswap-swap:f63143010d65e357cff1642c537c9ac69f75f5f0d081fcf124fbe6bd50e3d418",
+            "liveMainnet": true
+          }
+        },
+        {
+          "id": "aquarius-usdc-xlm-mainnet",
+          "venue": "AQUARIUS",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2598872",
+          "selectedPath": [
+            "USDC",
+            "AQUARIUS",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-aquarius-swap:88e042fb4988943830f639f6cb66485d89efed77ed298b1260e81c287b0d9e0a",
+            "liveMainnet": true
+          }
+        },
+        {
+          "id": "phoenix-usdc-xlm-mainnet",
+          "venue": "PHOENIX",
+          "tokenIn": "USDC",
+          "tokenOut": "XLM",
+          "amountBase": "500000",
+          "quoteOutBase": "2578379",
+          "selectedPath": [
+            "USDC",
+            "PHOENIX",
+            "XLM"
+          ],
+          "candidateUniverseSize": 1,
+          "quotedPathCount": 1,
+          "minEfficiencyBps": 0,
+          "plannerEfficiencyBps": null,
+          "passed": true,
+          "evidence": {
+            "mode": "live_mainnet_execution",
+            "collectedAt": "2026-06-13T06:10:10Z",
+            "source": "mainnet-phoenix-swap:476e4ae93a552540d95f9ec72f9c5a8f174215ed94af32e7ceeffb49bd9c6d65",
+            "liveMainnet": true
+          }
+        }
+      ]
+    }
+  },
+  "status": "mainnet_manual_release_ready",
+  "createdAt": "2026-06-10T12:05:32Z",
+  "updatedAt": "2026-07-04T19:45:00Z",
+  "wasmHashes": {
+    "arka": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701",
+    "shareToken": "63ec7343aa82c66a9b515ba59a1bf38f4e5a14dbd3cd672b82b96047cc9c3192",
+    "arkaFactory": "57691ae9931d9d124abe3749b00b3700ac3524162e0e147c1bced9fb2e0fb579",
+    "arkaRegistry": "4b0ec481f895d45af3ea43aaa2bb431a7a1bdc4c9fcc376e089ae0d69a6cb881",
+    "router": "a4616196739e405dd97888f38cb71ce0fa59dd8e09ccf16245a009718fa19872",
+    "venueRegistry": "842c5d41cf057b60d32511da67f739348c540175ff1a50a261d87fb1759b7c2e",
+    "adapterAquarius": "9ff31b1fb5a0fe16ffcfc28158710c7fe8cb2c31532b45985f1e808b990c78dd",
+    "adapterBalanced": "ae0608787861cca04b3563c0f0532111284ae3eba080762dd87a48893afe2d60",
+    "adapterBlend": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
+    "adapterBlendFixedXlmUsdc": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
+    "adapterBlendYieldBlox": "1a22a1b7b808cc3aaa195d6b847a43f45815521a7a618629f83d27947511958e",
+    "adapterPhoenix": "5d083d73612ee50ee02a187b38f230b1645b22d59712595ccf6b99fb6b0dd86e",
+    "adapterSoroswap": "9665ef7c77f338dac19adf04d2536ef37472270c01fb67fb5c666ce8f4a7a288",
+    "oracleGuard": "ca4e28f39354c0a92f8d9422b0284c37e00ee3baaaf9717983f22ef36ee28e71",
+    "coverageVault": "65f90efcee29dbcb1b2824aaa86d3a530f440bc7df4878ba70271655e8386abf",
+    "coverageFund": "7d5e1ef91b4c0f2899f0f10cca01469002acc77744e1206a10a415cc268f1664",
+    "claimsManager": "1ab5e135d3cfd6f15a13b0939c2c10cab1cea4243c78a9e19ec8a50c27043ef0",
+    "managerTier": "149c280d4a93b7dfab90b53b5cf81951224babf4c398ae3ccc9e84b517fe6188",
+    "arkaToken": "19f62f37e57ba77c24e674428f1a232433c263f8076b55b5c88fa3642a471572",
+    "lockedArka": "2eb96f7b10a9c586163851769666ec14f63291712cdbca47d36c2251a579189a",
+    "governanceToken": "2a581acfd0bc2a2cbd0abc56d9f9bd254260b368340478d611922f4f03ae270c",
+    "governanceExecutor": "868a26642dddbc9e8d676749b9ed27acfc4dd6b396b57686a84131882b65fb90",
+    "arkaVesting": "65b5f4a19eed8f6a6a3c802b4e06bcefbe8182d9687acc820faca8734637e4d9",
+    "emissionsController": "0fb09df4f7c8725a7b76219d72f775e04dd07bc4a79b77309bf552cd11b80812"
+  },
+  "evidence": {
+    "manifest": "../arkafund/deployments.mainnet.json",
+    "createDepositRedeem": "../arkafund/tmp/mainnet-canary-create-deposit-redeem.json",
+    "routingCanary": "../arkafund/tmp/mainnet-routing-canary.json",
+    "postUpgradeCreate": "../arkafund/tmp/mainnet-post-upgrade-create-canary-2026-07-04.json",
+    "postUpgradeCreateDepositRedeem": "../arkafund/tmp/mainnet-post-upgrade-deposit-redeem-canary-2026-07-04.json",
+    "postFixBlendAccounting": "tmp/mainnet-post-fix-blend-canary-2026-07-04.json",
+    "postUpgradeRouting": "tmp/mainnet-post-upgrade-routing-canary-2026-07-04.json",
+    "postUpgradeKillSwitch": "tmp/mainnet-post-upgrade-kill-switch-canary-2026-07-04.json"
+  },
+  "artifactShas": {
+    "artifacts/arka.wasm": "75fae87d8eb058c51098d5a05c2b4e73e63c44c10930280ab9c53d9539e12701"
+  }
+}

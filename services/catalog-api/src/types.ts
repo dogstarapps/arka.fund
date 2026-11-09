@@ -61,7 +61,7 @@ export interface CatalogPortfolioWeight {
 export interface CatalogEconomicMetrics {
   denominationAsset: CatalogAssetIdentity | null;
   denominationPrice: CatalogAssetPrice | null;
-  navDenomination: string;
+  navDenomination: string | null;
   navUsdEstimate: string | null;
   sharePrice: string | null;
   returns: Record<"1d" | "7d" | "30d" | "1y" | "all", CatalogPeriodMetric>;
@@ -85,6 +85,8 @@ export interface ArkaAssetExposure {
   netPositionValue: string;
   marketIds: string[];
   syncedAt: string;
+  /** V3 only: physical denomination cash reserved for fixed withdrawal claims. */
+  reservedWithdrawalBalance?: string;
 }
 
 export interface ArkaCatalogEntry {
@@ -92,7 +94,8 @@ export interface ArkaCatalogEntry {
   manager: string;
   curated: boolean;
   delisted: boolean;
-  nav: string;
+  nav: string | null;
+  navUnavailableReason?: string | null;
   denominationContract: string | null;
   whitelistContracts: string[];
   shareToken: string | null;
@@ -101,6 +104,7 @@ export interface ArkaCatalogEntry {
   economics?: CatalogEconomicMetrics;
   identity?: ArkaIdentityMetadata | null;
   syncedAt: string;
+  managedWithdrawals?: import("./managedTypes.js").ManagedCatalogState;
 }
 
 export interface AssetCatalogEntry {
@@ -118,6 +122,7 @@ export interface AssetCatalogEntry {
   /** USD valuation of the current managed amount, when every non-zero amount is priced. */
   netManagedUsdEstimate: string | null;
   syncedAt: string;
+  reservedWithdrawalBalance?: string;
 }
 
 export interface ManagerCatalogEntry {
@@ -137,6 +142,9 @@ export type IdentityTrustState = "unverified" | "curated" | "verified" | "offici
 export interface IdentityUpdatePayload {
   displayName?: string | null;
   description?: string | null;
+  strategy?: string | null;
+  riskDisclosure?: string | null;
+  targetReturn?: string | null;
   avatarUrl?: string | null;
   websiteUrl?: string | null;
   socialUrl?: string | null;
@@ -154,6 +162,9 @@ export interface IdentityUpdateRequest {
 interface IdentityMetadataBase {
   displayName: string | null;
   description: string | null;
+  strategy?: string | null;
+  riskDisclosure?: string | null;
+  targetReturn?: string | null;
   avatarUrl: string | null;
   websiteUrl: string | null;
   socialUrl: string | null;
@@ -186,6 +197,8 @@ export interface CatalogSyncFailure {
 }
 
 export interface CatalogMetrics {
+  unvaluedArkas?: number;
+  navComplete?: boolean;
   totalArkas: number;
   indexedArkas: number;
   failedArkas: number;
@@ -195,6 +208,7 @@ export interface CatalogMetrics {
   totalAssets: number;
   totalNav: string;
   syncedAt: string;
+  managedDataComplete?: boolean;
 }
 
 export interface CatalogSnapshot {
@@ -346,6 +360,33 @@ export interface ActivitySummary {
   netUserFlow: string;
 }
 
+export interface ArkaHolderEntry {
+  holder: string;
+  shares: string;
+  ownershipBps: number;
+  firstSeenLedger: number | null;
+  lastActivityLedger: number | null;
+  freeShares?: string;
+  pendingShares?: string;
+  claimableAssets?: string;
+  paidAssets?: string;
+  positionValueDenomination?: string | null;
+}
+
+export interface ArkaHolderPage extends Page<ArkaHolderEntry> {
+  arkaId: string;
+  shareToken: string | null;
+  totalShares: string;
+  indexedAt: string;
+  complete: boolean;
+  /** Last verified balances, served while a bounded background refresh runs. */
+  stale?: boolean;
+  refreshFailed?: boolean;
+  coverageFromLedger: number | null;
+  coverageToLedger: number | null;
+  managed?: {version: 3; observationId: string; nav: string | null; denominationContract: string | null; reservedAssets: string; pendingShares: string};
+}
+
 export interface DashboardMonitoringSummary {
   healthy: boolean;
   degraded: boolean;
@@ -424,7 +465,7 @@ export interface ArkaPortfolio {
   shareToken: string | null;
   denominationContract: string | null;
   syncedAt: string;
-  nav: string;
+  nav: string | null;
   totalNavContribution: string;
   totalNavUsdEstimate: string | null;
   items: ArkaPortfolioItem[];
@@ -445,7 +486,7 @@ export interface RankedAssetCatalogEntry extends AssetCatalogEntry {
 export interface ArkaHistoryPoint {
   arkaId: string;
   syncedAt: string;
-  nav: string;
+  nav: string | null;
   manager: string;
   curated: boolean;
   delisted: boolean;
@@ -537,6 +578,11 @@ export interface ActivityQuery {
   fromLedger?: number;
   toLedger?: number;
   order?: "asc" | "desc";
+  limit?: number;
+}
+
+export interface HolderQuery {
+  offset?: number;
   limit?: number;
 }
 

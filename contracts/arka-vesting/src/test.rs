@@ -26,24 +26,24 @@ fn test_linear_vesting_claim_and_revoke() {
     env.mock_all_auths();
     set_ledger(&env, 1_000, 10);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(&env, &token_id);
+    
+    
     let admin = Address::generate(&env);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(&env, &token_id);
 
     let treasury = Address::generate(&env);
     let team = Address::generate(&env);
     token.mint(&treasury, &1_000);
 
-    let vesting_id = env.register_contract(None, ArkaVesting);
+    
+    
+    let vesting_id = env.register(ArkaVesting, (&admin, &token_id,));
     let vesting = ArkaVestingClient::new(&env, &vesting_id);
-    vesting.init(&admin, &token_id);
     token.approve(&treasury, &vesting_id, &600);
 
     let grant_id = vesting.create_grant(
@@ -79,23 +79,23 @@ fn test_invalid_schedule_is_rejected() {
     env.mock_all_auths();
     set_ledger(&env, 1_000, 10);
 
-    let token_id = env.register_contract(None, ArkaToken);
-    let token = ArkaTokenClient::new(&env, &token_id);
+    
+    
     let admin = Address::generate(&env);
-    token.init(
-        &admin,
+    let token_id = env.register(ArkaToken, (&admin,
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &soroban_sdk::String::from_str(&env, "ARKA"),
         &7u32,
-        &Some(1_000_000i128),
-    );
+        &Some(1_000_000i128),));
+    let token = ArkaTokenClient::new(&env, &token_id);
     let treasury = Address::generate(&env);
     let beneficiary = Address::generate(&env);
     token.mint(&treasury, &100);
 
-    let vesting_id = env.register_contract(None, ArkaVesting);
+    
+    
+    let vesting_id = env.register(ArkaVesting, (&admin, &token_id,));
     let vesting = ArkaVestingClient::new(&env, &vesting_id);
-    vesting.init(&admin, &token_id);
     token.approve(&treasury, &vesting_id, &100);
     vesting.create_grant(
         &admin,
@@ -107,4 +107,24 @@ fn test_invalid_schedule_is_rejected() {
         &100,
         &true,
     );
+}
+
+
+#[test]
+fn optional_governor_clear_is_readable_and_does_not_revive_expired_admin() {
+    let env = Env::default();
+    env.mock_all_auths();
+    set_ledger(&env, 1_000, 10);
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let token = Address::generate(&env);
+    let id = env.register(ArkaVesting, (&admin, &token));
+    let client = ArkaVestingClient::new(&env, &id);
+    assert_eq!(client.governor(), None);
+    client.set_governor(&admin, &Some(governor));
+    client.set_governor(&admin, &None);
+    assert_eq!(client.governor(), None);
+    client.set_bootstrap_admin_expiry(&admin, &1_010u64);
+    set_ledger(&env, 1_020, 11);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
 }

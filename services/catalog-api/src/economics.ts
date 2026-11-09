@@ -49,29 +49,25 @@ export function buildArkaEconomicMetrics(
     ? context.assetPrices?.get(entry.denominationContract.trim().toUpperCase()) ?? null
     : null;
   const assetValues = entry.assets.map((asset) =>
-    valueAssetContribution(asset, context),
+    valueAssetContribution(asset, entry.denominationContract, context),
   );
   const hasRecordedAssets = entry.assets.length > 0;
   const hasUnpricedContribution = assetValues.some((value) => value.usdValue === null);
-  const recordedTotal = assetValues.reduce(
-    (total, value) => total + BigInt(value.contribution),
-    0n,
-  );
-  const navMatchesRecordedAssets = recordedTotal === BigInt(entry.nav);
   const denominationFallback = hasRecordedAssets
     ? null
-    : valueAmountInUsd(entry.nav, entry.denominationContract, context);
-  const navUsdEstimate = hasRecordedAssets
-    ? hasUnpricedContribution || !navMatchesRecordedAssets
+    : valueAmountInUsd(entry.nav ?? "0", entry.denominationContract, context);
+  const navUsdEstimate = entry.nav === null ? null : hasRecordedAssets
+    ? hasUnpricedContribution
       ? null
       : assetValues.reduce((total, value) => total + BigInt(value.usdValue ?? "0"), 0n).toString()
     : denominationFallback?.usdValue ?? null;
-  const missingPriceReasons = hasRecordedAssets
+  const missingPriceReasons = entry.nav === null
+    ? [entry.navUnavailableReason ?? "nav_unavailable"]
+    : hasRecordedAssets
     ? [
-        ...new Set([
-          ...assetValues.flatMap((value) => value.missingReason ? [value.missingReason] : []),
-          ...(navMatchesRecordedAssets ? [] : ["asset_exposure_does_not_reconcile_with_nav"]),
-        ]),
+          ...new Set([
+            ...assetValues.flatMap((value) => value.missingReason ? [value.missingReason] : []),
+          ]),
       ]
     : denominationFallback?.missingReason
       ? [denominationFallback.missingReason]
@@ -183,21 +179,74 @@ function buildPortfolioWeights(
   });
 }
 
-function navContribution(asset: ArkaAssetExposure): string {
-  return (BigInt(asset.liquidBalance) + BigInt(asset.netPositionValue)).toString();
-}
-
 function valueAssetContribution(
   asset: ArkaAssetExposure,
+  denominationContract: string | null,
   context: CatalogValuationContext,
 ): AssetContributionValue {
-  const contribution = navContribution(asset);
-  const valuation = valueAmountInUsd(contribution, asset.assetContract, context);
+  const availableLiquid = managedLiquid(asset);
+  const liquidUsd = valueAmountInUsd(availableLiquid, asset.assetContract, context);
+  // Credit adapters report netPositionValue in the Arka denomination, while
+  // liquidBalance remains in the asset's own units. Value them separately.
+  const positionUsd = valueAmountInUsd(
+    asset.netPositionValue,
+    denominationContract,
+    context,
+  );
+  const liquidDenomination = valueAmountInDenomination(
+    availableLiquid,
+    asset.assetContract,
+    denominationContract,
+    context,
+  );
+  const usdValue = liquidUsd.usdValue === null || positionUsd.usdValue === null
+    ? null
+    : (BigInt(liquidUsd.usdValue) + BigInt(positionUsd.usdValue)).toString();
+  const missingReason = liquidUsd.missingReason ?? positionUsd.missingReason;
+  const valuationSource = liquidUsd.valuationSource === "oracle_verified"
+    || positionUsd.valuationSource === "oracle_verified"
+    ? "oracle_verified"
+    : liquidUsd.valuationSource === "unavailable" || positionUsd.valuationSource === "unavailable"
+      ? "unavailable"
+      : "usd_stablecoin_parity";
+  const oracleStatus = usdValue === null
+    ? firstUnavailableOracleStatus([liquidUsd, positionUsd])
+    : valuationSource === "oracle_verified"
+      ? "verified"
+      : "not_required_usd_stablecoin";
   return {
     assetContract: asset.assetContract,
-    contribution,
-    ...valuation,
+    contribution: (
+      BigInt(liquidDenomination ?? "0") + BigInt(asset.netPositionValue)
+    ).toString(),
+    usdValue,
+    oracleStatus,
+    valuationSource,
+    missingReason,
   };
+}
+
+function valueAmountInDenomination(
+  amount: string,
+  assetContract: string,
+  denominationContract: string | null,
+  context: CatalogValuationContext,
+): string | null {
+  if (BigInt(amount) === 0n) return "0";
+  if (!denominationContract) return null;
+  if (assetContract.trim().toUpperCase() === denominationContract.trim().toUpperCase()) {
+    return amount;
+  }
+  const usd = valueAmountInUsd(amount, assetContract, context).usdValue;
+  if (usd === null) return null;
+  if (isUsdStablecoinContract(denominationContract)) return usd;
+  const price = context.assetPrices?.get(denominationContract.trim().toUpperCase()) ?? null;
+  if (price?.oracleStatus !== "verified" || price.priceUsd === null || BigInt(price.priceUsd) <= 0n) {
+    return null;
+  }
+  return (
+    (BigInt(usd) * (10n ** BigInt(price.decimals))) / BigInt(price.priceUsd)
+  ).toString();
 }
 
 function valueAmountInUsd(
@@ -259,3 +308,4 @@ function firstUnavailableOracleStatus(
 function cloneFees(fees: FeeSummary): FeeSummary {
   return { ...fees };
 }
+import { managedLiquid } from "./managedAssets.js";

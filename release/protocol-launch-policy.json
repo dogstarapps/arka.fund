@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "revision": "R32",
+  "mainnetApproved": false,
+  "noah": {
+    "version": 2,
+    "migrate": false
+  },
+  "targetNetwork": null,
+  "actualTargetReconciled": false,
+  "venues": [
+    {
+      "id": "PHOENIX",
+      "launch": "retired",
+      "newExposure": false,
+      "preserveLegacy": true,
+      "upgradeExistingInstances": false
+    },
+    {
+      "id": "SOROSWAP",
+      "launch": "candidate-pending-target-validation",
+      "address": null,
+      "codeHash": null,
+      "initialState": 0
+    },
+    {
+      "id": "AQUARIUS",
+      "launch": "candidate-pending-target-validation",
+      "address": null,
+      "codeHash": null,
+      "initialState": 0
+    },
+    {
+      "id": "SUSHI",
+      "launch": "candidate-fork-validated-pending-target-activation",
+      "address": null,
+      "codeHash": null,
+      "factory": null,
+      "pools": [],
+      "fundCallers": [],
+      "initialState": 0,
+      "borrowing": false,
+      "localValidation": {
+        "ledger": 65206504,
+        "report": "docs/LIQUIDATION_R9.md",
+        "scope": "R17 actual factory creates the routed vault and share token from selected unchanged WASM, then completes both Sushi directions, five protected withdrawal lots and full collection on authorized frozen R8 ledger 65206504. Funding, accounts, oracle, governance and target namespace are synthetic. No production activation.",
+        "manualDappWorkflow": "docs/WITHDRAWAL_FLOW_R10.md",
+        "readPreparationBackend": "docs/WITHDRAWAL_BACKEND_R11.md",
+        "clientExecution": "docs/MAINNET_EXECUTION_R12.md",
+        "offlineCryptography": "docs/CRYPTOGRAPHIC_VALIDATION_R13.md",
+        "factoryRoutedRehearsal": "docs/FACTORY_ROUTED_REHEARSAL_R17.md",
+        "factoryDappBackend": "docs/FACTORY_DAPP_BACKEND_R18.md",
+        "governedConstruction": "docs/GOVERNED_DEPLOYMENT_R27.md"
+      }
+    },
+    {
+      "id": "BLEND",
+      "launch": "separate-credit-candidate",
+      "address": null,
+      "codeHash": null,
+      "initialState": 0,
+      "borrowEnabledByDefault": false
+    },
+    {
+      "id": "BALANCED",
+      "launch": "blocked-pending-complete-intent-settlement-refund-validation",
+      "address": null,
+      "codeHash": null,
+      "initialState": 0,
+      "autoSwap": false
+    }
+  ],
+  "assetPolicy": {
+    "addAutomatically": false,
+    "requireDecimalsAndValuation": true,
+    "requireExecutableExitLiquidity": true,
+    "rwaIssuerEligibilityVerified": false
+  },
+  "activationRequires": [
+    "exact target identity and code hashes",
+    "governed role/action/asset/state review",
+    "fund and router allowlists",
+    "Sushi caller authorization and immutable directional bindings",
+    "pair/order-size depth and slippage",
+    "complete financial replay and real wallet/device canary",
+    "independent audit and explicit deployment authorization"
+  ],
+  "scope": "Review template only. Null addresses and initial zero states do not modify any target. No activation command, signed payload or deployment is generated.",
+  "deferred": [
+    "CURVE"
+  ],
+  "governedCreation": {
+    "executorCodeHash": "7704a9c78fe92431203501be8a387dc45b665bb00a7f30ee90e4a76ebccdc465",
+    "typedDeploymentOperation": true,
+    "legacyCallAbiPreserved": true,
+    "sushiCodeAndAdminImmutable": true,
+    "validatedLocally": true,
+    "targetValidated": false,
+    "report": "docs/GOVERNED_DEPLOYMENT_R27.md"
+  },
+  "internalAudit": {
+    "report": "docs/OPTIONAL_GOVERNANCE_ROLES_R32.md",
+    "openApplicationFindings": [],
+    "R31_03": "fixed-validated-local",
+    "roleRemovalQualifiedLocal": true,
+    "roleRemovalQualifiedAtTarget": false,
+    "bootstrapRevivalAllowed": false,
+    "proposedRolesRemainExplicit": true,
+    "realActivation": false
+  }
+}

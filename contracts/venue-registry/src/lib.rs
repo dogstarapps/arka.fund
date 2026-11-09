@@ -114,7 +114,7 @@ impl VenueRegistry {
                 }
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -127,7 +127,7 @@ impl VenueRegistry {
         let Some(governor) = env
             .storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -139,7 +139,7 @@ impl VenueRegistry {
 
     fn require_disable_auth(env: &Env, caller: &Address) {
         let store = env.storage().instance();
-        if let Some(guardian) = store.get::<DataKey, Address>(&DataKey::Guardian) {
+        if let Some(guardian) = store.get::<DataKey, Option<Address>>(&DataKey::Guardian).flatten() {
             if *caller == guardian {
                 caller.require_auth();
                 return;
@@ -177,7 +177,18 @@ impl VenueRegistry {
         Self::dynamic_set(env, &DataKey::Venue(venue.clone()), &config);
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, admin: Address, governor: Option<Address>, expires_at: u64) {
+        Self::initialize(env, admin, governor, expires_at);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address, governor: Option<Address>, expires_at: u64) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address, governor: Option<Address>, expires_at: u64) {
         admin.require_auth();
         let store = env.storage().instance();
         if store.has(&DataKey::BootstrapAdmin) {
@@ -259,6 +270,15 @@ impl VenueRegistry {
         }
     }
 
+    /// Deprecation drains existing credit positions; emergency disable stops
+    /// external calls. Neither transition removes accounting or native claims.
+    pub fn is_exit_allowed(env: Env, venue: Address) -> bool {
+        match Self::dynamic_get::<VenueConfig>(&env, &DataKey::Venue(venue)) {
+            Some(config) => config.status == STATUS_MANUAL_ONLY || config.status == STATUS_AUTO || config.status == STATUS_DEPRECATED,
+            None => false,
+        }
+    }
+
     pub fn venues(env: Env, offset: u32, limit: u32) -> Vec<Address> {
         let venues = Self::dynamic_get::<Vec<Address>>(&env, &DataKey::Venues)
             .unwrap_or_else(|| Vec::new(&env));
@@ -292,13 +312,13 @@ impl VenueRegistry {
     pub fn governor(env: Env) -> Option<Address> {
         env.storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
     }
 
     pub fn guardian(env: Env) -> Option<Address> {
         env.storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Guardian)
+            .get::<DataKey, Option<Address>>(&DataKey::Guardian).flatten()
     }
 
     pub fn upgrade(env: Env, caller: Address, new_wasm_hash: BytesN<32>) {

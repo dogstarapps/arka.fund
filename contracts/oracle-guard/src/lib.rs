@@ -1,10 +1,10 @@
 #![no_std]
 use soroban_sdk::{
     contract, contracterror, contractimpl, contracttype, panic_with_error, Address, BytesN, Env,
-    IntoVal, Symbol, TryFromVal, Val,
+    IntoVal, Symbol, TryFromVal, Val, I256,
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 #[contracttype]
 pub enum OracleAsset {
     Stellar(Address),
@@ -30,6 +30,17 @@ pub enum DataKey {
     ProviderAsset(OracleAsset, Address),
     Paused(OracleAsset),
     LastWasmHash,
+    ProviderNormalization(Address),
+}
+
+/// One explicit conversion leg from a provider's declared quote base to USD.
+/// This is not another independent price confirmation for the priced asset.
+#[derive(Clone)]
+#[contracttype]
+pub struct ProviderNormalization {
+    pub base_asset: OracleAsset,
+    pub conversion_oracle: Address,
+    pub conversion_asset: OracleAsset,
 }
 
 #[derive(Clone)]
@@ -96,6 +107,41 @@ pub struct OracleGuard;
 
 #[contractimpl]
 impl OracleGuard {
+    /// All prices exposed by this guard use USD and fourteen decimal places.
+    pub fn base(env: Env) -> OracleAsset {
+        Self::usd(&env)
+    }
+
+    pub fn decimals(_env: Env) -> u32 {
+        14
+    }
+
+    pub fn set_provider_normalization(
+        env: Env,
+        caller: Address,
+        provider: Address,
+        normalization: ProviderNormalization,
+    ) {
+        Self::require_admin(&env, &caller);
+        if normalization.base_asset == Self::usd(&env)
+            || normalization.conversion_oracle == provider
+            || normalization.conversion_oracle == env.current_contract_address()
+            || Self::provider_base(&env, &provider) != Some(normalization.base_asset.clone())
+            || Self::provider_base(&env, &normalization.conversion_oracle) != Some(Self::usd(&env))
+        {
+            panic_with_error!(&env, Error::InvalidPolicy);
+        }
+        Self::policy_set(&env, &DataKey::ProviderNormalization(provider), &normalization);
+    }
+
+    pub fn clear_provider_normalization(env: Env, caller: Address, provider: Address) {
+        Self::require_admin(&env, &caller);
+        Self::policy_remove(&env, &DataKey::ProviderNormalization(provider));
+    }
+
+    pub fn provider_normalization(env: Env, provider: Address) -> Option<ProviderNormalization> {
+        Self::policy_get(&env, &DataKey::ProviderNormalization(provider))
+    }
     fn bump_policy_key(env: &Env, key: &DataKey) {
         let max_ttl = env.storage().max_ttl();
         if max_ttl == 0 {
@@ -141,7 +187,18 @@ impl OracleGuard {
         env.storage().instance().remove(key);
     }
 
+    // The host creates and initializes the instance atomically.
+    pub fn __constructor(env: Env, admin: Address) {
+        Self::initialize(env, admin);
+    }
+
+    // Legacy ABI is intentionally closed, including after code upgrades.
+    #[allow(unused_variables)]
     pub fn init(env: Env, admin: Address) {
+        panic!("initialization_requires_constructor");
+    }
+
+    fn initialize(env: Env, admin: Address) {
         if env.storage().instance().has(&DataKey::Admin) {
             panic_with_error!(&env, Error::AlreadyInitialized);
         }
@@ -449,7 +506,7 @@ impl OracleGuard {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -462,7 +519,7 @@ impl OracleGuard {
         let Some(governor) = env
             .storage()
             .instance()
-            .get::<DataKey, Address>(&DataKey::Governor)
+            .get::<DataKey, Option<Address>>(&DataKey::Governor).flatten()
         else {
             panic_with_error!(env, Error::Unauthorized);
         };
@@ -531,7 +588,7 @@ impl OracleGuard {
                 return;
             }
         }
-        if let Some(governor) = store.get::<DataKey, Address>(&DataKey::Governor) {
+        if let Some(governor) = store.get::<DataKey, Option<Address>>(&DataKey::Governor).flatten() {
             if *caller == governor {
                 caller.require_auth();
                 return;
@@ -567,6 +624,9 @@ impl OracleGuard {
     ) {
         Self::require_admin(env, caller);
         Self::assert_policy(env, max_price_age, max_deviation_bps, divergence_mode);
+        if has_secondary && primary == secondary {
+            panic_with_error!(env, Error::InvalidPolicy);
+        }
         Self::policy_set(
             env,
             &DataKey::Policy(asset.clone()),
@@ -691,11 +751,11 @@ impl OracleGuard {
             };
         };
 
-        let primary = Self::read_provider(env, &policy.primary, &asset);
+        let primary = Self::read_provider(env, &policy.primary, &asset, policy.max_price_age);
         let primary_usable = Self::is_usable(env, &primary, policy.max_price_age);
 
         let (secondary, secondary_usable) = if policy.has_secondary {
-            let price = Self::read_provider(env, &policy.secondary, &asset);
+            let price = Self::read_provider(env, &policy.secondary, &asset, policy.max_price_age);
             let usable = Self::is_usable(env, &price, policy.max_price_age);
             (price, usable)
         } else {
@@ -797,14 +857,81 @@ impl OracleGuard {
         inspection
     }
 
-    fn read_provider(env: &Env, oracle: &Address, asset: &OracleAsset) -> OraclePriceData {
+    fn read_provider(env: &Env, oracle: &Address, asset: &OracleAsset, max_age: u64) -> OraclePriceData {
         let provider_asset =
             Self::provider_asset_get(env, asset, oracle).unwrap_or_else(|| asset.clone());
-        let raw = env.invoke_contract::<Val>(
+        let mut price = Self::raw_provider_price(env, oracle, &provider_asset);
+        let unavailable = || OraclePriceData { price: 0, timestamp: price.timestamp };
+        if !Self::is_usable(env, &price, max_age) {
+            return unavailable();
+        }
+        let Some(base) = Self::provider_base(env, oracle) else { return unavailable(); };
+        let Some(decimals) = Self::provider_decimals(env, oracle) else { return unavailable(); };
+        let configured = Self::policy_get::<ProviderNormalization>(
+            env, &DataKey::ProviderNormalization(oracle.clone()),
+        );
+        if let Some(expected) = &configured {
+            if expected.base_asset != base { return unavailable(); }
+        }
+        if base == Self::usd(env) {
+            price.price = Self::scaled_product(env, price.price, decimals, 1, 0).unwrap_or(0);
+            return price;
+        }
+        let Some(conversion) = configured else { return unavailable(); };
+        if conversion.base_asset != base || Self::is_paused_internal(env, &conversion.base_asset)
+            || conversion.conversion_oracle == *oracle
+            || conversion.conversion_oracle == env.current_contract_address()
+            || Self::provider_base(env, &conversion.conversion_oracle) != Some(Self::usd(env))
+        {
+            return unavailable();
+        }
+        let Some(rate_decimals) = Self::provider_decimals(env, &conversion.conversion_oracle)
+            else { return unavailable(); };
+        let rate = Self::raw_provider_price(env, &conversion.conversion_oracle, &conversion.conversion_asset);
+        if !Self::is_usable(env, &rate, max_age) {
+            return OraclePriceData { price: 0, timestamp: core::cmp::min(price.timestamp, rate.timestamp) };
+        }
+        price.price = Self::scaled_product(env, price.price, decimals, rate.price, rate_decimals).unwrap_or(0);
+        price.timestamp = core::cmp::min(price.timestamp, rate.timestamp);
+        price
+    }
+
+    fn usd(env: &Env) -> OracleAsset {
+        OracleAsset::Other(Symbol::new(env, "USD"))
+    }
+
+    fn provider_base(env: &Env, oracle: &Address) -> Option<OracleAsset> {
+        match env.try_invoke_contract::<OracleAsset, soroban_sdk::InvokeError>(
+            oracle, &Symbol::new(env, "base"), soroban_sdk::vec![env],
+        ) { Ok(Ok(base)) => Some(base), _ => None }
+    }
+
+    fn provider_decimals(env: &Env, oracle: &Address) -> Option<u32> {
+        match env.try_invoke_contract::<u32, soroban_sdk::InvokeError>(
+            oracle, &Symbol::new(env, "decimals"), soroban_sdk::vec![env],
+        ) { Ok(Ok(d)) if d <= 38 => Some(d), _ => None }
+    }
+
+    // Both positive i128 operands multiply safely within a signed 256-bit word.
+    // Scale once after multiplication; no intermediate rounding or i128 wrap.
+    fn scaled_product(env: &Env, left: i128, left_decimals: u32, right: i128, right_decimals: u32) -> Option<i128> {
+        if left <= 0 || right <= 0 || left_decimals > 38 || right_decimals > 38 { return None; }
+        let product = I256::from_i128(env, left).mul(&I256::from_i128(env, right));
+        let decimals = left_decimals + right_decimals;
+        let value = if decimals >= 14 {
+            product.div(&I256::from_i32(env, 10).pow(decimals - 14)).to_i128()?
+        } else {
+            product.to_i128()?.checked_mul(10i128.pow(14 - decimals))?
+        };
+        if value > 0 { Some(value) } else { None }
+    }
+
+    fn raw_provider_price(env: &Env, oracle: &Address, asset: &OracleAsset) -> OraclePriceData {
+        let raw = match env.try_invoke_contract::<Val, soroban_sdk::InvokeError>(
             oracle,
             &Symbol::new(env, "lastprice"),
-            soroban_sdk::vec![env, provider_asset.into_val(env)],
-        );
+            soroban_sdk::vec![env, asset.clone().into_val(env)],
+        ) { Ok(Ok(raw)) => raw, _ => return OraclePriceData { price: 0, timestamp: 0 } };
         if let Ok(price) = OraclePriceData::try_from_val(env, &raw) {
             return price;
         }

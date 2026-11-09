@@ -19,11 +19,11 @@ function routingResponse(): RoutingPlanResponse {
     generatedAt: "2026-07-19T12:00:00.000Z",
     plan: {
       requestedProtocol: "AUTO",
-      selectedProtocol: "PHOENIX",
+      selectedProtocol: "SUSHI",
       selectedCandidate: {
-        routeId: "phoenix-1",
-        protocol: "PHOENIX",
-        title: "Phoenix",
+        routeId: "sushi-1",
+        protocol: "SUSHI",
+        title: "Sushi",
         estimatedOutBase: 20_000_000,
         minOutBase: 19_900_000,
         available: true,
@@ -31,13 +31,13 @@ function routingResponse(): RoutingPlanResponse {
         autoEligible: true,
         pathAssets: [TOKEN_IN, TOKEN_OUT],
         hops: 1,
-        adapterId: ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix,
+        adapterId: TOKEN_IN,
         poolId: 1,
         note: "Live route.",
       },
       estimatedOutBase: 20_000_000,
       minOutBase: 19_900_000,
-      note: "Phoenix selected.",
+      note: "Sushi selected.",
       candidates: [],
       guardrails: {
         status: "passed",
@@ -86,7 +86,7 @@ test("ArkaWorkflow converts human amounts and turns the chosen route into vault 
     executionSteps(input: typeof prepared): Array<Record<string, unknown>>;
   }).executionSteps(prepared);
   assert.equal(steps.length, 1);
-  assert.equal(steps[0]?.adapter, ARKAFUND_MAINNET_CONTRACTS.adapterPhoenix);
+  assert.equal(steps[0]?.adapter, TOKEN_IN);
   assert.equal(steps[0]?.amountIn, 12_500_000);
   assert.equal(steps[0]?.minOut, 19_900_000);
 });

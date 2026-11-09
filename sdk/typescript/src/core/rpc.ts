@@ -5,6 +5,7 @@ import type {
   SubmittedTransaction,
 } from "./config.js";
 import { requireSigner } from "./config.js";
+import { TransactionBuilder } from "@stellar/stellar-sdk";
 
 interface RpcEnvelope<T> {
   result?: T;
@@ -81,10 +82,17 @@ export async function submitTransaction<T>(
   assembled: AssembledTransactionLike<T>,
 ): Promise<SubmittedTransaction<T>> {
   const signedConfig: SignedArkafundSdkConfig = requireSigner(config);
-  const signed = await signedConfig.signTransaction(assembled.toXDR(), {
+  const unsignedXdr = assembled.toXDR();
+  const expected = TransactionBuilder.fromXDR(unsignedXdr, config.networkPassphrase);
+  const signed = await signedConfig.signTransaction(unsignedXdr, {
     networkPassphrase: config.networkPassphrase,
     address: signedConfig.publicKey,
   });
+  const returned = TransactionBuilder.fromXDR(signed.signedTxXdr, config.networkPassphrase);
+  if (!returned.hash().equals(expected.hash()) || returned.signatures.length === 0) {
+    throw new Error("Wallet returned a different or unsigned transaction. Nothing was submitted.");
+  }
+  const expectedHash = expected.hash().toString("hex");
   const sendResponse = await rpcRequest<SendTransactionResult>(
     config.rpcUrl,
     "sendTransaction",
@@ -102,6 +110,9 @@ export async function submitTransaction<T>(
   }
   if (!sendResponse.hash) {
     throw new Error("sendTransaction did not return a transaction hash");
+  }
+  if (sendResponse.hash !== expectedHash) {
+    throw new Error("RPC returned a different transaction hash. Check the original receipt before another submission.");
   }
   const getResponse = await waitForTransaction(config, sendResponse.hash);
   return {

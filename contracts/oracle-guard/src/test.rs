@@ -10,6 +10,8 @@ use soroban_sdk::{
 enum FeedKey {
     Price(OracleAsset),
     Timestamp(OracleAsset),
+    Base,
+    Decimals,
 }
 
 #[contract]
@@ -17,6 +19,18 @@ struct DummyOracle;
 
 #[contractimpl]
 impl DummyOracle {
+    pub fn set_metadata(env: Env, base: OracleAsset, decimals: u32) {
+        env.storage().instance().set(&FeedKey::Base, &base);
+        env.storage().instance().set(&FeedKey::Decimals, &decimals);
+    }
+
+    pub fn base(env: Env) -> OracleAsset {
+        env.storage().instance().get(&FeedKey::Base).unwrap_or(OracleAsset::Other(Symbol::new(&env, "USD")))
+    }
+
+    pub fn decimals(env: Env) -> u32 {
+        env.storage().instance().get(&FeedKey::Decimals).unwrap_or(14)
+    }
     pub fn set_price(env: Env, asset: OracleAsset, price: i128, timestamp: u64) {
         env.storage()
             .instance()
@@ -42,15 +56,18 @@ impl DummyOracle {
     }
 }
 
+mod normalization;
+
 fn setup_guard<'a>(env: &'a Env) -> (OracleGuardClient<'a>, Address, OracleAsset) {
     if env.ledger().timestamp() == 0 {
         env.ledger().set_timestamp(1_000);
     }
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(env, &guard_id);
+    
+    
     let admin = Address::generate(env);
     env.mock_all_auths();
-    guard.init(&admin);
+    let guard_id = env.register(OracleGuard, (&admin,));
+    let guard = OracleGuardClient::new(env, &guard_id);
     let asset = OracleAsset::Stellar(Address::generate(env));
     (guard, admin, asset)
 }
@@ -391,4 +408,23 @@ fn guardian_expiry_must_be_in_the_future() {
     let guardian = Address::generate(&env);
 
     guard.set_guardian(&admin, &guardian, &1_000u64);
+}
+
+
+#[test]
+fn optional_governor_clear_keeps_admin_rotation_and_expiry_enforced() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let replacement = Address::generate(&env);
+    let id = env.register(OracleGuard, (&admin,));
+    let client = OracleGuardClient::new(&env, &id);
+    client.set_governor(&admin, &None);
+    client.set_admin(&admin, &replacement);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    client.set_bootstrap_admin_expiry(&replacement, &1_010u64);
+    env.ledger().set_timestamp(1_020);
+    assert!(client.try_set_governor(&replacement, &Some(replacement.clone())).is_err());
 }

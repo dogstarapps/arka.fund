@@ -8,6 +8,8 @@
 
 # Node
 node_modules/
+# Exact-lock dependency reuse may use a local symlink instead of a directory.
+node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -46,3 +48,13 @@ scripts/js/.codex-dist/
 /DELIVERABLE_FORM.md
 /docs/DELIVERABLE_VERIFICATION_FORM_RESPONSE.md
 /docs/DEMO_VIDEO_SCRIPT.md
+
+# Local tests produce ledger snapshots; retain audit copies outside the release.
+**/test_snapshots/
+
+# These reviewed deployment binaries are explicitly part of this release.
+!release/wasm/*.wasm
+
+# Local verified build outputs, including dependency-reuse symlinks.
+/sdk/typescript/dist
+/services/catalog-api/dist

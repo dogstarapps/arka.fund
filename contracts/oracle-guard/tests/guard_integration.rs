@@ -17,6 +17,8 @@ struct DummyOracle;
 
 #[contractimpl]
 impl DummyOracle {
+    pub fn base(env: Env) -> OracleAsset { OracleAsset::Other(Symbol::new(&env, "USD")) }
+    pub fn decimals(_env: Env) -> u32 { 14 }
     pub fn set_price(env: Env, asset: OracleAsset, price: i128, timestamp: u64) {
         env.storage()
             .instance()
@@ -50,6 +52,8 @@ mod optional_provider {
 
     #[contractimpl]
     impl OptionalOracle {
+        pub fn base(env: Env) -> OracleAsset { OracleAsset::Other(Symbol::new(&env, "USD")) }
+        pub fn decimals(_env: Env) -> u32 { 14 }
         pub fn set_price(env: Env, asset: OracleAsset, price: OraclePriceData) {
             env.storage()
                 .instance()
@@ -91,8 +95,6 @@ fn deploy_optional_oracle<'a>(
 fn public_api_supports_symbol_assets_and_policy_clearing() {
     let env = Env::default();
     env.ledger().set_timestamp(5_000);
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let admin = Address::generate(&env);
     let next_admin = Address::generate(&env);
     let symbol = Symbol::new(&env, "USDX");
@@ -100,7 +102,9 @@ fn public_api_supports_symbol_assets_and_policy_clearing() {
     let (primary_id, primary) = deploy_oracle(&env);
 
     env.mock_all_auths();
-    guard.init(&admin);
+    let guard_id = env.register(OracleGuard, (&admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     primary.set_price(&asset, &10_000_000i128, &4_990u64);
     guard.set_symbol_asset_policy(
         &admin,
@@ -126,8 +130,6 @@ fn public_api_supports_symbol_assets_and_policy_clearing() {
 fn public_api_fail_closes_divergent_symbol_feeds() {
     let env = Env::default();
     env.ledger().set_timestamp(8_000);
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let admin = Address::generate(&env);
     let symbol = Symbol::new(&env, "BTC");
     let asset = OracleAsset::Other(symbol.clone());
@@ -135,7 +137,9 @@ fn public_api_fail_closes_divergent_symbol_feeds() {
     let (secondary_id, secondary) = deploy_oracle(&env);
 
     env.mock_all_auths();
-    guard.init(&admin);
+    let guard_id = env.register(OracleGuard, (&admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     primary.set_price(&asset, &90_000_000_000i128, &7_995u64);
     secondary.set_price(&asset, &10_000_000_000i128, &7_997u64);
     guard.set_symbol_asset_policy(
@@ -161,8 +165,6 @@ fn public_api_fail_closes_divergent_symbol_feeds() {
 fn stellar_asset_can_query_provider_symbol_asset() {
     let env = Env::default();
     env.ledger().set_timestamp(12_000);
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let admin = Address::generate(&env);
     let vault_asset = Address::generate(&env);
     let provider_symbol = Symbol::new(&env, "USDC");
@@ -170,7 +172,9 @@ fn stellar_asset_can_query_provider_symbol_asset() {
     let (provider_id, provider) = deploy_optional_oracle(&env);
 
     env.mock_all_auths();
-    guard.init(&admin);
+    let guard_id = env.register(OracleGuard, (&admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     provider.set_price(
         &provider_asset,
         &OraclePriceData {
@@ -208,14 +212,14 @@ fn stellar_asset_can_query_provider_symbol_asset() {
 fn optional_provider_none_is_treated_as_unusable_price() {
     let env = Env::default();
     env.ledger().set_timestamp(13_000);
-    let guard_id = env.register_contract(None, OracleGuard);
-    let guard = OracleGuardClient::new(&env, &guard_id);
     let admin = Address::generate(&env);
     let vault_asset = Address::generate(&env);
     let (provider_id, _provider) = deploy_optional_oracle(&env);
 
     env.mock_all_auths();
-    guard.init(&admin);
+    let guard_id = env.register(OracleGuard, (&admin,));
+    let guard = OracleGuardClient::new(&env, &guard_id);
+
     guard.set_stellar_asset_policy(
         &admin,
         &vault_asset,

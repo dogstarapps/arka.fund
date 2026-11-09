@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
+import type { ManagedCatalogAccess } from "./managedIndexer.js";
 import { NoopActivityReader, type ActivityReader } from "./activity.js";
+import { NoopHolderReader, type HolderReader } from "./holders.js";
 import {
   findAsset,
   findAssetPrice,
@@ -55,6 +57,7 @@ import type { CatalogSyncRunner } from "./runners.js";
 import type {
   ActivityEntry,
   ActivityQuery,
+  ArkaHolderPage,
   AlertTransition,
   ArkaCatalogEntry,
   ArkaAssetExposure,
@@ -73,6 +76,7 @@ import type {
   DashboardOverview,
   DashboardOverviewQuery,
   HistoryQuery,
+  HolderQuery,
   IdentityArchive,
   IdentityUpdateRequest,
   ManagerCatalogEntry,
@@ -107,7 +111,9 @@ export interface CatalogServiceOptions {
   monitoringThresholds?: MonitoringThresholds;
   notifier?: MonitoringNotifier;
   activityReader?: ActivityReader;
+  holderReader?: HolderReader;
   now?: () => Date;
+  managedWithdrawals?: ManagedCatalogAccess;
 }
 
 export class CatalogService {
@@ -116,7 +122,11 @@ export class CatalogService {
   private readonly monitoringThresholds: MonitoringThresholds;
   private readonly notifier: MonitoringNotifier;
   private readonly activityReader: ActivityReader;
+  private readonly holderReader: HolderReader;
   private readonly now: () => Date;
+  private readonly optionsManaged: ManagedCatalogAccess | undefined;
+  private syncInFlight: Promise<CatalogSnapshot> | undefined;
+  private identityMutation: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly store: FileCatalogStore,
@@ -130,7 +140,9 @@ export class CatalogService {
       options.monitoringThresholds ?? defaultMonitoringThresholds();
     this.notifier = options.notifier ?? new NoopMonitoringNotifier();
     this.activityReader = options.activityReader ?? new NoopActivityReader();
+    this.holderReader = options.holderReader ?? new NoopHolderReader();
     this.now = options.now ?? (() => new Date());
+    this.optionsManaged = options.managedWithdrawals;
   }
 
   current(): Promise<CatalogSnapshot | null> {
@@ -149,7 +161,16 @@ export class CatalogService {
     return this.identityStore.read();
   }
 
-  async sync(): Promise<CatalogSnapshot> {
+  sync(): Promise<CatalogSnapshot> {
+    if (this.syncInFlight) return this.syncInFlight;
+    const operation = Promise.resolve().then(() => this.syncOnce());
+    this.syncInFlight = operation;
+    const clear = () => { if (this.syncInFlight === operation) this.syncInFlight = undefined; };
+    void operation.then(clear, clear);
+    return operation;
+  }
+
+  private async syncOnce(): Promise<CatalogSnapshot> {
     const startedAt = this.now().toISOString();
     try {
       const snapshot = await this.runner.run();
@@ -306,37 +327,47 @@ export class CatalogService {
     arkaId: string,
     request: IdentityUpdateRequest,
   ): Promise<ArkaCatalogEntry["identity"]> {
-    const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
-    const entry = snapshot ? findArka(snapshot, arkaId) : null;
-    const manager = entry?.manager ?? request.signer;
-    const next = upsertArkaIdentityInArchive({
-      archive,
-      arkaId,
-      manager,
-      curated: entry?.curated ?? false,
-      pendingIndexation: !entry,
-      request,
-      now: this.now(),
+    return this.mutateIdentity(async () => {
+      const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
+      const entry = snapshot ? findArka(snapshot, arkaId) : null;
+      const manager = entry?.manager ?? request.signer;
+      const next = upsertArkaIdentityInArchive({
+        archive,
+        arkaId,
+        manager,
+        curated: entry?.curated ?? false,
+        pendingIndexation: !entry,
+        request,
+        now: this.now(),
+      });
+      await this.identityStore.write(next.archive);
+      return next.identity;
     });
-    await this.identityStore.write(next.archive);
-    return next.identity;
   }
 
   async updateManagerIdentity(
     managerId: string,
     request: IdentityUpdateRequest,
   ): Promise<ManagerCatalogEntry["identity"]> {
-    const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
-    const entry = snapshot ? findManager(snapshot, managerId) : null;
-    const next = upsertManagerIdentityInArchive({
-      archive,
-      manager: managerId,
-      curated: (entry?.curatedArkaCount ?? 0) > 0,
-      request,
-      now: this.now(),
+    return this.mutateIdentity(async () => {
+      const [snapshot, archive] = await Promise.all([this.current(), this.identity()]);
+      const entry = snapshot ? findManager(snapshot, managerId) : null;
+      const next = upsertManagerIdentityInArchive({
+        archive,
+        manager: managerId,
+        curated: (entry?.curatedArkaCount ?? 0) > 0,
+        request,
+        now: this.now(),
+      });
+      await this.identityStore.write(next.archive);
+      return next.identity;
     });
-    await this.identityStore.write(next.archive);
-    return next.identity;
+  }
+
+  private mutateIdentity<T>(operation: () => Promise<T>): Promise<T> {
+    const pending = this.identityMutation.then(operation);
+    this.identityMutation = pending.then(() => undefined, () => undefined);
+    return pending;
   }
 
   async asset(assetContract: string): Promise<AssetCatalogEntry | null> {
@@ -439,6 +470,34 @@ export class CatalogService {
       return emptyPage(query.limit);
     }
     return this.readActivity([arka], query);
+  }
+
+  async arkaHolders(
+    arkaId: string,
+    query: HolderQuery = {},
+  ): Promise<ArkaHolderPage | null> {
+    const snapshot = await this.current();
+    const arka = snapshot?.arkas.find((entry) => entry.arkaId === arkaId);
+    return arka ? this.holderReader.list(arka, query) : null;
+  }
+
+  async arkaWithdrawals(arkaId: string, query: HolderQuery = {}, selection:{owner?:string;closedOnly?:boolean;observationId?:string}={}) {
+    const snapshot = await this.current();
+    const arka = snapshot?.arkas.find(entry => entry.arkaId === arkaId);
+    if (!arka?.managedWithdrawals || !this.optionsManaged) return null;
+    return this.optionsManaged.withdrawals(arka, query, selection);
+  }
+
+  async arkaManagedPosition(arkaId: string, owner: string, activeOnly=false) {
+    const snapshot = await this.current();
+    const arka = snapshot?.arkas.find(entry => entry.arkaId === arkaId);
+    if (!arka?.managedWithdrawals || !this.optionsManaged) return null;
+    return this.optionsManaged.position(arka, owner, activeOnly);
+  }
+
+  async arkaWithdrawalHistory(arkaId: string, query: HolderQuery = {}) {
+    if (!this.optionsManaged) return null;
+    return this.optionsManaged.history(arkaId, query);
   }
 
   async monitoringStatus(): Promise<MonitoringStatus> {

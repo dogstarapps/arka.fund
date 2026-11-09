@@ -10,11 +10,13 @@ import {
   buildIdentityUpdateMessage,
   CatalogService,
   createCatalogApp,
+  createSep53MessageHash,
   FileCatalogHistoryStore,
   FileCatalogStore,
   FileMonitoringStore,
   signPayload,
   StaticActivityReader,
+  StaticHolderReader,
   StaticCatalogSyncRunner,
   WebhookMonitoringNotifier,
 } from "../../src/index.js";
@@ -161,7 +163,30 @@ test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", asy
     new FileCatalogStore(join(directory, "snapshot.json")),
     new FileCatalogHistoryStore(join(directory, "history.json")),
     runner,
-    { activityReader },
+    {
+      activityReader,
+      holderReader: new StaticHolderReader({
+        [arkaOne.arkaId]: {
+          arkaId: arkaOne.arkaId,
+          shareToken: null,
+          totalShares: "2000",
+          indexedAt: syncedAt,
+          complete: true,
+          coverageFromLedger: 100,
+          coverageToLedger: 102,
+          total: 1,
+          offset: 0,
+          limit: 1,
+          items: [{
+            holder: "GUSERONE",
+            shares: "2000",
+            ownershipBps: 10_000,
+            firstSeenLedger: 101,
+            lastActivityLedger: 101,
+          }],
+        },
+      }),
+    },
   );
   const app = createCatalogApp({ service, syncToken: "secret" });
 
@@ -203,6 +228,14 @@ test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", asy
     assert.equal(nav.json().totalNavDelta, dashboardOverview.json().totalNavDelta);
     assert.equal(nav.json().activity, undefined);
     assert.match(nav.headers["cache-control"] ?? "", /max-age=5/);
+
+    const holders = await app.inject({
+      method: "GET",
+      url: `/v1/arkas/${arkaOne.arkaId}/holders?limit=10`,
+    });
+    assert.equal(holders.statusCode, 200);
+    assert.equal(holders.json().complete, true);
+    assert.equal(holders.json().items[0].ownershipBps, 10_000);
 
     const dashboardComposition = await app.inject({
       method: "GET",
@@ -584,7 +617,9 @@ test("HTTP API records failed sync runs and exposes critical monitoring status",
   }
 });
 
-test("HTTP API saves signed Arka and manager identity metadata", async () => {
+// Cryptographic cases require the explicit contained ephemeral-key test profile.
+const cryptoTest = process.env.ARKA_EPHEMERAL_SIGNATURE_TESTS === '1' ? test : test.skip;
+cryptoTest("HTTP API saves signed Arka and manager identity metadata", async () => {
   const directory = await mkdtemp(join(tmpdir(), "catalog-api-identity-"));
   const managerKey = Keypair.random();
   const otherKey = Keypair.random();
@@ -619,6 +654,9 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
       payload: {
         displayName: "Stellar Growth Arka",
         description: "Public test mandate.",
+        strategy: "Diversified liquid exposure.\n\nRebalanced within the stated mandate.",
+        riskDisclosure: "Market, liquidity and protocol risks apply.",
+        targetReturn: "Long-term objective; not a guarantee.",
         avatarUrl: null,
         websiteUrl: "https://arka.fund/",
         socialUrl: null,
@@ -633,6 +671,10 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
     });
     assert.equal(arkaResponse.statusCode, 200);
     assert.equal(arkaResponse.json().displayName, "Stellar Growth Arka");
+    assert.equal(
+      arkaResponse.json().strategy,
+      "Diversified liquid exposure.\n\nRebalanced within the stated mandate.",
+    );
 
     const managerRequest = signIdentityUpdate({
       keypair: managerKey,
@@ -641,6 +683,9 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
       payload: {
         displayName: "Stellar Growth Manager",
         description: null,
+        strategy: null,
+        riskDisclosure: null,
+        targetReturn: null,
         avatarUrl: null,
         websiteUrl: null,
         socialUrl: null,
@@ -656,12 +701,49 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
     assert.equal(managerResponse.statusCode, 200);
     assert.equal(managerResponse.json().displayName, "Stellar Growth Manager");
 
+    const rawPayload = {
+      displayName: "Raw Signature",
+      description: null,
+      strategy: null,
+      riskDisclosure: null,
+      targetReturn: null,
+      avatarUrl: null,
+      websiteUrl: null,
+      socialUrl: null,
+      nonce: "identity-test-raw",
+      issuedAt: "2026-07-07T10:00:00.000Z",
+    };
+    const rawMessage = buildIdentityUpdateMessage({
+      scope: "manager",
+      target: manager,
+      signer: manager,
+      payload: rawPayload,
+    });
+    const rawSignatureResponse = await app.inject({
+      method: "PUT",
+      url: `/v1/managers/${manager}/identity`,
+      payload: {
+        signer: manager,
+        message: rawMessage,
+        signature: managerKey.sign(Buffer.from(rawMessage, "utf8")).toString("base64"),
+        payload: rawPayload,
+      },
+    });
+    assert.equal(rawSignatureResponse.statusCode, 401);
+    assert.equal(rawSignatureResponse.json().error, "invalid_signature");
+
     const arkaIdentity = await app.inject({
       method: "GET",
       url: `/v1/arkas/${arkaId}/identity`,
     });
     assert.equal(arkaIdentity.statusCode, 200);
     assert.equal(arkaIdentity.json().displayName, "Stellar Growth Arka");
+    assert.equal(
+      arkaIdentity.json().strategy,
+      "Diversified liquid exposure.\n\nRebalanced within the stated mandate.",
+    );
+    assert.equal(arkaIdentity.json().riskDisclosure, "Market, liquidity and protocol risks apply.");
+    assert.equal(arkaIdentity.json().targetReturn, "Long-term objective; not a guarantee.");
 
     const managerIdentity = await app.inject({
       method: "GET",
@@ -676,6 +758,10 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
     });
     assert.equal(detail.statusCode, 200);
     assert.equal(detail.json().identity.displayName, "Stellar Growth Arka");
+    assert.equal(
+      detail.json().identity.strategy,
+      "Diversified liquid exposure.\n\nRebalanced within the stated mandate.",
+    );
 
     const search = await app.inject({
       method: "GET",
@@ -692,6 +778,9 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
       payload: {
         displayName: "Wrong Manager",
         description: null,
+        strategy: null,
+        riskDisclosure: null,
+        targetReturn: null,
         avatarUrl: null,
         websiteUrl: null,
         socialUrl: null,
@@ -706,6 +795,46 @@ test("HTTP API saves signed Arka and manager identity metadata", async () => {
     });
     assert.equal(blocked.statusCode, 403);
     assert.equal(blocked.json().error, "not_manager");
+
+    const oversizedPayload = {
+      displayName: "Stellar Growth Arka",
+      description: "x".repeat(281),
+      strategy: null,
+      riskDisclosure: null,
+      targetReturn: null,
+      avatarUrl: null,
+      websiteUrl: null,
+      socialUrl: null,
+      nonce: "identity-test-oversized",
+      issuedAt: "2026-07-07T10:00:00.000Z",
+    };
+    const oversizedMessage = JSON.stringify({
+      version: 1,
+      app: "arka.fund",
+      action: "identity.update",
+      scope: "arka",
+      target: arkaId,
+      signer: manager,
+      payload: oversizedPayload,
+    });
+    const oversized = await app.inject({
+      method: "PUT",
+      url: `/v1/arkas/${arkaId}/identity`,
+      payload: {
+        signer: manager,
+        message: oversizedMessage,
+        signature: managerKey.sign(createSep53MessageHash(oversizedMessage)).toString("base64"),
+        payload: oversizedPayload,
+      },
+    });
+    assert.equal(oversized.statusCode, 400);
+    assert.equal(oversized.json().error, "profile_text_too_long");
+
+    const unchanged = await app.inject({
+      method: "GET",
+      url: `/v1/arkas/${arkaId}/identity`,
+    });
+    assert.equal(unchanged.json().description, "Public test mandate.");
   } finally {
     await app.close();
   }
@@ -771,6 +900,9 @@ function signIdentityUpdate(input: {
   payload: {
     displayName?: string | null;
     description?: string | null;
+    strategy?: string | null;
+    riskDisclosure?: string | null;
+    targetReturn?: string | null;
     avatarUrl?: string | null;
     websiteUrl?: string | null;
     socialUrl?: string | null;
@@ -788,7 +920,7 @@ function signIdentityUpdate(input: {
   return {
     signer,
     message,
-    signature: input.keypair.sign(Buffer.from(message, "utf8")).toString("base64"),
+    signature: input.keypair.sign(createSep53MessageHash(message)).toString("base64"),
     payload: input.payload,
   };
 }

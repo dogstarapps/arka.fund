@@ -55,10 +55,11 @@ fn test_deposit_withdraw_with_lock() {
     let env = Env::default();
     let token_id = env.register_contract(None, MockToken);
     let token = MockTokenClient::new(&env, &token_id);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let client = CoverageVaultClient::new(&env, &vault_id);
+    
+    
     let mgr = Address::generate(&env);
-    client.init(&mgr, &token_id, &2000);
+    let vault_id = env.register(CoverageVault, (&mgr, &token_id, &2000i32,));
+    let client = CoverageVaultClient::new(&env, &vault_id);
     let user = Address::generate(&env);
     let treasury = Address::generate(&env);
 
@@ -80,13 +81,14 @@ fn test_withdraw_above_max_lock_violates() {
     let env = Env::default();
     let token_id = env.register_contract(None, MockToken);
     let token = MockTokenClient::new(&env, &token_id);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let client = CoverageVaultClient::new(&env, &vault_id);
+    
+    
     let mgr = Address::generate(&env);
     let user = Address::generate(&env);
     let treasury = Address::generate(&env);
 
-    client.init(&mgr, &token_id, &2000);
+    let vault_id = env.register(CoverageVault, (&mgr, &token_id, &2000i32,));
+    let client = CoverageVaultClient::new(&env, &vault_id);
     env.mock_all_auths();
     token.mint(&user, &500);
     token.approve(&user, &vault_id, &500);
@@ -98,12 +100,13 @@ fn test_withdraw_above_max_lock_violates() {
 fn test_governor_takes_policy_control() {
     let env = Env::default();
     let token_id = env.register_contract(None, MockToken);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let client = CoverageVaultClient::new(&env, &vault_id);
+    
+    
     let mgr = Address::generate(&env);
     let gov = Address::generate(&env);
     env.mock_all_auths();
-    client.init(&mgr, &token_id, &1000);
+    let vault_id = env.register(CoverageVault, (&mgr, &token_id, &1000i32,));
+    let client = CoverageVaultClient::new(&env, &vault_id);
     client.set_governor(&mgr, &gov);
     assert_eq!(client.governor(), Some(gov.clone()));
     client.set_lock_bps(&gov, &3000);
@@ -115,14 +118,15 @@ fn test_claim_payout_bypasses_lock_for_authorized_claims_manager() {
     let env = Env::default();
     let token_id = env.register_contract(None, MockToken);
     let token = MockTokenClient::new(&env, &token_id);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let client = CoverageVaultClient::new(&env, &vault_id);
+    
+    
     let mgr = Address::generate(&env);
     let claims_mgr = Address::generate(&env);
     let recipient = Address::generate(&env);
     env.mock_all_auths();
 
-    client.init(&mgr, &token_id, &8000);
+    let vault_id = env.register(CoverageVault, (&mgr, &token_id, &8000i32,));
+    let client = CoverageVaultClient::new(&env, &vault_id);
     client.set_claims_manager(&mgr, &Some(claims_mgr.clone()));
     token.mint(&mgr, &1_000);
     token.approve(&mgr, &vault_id, &1_000);
@@ -146,13 +150,14 @@ fn test_bootstrap_admin_cannot_extend_expiry() {
     let env = Env::default();
     env.ledger().set_timestamp(1_000);
     let token_id = env.register_contract(None, MockToken);
-    let vault_id = env.register_contract(None, CoverageVault);
-    let client = CoverageVaultClient::new(&env, &vault_id);
+    
+    
     let mgr = Address::generate(&env);
     let admin = Address::generate(&env);
 
     env.mock_all_auths();
-    client.init(&mgr, &token_id, &1000);
+    let vault_id = env.register(CoverageVault, (&mgr, &token_id, &1000i32,));
+    let client = CoverageVaultClient::new(&env, &vault_id);
     client.set_bootstrap_admin(&mgr, &admin, &2_000);
     client.set_bootstrap_admin(&admin, &admin, &2_001);
 }

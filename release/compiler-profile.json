@@ -1,0 +1,32 @@
+{
+  "version": "rustc 1.93.0-nightly (518b42830 2025-11-16)",
+  "rustflags": "-Zunstable-options -Cpanic=immediate-abort -Zlocation-detail=none -Zfmt-debug=none -Zmir-opt-level=4 -Zinline-mir=yes -Ctarget-feature=+bulk-memory,+sign-ext -Cllvm-args=-ir-outliner -Cllvm-args=-enable-linkonceodr-ir-outlining -Cpasses=iroutliner",
+  "optLevel": "z",
+  "coreRebuilt": true,
+  "lto": "fat",
+  "overflowChecks": true,
+  "contractErrorCodesRetained": true,
+  "firstOptimizerFlags": [
+    "--enable-bulk-memory",
+    "--enable-sign-ext",
+    "--flatten",
+    "--rereloop",
+    "-Oz",
+    "--closed-world",
+    "--gufa-optimizing",
+    "--converge"
+  ],
+  "secondOptimizerFlags": [
+    "--enable-bulk-memory",
+    "--enable-sign-ext",
+    "-Oz",
+    "--closed-world",
+    "--gufa-optimizing",
+    "--merge-similar-functions",
+    "--dae-optimizing",
+    "--code-folding",
+    "--memory-packing",
+    "--optimize-stack-ir",
+    "--converge"
+  ]
+}

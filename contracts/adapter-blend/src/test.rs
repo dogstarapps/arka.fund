@@ -40,11 +40,12 @@ impl DummySubmitRouter {
 #[test]
 fn test_execute_lend_and_borrow() {
     let env = Env::default();
-    let id = env.register_contract(None, BlendAdapter);
-    let client = BlendAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let router = env.register_contract(None, DummyBlendRouter);
-    client.init(&admin, &router);
+    let id = env.register(BlendAdapter, (&admin, &router,));
+    let client = BlendAdapterClient::new(&env, &id);
     let caller = Address::generate(&env);
     let receiver = Address::generate(&env);
     env.mock_all_auths();
@@ -58,12 +59,13 @@ fn test_execute_lend_and_borrow() {
 #[test]
 fn test_execute_submit_path_with_market_asset() {
     let env = Env::default();
-    let id = env.register_contract(None, BlendAdapter);
-    let client = BlendAdapterClient::new(&env, &id);
+    
+    
     let admin = Address::generate(&env);
     let router = env.register_contract(None, DummySubmitRouter);
     let asset = Address::generate(&env);
-    client.init(&admin, &router);
+    let id = env.register(BlendAdapter, (&admin, &router,));
+    let client = BlendAdapterClient::new(&env, &id);
     env.mock_all_auths();
     client.set_market_asset(&admin, &7u128, &asset);
 
@@ -74,4 +76,25 @@ fn test_execute_submit_path_with_market_asset() {
 
     let out_withdraw = client.execute(&caller, &Action::Withdraw, &7u128, &200i128, &receiver);
     assert_eq!(out_withdraw, 200);
+}
+
+
+#[test]
+fn optional_governor_clear_keeps_admin_rotation_and_expiry_enforced() {
+    use soroban_sdk::testutils::Ledger as _;
+    let env = Env::default();
+    env.ledger().set_timestamp(1_000);
+    env.mock_all_auths();
+    let admin = Address::generate(&env);
+    let governor = Address::generate(&env);
+    let replacement = Address::generate(&env);
+    let id = env.register(BlendAdapter, (&admin, &Address::generate(&env)));
+    let client = BlendAdapterClient::new(&env, &id);
+    client.set_governor(&admin, &Some(governor));
+    client.set_governor(&admin, &None);
+    client.set_admin(&admin, &replacement);
+    assert!(client.try_set_governor(&admin, &Some(admin.clone())).is_err());
+    client.set_bootstrap_admin_expiry(&replacement, &1_010u64);
+    env.ledger().set_timestamp(1_020);
+    assert!(client.try_set_governor(&replacement, &Some(replacement.clone())).is_err());
 }

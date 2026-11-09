@@ -96,6 +96,7 @@ jobs:
           stellar --version
           cargo fetch --locked --manifest-path contracts/Cargo.toml
           cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
+          cargo fetch --locked --manifest-path "$(rustc --print sysroot)/lib/rustlib/src/rust/library/Cargo.toml"
           npm ci --prefix release/build-tools --ignore-scripts --no-audit --no-fund
       - name: Guard the wasm guest dependency boundary
         run: node release/dependency-scope.mjs --rust

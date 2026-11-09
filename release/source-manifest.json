@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "b84b3088fac9cc754a2d1c99f4f3b4b61d2750591566feb4588e2ed4c3cd31f3",
+  "releaseId": "616b4d4ea5590daa7ef803b1adfbb7c4d303f9cdf18734de98503cf1b6eb0c8a",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -10,8 +10,8 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "9fdcce61bd75a835926c1d0df27b5a3e96076f82015f55db02b61b6fe8d7c9e8",
-      "bytes": 5636
+      "sha256": "27eee83d92c1850e848c3bece62516ec3e81fc3d611782b3196e72fc6a435d97",
+      "bytes": 5750
     },
     {
       "path": ".gitignore",

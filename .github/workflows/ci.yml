@@ -77,16 +77,25 @@ jobs:
           toolchain: nightly-2025-11-17
           components: rust-src
           targets: wasm32v1-none
-      - name: Prepare exact compiler dependencies and optimizer
+      - name: Install pinned cargo-audit
         run: |
           mkdir -p "$ARKA_RELEASE_EVIDENCE_DIR"
+          audit_archive="$RUNNER_TEMP/cargo-audit.tgz"
+          audit_asset=cargo-audit-x86_64-unknown-linux-musl-v0.22.2
+          curl -fsSL --proto "=https" --retry 3 "https://github.com/rustsec/rustsec/releases/download/cargo-audit/v0.22.2/$audit_asset.tgz" -o "$audit_archive"
+          echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  $audit_archive" | sha256sum --check --strict
+          tar -xzf "$audit_archive" -C "$HOME/.cargo/bin" --strip-components=1 "$audit_asset/cargo-audit"
+          cargo audit --version
+      - name: Prepare exact compiler dependencies and optimizer
+        run: |
+          stellar_package="$RUNNER_TEMP/stellar-cli.deb"
+          curl -fsSL --proto "=https" --retry 3 https://github.com/stellar/stellar-cli/releases/download/v26.1.0/stellar-cli_26.1.0_amd64.deb -o "$stellar_package"
+          echo "36493acb7cee52416ebec17b533196bac8304a305fee00674069c6339f9a07a0  $stellar_package" | sha256sum --check --strict
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libdbus-1-dev
-          pkg-config --exists 'dbus-1 >= 1.6'
+          sudo apt-get install -y --no-install-recommends "$stellar_package"
+          stellar --version
           cargo fetch --locked --manifest-path contracts/Cargo.toml
           cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
-          cargo +stable install --locked stellar-cli --version 26.1.0
-          cargo +stable install --locked cargo-audit --version 0.22.2
           npm ci --prefix release/build-tools --ignore-scripts --no-audit --no-fund
       - name: Guard the wasm guest dependency boundary
         run: node release/dependency-scope.mjs --rust
@@ -95,6 +104,7 @@ jobs:
       - name: Rebuild all 24 selected artifacts and require identical hashes
         run: node release/build-contracts.mjs
       - name: Audit workspace Rust dependencies against current RustSec
+        if: always()
         run: cargo audit --file contracts/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-workspace.json"
       - name: Audit quote adapter Rust dependencies against current RustSec
         if: always()

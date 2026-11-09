@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "616b4d4ea5590daa7ef803b1adfbb7c4d303f9cdf18734de98503cf1b6eb0c8a",
+  "releaseId": "9e633ad72cc87cb541c2c14d9b9947a252415504a2129ea3d2b5013ed6acb37a",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -10,8 +10,8 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "27eee83d92c1850e848c3bece62516ec3e81fc3d611782b3196e72fc6a435d97",
-      "bytes": 5750
+      "sha256": "9c54ceb8fecbcf28acffb7a950325ce8721275340aa08ddd2894cd9441c165d6",
+      "bytes": 7069
     },
     {
       "path": ".gitignore",
@@ -3890,8 +3890,8 @@
     },
     {
       "path": "release/build-contracts.mjs",
-      "sha256": "c012cc1350e95a1471b7c7e6fb294f400a4fcbfd0139d965a187b98582d58465",
-      "bytes": 4101
+      "sha256": "907eda59a3213aef46ed3f2932ed0e5dec7903415f94dc3cda8b023f8ee1c649",
+      "bytes": 4766
     },
     {
       "path": "release/build-tools/package-lock.json",
@@ -4100,8 +4100,8 @@
     },
     {
       "path": "release/tests/ci-configuration.test.mjs",
-      "sha256": "d58d37cbea1ed6e55857629a8a4193728e53b856591c0587c7b0aff0bc41dbca",
-      "bytes": 4075
+      "sha256": "8f23c2ece9a7953f967f02951fbba7670c6f2c0b77b78fb6df1d8f5e38692479",
+      "bytes": 4129
     },
     {
       "path": "release/tests/dependency-scope.test.mjs",

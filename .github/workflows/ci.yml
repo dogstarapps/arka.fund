@@ -86,24 +86,14 @@ jobs:
           echo "7fb9497f8594b389e5fce5ef9b92db08432996895b2e0c5a0167a69ed445c428  $audit_archive" | sha256sum --check --strict
           tar -xzf "$audit_archive" -C "$HOME/.cargo/bin" --strip-components=1 "$audit_asset/cargo-audit"
           cargo audit --version
-      - name: Prepare exact compiler dependencies and optimizer
+      - name: Fetch locked Rust dependencies
         run: |
-          stellar_package="$RUNNER_TEMP/stellar-cli.deb"
-          curl -fsSL --proto "=https" --retry 3 https://github.com/stellar/stellar-cli/releases/download/v26.1.0/stellar-cli_26.1.0_amd64.deb -o "$stellar_package"
-          echo "36493acb7cee52416ebec17b533196bac8304a305fee00674069c6339f9a07a0  $stellar_package" | sha256sum --check --strict
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends "$stellar_package"
-          stellar --version
           cargo fetch --locked --manifest-path contracts/Cargo.toml
           cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
-          cargo fetch --locked --manifest-path "$(rustc --print sysroot)/lib/rustlib/src/rust/library/Cargo.toml"
-          npm ci --prefix release/build-tools --ignore-scripts --no-audit --no-fund
       - name: Guard the wasm guest dependency boundary
         run: node release/dependency-scope.mjs --rust
       - name: Native contract library tests with offline dependency resolution
         run: cargo test --manifest-path contracts/Cargo.toml --offline --locked --workspace --jobs 2
-      - name: Rebuild all 24 selected artifacts and require identical hashes
-        run: node release/build-contracts.mjs
       - name: Audit workspace Rust dependencies against current RustSec
         if: always()
         run: cargo audit --file contracts/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-workspace.json"
@@ -115,4 +105,48 @@ jobs:
         with:
           name: r16-contract-evidence
           path: ${{ github.workspace }}/artifacts/ci/contract-evidence
+          if-no-files-found: error
+
+  wasm-reproducibility:
+    runs-on: macos-26
+    env:
+      CARGO_TARGET_DIR: ${{ github.workspace }}/artifacts/ci/wasm-target
+      ARKA_RELEASE_EVIDENCE_DIR: ${{ github.workspace }}/artifacts/ci/wasm-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2025-11-17
+          components: rust-src
+          targets: wasm32v1-none
+      - name: Prepare macOS ARM64 build tools
+        run: |
+          test "$(uname -m)" = arm64
+          sw_vers
+          rustc -vV
+          /usr/bin/sandbox-exec -p "(version 1) (allow default) (deny network*)" /usr/bin/true
+          mkdir -p "$CARGO_TARGET_DIR" "$ARKA_RELEASE_EVIDENCE_DIR"
+          stellar_archive="$RUNNER_TEMP/stellar-arm64.tar.gz"
+          curl -fsSL --proto "=https" --retry 3 https://github.com/stellar/stellar-cli/releases/download/v26.1.0/stellar-cli-26.1.0-aarch64-apple-darwin.tar.gz -o "$stellar_archive"
+          echo "1161b268c39eac1dbf22a1a2763701822833256f3c64574340747aefc7182cba  $stellar_archive" | shasum -a 256 --check
+          mkdir -p "$RUNNER_TEMP/stellar-bin"
+          tar -xzf "$stellar_archive" -C "$RUNNER_TEMP/stellar-bin" stellar
+          "$RUNNER_TEMP/stellar-bin/stellar" --version
+          echo "$RUNNER_TEMP/stellar-bin" >> "$GITHUB_PATH"
+          cargo fetch --locked --manifest-path contracts/Cargo.toml
+          cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
+          cargo fetch --locked --manifest-path "$(rustc --print sysroot)/lib/rustlib/src/rust/library/Cargo.toml"
+          npm ci --prefix release/build-tools --ignore-scripts --no-audit --no-fund
+      - name: Rebuild all 24 selected artifacts and require identical hashes
+        run: node release/build-contracts.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r60-macos-wasm-evidence
+          path: ${{ github.workspace }}/artifacts/ci/wasm-evidence
           if-no-files-found: error

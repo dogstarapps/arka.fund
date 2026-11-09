@@ -13,7 +13,7 @@ jobs:
   application:
     runs-on: ubuntu-latest
     env:
-      ARKA_RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/arka-application-evidence
+      ARKA_RELEASE_EVIDENCE_DIR: ${{ github.workspace }}/artifacts/ci/application-evidence
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,7 +54,7 @@ jobs:
         if: always()
         with:
           name: r16-application-evidence
-          path: ${{ runner.temp }}/arka-application-evidence
+          path: ${{ github.workspace }}/artifacts/ci/application-evidence
           if-no-files-found: error
 
   contracts:
@@ -63,8 +63,8 @@ jobs:
       CARGO_INCREMENTAL: 0
       CARGO_PROFILE_DEV_DEBUG: 0
       CARGO_PROFILE_TEST_DEBUG: 0
-      CARGO_TARGET_DIR: ${{ runner.temp }}/arka-contract-target
-      ARKA_RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/arka-contract-evidence
+      CARGO_TARGET_DIR: ${{ github.workspace }}/artifacts/ci/contract-target
+      ARKA_RELEASE_EVIDENCE_DIR: ${{ github.workspace }}/artifacts/ci/contract-evidence
     steps:
       - uses: actions/checkout@v4
         with:
@@ -99,5 +99,5 @@ jobs:
         if: always()
         with:
           name: r16-contract-evidence
-          path: ${{ runner.temp }}/arka-contract-evidence
+          path: ${{ github.workspace }}/artifacts/ci/contract-evidence
           if-no-files-found: error

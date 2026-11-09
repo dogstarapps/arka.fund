@@ -79,6 +79,10 @@ jobs:
           targets: wasm32v1-none
       - name: Prepare exact compiler dependencies and optimizer
         run: |
+          mkdir -p "$ARKA_RELEASE_EVIDENCE_DIR"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libdbus-1-dev
+          pkg-config --exists 'dbus-1 >= 1.6'
           cargo fetch --locked --manifest-path contracts/Cargo.toml
           cargo fetch --locked --manifest-path release/quote-adapter/Cargo.toml
           cargo +stable install --locked stellar-cli --version 26.1.0

@@ -818,7 +818,7 @@ impl OracleGuard {
             return inspection;
         }
 
-        inspection.deviation_bps = Self::deviation_bps(primary.price, secondary.price);
+        inspection.deviation_bps = Self::deviation_bps(env, primary.price, secondary.price);
         inspection.diverged = inspection.deviation_bps > policy.max_deviation_bps;
         if !inspection.diverged {
             if secondary.timestamp > primary.timestamp {
@@ -966,25 +966,27 @@ impl OracleGuard {
         }
     }
 
-    fn deviation_bps(left: i128, right: i128) -> u32 {
+    fn deviation_bps(env: &Env, left: i128, right: i128) -> u32 {
+        const BPS_SCALE: i128 = 10_000;
         if left <= 0 || right <= 0 {
-            return 10_000;
+            return BPS_SCALE as u32;
         }
-        let base = if left < right { left } else { right };
-        if base <= 0 {
-            return 10_000;
+        let base = left.min(right);
+        let diff = left.max(right) - base;
+        if diff >= base {
+            return BPS_SCALE as u32;
         }
-        let diff = if left > right {
-            left - right
-        } else {
-            right - left
+        let raw = match diff.checked_mul(BPS_SCALE) {
+            Some(scaled) => scaled / base,
+            // Preserve exact rounding for large prices. Since diff < base,
+            // the quotient is below BPS_SCALE and always fits in i128.
+            None => I256::from_i128(env, diff)
+                .mul(&I256::from_i128(env, BPS_SCALE))
+                .div(&I256::from_i128(env, base))
+                .to_i128()
+                .unwrap(),
         };
-        let raw = (diff * 10_000i128) / base;
-        if raw > 10_000i128 {
-            10_000
-        } else {
-            raw as u32
-        }
+        raw as u32
     }
 }
 

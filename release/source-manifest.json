@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "9e633ad72cc87cb541c2c14d9b9947a252415504a2129ea3d2b5013ed6acb37a",
+  "releaseId": "d5b1bdaedfa89ca76db1f9584874690ee260b3fd8b5484716fb47bc02c6bc2af",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -3620,13 +3620,13 @@
     },
     {
       "path": "contracts/oracle-guard/src/lib.rs",
-      "sha256": "ca35acbc1a828b321873202b0064526789b3c5b3b85f967e37a808bb33fc365b",
-      "bytes": 33042
+      "sha256": "21f49805a731d09f15b036b9c797137262c08212af4d0de77c37bcba56aed644",
+      "bytes": 33361
     },
     {
       "path": "contracts/oracle-guard/src/test.rs",
-      "sha256": "953f1f1fda11d79244a368f67c165a5ae9d9d6458ff36e6380d0a9c1d86c3312",
-      "bytes": 12957
+      "sha256": "c1cb81f184843fa72f93b56cf4b8e3f2c242793c1c613825e5fca014358e5c1f",
+      "bytes": 13769
     },
     {
       "path": "contracts/oracle-guard/src/test/normalization.rs",
@@ -3920,7 +3920,7 @@
     },
     {
       "path": "release/contract-selection.json",
-      "sha256": "a96fcbceacc00bb4a601a6d05a3fdcc79c8a9b748aaaa3668d6b321d0c506bca",
+      "sha256": "633092c91ea2aa907e1c9079a365dca80ac59545ca40f8b7a2226755729a7fd6",
       "bytes": 5429
     },
     {
@@ -3940,7 +3940,7 @@
     },
     {
       "path": "release/factory-constructor-profile.json",
-      "sha256": "6e70057aec86628e017737957ed691d792c541097793611b614c1bae0f9a02cc",
+      "sha256": "f84c69d4aa1591f66e842f9c1531873ceea7b055606e6b2ccf094355def0dcd5",
       "bytes": 2597
     },
     {
@@ -3950,7 +3950,7 @@
     },
     {
       "path": "release/initialization-matrix.json",
-      "sha256": "73d433d5e6edfda955d6aae68a96a1abc3e9611b36137f6a93fec0736d6bf02c",
+      "sha256": "3338c5b46964db9c5a1942de2fb84c88d7a6714bb3e5b925950aa7fe7a34c5fb",
       "bytes": 10550
     },
     {
@@ -3960,8 +3960,8 @@
     },
     {
       "path": "release/mainnet-pending.json",
-      "sha256": "2e181b56b3b298feb76cf7e7e7d5f95f68d3151d1c3214d115748268d952e519",
-      "bytes": 8877
+      "sha256": "0f621bc33ebb05a52670294395d6fad388d6c349a14433cd7e41b74aa7ac988d",
+      "bytes": 9126
     },
     {
       "path": "release/make-manifest.mjs",
@@ -4030,12 +4030,12 @@
     },
     {
       "path": "release/sushi-only-r60/application-plan.json",
-      "sha256": "626da113b14c25ac0f4405fbadffb172e277800b14bc2de3deca45522efa233e",
-      "bytes": 14695
+      "sha256": "bcf09d1ff3319f5408f4be98db77eccd17eb370fe8e81253bfc0bc23354b6687",
+      "bytes": 14703
     },
     {
       "path": "release/sushi-only-r60/catalog.env.example",
-      "sha256": "d3e50afebdb5a3964a53b83c86ae30f35afa74cda01ed9a42867c0fa98bbbb35",
+      "sha256": "837c8a4016b2b12c712e8739e403f9fdb0e220aa7e599e48ad5a953d4474039b",
       "bytes": 1707
     },
     {
@@ -4045,12 +4045,12 @@
     },
     {
       "path": "release/sushi-only-r60/README.md",
-      "sha256": "4cffe9fd4de948defd3375a1443f56ce838fb5077a958316e7b42ed8f7ab7ecc",
-      "bytes": 1758
+      "sha256": "85bc5a0c772cde45c78091b45de6aecbc4a0578262b17b8ae0a358c81135d2ac",
+      "bytes": 1648
     },
     {
       "path": "release/sushi-only-r60/review-config.template.json",
-      "sha256": "8550b5104e723c7deb582c1dc9a57734d5b0fc0aa4c23ba78e809c9a8e002b40",
+      "sha256": "8f103ad48e13cf329b31751e32712efb0e5e686c56d570b3e457d28af0ed7d7b",
       "bytes": 1589
     },
     {
@@ -4065,7 +4065,7 @@
     },
     {
       "path": "release/sushi-only/application.json",
-      "sha256": "d29a534a3ef11fd9fc128d9774e645504d93281b0259305481be9b537d620ec9",
+      "sha256": "af86a9c5240ce46ccf9bcb9844378386f0e6b58994aee34e0e3250a0b94d939f",
       "bytes": 5127
     },
     {
@@ -4240,8 +4240,8 @@
     },
     {
       "path": "release/wasm/oracle-guard.wasm",
-      "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
-      "bytes": 35258
+      "sha256": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",
+      "bytes": 35400
     },
     {
       "path": "release/wasm/router.wasm",

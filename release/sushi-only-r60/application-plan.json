@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "revision": "R60",
+  "revision": "R61",
   "status": "local-reviewed-proposal-not-applied",
   "network": "Public Global Stellar Network ; September 2015",
-  "baseSourceRelease": "R58",
-  "contractBundleId": "a7518e6f5bd424f0f1b3b9d4b63e20c090c34367efe661f87c28e6725b4c8570",
-  "saltNamespace": "arka.fund|mainnet|managed-sushi-only|v1|a7518e6f5bd424f0f1b3b9d4b63e20c090c34367efe661f87c28e6725b4c8570|ROLE",
+  "baseSourceRelease": "R60",
+  "contractBundleId": "1fa118f2e521777208e3180f5dbd701dd141a3b9abe9c2437110185906f9d6dd",
+  "saltNamespace": "arka.fund|mainnet|managed-sushi-only|v1|1fa118f2e521777208e3180f5dbd701dd141a3b9abe9c2437110185906f9d6dd|ROLE",
   "addressAlgorithm": "SHA256 XDR HashIdPreimageContractId(networkId=SHA256(passphrase), address=creator, salt=SHA256(namespace)); code and constructor pinned separately",
   "addressesArePredictedNotObserved": true,
   "authority": {
@@ -25,8 +25,8 @@
     {
       "role": "governance-executor",
       "creator": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
-      "address": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "salt": "6f0e2e602f5dfaaf811184a479aca4b9f8128e5bd27342e3dea1d46946f6c455",
+      "address": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "salt": "d0454f3b745152ed43963bf5e1f3253976f016512cbf29d01fe63e9333cbda74",
       "codeHash": "7704a9c78fe92431203501be8a387dc45b665bb00a7f30ee90e4a76ebccdc465",
       "constructorArgs": [
         "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
@@ -36,95 +36,95 @@
     },
     {
       "role": "arka-factory",
-      "operationId": "f45521579585d7c6eda59a2800c98975ce76fda5ac3f744b8b88318ad2d7af44",
-      "salt": "690b7eeeb41a21edef3fb3126f8917a2639ae7f9b726adf4fabbdd38a69574f8",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CAOFU5A6D6AM34X2WEVGPCITEFGDNUJLAKAVNKFE2CODYKY6Y4FTJPPB",
+      "operationId": "29488d2ea4020b97b7c3f4d267644dbb847e36cd863874c371c199b6ba1aa746",
+      "salt": "c532855aee8052fb563d952868fddafcd4acb5954afbf4aecb4543004107b8c6",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CARW6ISMTGWZL2JKLQXKOQZMZVSQALGNCWN7U3ZUGJVPVYIIAGDTTTIV",
       "codeHash": "5c4436e3257c462beed1dcb5ffc656a022cab85325aa77640e81b5f8bad888a2",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ=="
       ]
     },
     {
       "role": "arka-registry",
-      "operationId": "aada70060ef44647670a8b3701fbf5039020abc569f809617f2b0f856ea013d7",
-      "salt": "4db4a836a507632c65bca192af44ac571497c789542d4d7b5aeb4bf8578099fe",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CAVLJHDTMQ5NQ2PZJVVEEBQ3LKCOAPCLHRGY6YS5PEWTRGP2OPLJOI5F",
+      "operationId": "8345d953842ddc32e322fb53abbad93dacde90e7152db339c8fd2f2e5cb595d7",
+      "salt": "6b52940ece96900028683cde60b6774f9760d146f23e479daded4744626872cf",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CB4JRMC2HYEPAZGATK2JQ2HM5Q7CTMFC4SUJYZHOZ6ATFUODPQWULRB2",
       "codeHash": "c6ef013cc807e2519966a3992382939a54c83e73ba662fff602fe0d43db9f1e6",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ=="
       ]
     },
     {
       "role": "venue-registry",
-      "operationId": "a2d8037852af196e57208f500eb0360bde82d0d413da599816e34dc1c2c2f481",
-      "salt": "5dbeba6fca23c94a95eea655aec9d7024151ad696063ca241e0e16bab27ef760",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CDYBEVCCCTTV3GC6WD655ZWNN3ZWHHGEUNOZDNJ3IDPCBCMVP6F6BRIJ",
+      "operationId": "f5c097811530db96306c35019e58990e9053af60f11639f07de889f219ec381a",
+      "salt": "7cc63029cd68b6e92e497bdc141c912b319405d82955a2a0134d507c2857325c",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CDPMVO3SNDEQOOLN4BI2OZJRTRR4QY3WAOMLPAQZYCVGWCGQDWJQSN6J",
       "codeHash": "86e9af8430ed9db3bfed015d3e12e30ee443bdeb0dee9c23ec0e0c6543bc037f",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
         "1812629132"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ==",
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ==",
         "AAAABQAAAABsCoaM"
       ]
     },
     {
       "role": "router",
-      "operationId": "04ea8c819c4695f3f32b05248e6fcef0f4c668ac148773da2ad4a1448c82d722",
-      "salt": "673d2f89c3e20a67e4c02726f263f244e932cb269971826c589c58020878f240",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "operationId": "6ca3e0742d45bc7e7ef9b0986c6cff5f57c714e05ff562e5959825c2fff63f67",
+      "salt": "001e5ad44d5480363e2bd0f6429dff8773b1b4746a3cc17ead812d45eef71ef9",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CC2ZDNJUCYNNM2VS6XKLNLE4DJE5QERPYJRC6CV7D5KDXTNBSBMBKTKM",
       "codeHash": "0e2317c60464754354c59fe854c73060c28827ea1e05d429078f37b98f85385d",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
         "1812629132"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ==",
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ==",
         "AAAABQAAAABsCoaM"
       ]
     },
     {
       "role": "oracle-guard",
-      "operationId": "a30c732cf978ed71f10684d6b8c64a3df403bdd1db84afe94d9a52f0c1e97cf6",
-      "salt": "61d13cdb6689e4baecd7a540bcce2f6f97f8009070420b9c685e47fc890246da",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CCLDVKBR5RSSTWKVEXTRDJMKM2R6OGGP7MT26WBTLZQXGZDR7J6DZNIM",
-      "codeHash": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
+      "operationId": "c52e4f67db0786323198c2b74fd1b769afb3eb364dbd486ddec864ddf377aa63",
+      "salt": "6e21f296bbc699e8faace5f3b9fa2c877247e6ad4188e860ad488d5124c62e13",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CCBPMRONJFQD7CZJDOWI5UUQES4SMVECJNWOWMVH5NWP7WS4NRKGDL5I",
+      "codeHash": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB"
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ=="
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ=="
       ]
     },
     {
       "role": "adapter-sushi",
-      "operationId": "21fffb5678cca9ed03f1427f02ce6df42365b2a4497876d8278a198708c4ede0",
-      "salt": "2efb7e2bf3bc0128f8f010030885b5244fc041f9c241e19317da38388b9c1148",
-      "creator": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-      "address": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
+      "operationId": "d1a2416360e828276ba189ad2dbc924b6d3ab3bb3af13d3a4081ac3b45c42742",
+      "salt": "09ee87d6c1b0c3ea6641ab1976622f97e576ce99860f2ed8a41f6071a544de02",
+      "creator": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+      "address": "CAIBAANBEHP45X2BOTO244WGRNWH634YMBUDIE6RQE4EBK5FR4UEZG4L",
       "codeHash": "cb0b6341e44d743e03f1f601738b4318843d60b9be1e46638e65e8d04c4cd1e7",
       "constructorArgs": [
-        "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+        "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
         "CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF"
       ],
       "constructorArgsXdr": [
-        "AAAAEgAAAAFev+HvrBkt5CgQQagMySqf1uRTyr/4uDJpuGOT4Gw2dQ==",
+        "AAAAEgAAAAEWIcPBV/LEuWL3xwgWtvqs17D25RInsVhBfHM8O/z/aQ==",
         "AAAAEgAAAAH2qKjDjWz71Dut10ZBTL+vn0NH3viK5Hy92gYqUawX0w=="
       ]
     }
@@ -190,14 +190,14 @@
     ]
   },
   "permissions": {
-    "factoryGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-    "registryGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-    "registryRegistrar": "CAOFU5A6D6AM34X2WEVGPCITEFGDNUJLAKAVNKFE2CODYKY6Y4FTJPPB",
-    "routerGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-    "venueGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "factoryGovernor": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+    "registryGovernor": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+    "registryRegistrar": "CARW6ISMTGWZL2JKLQXKOQZMZVSQALGNCWN7U3ZUGJVPVYIIAGDTTTIV",
+    "routerGovernor": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+    "venueGovernor": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
     "venueGuardian": "GBHIT7TXZSRWT4QZXKINECMQWKC7NC7GBJAGK6XFOURI3T6ZHJDTHCMD",
-    "oracleAdminAndGovernor": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
-    "sushiImmutableAdmin": "CBPL7YPPVQMS3ZBICBA2QDGJFKP5NZCTZK77ROBSNG4GHE7ANQ3HKGNB",
+    "oracleAdminAndGovernor": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
+    "sushiImmutableAdmin": "CALCDQ6BK7ZMJOLC67DQQFVW7KWNPMHW4UJCPMKYIF6HGPB37T7WTFEB",
     "initialVenueStatus": 0,
     "initialAuto": false,
     "initialCallers": [],
@@ -211,16 +211,16 @@
     {
       "poolId": "1",
       "direction": "XLM->USDC",
-      "adapter": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
-      "executor": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "adapter": "CAIBAANBEHP45X2BOTO244WGRNWH634YMBUDIE6RQE4EBK5FR4UEZG4L",
+      "executor": "CC2ZDNJUCYNNM2VS6XKLNLE4DJE5QERPYJRC6CV7D5KDXTNBSBMBKTKM",
       "venue": "CCR2CH4GQVCZHG7CHFVMNANCK45CU5DVKXZIIITDZQAU3CEJZ7RQH2MQ",
       "feePpm": 3000
     },
     {
       "poolId": "2",
       "direction": "USDC->XLM",
-      "adapter": "CDEKAFTUOIETH4QPFZWE7ZV733IIHD5NMRXJMEA5IG242HWEWUCU4566",
-      "executor": "CCTAZG3LQ6YN3KJUZRCJJV2K6ERZKP3QX2GS3NOIECJE44SAH64JWKLI",
+      "adapter": "CAIBAANBEHP45X2BOTO244WGRNWH634YMBUDIE6RQE4EBK5FR4UEZG4L",
+      "executor": "CC2ZDNJUCYNNM2VS6XKLNLE4DJE5QERPYJRC6CV7D5KDXTNBSBMBKTKM",
       "venue": "CCR2CH4GQVCZHG7CHFVMNANCK45CU5DVKXZIIITDZQAU3CEJZ7RQH2MQ",
       "feePpm": 3000
     }
@@ -284,7 +284,7 @@
       "/v1/*,/health": "catalog service"
     },
     "operatorSyncEndpointPublic": false,
-    "stateRoot": "/var/lib/arka/sushi-only/CAVLJHDTMQ5NQ2PZJVVEEBQ3LKCOAPCLHRGY6YS5PEWTRGP2OPLJOI5F",
+    "stateRoot": "/var/lib/arka/sushi-only/CB4JRMC2HYEPAZGATK2JQ2HM5Q7CTMFC4SUJYZHOZ6ATFUODPQWULRB2",
     "initialLedger": "Actual registry deployment ledger, never copied from the local replay",
     "mainnetApproved": false,
     "executionEnabled": false,
@@ -310,7 +310,7 @@
     "Apply only reviewed financial template parameters under governance; read the resulting template digest and set the backend release/profile binding",
     "Set catalog initial ledger to actual new registry creation; start isolated catalog/review, verify empty/new-fund indexing, backups/restoration and strict TTL metadata",
     "Build target-host frontend with approved origins/endpoints; publish preview only after authorization; retain existing app/Noah V2",
-    "After independent audit/CI/dependency disposition and explicit wallet/canary/activation approval, admit exact fund callers and manually activate Sushi; validate guardian disable, governed recovery and full exit"
+    "After internal technical review/CI/dependency disposition and explicit wallet/canary/activation approval, admit exact fund callers and manually activate Sushi; validate guardian disable, governed recovery and full exit"
   ],
   "productionWrites": 0,
   "sign": false,

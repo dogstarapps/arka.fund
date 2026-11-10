@@ -58,6 +58,30 @@ impl DummyOracle {
 
 mod normalization;
 
+#[test]
+fn deviation_bps_handles_extreme_prices_and_preserves_rounding() {
+    let env = Env::default();
+    let one_bps = i128::MAX / 20_000;
+    let base = 10_000 * one_bps;
+    let cases = [
+        (0, i128::MAX, 10_000),
+        (i128::MIN, i128::MAX, 10_000),
+        (1, i128::MAX, 10_000),
+        (i128::MAX, i128::MAX, 0),
+        (i128::MAX - 1, i128::MAX, 0),
+        (3, 4, 3_333),
+        (base, base + 300 * one_bps - 1, 299),
+        (base, base + 300 * one_bps, 300),
+        (base, base + 301 * one_bps, 301),
+        (base, 2 * base - 1, 9_999),
+        (base, 2 * base, 10_000),
+    ];
+    for (left, right, expected) in cases {
+        assert_eq!(OracleGuard::deviation_bps(&env, left, right), expected);
+        assert_eq!(OracleGuard::deviation_bps(&env, right, left), expected);
+    }
+}
+
 fn setup_guard<'a>(env: &'a Env) -> (OracleGuardClient<'a>, Address, OracleAsset) {
     if env.ledger().timestamp() == 0 {
         env.ledger().set_timestamp(1_000);

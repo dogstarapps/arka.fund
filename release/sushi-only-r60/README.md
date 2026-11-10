@@ -1,4 +1,4 @@
-# R60 Sushi-only application proposal
+# R61 Sushi-only application proposal
 
 Seven predicted shared IDs derive from the existing authority and the exact selected contract bundle; Arka/share are per-fund templates. IDs are not deployed/observed target addresses. The old executor bytecode proves that its86400/604800 windows use ledgers; the new executor preserves those values. No new council or authority is introduced.
 
@@ -6,6 +6,6 @@ Review-config.template.json deliberately cannot start before releaseId and the a
 
 API and preview hostnames are proposals, not provisioned resources. Review and catalog share the proposed HTTPS API origin with separate internal processes. Existing app.arka.fund and Noah V2 remain untouched. Before a global frontend replacement, qualify legacy coexistence separately. Flags keep backend execution disabled; applying a frontend does not activate contracts.
 
-Only new registry constructor initialization creates an empty persistent All row with its normal TTL. No ABI, permissions, key meaning or existing instance changes. The other23 selected WASM remain unchanged. Frontend changes share one URL/Host/Origin validation and prevent managed catalog reads from falling back to the legacy RPC.
+R61 fixes overflow in OracleGuard divergence calculations with exact integer rounding and the existing policy. Its new WASM hash changes the bundle and all seven predicted addresses, so the constructor, catalog and review profiles bind to the R61 namespace. The other 23 WASM match R60.
 
-No wallets, keys, signatures, submissions, production changes, public pushes or auditor sending are authorized by this package. Exact local build/replay/HTTP receipts and pending status are sealed outside the source tree in R60 artifacts.
+Exact local build and replay receipts are retained with the R61 evidence. The profile remains an offline proposal pending current-target qualification and deployment approval.

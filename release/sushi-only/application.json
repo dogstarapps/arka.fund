@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "revision": "R60",
+  "revision": "R61",
   "baseRuntimeReleaseId": "37506f89145749947806f59cab91b4ac94c0e62e3780277a59f5e7fdfd84f0db",
   "network": "Public Global Stellar Network ; September 2015",
   "mainnetApproved": false,
@@ -74,8 +74,8 @@
     {
       "role": "oracle-guard",
       "file": "release/wasm/oracle-guard.wasm",
-      "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
-      "bytes": 35258
+      "sha256": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",
+      "bytes": 35400
     },
     {
       "role": "adapter-sushi",

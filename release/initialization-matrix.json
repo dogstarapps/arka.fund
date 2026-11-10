@@ -118,8 +118,8 @@
       "wasm": {
         "role": "oracle-guard",
         "file": "release/wasm/oracle-guard.wasm",
-        "sha256": "0ca18a466c83583e22683cf5a9e18bb57a7655d4dc0b08629c82430ece1e8593",
-        "bytes": 35258
+        "sha256": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",
+        "bytes": 35400
       }
     },
     {

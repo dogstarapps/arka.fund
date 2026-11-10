@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "revision": "R60",
-  "candidate": "R60",
-  "baseCandidate": "R58",
-  "baseCommit": "12158f4aa694075ec8628f2a545000fc926ec828",
-  "date": "2026-11-05",
+  "revision": "R61",
+  "candidate": "R61",
+  "baseCandidate": "R60",
+  "baseCommit": "ced030e4f30ceb4a25a25586a5be2389dabece4b",
+  "date": "2026-11-10",
   "mainnetApproved": false,
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
@@ -12,7 +12,7 @@
     "migrate": false,
     "targetedReadsThisRevision": 0
   },
-  "scope": "Sushi-only concrete application plan, HTTPS managed catalog proxy and empty new-registry initialization",
+  "scope": "OracleGuard divergence arithmetic and rebound Sushi-only launch plan",
   "existingProductionApprovalReevaluated": false,
   "existingProductionApprovalRevoked": false,
   "pending": [
@@ -20,13 +20,13 @@
       "id": "development-dependency-advisory",
       "status": "pending",
       "category": "release-policy-and-upstream",
-      "closure": "Current exact candidate: all copies development-only; no affected production lock node, no affected Next NFT reference or known compiled marker. Actual lint/docs do not reach the described level-2 mechanism; native V8 positive controls detect it. Advisory stays open by version and published range discrepancy. Strict full audits still fail. Close with a supported compatible upstream fix and validation, or an independently reviewed explicit release-risk/policy decision. Neither is applied."
+      "closure": "R60 technical review, with dependency locks identical in R61: all copies development-only; no affected production lock node, no affected Next NFT reference or known compiled marker. Actual lint/docs do not reach the described level-2 mechanism; native V8 positive controls detect it. Advisory stays open by version and published range discrepancy. Strict full audits still fail. Close with a supported compatible upstream fix and validation, or an explicit release-risk/policy decision. Neither is applied."
     },
     {
       "id": "rust-dependency-advisories",
       "status": "pending",
       "category": "release-policy-and-upstream",
-      "closure": "Five fresh graphs: affected crypto-bigint 0.5.5 in native hosts, absent from both normal/build guest graphs. Reviewed host23/P29 ECDSA entry points use public verification/recovery inputs; no signing-secret flow identified in these paths. Not a constant-time proof or validator-host qualification. Three raw lock audits remain failing. Need supported upstream migration and requalification, or an independently reviewed explicit native-tooling risk decision. No waiver or suppression is applied."
+      "closure": "Five fresh graphs: affected crypto-bigint 0.5.5 in native hosts, absent from both normal/build guest graphs. Reviewed host23/P29 ECDSA entry points use public verification/recovery inputs; no signing-secret flow identified in these paths. Not a constant-time proof or validator-host qualification. Three raw lock audits remain failing. Need supported upstream migration and requalification, or an explicit native-tooling risk decision. No waiver or suppression is applied."
     },
     {
       "id": "wallet-device-and-canary",
@@ -38,7 +38,7 @@
       "id": "protocol-activation-deactivation",
       "status": "pending",
       "category": "target-operational-validation",
-      "closure": "Reconcile actual destination code/roles/constructors, real governor/council/guardian, fund-specific allowlists/callers and factory template digests. Validate current liquidity, resources, history/index and wallet/canary with separate authorization, then independent review and explicit deployment/activation approval. Local references do not supply real target addresses. R31-03 is closed locally by R32; removal never revives retired bootstrap and must account for the remaining authorities. R42 mantiene las pruebas locales anteriores por identidad: Sushi/SoroSwap/Aquarius siguen requiriendo cualificación del destino; no se activa ni desactiva nada.",
+      "closure": "Reconcile actual destination code/roles/constructors, real governor/council/guardian, fund-specific allowlists/callers and factory template digests. Validate current liquidity, resources, history/index and wallet/canary with separate authorization, then internal technical review and explicit deployment/activation approval. Local references do not supply real target addresses. R31-03 is closed locally by R32; removal never revives retired bootstrap and must account for the remaining authorities. R42 mantiene las pruebas locales anteriores por identidad: Sushi/SoroSwap/Aquarius siguen requiriendo cualificación del destino; no se activa ni desactiva nada.",
       "localR56Evidence": "New guard conversion proven locally; production configuration and activation are pending under the existing authority."
     },
     {
@@ -57,13 +57,13 @@
       "id": "hosted-ci",
       "status": "pending",
       "category": "release-policy-and-validation",
-      "closure": "R47 frontend1368/0/57,72 additional cases and local release/build/types/browser receipts at closeout. No hosted CI or publication; advisories remain open."
+      "closure": "R61 local contract tests and macOS ARM64 WASM reproduction pass. Hosted CI remains pending for R61. The R60 hosted run remains historical and failed the strict dependency audits."
     },
     {
-      "id": "independent-audit",
+      "id": "internal-technical-review",
       "status": "pending",
-      "category": "independent-review",
-      "closure": "R46-01 corrected in R47; R44-01 and earlier corrections retained. Review the exact candidate, retained Arka return ABI/client compatibility and both advisories independently. No auditor contacted or sending."
+      "category": "internal-technical-review",
+      "closure": "Complete the internal release decision for the exact successor, including both open dependency advisories. The OracleGuard fix has fresh local regression evidence."
     },
     {
       "id": "deployment-authorization",
@@ -74,7 +74,7 @@
   ],
   "nextLocalPending": {
     "id": "application-policy-and-hosting-qualification",
-    "localStep": "Review remaining managed withdrawal/portfolio production terms; resolve actual template digest and creation ledger only after separate authorized application; qualify API/preview hosting, positive TTL metadata, current dependencies, hosted CI and independent review before wallets/canary/activation.",
+    "localStep": "Review both open dependency advisories for the exact candidate and run hosted CI under applicable authorization. Then qualify the current target, actual template digest and registry creation ledger, API/preview hosting, and authorized wallet and funded canary.",
     "applicationDefectOpen": false
   },
   "currentLocalAudit": {
@@ -96,7 +96,8 @@
       "R42-02",
       "R44-01",
       "R46-01",
-      "R55-01"
+      "R55-01",
+      "oracle-guard-divergence"
     ],
     "openApplicationFindings": [],
     "retainedOpenAdvisories": [
@@ -105,17 +106,17 @@
     ],
     "allApplicationFindingsClosed": true,
     "allInternalFindingsClosed": false,
-    "scope": "Guard normalization remediation and affected path checks; older broader evidence retained by identity"
+    "scope": "R61 divergence regression, targeted financial and governance replays, and native contract suite. Earlier audit evidence is historical."
   },
   "contractsChanged": 1,
   "selectedWasmChanged": 1,
   "selectedWasmUnchanged": 23,
   "dependenciesChanged": 0,
-  "signaturesCreated": 9,
+  "signaturesCreated": 0,
   "signaturesCreatedThisRevision": 0,
   "transactionsSubmitted": 0,
-  "productionAccess": true,
-  "productionReadsThisRevision": 1,
+  "productionAccess": false,
+  "productionReadsThisRevision": 0,
   "productionWrites": 0,
   "externalAuditSent": false,
   "candidateCommit": null,
@@ -150,23 +151,31 @@
     "harnessRemediated": true,
     "positiveSigningTestsNotAuthorizedOrRunAgain": true
   },
-  "baseReleaseId": "d1fb398904d8c22e112b1bdc864dae03ea6c214eebd2bac313b4ac4381ed87ad",
-  "auditRevision": "R56-remediation",
+  "baseReleaseId": "9e633ad72cc87cb541c2c14d9b9947a252415504a2129ea3d2b5013ed6acb37a",
+  "auditRevision": "R61-oracle-divergence",
   "retainedPriorEvidence": {
     "baseline": "R47",
     "sourceReleaseId": "d1fb398904d8c22e112b1bdc864dae03ea6c214eebd2bac313b4ac4381ed87ad",
     "metadataFile": "../release-r47/release/mainnet-pending.json",
     "scope": "Historical broader qualification only; changed OracleGuard is validated freshly in R56, and 23 unchanged WASM identities are checked."
   },
-  "runtimeCandidate": "R56 plus new-registry constructor initialization",
+  "runtimeCandidate": "R61",
   "newSignaturesThisRevision": 0,
   "historicalR56SignatureIncidentPreserved": true,
   "productionWritesThisRevision": 0,
-  "productionAccessMode": "one authorized contract-code read; all planning/builds/replays local",
+  "productionAccessMode": "offline-only",
   "selectedWasmChangedThisRevision": 1,
   "selectedWasmUnchangedThisRevision": 23,
   "sourceFindingsClosedThisRevision": [
-    "R60-01",
-    "R60-02"
-  ]
+    "oracle-guard-divergence"
+  ],
+  "localOracleDivergence": {
+    "closedFinding": "oracle-guard-divergence",
+    "guardWasm": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",
+    "r60OverflowReproduced": true,
+    "r61PolicyAndRoundingVerified": true,
+    "nativeTestsPassed": 319,
+    "wasmReproducedOnMacosArm64": 24,
+    "sevenPredictedAddressesRebound": true
+  }
 }

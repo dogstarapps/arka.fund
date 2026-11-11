@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "30529bc27457d92d6df1ef03f87f2c5e960fb349b32666ef0b78e35abfccc751",
+  "releaseId": "f7efa8997cfd76856ca706e7cfc79bd9cd882b96f84be6e2711f90db1fded610",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -1015,13 +1015,13 @@
     },
     {
       "path": "apps/web/src/app/factory/create/CreateArkaClient.tsx",
-      "sha256": "6df7443f12fdc1e3d0e6258e7693c2c3765b953993c5dfb04a9ced5b893b858d",
-      "bytes": 70669
+      "sha256": "4574995eabb6a1e4d3f0aeaef7112c55f0351216884aaf74d0be5e7a47492bf2",
+      "bytes": 69558
     },
     {
       "path": "apps/web/src/app/factory/create/creation-header.css",
-      "sha256": "df19d55e17dedbd005f98aa17784f14e5078a7424c7bcb971fbeaf97d06c114b",
-      "bytes": 2331
+      "sha256": "a3171d6795afeccb89326b6859a431224ed549ca72d2f0db54244ac18bdcde93",
+      "bytes": 2765
     },
     {
       "path": "apps/web/src/app/factory/create/page.tsx",
@@ -1230,8 +1230,8 @@
     },
     {
       "path": "apps/web/src/components/product/managed-product.css",
-      "sha256": "cb4580a11a889b69726f932fe269b0996a047dfbdda2617d6655ea160924fadd",
-      "bytes": 9180
+      "sha256": "fb73e6ae2a56d123f7f6c0809c24d0388bc7c998c57ab4c6269dce9e35000e25",
+      "bytes": 10607
     },
     {
       "path": "apps/web/src/components/product/ManagedContextHelp.tsx",
@@ -1250,8 +1250,8 @@
     },
     {
       "path": "apps/web/src/components/product/ManagedProductSurface.tsx",
-      "sha256": "1e61a3b56d269cf10cd12a39e702e01d2cf539e6316559785d7d04f4fd8731a8",
-      "bytes": 40488
+      "sha256": "7cfbbe5a0723f1267be32ea102b4f1b01cd0116537a1485201b68fdbc2b65556",
+      "bytes": 41666
     },
     {
       "path": "apps/web/src/components/product/ManagedWithdrawalHistory.tsx",
@@ -1290,8 +1290,8 @@
     },
     {
       "path": "apps/web/src/components/product/V3VersionBoundary.tsx",
-      "sha256": "0727b1e6b72e9323a0802448393248bd4d1801464964a6f6b8c846c3b11cf55e",
-      "bytes": 1438
+      "sha256": "8580a2b72154405a208e30dcc9604788d43b08709aeb02e91b9e4e1072a039d9",
+      "bytes": 1285
     },
     {
       "path": "apps/web/src/components/product/VaultDetailSurface.tsx",
@@ -1310,8 +1310,8 @@
     },
     {
       "path": "apps/web/src/lib/catalog/api.ts",
-      "sha256": "d99730984c4a22bce7e6c45e86925c66d166babb2093814cdc12decd08f254f1",
-      "bytes": 16883
+      "sha256": "dad6f52f3e4e29f618c451ece4c0980950cab430b454335cfdd5bf5a2f1c606b",
+      "bytes": 16927
     },
     {
       "path": "apps/web/src/lib/catalog/arkas.ts",
@@ -2140,8 +2140,8 @@
     },
     {
       "path": "apps/web/tests/integration/managed-product-ui.test.tsx",
-      "sha256": "3a61f3993ca5c0d31c1e8f0c7977e6c06b2731bddb18a91ee46a5d34bab528f1",
-      "bytes": 22487
+      "sha256": "d2bebeb4bc726bd4d0800401da49d3a135207e1d068d6e39f714779d34def477",
+      "bytes": 22489
     },
     {
       "path": "apps/web/tests/integration/managed-read-coherence.test.tsx",
@@ -2240,8 +2240,8 @@
     },
     {
       "path": "apps/web/tests/integration/workflow-surfaces.test.tsx",
-      "sha256": "1ef77eb46f8163896a9019e97af1bac103fb641bd93d31d891e4c879f80782b3",
-      "bytes": 112438
+      "sha256": "aa94644a543f1953e228d08da130336e995de9992f5b2bb36a7cb1c4f56847c5",
+      "bytes": 116731
     },
     {
       "path": "apps/web/tests/setup.ts",
@@ -4010,7 +4010,7 @@
     },
     {
       "path": "release/rustsec-risk-acceptance.json",
-      "sha256": "43f5f23e91eeffa92307703fc90eac7a12ad2a88df06655effab01b354e0d56a",
+      "sha256": "4ea44b864155da19f4d0612b313ee55b7c200107a220da6c48a887ca5c953a40",
       "bytes": 1586
     },
     {

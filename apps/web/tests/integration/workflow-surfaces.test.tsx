@@ -155,6 +155,19 @@ import {
   GOVERNED_ACTION_TEMPLATES,
 } from "@/lib/workflows/governanceComposer";
 import { resolveCatalogFixture } from "@/lib/catalog/testFixtures";
+import type { Page, RankedAssetCatalogEntry } from "@/lib/catalog/types";
+import { DENOMINATION } from "@/lib/config";
+
+function creationCatalogFixture(params: URLSearchParams) {
+  const page = resolveCatalogFixture("/v1/assets", params) as Page<RankedAssetCatalogEntry>;
+  const listed = page.items;
+  const extra = [DENOMINATION, "CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY"]
+    .filter(assetContract => !listed.some(asset => asset.assetContract === assetContract))
+    .map(assetContract => ({ ...listed[0], assetContract, arkaCount: 0, managerCount: 0 }));
+  const items = [...listed, ...extra];
+  return { ...page, items, total: items.length };
+}
+
 
 describe("workflow surfaces", () => {
   afterEach(() => {
@@ -262,6 +275,12 @@ describe("workflow surfaces", () => {
     const original = sorobanMocks.readFactoryCreationFeeAmount.getMockImplementation();
     let liveFee = 5_000_000;
     sorobanMocks.readFactoryCreationFeeAmount.mockImplementation(async () => liveFee);
+    vi.stubGlobal("fetch", vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/catalog/v1/assets") return Response.json(creationCatalogFixture(url.searchParams));
+      if (url.pathname === "/api/assets/core-registry") return Response.json({ items: [] });
+      throw new Error("Unexpected test request");
+    }));
     try {
       const user = userEvent.setup();
       render(<CreateArkaClient />);
@@ -2224,6 +2243,65 @@ describe("workflow surfaces", () => {
     expect(screen.getByTestId("integrations-run-balanced")).toBeDisabled();
   });
 
+  it("keeps an incomplete asset catalog out of creation and loads all pages on retry", async () => {
+    const user = userEvent.setup();
+    const available = creationCatalogFixture(new URLSearchParams()).items;
+    const offsets: number[] = [];
+    let unavailable = true;
+    vi.stubGlobal("fetch", vi.fn(async (input: string) => {
+      const url = new URL(input, "http://localhost");
+      if (url.pathname === "/api/assets/core-registry") return Response.json({ items: [] });
+      if (url.pathname !== "/api/catalog/v1/assets") throw new Error("Unexpected test request");
+      const offset = Number(url.searchParams.get("offset"));
+      offsets.push(offset);
+      if (offset === 1 && unavailable) return Response.json({ message: "Unavailable" }, { status: 503 });
+      const items = offset === 0 ? available.slice(0, 1) : available.slice(offset);
+      return Response.json({ offset, limit: items.length, total: available.length, items });
+    }));
+
+    render(<CreateArkaClient />);
+    await screen.findByText("Asset catalog unavailable.");
+    expect(screen.queryByTestId("create-arka-denomination-select")).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("create-step-review"));
+    expect(screen.getByTestId("create-arka-submit-button")).toBeDisabled();
+    unavailable = false;
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.getByTestId("create-arka-submit-button")).toBeEnabled());
+    expect(offsets).toEqual([0, 1, 0, 1]);
+    expect(txMocks.signXdr).not.toHaveBeenCalled();
+  });
+
+  it("uses the reviewed template for managed creation before the catalog has a fund", async () => {
+    vi.stubEnv("NEXT_PUBLIC_V3_DEFAULT_CREATION", "1");
+    vi.resetModules();
+    try {
+      const denomination = "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA";
+      const other = "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75";
+      const factory = "CAUIKL3IYGMERDRUN6YSCLWVAKIFG5Q4YJHUKM4S4NJZQIA3BAS6OJPK";
+      const templateHash = "ab".repeat(32);
+      const fetch = vi.fn(async (input: string) => {
+        const url = new URL(input, "http://localhost");
+        if (url.pathname === "/api/assets/core-registry") return Response.json({ items: [] });
+        if (url.pathname === "/api/mainnet-connector/profile") return Response.json({
+          profile: { network: "Public Global Stellar Network ; September 2015", factory, router: factory, templateHash },
+          defaultDraft: { factoryId: factory, routerId: factory, templateHash,
+            denominationContract: denomination, whitelistContracts: [denomination, other] },
+        });
+        throw new Error("Unexpected test request");
+      });
+      vi.stubGlobal("fetch", fetch);
+      const { default: ManagedCreation } = await import("@/app/factory/create/CreateArkaClient");
+      render(<ManagedCreation />);
+      const selector = await screen.findByTestId("create-arka-denomination-select");
+      expect(selector).toHaveValue(denomination);
+      expect(selector).toBeDisabled();
+      expect(screen.getByTestId(`create-arka-whitelist-option-${other}`)).toBeDisabled();
+      expect(fetch.mock.calls.every(([url]) => !url.startsWith("/api/catalog/v1/assets"))).toBe(true);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("prefills Create Arka denomination and allowed assets from registry route params", async () => {
     const user = userEvent.setup();
     window.history.replaceState(
@@ -2238,7 +2316,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2383,7 +2461,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2486,7 +2564,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2549,7 +2627,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2616,7 +2694,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2702,7 +2780,7 @@ describe("workflow surfaces", () => {
 
         if (url.startsWith("/api/catalog/v1/assets")) {
           const parsed = new URL(url, "http://localhost");
-          const body = resolveCatalogFixture("/v1/assets", parsed.searchParams);
+          const body = creationCatalogFixture(parsed.searchParams);
           return new Response(JSON.stringify(body), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -2855,7 +2933,7 @@ describe("workflow surfaces", () => {
     );
 
     await waitFor(() =>
-      expect(screen.getByRole("option", { name: "USDC" })).toBeInTheDocument(),
+      expect(screen.getByRole("option", { name: /^USDC · CCW67/ })).toBeInTheDocument(),
     );
     for (const contract of [
       "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",

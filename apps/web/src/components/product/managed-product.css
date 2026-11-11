@@ -9,6 +9,26 @@
 .managed-product p { line-height: 1.65; }
 .managed-product .surface-eyebrow { display: block; margin: 0; }
 .managed-product > .managed-product-header { gap: 12px; }
+.managed-fund-topline, .managed-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.managed-fund-topline { flex-wrap: wrap; }
+.managed-product > .managed-collect {
+  border-inline-start: 3px solid #b8fb4b;
+  background: color-mix(in srgb, #b8fb4b 8%, var(--surface-panel, #211641));
+}
+.managed-product > .managed-collect-single {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.managed-collect h2 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
+.managed-collect p { margin-top: 4px; }
+.managed-collect-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.managed-collect-list > li { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.managed-product .managed-investment-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .managed-product-header > p { max-width: 65ch; }
 .managed-product-header .surface-entry-actions { margin-top: 4px; }
 .managed-product .surface-entry-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
@@ -38,6 +58,18 @@
 .managed-instant > .surface-button { justify-self: start; }
 .managed-keeper details p { font-size: .8rem; overflow-wrap: anywhere; }
 .managed-product small, .managed-product .surface-note { color: #c1b6cf; }
+@media (max-width: 600px) {
+  .managed-product > .managed-product-header.surface-panel { gap: 8px; padding-block: 14px; }
+  .managed-product > .managed-collect-single { grid-template-columns: minmax(0, 1fr); }
+  .managed-collect-list > li { flex-wrap: wrap; }
+  .managed-collect-list .surface-button { width: 100%; }
+}
+@media (max-width: 360px) {
+  .managed-product { gap: 12px; }
+  .managed-fund-topline { row-gap: 4px; }
+  .managed-product-header h1 { font-size: 1.55rem; }
+  .managed-product > .managed-collect.surface-panel { gap: 12px; padding-block: 16px; }
+}
 /* Shared public navigation; authorization for operator tools is unchanged. */
 .managed-platform-navigation > summary { padding: 14px 16px; border-top: 1px solid var(--surface-border); font-size: .8rem; }
 /* Creation only: one compact summary, then a replacement review. */

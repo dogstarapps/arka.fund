@@ -406,13 +406,13 @@ export async function loadManagersResolvedPage(
 }
 
 export async function loadAssetsPage(
-  query: ExplorerQuery = {},
+  query: ExplorerQuery & { offset?: number } = {},
   signal?: AbortSignal,
 ): Promise<Page<RankedAssetCatalogEntry>> {
   const search = query.search?.trim() || undefined;
   return fetchCatalog<Page<RankedAssetCatalogEntry>>(
     "/v1/assets",
-    { search, limit: 24 },
+    { search, offset: query.offset, limit: 24 },
     { signal },
   );
 }

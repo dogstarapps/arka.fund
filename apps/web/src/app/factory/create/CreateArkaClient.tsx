@@ -1,5 +1,7 @@
 "use client";
-import {GENERAL_MAINNET} from "@/lib/generalMainnet";
+import { StrKey } from "@stellar/stellar-sdk";
+import { GENERAL_MAINNET, generalRead } from "@/lib/generalMainnet";
+import { MAINNET_NETWORK } from "@/lib/mainnetWalletConnector";
 import "./creation-header.css";
 
 import Link from "next/link";
@@ -34,7 +36,7 @@ import {
 } from "@/lib/catalog/identity";
 import type { IdentityUpdateRequest } from "@/lib/catalog/types";
 import type { CoreStellarAssetMetadata, RankedAssetCatalogEntry } from "@/lib/catalog/types";
-import { ARKA_FACTORY, ARKA_ROUTER, ROUTING_ASSET_A, ROUTING_ASSET_B, DENOMINATION, SIM_ACCOUNT } from "@/lib/config";
+import { ARKA_FACTORY, ARKA_ROUTER, DENOMINATION, SIM_ACCOUNT } from "@/lib/config";
 import { assertFinancialActionsEnabled, UX_REVIEW_PREVIEW } from "@/lib/previewSafety";
 import {
   resolveRpcUrl,
@@ -75,118 +77,56 @@ import {
   signMessageWithWallet,
 } from "@/lib/walletKit";
 
-interface CreateAssetOption {
-  key: string;
-  contract: string | null;
-  label: string;
-  registryId: string | null;
-  arkaCount: number;
-  managerCount: number;
-  source: "catalog" | "config" | "core_registry";
-  selectable: boolean;
-  statusLabel: string;
-  iconUrl: string | null;
-  fallbackIconUrl: string | null;
-  iconSource: CoreStellarAssetMetadata["iconSource"] | null;
-  tomlState: CoreStellarAssetMetadata["tomlState"] | null;
-  iconProvenanceLabel: string | null;
-}
+const MANAGED_CREATION = process.env.NEXT_PUBLIC_V3_DEFAULT_CREATION === "1";
 
-function dedupeAssetOptions(options: CreateAssetOption[]): CreateAssetOption[] {
-  const byKey = new Map<string, CreateAssetOption>();
-  for (const option of options) {
-    const dedupeKey = option.registryId ?? option.contract ?? option.key;
-    const existing = byKey.get(dedupeKey);
-    if (!existing) {
-      byKey.set(dedupeKey, option);
-      continue;
-    }
-    byKey.set(dedupeKey, {
-      ...existing,
-      contract: existing.contract ?? option.contract,
-      arkaCount: Math.max(existing.arkaCount, option.arkaCount),
-      managerCount: Math.max(existing.managerCount, option.managerCount),
-      source:
-        existing.source === "catalog" || option.source === "catalog"
-          ? "catalog"
-          : existing.source === "config" || option.source === "config"
-            ? "config"
-            : "core_registry",
-      selectable: existing.selectable || option.selectable,
-      statusLabel:
-        existing.source === "catalog" || option.source === "catalog"
-          ? "Available asset"
-          : existing.statusLabel,
-      iconUrl: existing.iconUrl ?? option.iconUrl,
-      fallbackIconUrl: existing.fallbackIconUrl ?? option.fallbackIconUrl,
-      iconSource: existing.iconSource ?? option.iconSource,
-      tomlState: existing.tomlState ?? option.tomlState,
-      iconProvenanceLabel:
-        existing.iconProvenanceLabel ?? option.iconProvenanceLabel,
-    });
+type CreationTemplate = {
+  denomination: string;
+  assets: string[];
+  router: string;
+};
+
+async function readCreationTemplate(signal: AbortSignal): Promise<CreationTemplate> {
+  const { profile, defaultDraft } = await generalRead("profile", {}, signal);
+  const assets = defaultDraft?.whitelistContracts;
+  const denomination = defaultDraft?.denominationContract;
+  const router = defaultDraft?.routerId;
+  if (
+    profile?.network !== MAINNET_NETWORK ||
+    !/^[a-f0-9]{64}$/.test(profile?.templateHash ?? "") ||
+    profile.templateHash !== defaultDraft?.templateHash ||
+    !StrKey.isValidContract(profile.factory) ||
+    profile.factory !== defaultDraft.factoryId ||
+    !StrKey.isValidContract(router ?? "") ||
+    router !== profile.router ||
+    !Array.isArray(assets) ||
+    !assets.every(asset => typeof asset === "string" && StrKey.isValidContract(asset)) ||
+    !assets.includes(denomination)
+  ) {
+    throw new Error("Creation template unavailable.");
   }
-  return [...byKey.values()];
+  return { denomination, assets, router };
 }
 
-function mapAssetEntryToOption(entry: RankedAssetCatalogEntry): CreateAssetOption {
-  return {
-    key: entry.assetContract,
-    contract: entry.assetContract,
-    label: resolveAssetDisplayLabel(entry.assetContract),
-    registryId: null,
-    arkaCount: entry.arkaCount,
-    managerCount: entry.managerCount,
-    source: "catalog",
-    selectable: true,
-    statusLabel: "Available asset",
-    iconUrl: null,
-    fallbackIconUrl: null,
-    iconSource: null,
-    tomlState: null,
-    iconProvenanceLabel: null,
-  };
-}
-
-function buildConfigAssetOption(contract: string): CreateAssetOption {
-  return {
-    key: contract,
-    contract,
-    label: resolveAssetDisplayLabel(contract),
-    registryId: null,
-    arkaCount: 0,
-    managerCount: 0,
-    source: "config",
-    selectable: true,
-    statusLabel: "Configured asset",
-    iconUrl: null,
-    fallbackIconUrl: null,
-    iconSource: null,
-    tomlState: null,
-    iconProvenanceLabel: null,
-  };
-}
-
-function mapCoreRegistryItemToOption(entry: CoreStellarAssetMetadata): CreateAssetOption {
-  return {
-    key: `core-${entry.id}`,
-    contract: entry.selectableContract,
-    label: entry.symbol,
-    registryId: entry.id,
-    arkaCount: 0,
-    managerCount: 0,
-    source: "core_registry",
-    selectable: Boolean(entry.selectableContract),
-    statusLabel: entry.selectableContract ? "Supported asset" : "Metadata only",
-    iconUrl: entry.iconUrl,
-    fallbackIconUrl: entry.fallbackIconUrl,
-    iconSource: entry.iconSource,
-    tomlState: entry.tomlState,
-    iconProvenanceLabel:
-      entry.iconProvenanceLabel ??
-      (entry.iconSource === "stellar_toml"
-        ? "stellar.toml verified"
-        : "asset icon"),
-  };
+async function readCreationCatalog(signal: AbortSignal): Promise<RankedAssetCatalogEntry[]> {
+  const assets: RankedAssetCatalogEntry[] = [];
+  let total: number;
+  do {
+    const page = await loadAssetsPage({ offset: assets.length }, signal);
+    total = page.total;
+    if (
+      page.offset !== assets.length ||
+      !Number.isSafeInteger(total) ||
+      total < assets.length + page.items.length ||
+      (page.items.length === 0 && assets.length < total)
+    ) {
+      throw new Error("Asset catalog is incomplete.");
+    }
+    assets.push(...page.items);
+  } while (assets.length < total);
+  if (new Set(assets.map(asset => asset.assetContract)).size !== assets.length) {
+    throw new Error("Asset catalog changed while loading.");
+  }
+  return assets;
 }
 
 function readStoredWalletPubkey(): string {
@@ -273,25 +213,19 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
     };
   }, [pubKey]);
 
-  const [routerId] = useState(ARKA_ROUTER);
   const [assetSearch, setAssetSearch] = useState("");
   const [prefillNotice, setPrefillNotice] = useState("");
   const prefillAppliedRef = useRef(false);
   const assetSearchTouchedRef = useRef(false);
   const assetSearchInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedDenomination, setSelectedDenomination] = useState(DENOMINATION);
-  const [selectedWhitelist, setSelectedWhitelist] = useState<string[]>(
-    process.env.NEXT_PUBLIC_V3_DEFAULT_CREATION==='1' ? [ROUTING_ASSET_A,ROUTING_ASSET_B] : DENOMINATION ? [DENOMINATION] : [],
-  );
-  const [catalogAssetOptions, setCatalogAssetOptions] = useState<CreateAssetOption[]>(() =>
-    dedupeAssetOptions(
-      [DENOMINATION, ROUTING_ASSET_A, ROUTING_ASSET_B].filter(Boolean).map(buildConfigAssetOption),
-    ),
-  );
-  const [coreRegistry, setCoreRegistry] = useState<CoreStellarAssetMetadata[]>([]);
-  const [assetCatalogState, setAssetCatalogState] = useState<
-    "idle" | "loading" | "ready" | "error"
-  >("idle");
+  const [selectedDenomination, setSelectedDenomination] = useState("");
+  const [selectedWhitelist, setSelectedWhitelist] = useState<string[]>([]);
+  const [catalogAssets, setCatalogAssets] = useState<RankedAssetCatalogEntry[]>([]);
+  const [creationTemplate, setCreationTemplate] = useState<CreationTemplate | null>(null);
+  const [assetMetadataLookup, setAssetMetadataLookup] = useState<Record<string, CoreStellarAssetMetadata>>({});
+  const [assetCatalogState, setAssetCatalogState] = useState<"loading" | "ready" | "error">("loading");
+  const [assetCatalogAttempt, setAssetCatalogAttempt] = useState(0);
+  const routerId = MANAGED_CREATION ? creationTemplate?.router ?? "" : ARKA_ROUTER;
   const [feesPct, setFeesPct] = useState({ mgmt: "0", perf: "0", dep: "0", red: "0" });
   const [feeToken, setFeeToken] = useState("");
   const [feeAmount, setFeeAmount] = useState(0);
@@ -314,10 +248,6 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
   const [identitySaveError, setIdentitySaveError] = useState("");
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [confirmCreate, setConfirmCreate] = useState(false);
-  const assetMetadataLookup = useMemo(
-    () => indexCoreAssetMetadata(coreRegistry),
-    [coreRegistry],
-  );
 
   useEffect(() => {
     writeCreateWizardUrlState({
@@ -331,35 +261,35 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
     const run = async () => {
       setAssetCatalogState("loading");
       try {
-        const page = await loadAssetsPage({ search: undefined }, controller.signal);
-        const seeded = dedupeAssetOptions(
-          [
-            ...page.items.map(mapAssetEntryToOption),
-            ...[DENOMINATION, ROUTING_ASSET_A, ROUTING_ASSET_B].filter(Boolean).map(buildConfigAssetOption),
-          ],
-        );
-        setCatalogAssetOptions(seeded);
+        if (MANAGED_CREATION) {
+          const template = await readCreationTemplate(controller.signal);
+          if (controller.signal.aborted) return;
+          setCreationTemplate(template);
+        } else {
+          const assets = await readCreationCatalog(controller.signal);
+          if (controller.signal.aborted) return;
+          setCatalogAssets(assets);
+        }
         setAssetCatalogState("ready");
       } catch {
-        const fallbackOptions = dedupeAssetOptions(
-          [DENOMINATION, ROUTING_ASSET_A, ROUTING_ASSET_B].filter(Boolean).map(buildConfigAssetOption),
-        );
-        setCatalogAssetOptions(fallbackOptions);
+        if (controller.signal.aborted) return;
+        setCatalogAssets([]);
+        setCreationTemplate(null);
         setAssetCatalogState("error");
       }
     };
     void run();
     return () => controller.abort();
-  }, []);
+  }, [assetCatalogAttempt]);
 
   useEffect(() => {
     const controller = new AbortController();
     const run = async () => {
       try {
         const registry = await loadCoreStellarAssetRegistry(controller.signal);
-        setCoreRegistry(registry.items);
+        if (!controller.signal.aborted) setAssetMetadataLookup(indexCoreAssetMetadata(registry.items));
       } catch {
-        setCoreRegistry([]);
+        if (!controller.signal.aborted) setAssetMetadataLookup({});
       }
     };
     void run();
@@ -367,45 +297,30 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
   }, []);
 
   const assetOptions = useMemo(() => {
-    const seeded = coreRegistry.map(mapCoreRegistryItemToOption);
-    const merged = dedupeAssetOptions(
-      [...seeded, ...catalogAssetOptions].map((option) => {
-        const metadata = lookupCoreAssetMetadata(
-          assetMetadataLookup,
-          option.contract ?? option.registryId,
-        );
-        return {
-          ...option,
-          label: metadata?.symbol ?? option.label,
-          registryId: metadata?.id ?? option.registryId,
-          iconUrl: metadata?.iconUrl ?? option.iconUrl,
-          fallbackIconUrl: metadata?.fallbackIconUrl ?? option.fallbackIconUrl,
-          contract: option.contract ?? metadata?.selectableContract ?? null,
-          selectable:
-            option.selectable || Boolean(option.contract ?? metadata?.selectableContract),
-          statusLabel:
-            option.source === "catalog"
-              ? "Available asset"
-              : option.selectable || Boolean(option.contract ?? metadata?.selectableContract)
-                ? "Core asset"
-                : "Registry only",
-        };
-      }),
-    );
-    return merged.sort((left, right) => {
-      if (left.selectable !== right.selectable) {
-        return left.selectable ? -1 : 1;
-      }
-      if (left.source !== right.source) {
-        if (left.source === "catalog") return -1;
-        if (right.source === "catalog") return 1;
-      }
-      return left.label.localeCompare(right.label);
-    });
-  }, [assetMetadataLookup, catalogAssetOptions, coreRegistry]);
+    if (assetCatalogState !== "ready") return [];
+    const assets = creationTemplate
+      ? creationTemplate.assets.map(assetContract => ({ assetContract, arkaCount: null }))
+      : catalogAssets;
+    return assets.map(({ assetContract, arkaCount }) => {
+      const metadata = lookupCoreAssetMetadata(assetMetadataLookup, assetContract);
+      return {
+        key: assetContract,
+        contract: assetContract,
+        label: metadata?.symbol ?? resolveAssetDisplayLabel(assetContract),
+        registryId: metadata?.id ?? null,
+        selectable: true,
+        arkaCount,
+        iconUrl: metadata?.iconUrl ?? null,
+        fallbackIconUrl: metadata?.fallbackIconUrl ?? null,
+        iconSource: metadata?.iconSource ?? null,
+        tomlState: metadata?.tomlState ?? null,
+        iconProvenanceLabel: metadata?.iconProvenanceLabel ?? null,
+      };
+    }).sort((left, right) => left.label.localeCompare(right.label));
+  }, [assetCatalogState, assetMetadataLookup, catalogAssets, creationTemplate]);
 
   useEffect(() => {
-    if (prefillAppliedRef.current) {
+    if (prefillAppliedRef.current || assetCatalogState !== "ready" || MANAGED_CREATION) {
       return;
     }
     if (typeof window === "undefined" || !window.location.search) {
@@ -486,17 +401,19 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
     }
   }, [assetOptions.length, assetSearch]);
 
-  const denominationContract = selectedDenomination.trim() || DENOMINATION;
+  const availableAssets = useMemo(() => new Set(assetOptions.map(asset => asset.contract)), [assetOptions]);
+  const assetLabelCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const asset of assetOptions) counts.set(asset.label, (counts.get(asset.label) ?? 0) + 1);
+    return counts;
+  }, [assetOptions]);
+  const denominationCandidate = creationTemplate?.denomination ?? (selectedDenomination || DENOMINATION);
+  const denominationContract = availableAssets.has(denominationCandidate) ? denominationCandidate : "";
   const whitelist = useMemo(() => {
-    const ensured = denominationContract
-      ? [denominationContract, ...selectedWhitelist]
-      : selectedWhitelist;
-    return Array.from(new Set(ensured.map((item) => item.trim()).filter(Boolean)));
-  }, [denominationContract, selectedWhitelist]);
-  const selectedDenominationLabel = useMemo(
-    () => resolveAssetDisplayLabel(denominationContract),
-    [denominationContract],
-  );
+    const selected = creationTemplate?.assets ?? [denominationContract, ...selectedWhitelist];
+    return [...new Set(selected.filter(asset => availableAssets.has(asset)))];
+  }, [availableAssets, creationTemplate, denominationContract, selectedWhitelist]);
+  const selectedDenominationLabel = assetOptions.find(asset => asset.contract === denominationContract)?.label ?? "";
   const selectedWhitelistLabel = useMemo(() => {
     if (whitelist.length === 0) return "No additional assets selected";
     const labels = whitelist.slice(0, 3).map((contract) => resolveAssetDisplayLabel(contract));
@@ -519,7 +436,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
         pubKey,
         routerId,
         denominationInput: denominationContract,
-        defaultDenomination: DENOMINATION,
+        defaultDenomination: "",
         feeToken,
         feeAmount,
         whitelist,
@@ -785,6 +702,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
   const submitCreateArka = async (): Promise<void> => {
     try {
       assertFinancialActionsEnabled();
+      if (assetCatalogState !== "ready" || !denominationContract) throw new Error("Choose a verified denomination asset.");
       if (!ARKA_FACTORY) throw new Error("NEXT_PUBLIC_ARKA_FACTORY not set");
       setCreatedArkaId("");
       setCreatedArkaTxHash("");
@@ -857,8 +775,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
       const saltHex = crypto
         .getRandomValues(new Uint8Array(32))
         .reduce((seed, byte) => seed + byte.toString(16).padStart(2, "0"), "");
-      const denomCid = denominationContract && denominationContract.trim().length > 0 ? denominationContract.trim() : DENOMINATION;
-      if (!denomCid) throw new Error("Denomination not set (env or input)");
+      const denomCid = denominationContract;
       if (!feeValidation.valid) {
         setActiveCreateStep("fees");
         throw new Error(feeValidation.firstError ?? "Invalid fee profile");
@@ -918,7 +835,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
   });
   const progressSummary = summarizeCreateWizardProgress(stepReadiness);
   const activeStepReadiness = stepReadiness[activeCreateStep];
-  const canSubmitCreate = process.env.NEXT_PUBLIC_V3_DEFAULT_CREATION!=='1' && !UX_REVIEW_PREVIEW && createSummary.isReady && feeValidation.valid && creationFeeState === "ready";
+  const canSubmitCreate = !MANAGED_CREATION && assetCatalogState === "ready" && !UX_REVIEW_PREVIEW && createSummary.isReady && feeValidation.valid && creationFeeState === "ready";
   const visualStages = buildCreateWizardVisualStages(stepperRows);
   const connectCreateWallet = async () => {
     setError("");
@@ -1013,6 +930,17 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
       </article>
     </section>
   );
+
+  const assetLoadStatus = assetCatalogState === "error" ? (
+    <div className="create-asset-status">
+      <p role="alert">{MANAGED_CREATION ? "Creation template unavailable." : "Asset catalog unavailable."}</p>
+      <button type="button" className="surface-button surface-button-secondary" onClick={() => {
+        setAssetCatalogState("loading");
+        setAssetCatalogAttempt(attempt => attempt + 1);
+      }}>Retry</button>
+    </div>
+  ) : assetCatalogState === "loading" ? <p role="status">Checking available assets…</p>
+    : assetOptions.length === 0 ? <p role="status">No assets are listed for creation.</p> : null;
 
   const renderBasicsStep = (): ReactNode => (
     <section className="create-step-surface" data-testid="create-profile-panel">
@@ -1179,7 +1107,8 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
           <span>{prefillNotice}</span>
         </div>
       ) : null}
-      <div className="create-asset-selection-grid">
+      {assetLoadStatus}
+      {assetOptions.length > 0 ? <div className="create-asset-selection-grid">
         <section
           id="create-denomination-panel"
           className="create-asset-panel"
@@ -1199,19 +1128,19 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
               className="ops-select"
               data-testid="create-arka-denomination-select"
               value={denominationContract}
+              disabled={MANAGED_CREATION}
               onChange={(event) => setSelectedDenomination(event.target.value)}
             >
-              {assetOptions
-                .filter((asset) => asset.contract && asset.selectable)
-                .map((asset) => (
-                  <option key={`denomination-${asset.key}`} value={asset.contract ?? ""}>
-                    {asset.label}
+              {!denominationContract ? <option value="">Select a denomination</option> : null}
+              {assetOptions.filter(asset => !MANAGED_CREATION || asset.contract === denominationContract).map((asset) => (
+                  <option key={asset.contract} value={asset.contract}>
+                    {assetLabelCounts.get(asset.label) === 1 ? asset.label : `${asset.label} · ${formatContractLabel(asset.contract, 5, 4)}`}
                   </option>
                 ))}
             </select>
           </label>
           <div className="surface-note" data-testid="create-arka-denom-summary">
-            Portfolio value and withdrawals use {selectedDenominationLabel}. Deposits in other allowed assets also need a live price.
+            {denominationContract ? `Portfolio value and withdrawals use ${selectedDenominationLabel}.` : "Select the asset used for valuation and withdrawals."}
           </div>
         </section>
 
@@ -1265,13 +1194,13 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
             {filteredAssets.map((asset) => {
               const selected = asset.contract ? whitelist.includes(asset.contract) : false;
               const lockedBaseSleeve = asset.contract === denominationContract;
-              const exposureLabel = asset.arkaCount > 0
+              const exposureLabel = asset.arkaCount !== null && asset.arkaCount > 0
                 ? `${asset.arkaCount} ${asset.arkaCount === 1 ? "Arka" : "Arkas"}`
                 : null;
               return (
                 <button
                   key={`whitelist-${asset.key}`}
-                  disabled={lockedBaseSleeve || !asset.selectable}
+                  disabled={MANAGED_CREATION || lockedBaseSleeve}
                   type="button"
                   data-testid={`create-arka-whitelist-option-${asset.contract ?? asset.registryId ?? asset.key}`}
                   data-core-asset-id={asset.registryId ?? undefined}
@@ -1294,9 +1223,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
                     <div className="create-asset-option-copy">
                       <strong>{asset.label}</strong>
                       <span className="surface-table-subtle">
-                        {asset.contract
-                          ? formatContractLabel(asset.contract, 8, 6)
-                          : "Asset metadata ready · not selectable on this network yet"}
+                        {formatContractLabel(asset.contract, 8, 6)}
                       </span>
                     </div>
                   </div>
@@ -1304,11 +1231,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
                     <span>
                       {lockedBaseSleeve
                         ? "Denomination"
-                        : !asset.selectable
-                          ? "Asset metadata only"
-                          : selected
-                            ? "Included"
-                            : "Optional"}
+                        : selected ? "Included" : "Optional"}
                     </span>
                     {exposureLabel ? <span>{exposureLabel}</span> : null}
                   </div>
@@ -1325,7 +1248,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
             Allowed asset set: {selectedWhitelistLabel}
           </div>
         </section>
-      </div>
+      </div> : null}
     </section>
   );
 
@@ -1487,8 +1410,11 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
           tone={createSummary.isReady ? "positive" : "warning"}
           testId="create-arka-review-card"
         />
-      {process.env.NEXT_PUBLIC_V3_DEFAULT_CREATION==='1'?<V3DefaultCreationReview draft={{creatorPubKey:pubKey,denominationContract:denominationContract||DENOMINATION,fees:feeValidation.bps,whitelistContracts:whitelist,routerId}}/>:null}
-        {process.env.NEXT_PUBLIC_V3_DEFAULT_CREATION!=='1'?<>
+        {assetLoadStatus}
+        {MANAGED_CREATION && denominationContract && feeValidation.valid ? (
+          <V3DefaultCreationReview draft={{creatorPubKey:pubKey,denominationContract,fees:feeValidation.bps,whitelistContracts:whitelist,routerId}}/>
+        ) : null}
+        {!MANAGED_CREATION ? <>
         <div className="ops-action-row">
           <button
             data-testid="create-arka-submit-button"

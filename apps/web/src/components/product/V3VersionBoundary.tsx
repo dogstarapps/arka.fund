@@ -20,5 +20,5 @@ export default function V3VersionBoundary({children}:{children:ReactNode}){
  },[id]);
  if(unavailable)return <section className="surface-panel"><h1>Arka unavailable</h1><p role="alert">This Arka could not be verified. Refresh before continuing.</p></section>;
  if(!state||state.id!==id)return <p role="status">Checking Arka…</p>;
- return <>{state.version===3?<div className="surface-chip-wrap" data-testid="arka-version"><span className="surface-status-pill">Stellar mainnet</span></div>:null}{state.version===3?<ManagedFundSurface/>:children}</>;
+ return state.version===3?<ManagedFundSurface/>:<>{children}</>;
 }

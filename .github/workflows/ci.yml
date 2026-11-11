@@ -96,10 +96,18 @@ jobs:
         run: cargo test --manifest-path contracts/Cargo.toml --offline --locked --workspace --jobs 2
       - name: Audit workspace Rust dependencies against current RustSec
         if: always()
-        run: cargo audit --file contracts/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-workspace.json"
+        run: |
+          report="$ARKA_RELEASE_EVIDENCE_DIR/rustsec-workspace.json"
+          audit_exit=0
+          cargo audit --file contracts/Cargo.lock --json > "$report" || audit_exit=$?
+          node release/rustsec-gate.mjs contracts/Cargo.lock "$report" "$audit_exit"
       - name: Audit quote adapter Rust dependencies against current RustSec
         if: always()
-        run: cargo audit --file release/quote-adapter/Cargo.lock --json > "$ARKA_RELEASE_EVIDENCE_DIR/rustsec-quote-adapter.json"
+        run: |
+          report="$ARKA_RELEASE_EVIDENCE_DIR/rustsec-quote-adapter.json"
+          audit_exit=0
+          cargo audit --file release/quote-adapter/Cargo.lock --json > "$report" || audit_exit=$?
+          node release/rustsec-gate.mjs release/quote-adapter/Cargo.lock "$report" "$audit_exit"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

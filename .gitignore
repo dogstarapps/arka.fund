@@ -33,6 +33,10 @@ __pycache__/
 
 # Vendored dependencies (if not using submodules)
 vendor/
+!/sdk/typescript/vendor/
+/sdk/typescript/vendor/*
+!/sdk/typescript/vendor/README.md
+!/sdk/typescript/vendor/typedoc-0.28.20-pr3151-529c394.tgz
 
 # Rust build artifacts
 /contracts/target/

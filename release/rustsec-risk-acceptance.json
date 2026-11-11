@@ -1,0 +1,23 @@
+{
+  "acceptedOn": "2026-11-10",
+  "authorization": "The release requester approved using the official Soroban host with this finding in the reviewed locks.",
+  "advisory": "RUSTSEC-2026-0387",
+  "package": "crypto-bigint",
+  "version": "0.5.5",
+  "source": "registry+https://github.com/rust-lang/crates.io-index",
+  "packageSha256": "0dc92fb57ca44df6db8059111ab3af99a63d5d0f8375d9972e319a379c6bab76",
+  "locks": {
+    "contracts/Cargo.lock": "19bafc5f81c89f37924b2a61cf7dda763b22701c3f2e346a7924b52d125332ac",
+    "release/quote-adapter/Cargo.lock": "91dabc8f95425f242d6443187c31bbef1c1378196eaa98a1c4dd35f5d4b793ae"
+  },
+  "reviewedSourcesSha256": "7d6edc937dde8fbabcac4248604ea77a73e85cb167d7796d08b8d580361aeccf",
+  "risk": "Timing differences in affected operations could reveal secret operands to an observer able to measure them.",
+  "rationale": "The dependency is present in the official native host used for validation and absent from the normal and build edges of both WASM guest graphs. The relevant Soroban curve paths operate on public signature verification data. This limits the direct risk in the reviewed Arka candidate.",
+  "disposition": "Accept this finding only for the reviewed sources and locks. CI retains the full reports and warns on the accepted finding. Reassess after a change in sources, locks or cryptographic usage, or when a compatible upstream fix is available.",
+  "mainnetApproved": false,
+  "noahVersion": 2,
+  "references": [
+    "https://rustsec.org/advisories/RUSTSEC-2026-0387.html",
+    "https://github.com/stellar/stellar-cli/pull/2882"
+  ]
+}

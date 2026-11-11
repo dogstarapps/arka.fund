@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "revision": "R61",
-  "candidate": "R61",
-  "baseCandidate": "R60",
-  "baseCommit": "ced030e4f30ceb4a25a25586a5be2389dabece4b",
+  "revision": "sushi-official-host",
+  "candidate": "sushi-official-host",
+  "baseCandidate": "R61",
+  "baseCommit": "2f2bf46fec116fd91d8df01af8745bc245865cca",
   "date": "2026-11-10",
   "mainnetApproved": false,
   "noah": {
@@ -12,21 +12,21 @@
     "migrate": false,
     "targetedReadsThisRevision": 0
   },
-  "scope": "OracleGuard divergence arithmetic and rebound Sushi-only launch plan",
+  "scope": "Development dependency fixes for web lint and SDK documentation with the official Soroban host",
   "existingProductionApprovalReevaluated": false,
   "existingProductionApprovalRevoked": false,
   "pending": [
     {
       "id": "development-dependency-advisory",
-      "status": "pending",
+      "status": "reviewed-locally",
       "category": "release-policy-and-upstream",
-      "closure": "R60 technical review, with dependency locks identical in R61: all copies development-only; no affected production lock node, no affected Next NFT reference or known compiled marker. Actual lint/docs do not reach the described level-2 mechanism; native V8 positive controls detect it. Advisory stays open by version and published range discrepancy. Strict full audits still fail. Close with a supported compatible upstream fix and validation, or an explicit release-risk/policy decision. Neither is applied."
+      "closure": "The two affected tooling paths resolve minimatch 11.0.5. The locked development packages and their provenance passed local review."
     },
     {
       "id": "rust-dependency-advisories",
-      "status": "pending",
+      "status": "accepted",
       "category": "release-policy-and-upstream",
-      "closure": "Five fresh graphs: affected crypto-bigint 0.5.5 in native hosts, absent from both normal/build guest graphs. Reviewed host23/P29 ECDSA entry points use public verification/recovery inputs; no signing-secret flow identified in these paths. Not a constant-time proof or validator-host qualification. Three raw lock audits remain failing. Need supported upstream migration and requalification, or an explicit native-tooling risk decision. No waiver or suppression is applied."
+      "closure": "See release/rustsec-risk-acceptance.json for the scope of the acceptance and the CI warning."
     },
     {
       "id": "wallet-device-and-canary",
@@ -57,13 +57,13 @@
       "id": "hosted-ci",
       "status": "pending",
       "category": "release-policy-and-validation",
-      "closure": "R61 local contract tests and macOS ARM64 WASM reproduction pass. Hosted CI remains pending for R61. The R60 hosted run remains historical and failed the strict dependency audits."
+      "closure": "Run hosted CI on the exact release commit after publication is authorized."
     },
     {
       "id": "internal-technical-review",
       "status": "pending",
       "category": "internal-technical-review",
-      "closure": "Complete the internal release decision for the exact successor, including both open dependency advisories. The OracleGuard fix has fresh local regression evidence."
+      "closure": "Dependency provenance passed local review. The release decision follows hosted CI and target qualification."
     },
     {
       "id": "deployment-authorization",
@@ -74,7 +74,7 @@
   ],
   "nextLocalPending": {
     "id": "application-policy-and-hosting-qualification",
-    "localStep": "Review both open dependency advisories for the exact candidate and run hosted CI under applicable authorization. Then qualify the current target, actual template digest and registry creation ledger, API/preview hosting, and authorized wallet and funded canary.",
+    "localStep": "Run hosted CI on the exact commit and qualify the deployment target.",
     "applicationDefectOpen": false
   },
   "currentLocalAudit": {
@@ -106,12 +106,12 @@
     ],
     "allApplicationFindingsClosed": true,
     "allInternalFindingsClosed": false,
-    "scope": "R61 divergence regression, targeted financial and governance replays, and native contract suite. Earlier audit evidence is historical."
+    "scope": "The Sushi runtime and contract identities match the audited baseline. Dependency review and replay records are retained locally."
   },
-  "contractsChanged": 1,
-  "selectedWasmChanged": 1,
-  "selectedWasmUnchanged": 23,
-  "dependenciesChanged": 0,
+  "contractsChanged": 0,
+  "selectedWasmChanged": 0,
+  "selectedWasmUnchanged": 24,
+  "dependenciesChanged": 2,
   "signaturesCreated": 0,
   "signaturesCreatedThisRevision": 0,
   "transactionsSubmitted": 0,
@@ -151,7 +151,7 @@
     "harnessRemediated": true,
     "positiveSigningTestsNotAuthorizedOrRunAgain": true
   },
-  "baseReleaseId": "9e633ad72cc87cb541c2c14d9b9947a252415504a2129ea3d2b5013ed6acb37a",
+  "baseReleaseId": "d5b1bdaedfa89ca76db1f9584874690ee260b3fd8b5484716fb47bc02c6bc2af",
   "auditRevision": "R61-oracle-divergence",
   "retainedPriorEvidence": {
     "baseline": "R47",
@@ -164,11 +164,9 @@
   "historicalR56SignatureIncidentPreserved": true,
   "productionWritesThisRevision": 0,
   "productionAccessMode": "offline-only",
-  "selectedWasmChangedThisRevision": 1,
-  "selectedWasmUnchangedThisRevision": 23,
-  "sourceFindingsClosedThisRevision": [
-    "oracle-guard-divergence"
-  ],
+  "selectedWasmChangedThisRevision": 0,
+  "selectedWasmUnchangedThisRevision": 24,
+  "sourceFindingsClosedThisRevision": [],
   "localOracleDivergence": {
     "closedFinding": "oracle-guard-divergence",
     "guardWasm": "fd08e2c0712e4eaf7436a1eb68c2cf088cbb9627e132d2564227bdd98c1d310c",

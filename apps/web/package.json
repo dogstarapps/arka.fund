@@ -99,6 +99,10 @@
     "toml": "5.0.1",
     "valibot": "1.4.2",
     "viem": "2.50.4",
-    "ws": "8.21.0"
+    "ws": "8.21.0",
+    "eslint-config-next": {
+      "@typescript-eslint/parser": "8.72.3-alpha.3",
+      "@typescript-eslint/eslint-plugin": "8.72.3-alpha.3"
+    }
   }
 }

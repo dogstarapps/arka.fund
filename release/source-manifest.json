@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "d5b1bdaedfa89ca76db1f9584874690ee260b3fd8b5484716fb47bc02c6bc2af",
+  "releaseId": "30529bc27457d92d6df1ef03f87f2c5e960fb349b32666ef0b78e35abfccc751",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -10,13 +10,13 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "9c54ceb8fecbcf28acffb7a950325ce8721275340aa08ddd2894cd9441c165d6",
-      "bytes": 7069
+      "sha256": "2c2e8e36d22c1fc20d7021bd4125bbd6fd4d2b7fc1637d7746bbb19a63127afc",
+      "bytes": 7409
     },
     {
       "path": ".gitignore",
-      "sha256": "337b3bed508be740c4151be5b44d2c59fdb9bd315a4f01959ce6ac36baf02ae0",
-      "bytes": 1106
+      "sha256": "a0c90059e877e3a7f7bd760385c91209b4b1ca11969d7780924f5d62001dcdc0",
+      "bytes": 1249
     },
     {
       "path": "AGENTS.md",
@@ -500,13 +500,13 @@
     },
     {
       "path": "apps/web/package-lock.json",
-      "sha256": "ed988053304c7bcad0283867482928b6b737f77282796c96e427d98863484d01",
-      "bytes": 288577
+      "sha256": "ef752131e7bf813bde2d6700cac08aa93a78c7056a59e0f0d56c71b4ac1001cf",
+      "bytes": 289350
     },
     {
       "path": "apps/web/package.json",
-      "sha256": "14f1d4aff607923df6e24a98743b2507cbd865d31939578400e567b8cf9e5c6d",
-      "bytes": 4432
+      "sha256": "a4392daffa865d2cb2fe011727e196efc7c427eb6ba4421ef8e8ebbb870fa0af",
+      "bytes": 4579
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -3960,8 +3960,8 @@
     },
     {
       "path": "release/mainnet-pending.json",
-      "sha256": "0f621bc33ebb05a52670294395d6fad388d6c349a14433cd7e41b74aa7ac988d",
-      "bytes": 9126
+      "sha256": "35a5c4cb87520b8320497dbf730de314c026ee6fa5a8ed92c03d5e746943f6ed",
+      "bytes": 8047
     },
     {
       "path": "release/make-manifest.mjs",
@@ -4002,6 +4002,16 @@
       "path": "release/run-local.mjs",
       "sha256": "d07f8d87e502fcb3bb06ec2e35bb6c30b57e5f2ba635cf924cbd435ace7f31b6",
       "bytes": 6203
+    },
+    {
+      "path": "release/rustsec-gate.mjs",
+      "sha256": "f1549d0f274dee7732a5060dd02d74b2a6681c7c6f3e3b98365450e72a2d4e28",
+      "bytes": 2837
+    },
+    {
+      "path": "release/rustsec-risk-acceptance.json",
+      "sha256": "43f5f23e91eeffa92307703fc90eac7a12ad2a88df06655effab01b354e0d56a",
+      "bytes": 1586
     },
     {
       "path": "release/signature-check.mjs",
@@ -4100,13 +4110,13 @@
     },
     {
       "path": "release/tests/ci-configuration.test.mjs",
-      "sha256": "8f23c2ece9a7953f967f02951fbba7670c6f2c0b77b78fb6df1d8f5e38692479",
-      "bytes": 4129
+      "sha256": "2fbe58bc317ff2ace15198065b87f7bee4fbf7a28a3bbde619b9caf1190d38d1",
+      "bytes": 4537
     },
     {
       "path": "release/tests/dependency-scope.test.mjs",
-      "sha256": "12f0f2f71abdc35b7667bf3f9714c155bd609e3fc423dda669fa559316987d15",
-      "bytes": 2786
+      "sha256": "ed89ff756bb384288447660b185c151cd7738187b54a7eaa665175c12bd1b204",
+      "bytes": 5753
     },
     {
       "path": "release/tests/ephemeral-signatures.test.mjs",
@@ -4300,13 +4310,13 @@
     },
     {
       "path": "sdk/typescript/package-lock.json",
-      "sha256": "7ee6e753f5724dbafc61bba3b1358126820677b6f4ebfb710660ac175ed4b5c8",
-      "bytes": 29773
+      "sha256": "488600c404dfa8960a61d0643b16da5d1334bd9e0eb4ecf402339212e17df16b",
+      "bytes": 30222
     },
     {
       "path": "sdk/typescript/package.json",
-      "sha256": "39b50c9c0e00f8fc310e5965100b8c025fa60afdc01171f7ecdc6ada8f4b52e5",
-      "bytes": 1489
+      "sha256": "29226c343a56d0496bac4de46ddaeb8de878d6a170a90902459ea799939a4f2a",
+      "bytes": 1527
     },
     {
       "path": "sdk/typescript/README.md",
@@ -4582,6 +4592,16 @@
       "path": "sdk/typescript/typedoc.json",
       "sha256": "2d093b78fde77b6af8a5fa66eea30cfad2fb18aa09916d5236ef2df5f1ae8b63",
       "bytes": 598
+    },
+    {
+      "path": "sdk/typescript/vendor/README.md",
+      "sha256": "1c4d222d33206171deb8e7119a7787bf897b3235697b3204b2fcba2e4cc47381",
+      "bytes": 835
+    },
+    {
+      "path": "sdk/typescript/vendor/typedoc-0.28.20-pr3151-529c394.tgz",
+      "sha256": "b4ce718cf6c415697e3c7b3565be8f8abe15e7d4ca8301c5b7dcd16253ab13b2",
+      "bytes": 483268
     },
     {
       "path": "services/catalog-api/.dockerignore",

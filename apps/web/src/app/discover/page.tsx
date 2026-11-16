@@ -9,5 +9,6 @@ export default async function DiscoverPage({ searchParams }: DiscoverPageProps) 
   const rawQuery = resolvedSearchParams?.q;
   const initialQuery = typeof rawQuery === "string" ? rawQuery : "";
 
-  return <DiscoverSurface initialQuery={initialQuery} />;
+  const redesign = process.env.ARKA_FRONTEND_REDESIGN === "1";
+  return <DiscoverSurface key={redesign ? initialQuery : undefined} initialQuery={initialQuery} redesign={redesign} />;
 }

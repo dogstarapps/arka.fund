@@ -406,8 +406,10 @@ function formatProtocolMapNodeDetail(venue: ExecutionVenueDescriptor): string {
 
 export function IntegrationsSurface({
   mode = "public",
+  redesign = false,
 }: {
   mode?: IntegrationSurfaceMode;
+  redesign?: boolean;
 }) {
   const integrationAccessModel = useMemo(
     () => buildIntegrationSurfaceAccessModel(mode),
@@ -1496,16 +1498,102 @@ export function IntegrationsSurface({
     }
   };
 
+  const sodaxExplainer = (
+    <>
+      <p>SODAX uses an intent: an order describing what the fund pays and the minimum it must receive. A connection check alone does not mean this route is available for your fund.</p>
+      <ol>
+        <li><strong>Get a live quote.</strong> Check the assets, amount and minimum received.</li>
+        <li><strong>Review and sign.</strong> Only the fund manager can authorize an order.</li>
+        <li><strong>Wait for settlement.</strong> An accepted or submitted order is not a completed swap. Confirm delivery before treating it as complete.</li>
+      </ol>
+      <p>If an order expires or fails, check its status and refund eligibility; do not resubmit blindly. Fees, delays and refund conditions depend on the route.</p>
+      <Link className="surface-button surface-button-secondary" href="/manage">Choose a fund I manage</Link>
+    </>
+  );
+  const diagnostics = (
+    <>
+      <section
+        className="public-figma-metric-deck integrations-public-metric-deck"
+        data-testid="integrations-public-metric-deck"
+        aria-label="Integration metrics"
+      >
+        {integrationPublicMetricTiles.map((tile) => (
+          <article
+            key={tile.id}
+            className={`public-figma-metric-card public-figma-metric-card-${tile.tone} public-figma-metric-card-${tile.id}`}
+            data-testid={integrationPublicMetricTestId(tile)}
+          >
+            <div className="public-figma-metric-head">
+              <span className="public-figma-metric-icon" aria-hidden="true" />
+              <strong>{tile.label}</strong>
+            </div>
+            <div className="public-figma-metric-value">{tile.value}</div>
+            <p className="public-figma-metric-detail">{tile.detail}</p>
+          </article>
+        ))}
+       </section>
+      <section
+          className="integrations-protocol-visual"
+          data-testid="integrations-protocol-visual"
+          aria-label="Protocol readiness constellation"
+        >
+          <div className="integrations-protocol-copy">
+            <span className="surface-eyebrow">Validated venue map</span>
+            <h2>
+              {loadedRoutes}/{integrationWorkspaceSnapshot.totalRoutes} adapter reads returned
+            </h2>
+            <p>
+              Adapter readability, manager-reviewed actions and AUTO eligibility are reported
+              separately so operator review never implies unsupported execution.
+            </p>
+            <div className="integrations-protocol-stats">
+              <span>{autoVenueCount} AUTO-ready</span>
+              <span>{admittedVenueCount} admitted venues</span>
+              <span>{walletLabel}</span>
+            </div>
+          </div>
+          <div className="integrations-protocol-orbit">
+            <span>Planner</span>
+            <strong>{autoVenueCount}/{integrationProtocolVisualNodes.length}</strong>
+            <small>AUTO-ready venues</small>
+          </div>
+          <div className="integrations-protocol-nodes">
+            {integrationProtocolVisualNodes.map((node) => (
+              <article
+                key={node.id}
+                className={`integrations-protocol-node integrations-protocol-node-${node.tone}`}
+                data-testid={`integrations-protocol-node-${node.id.toLowerCase()}`}
+              >
+                <div>
+                  <span>{node.family}</span>
+                  <strong>{node.title}</strong>
+                </div>
+                <StatusPill label={node.status} tone={node.tone} />
+                <small>
+                  {node.reason}
+                </small>
+              </article>
+            ))}
+          </div>
+        </section>
+    </>
+  );
+
   return (
     <main
-      className="surface-stack integrations-fidelity-shell"
+      className={redesign ? "arka-workflow arka-integrations" : "surface-stack integrations-fidelity-shell"}
       data-testid={
         operatorSurface
           ? "integrations-operator-surface"
           : "integrations-public-surface"
       }
     >
-      <header className="surface-stage-header">
+      {redesign ? (
+        <header className="arka-redesign-page-heading">
+          <h1>{operatorSurface ? "Integrations operator" : "Integrations"}</h1>
+          <p>{operatorSurface ? "Review routes, prepare orders and check settlement." : "See the protocols Arkas can use and check their availability."}</p>
+        </header>
+      ) : <header className="surface-stage-header">
         <span className="surface-eyebrow">Protocols</span>
         <h1 className="surface-title">
           {operatorSurface ? "Integrations operator" : "Integrations"}
@@ -1515,7 +1603,7 @@ export function IntegrationsSurface({
             ? integrationAccessModel.operatorSummary
             : integrationAccessModel.publicSummary}
         </p>
-      </header>
+      </header>}
       <section
         className="integrations-product-catalog"
         data-testid="integrations-product-catalog"
@@ -1523,10 +1611,10 @@ export function IntegrationsSurface({
       >
         <div className="integrations-product-catalog-head">
           <div>
-            <span className="surface-eyebrow">Supported protocols</span>
-            <h2>Protocols</h2>
+            {!redesign ? <span className="surface-eyebrow">Supported protocols</span> : null}
+            <h2>{redesign ? "Protocol connections" : "Protocols"}</h2>
           </div>
-          <p>Manage protocols from your Arka. These checks are not a quote, a successful transaction or a guarantee of liquidity.</p>
+          {!redesign ? <p>Manage protocols from your Arka. These checks are not a quote, a successful transaction or a guarantee of liquidity.</p> : null}
         </div>
         <div className="ops-action-row ux-protocol-checks">
           <p role="status" className="surface-note" data-testid="integrations-public-check-status">{protocolChecks === "loading" ? "Checking protocol connections…" : protocolChecks === "error" ? "Connections could not be verified. No availability is assumed." : "Connection checks complete. Each fund, asset pair and amount needs its own checks."}</p>
@@ -1538,7 +1626,7 @@ export function IntegrationsSurface({
         >
           {integrationProtocolCatalogCards.map((card) => (
             (() => {
-              const brandAsset = integrationFigmaBrandAsset(card.id);
+              const brandAsset = redesign && card.id === "SUSHI" ? "/brand/sushi.svg" : integrationFigmaBrandAsset(card.id);
 
               return (
                 <article
@@ -1585,9 +1673,11 @@ export function IntegrationsSurface({
                     <StatusPill label={protocolChecks === "loading" ? "Checking…" : protocolChecks === "error" ? "Not verified" : card.postureLabel} tone={protocolChecks !== "ready" ? "neutral" : card.statusTone} />
                   </div>
                   <div className="integrations-product-card-copy">
-                    <span>{card.eyebrow}</span>
-                    <strong>{card.title}</strong>
-                    <p>{protocolChecks === "loading" ? "Waiting for connection checks. No availability is assumed yet." : protocolChecks === "error" ? "Try refreshing the connection checks." : card.detail}</p>
+                    {!redesign ? <span>{card.eyebrow}</span> : null}
+                    {redesign ? <h3>{card.title}</h3> : <strong>{card.title}</strong>}
+                    {redesign && protocolChecks !== "ready" ? null : (
+                      <p>{protocolChecks === "loading" ? "Waiting for connection checks. No availability is assumed yet." : protocolChecks === "error" ? "Try refreshing the connection checks." : card.detail}</p>
+                    )}
                     {protocolChecks === "ready" && card.capability ? <small>{card.capability}</small> : null}
                   </div>
                   <div className="integrations-product-card-footer">
@@ -1624,84 +1714,19 @@ export function IntegrationsSurface({
             })()
           ))}
         </div>
-        <section className="ux-sodax-explainer" aria-labelledby="sodax-how-it-works" data-testid="integrations-sodax-explainer">
-          <h2 id="sodax-how-it-works">How Balanced / SODAX swaps work</h2>
-          <p>SODAX uses an intent: an order describing what the fund pays and the minimum it must receive. A connection check alone does not mean this route is available for your fund.</p>
-          <ol>
-            <li><strong>Get a live quote.</strong> Check the assets, amount and minimum received.</li>
-            <li><strong>Review and sign.</strong> Only the fund manager can authorize an order.</li>
-            <li><strong>Wait for settlement.</strong> An accepted or submitted order is not a completed swap. Confirm delivery before treating it as complete.</li>
-          </ol>
-          <p>If an order expires or fails, check its status and refund eligibility; do not resubmit blindly. Fees, delays and refund conditions depend on the route.</p>
-          <Link className="surface-button surface-button-secondary" href="/manage">Choose a fund I manage</Link>
-        </section>
+        {redesign ? (
+          <details className="arka-workflow-disclosure" data-testid="integrations-sodax-explainer">
+            <summary>How Balanced / SODAX swaps work</summary>
+            {sodaxExplainer}
+          </details>
+        ) : (
+          <section className="ux-sodax-explainer" aria-labelledby="sodax-how-it-works" data-testid="integrations-sodax-explainer">
+            <h2 id="sodax-how-it-works">How Balanced / SODAX swaps work</h2>
+            {sodaxExplainer}
+          </section>
+        )}
       </section>
-      {operatorSurface ? <section
-        className="public-figma-metric-deck integrations-public-metric-deck"
-        data-testid="integrations-public-metric-deck"
-        aria-label="Integration metrics"
-      >
-        {integrationPublicMetricTiles.map((tile) => (
-          <article
-            key={tile.id}
-            className={`public-figma-metric-card public-figma-metric-card-${tile.tone} public-figma-metric-card-${tile.id}`}
-            data-testid={integrationPublicMetricTestId(tile)}
-          >
-            <div className="public-figma-metric-head">
-              <span className="public-figma-metric-icon" aria-hidden="true" />
-              <strong>{tile.label}</strong>
-            </div>
-            <div className="public-figma-metric-value">{tile.value}</div>
-            <p className="public-figma-metric-detail">{tile.detail}</p>
-          </article>
-        ))}
-      </section> : null}
-      {operatorSurface ? (
-        <section
-          className="integrations-protocol-visual"
-          data-testid="integrations-protocol-visual"
-          aria-label="Protocol readiness constellation"
-        >
-          <div className="integrations-protocol-copy">
-            <span className="surface-eyebrow">Validated venue map</span>
-            <h2>
-              {loadedRoutes}/{integrationWorkspaceSnapshot.totalRoutes} adapter reads returned
-            </h2>
-            <p>
-              Adapter readability, manager-reviewed actions and AUTO eligibility are reported
-              separately so operator review never implies unsupported execution.
-            </p>
-            <div className="integrations-protocol-stats">
-              <span>{autoVenueCount} AUTO-ready</span>
-              <span>{admittedVenueCount} admitted venues</span>
-              <span>{walletLabel}</span>
-            </div>
-          </div>
-          <div className="integrations-protocol-orbit">
-            <span>Planner</span>
-            <strong>{autoVenueCount}/{integrationProtocolVisualNodes.length}</strong>
-            <small>AUTO-ready venues</small>
-          </div>
-          <div className="integrations-protocol-nodes">
-            {integrationProtocolVisualNodes.map((node) => (
-              <article
-                key={node.id}
-                className={`integrations-protocol-node integrations-protocol-node-${node.tone}`}
-                data-testid={`integrations-protocol-node-${node.id.toLowerCase()}`}
-              >
-                <div>
-                  <span>{node.family}</span>
-                  <strong>{node.title}</strong>
-                </div>
-                <StatusPill label={node.status} tone={node.tone} />
-                <small>
-                  {node.reason}
-                </small>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {operatorSurface && !redesign ? diagnostics : null}
       {operatorSurface ? (
         <>
           <nav
@@ -1722,7 +1747,7 @@ export function IntegrationsSurface({
                 data-testid={`integrations-workspace-tab-${tab.id}`}
               >
                 <span>{tab.label}</span>
-                <small>{tab.eyebrow}</small>
+                {!redesign ? <small>{tab.eyebrow}</small> : null}
               </button>
             ))}
           </nav>
@@ -3233,6 +3258,12 @@ export function IntegrationsSurface({
             </div>
           ) : null}
         </Panel>
+      ) : null}
+      {operatorSurface && redesign ? (
+        <details className="arka-workflow-disclosure">
+          <summary>Adapter diagnostics</summary>
+          {diagnostics}
+        </details>
       ) : null}
     </main>
   );

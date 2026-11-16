@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import VaultDetailSurface from "@/components/product/VaultDetailSurface";
@@ -35,7 +35,30 @@ function installCatalogFetchMock() {
 const ARKA_ID = "CA7ALPHAQFK2MZKJY4R5S8N2P1T6V9W3X7Y2Z5ABCD1EFGH2345678IJ";
 
 describe("VaultDetailSurface", () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it("keeps the profile metrics, disclosure and financial entry points in the redesign", async () => {
+    installCatalogFetchMock();
+    const user = userEvent.setup();
+    render(<VaultDetailSurface arkaId={ARKA_ID} redesign />);
+
+    expect(await screen.findByRole("link", { name: "Deposit or withdraw" })).toHaveAttribute(
+      "href", `/arkas/${ARKA_ID}?workspace=flow`,
+    );
+    expect(screen.getByRole("link", { name: "Manage fund assets" })).toHaveAttribute(
+      "href", `/arkas/${ARKA_ID}?workspace=rebalance`,
+    );
+    const metrics = screen.getByText("Financial and catalog metrics");
+    expect(metrics.closest("details")).not.toHaveAttribute("open");
+    await user.click(metrics);
+    expect(metrics.closest("details")).toHaveAttribute("open");
+    expect(screen.getByTestId("vault-detail-fees")).toHaveTextContent("Management 2.00%");
+    await user.click(screen.getByRole("button", { name: "Policies" }));
+    expect(screen.getByTestId("vault-policies-table")).toHaveTextContent("Management fee");
+  });
 
   it("renders the public profile and switches across portfolio, activity and policies", async () => {
     installCatalogFetchMock();

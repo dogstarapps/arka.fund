@@ -1,0 +1,552 @@
+.arka-redesign {
+  --arka-page: #151221;
+  --arka-panel: #211c31;
+  --arka-control: #2b243d;
+  --arka-line: #484056;
+  --arka-text: #f5f2fa;
+  --arka-muted: #c8bfd6;
+  --arka-accent: #d7ff65;
+  min-block-size: 100vh;
+  color: var(--arka-text);
+  background: var(--arka-page);
+}
+
+.arka-redesign-frame {
+  inline-size: min(calc(100% - 2 * clamp(1rem, 4vw, 3rem)), 75rem);
+  margin-inline: auto;
+  min-inline-size: 0;
+}
+
+.arka-redesign-header {
+  border-block-end: 1px solid var(--arka-line);
+  background: var(--arka-panel);
+}
+
+.arka-redesign-header-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-block-size: 5rem;
+  padding-block: .625rem;
+}
+
+.arka-redesign-header .chrome-brand {
+  display: inline-flex;
+  inline-size: auto;
+  margin: 0;
+}
+
+.arka-redesign-header .chrome-brand-image {
+  display: block;
+  inline-size: 7.75rem;
+  block-size: auto;
+  object-fit: contain;
+}
+
+.arka-redesign-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(.125rem, 1vw, .75rem);
+  min-inline-size: 0;
+  color: var(--arka-muted);
+  font-size: .925rem;
+  font-weight: 600;
+}
+
+.arka-redesign-nav > a,
+.arka-redesign-menu > summary,
+.arka-redesign-menu-links > a {
+  display: flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  padding: .5rem .7rem;
+  border-radius: .5rem;
+  text-decoration: none;
+}
+
+.arka-redesign-nav a:hover,
+.arka-redesign-menu summary:hover,
+.arka-redesign-nav a[aria-current="page"] {
+  background: var(--arka-control);
+  color: var(--arka-text);
+}
+
+.arka-redesign-nav a[aria-current="page"] {
+  box-shadow: inset 0 -2px var(--arka-accent);
+}
+
+.arka-redesign-menu { position: relative; }
+.arka-redesign-menu > summary { cursor: pointer; gap: .5rem; }
+.arka-redesign-menu > summary::-webkit-details-marker { display: none; }
+.arka-redesign-menu > summary::after { content: ""; width: .45rem; height: .45rem; border: solid currentColor; border-width: 0 1px 1px 0; transform: rotate(45deg) translateY(-2px); }
+
+.arka-redesign-menu-panel {
+  position: absolute;
+  inset-block-start: calc(100% + .5rem);
+  inset-inline-end: 0;
+  z-index: 15;
+  inline-size: min(24rem, calc(100vw - 2rem));
+  max-block-size: min(27rem, 64vh);
+  overflow: auto;
+  padding: .75rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: 0 .75rem 2rem #0d091caf;
+}
+
+.arka-redesign-menu-panel form,
+.arka-redesign-menu-links { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
+.arka-redesign-menu-links { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-block-start: .75rem; }
+
+.arka-redesign-canvas { padding-block: clamp(1.25rem, 4vw, 3rem) 4rem; }
+.arka-redesign-canvas .ux-preview-banner { margin: 0 0 1.25rem; border-radius: .5rem; }
+.arka-redesign-canvas > .chrome-advanced-console { margin-block-start: 1.5rem; }
+
+.arka-redesign-skip {
+  position: fixed;
+  z-index: 30;
+  inset-block-start: .5rem;
+  inset-inline-start: .5rem;
+  transform: translateY(calc(-100% - 1rem));
+  background: var(--arka-accent);
+  color: var(--arka-page);
+  padding: .75rem;
+  border-radius: .5rem;
+}
+
+.arka-redesign-skip:focus { transform: none; }
+
+.arka-redesign :focus-visible {
+  outline: 2px solid var(--arka-accent);
+  outline-offset: 3px;
+}
+
+.arka-redesign-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 2.75rem;
+  border: 1px solid transparent;
+  border-radius: .5rem;
+  padding: .5rem .95rem;
+  background: var(--arka-accent);
+  color: var(--arka-page);
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.arka-redesign-button-secondary {
+  border-color: var(--arka-line);
+  background: transparent;
+  color: var(--arka-text);
+}
+
+.arka-redesign-button-secondary:hover { border-color: var(--arka-accent); }
+
+.arka-redesign-wallet .chrome-connect-button,
+.arka-redesign-wallet .chrome-disconnect-button {
+  min-block-size: 2.75rem;
+  margin: 0;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  box-shadow: none;
+  padding: .5rem .75rem;
+  background: transparent;
+  color: var(--arka-text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.arka-redesign-wallet .chrome-connect-connected { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .375rem; }
+.arka-redesign-wallet .chrome-connect-badge { background: transparent; color: var(--arka-muted); box-shadow: none; }
+
+.arka-redesign-page-heading { margin-block-end: clamp(1.5rem, 4vw, 2.5rem); }
+.arka-redesign-page-heading h1 {
+  margin: 0;
+  color: var(--arka-text);
+  font: 700 clamp(2.2rem, 4.4vw, 3.85rem)/1.07 var(--font-display), sans-serif;
+  letter-spacing: -.04em;
+}
+.arka-redesign-page-heading p { color: var(--arka-muted); font-size: 1rem; line-height: 1.6; margin: .65rem 0 0; }
+
+.arka-explore-filters { display: flex; flex-wrap: wrap; align-items: end; gap: .875rem; margin-block-end: 1.25rem; }
+.arka-explore-filters label { display: grid; gap: .4rem; min-inline-size: 0; font-weight: 600; color: var(--arka-muted); font-size: .875rem; }
+.arka-explore-filters .arka-explore-search { flex: 1 1 18rem; }
+.arka-explore-filters .arka-explore-curated { display: flex; align-items: center; min-block-size: 2.75rem; gap: .5rem; }
+.arka-explore-curated input { inline-size: 1.1rem; block-size: 1.1rem; accent-color: var(--arka-accent); }
+
+.arka-explore-filters :is(input[type="search"], select), .arka-redesign-menu input {
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  padding: .5rem .75rem;
+  background: var(--arka-control);
+  color: var(--arka-text);
+  font-size: 1rem;
+  color-scheme: dark;
+}
+
+.arka-explore-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+}
+
+.arka-explore-card {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .875rem;
+  background: var(--arka-panel);
+}
+
+.arka-explore-card-top { display: flex; justify-content: space-between; align-items: start; gap: .75rem; }
+.arka-explore-card h2 { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.arka-explore-strategy { margin: 0; color: var(--arka-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.arka-explore-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: auto 0 0; padding-block-start: .875rem; border-block-start: 1px solid var(--arka-line); }
+.arka-explore-facts dt { color: var(--arka-muted); font-size: .825rem; }
+.arka-explore-facts dd { margin: .15rem 0 0; font-weight: 650; overflow-wrap: anywhere; }
+.arka-explore-footer { margin-block-start: 1.25rem; }
+.arka-explore-footer a { color: var(--arka-accent); text-underline-offset: .22em; }
+.arka-explore-message { display: flex; flex-wrap: wrap; align-items: center; gap: .875rem; margin-block-end: 1rem; }
+.arka-explore-message p { margin: 0; }
+
+@media (max-width: 54rem) {
+  .arka-redesign-header-row { grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
+  .arka-redesign-nav { grid-area: 2 / 1 / 3 / 3; justify-content: space-between; }
+  .arka-redesign-nav > a, .arka-redesign-menu > summary { padding-inline: .4rem; }
+}
+
+@media (max-width: 27rem) {
+  .arka-redesign-nav { font-size: .8rem; gap: .125rem; }
+  .arka-redesign-nav > a, .arka-redesign-menu > summary { padding-inline: .3rem; }
+}
+
+.arka-redesign-portfolio-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.arka-redesign-profile-heading { overflow-wrap: anywhere; }
+.arka-redesign-profile-title { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.arka-redesign-back { display: inline-flex; align-items: center; min-block-size: 2.75rem; margin-block-end: .65rem; color: var(--arka-accent); }
+.arka-redesign-profile-risk { margin-block-start: 1rem; color: var(--arka-muted); }
+.arka-redesign-profile-risk summary { cursor: pointer; min-block-size: 2.75rem; align-content: center; }
+.arka-redesign-profile-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: .75rem 1.25rem;
+  margin: 1.25rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .75rem;
+  background: var(--arka-panel);
+}
+.arka-redesign-profile-facts dt { font-size: .8125rem; color: var(--arka-muted); }
+.arka-redesign-profile-facts dd { margin: .2rem 0 0; font-weight: 650; }
+
+.arka-redesign-profile .arka-redesign-profile-heading { margin-block-end: .5rem; }
+.arka-redesign-profile .vault-identity-actions { margin: 0; }
+.arka-redesign-profile .vault-detail-tab-row { padding: 0 0 .75rem; border: 0; border-block-end: 1px solid var(--arka-line); background: transparent; box-shadow: none; }
+.arka-redesign-profile .detail-tab { min-block-size: 2.75rem; border: 1px solid var(--arka-line); border-radius: .5rem; background: transparent; color: var(--arka-text); }
+.arka-redesign-profile .detail-tab-active { border-color: var(--arka-accent); background: var(--arka-control); }
+.arka-redesign :is(.arka-redesign-profile, .ux-portfolio, .managed-product) .surface-panel,
+.arka-redesign-profile .surface-entry-card {
+  border: 1px solid var(--arka-line);
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: none;
+}
+.arka-redesign-profile .surface-panel::before,
+.arka-redesign-profile .surface-entry-card::before { content: none; }
+
+.arka-redesign-metrics-disclosure { padding: .25rem 1rem; border: 1px solid var(--arka-line); border-radius: .75rem; }
+.arka-redesign-metrics-disclosure summary { min-block-size: 2.75rem; align-content: center; cursor: pointer; }
+.arka-redesign-profile-metrics { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%, 14rem),1fr)); gap: .75rem; margin: .5rem 0 1rem; }
+.arka-redesign-profile-metrics .public-figma-metric-card { min-inline-size: 0; padding: 1rem; border: 1px solid var(--arka-line); border-radius: .5rem; background: var(--arka-panel); box-shadow: none; }
+.arka-redesign-profile-metrics .public-figma-metric-icon { display: none; }
+
+/* Shared workflow surfaces for creation, governance and integrations. */
+.arka-workflow {
+  display: grid;
+  gap: 1.25rem;
+  min-inline-size: 0;
+  --surface-panel: var(--arka-panel);
+  --surface-panel-soft: var(--arka-control);
+  --surface-card: var(--arka-panel);
+  --surface-border: var(--arka-line);
+  --text-strong: var(--arka-text);
+  --text-soft: var(--arka-muted);
+  --text-muted: var(--arka-muted);
+}
+
+.arka-workflow > * { min-inline-size: 0; }
+.arka-workflow .arka-redesign-page-heading { margin: 0; }
+.arka-workflow :is(h1, h2, h3, dd, p, code) { overflow-wrap: anywhere; }
+
+.arka-workflow :is(
+  .arka-workflow-panel, .surface-panel, .surface-entry-card, .surface-signal-card,
+  .surface-table, .transaction-review-card, .integrations-workspace-summary,
+  .integrations-protocol-visual, .integrations-protocol-node, .integrations-command-card,
+  .public-figma-metric-card, .create-asset-panel, .create-assistant-result-card,
+  .arka-workflow-disclosure, .ux-create-profile-details
+) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  border: 1px solid var(--arka-line);
+  border-image: none;
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: none;
+}
+.arka-workflow :is(.surface-panel, .transaction-review-card, .surface-signal-card, .surface-entry-card)::before { content: none; }
+
+.arka-workflow :is(.arka-workflow-panel, .surface-panel, .integrations-workspace-summary, .integrations-protocol-visual) {
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.arka-workflow h2,
+.arka-workflow .surface-panel-title {
+  margin: 0;
+  color: var(--arka-text);
+  font-size: 1.35rem;
+  line-height: 1.25;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -.015em;
+}
+
+.arka-workflow :is(.surface-note, .surface-panel-subtitle, .ops-field-hint, .arka-workflow-note) { color: var(--arka-muted); }
+.arka-workflow :is(.ops-input, .ops-select, .ops-textarea) {
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  padding: .5rem .75rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  background: var(--arka-control);
+  color: var(--arka-text);
+  font-size: 1rem;
+  color-scheme: dark;
+}
+.arka-workflow :is(.ops-field-invalid .ops-input, .ops-field-invalid .ops-select, .ops-field-invalid .ops-textarea, input[aria-invalid="true"]) {
+  border-color: #f39da8;
+}
+
+.arka-workflow .ops-form-grid { gap: 1rem; }
+.arka-workflow .ops-field { display: flex; flex-direction: column; gap: .375rem; min-inline-size: 0; }
+.arka-workflow .ops-field-label { font-size: .875rem; text-transform: none; letter-spacing: 0; }
+
+.arka-workflow :is(.surface-button, .surface-section-tabs a, .surface-section-tabs button, .detail-tab) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: .5rem .9rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  background: transparent;
+  box-shadow: none;
+  color: var(--arka-text);
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+.arka-workflow .surface-button-primary {
+  border-color: transparent;
+  background: var(--arka-accent);
+  color: var(--arka-page);
+  font-weight: 700;
+}
+
+.arka-workflow :is(button:disabled, [aria-disabled="true"]) { opacity: .6; cursor: default; }
+.arka-workflow :is(.surface-tab-active, [aria-pressed="true"]).surface-tab { border-color: var(--arka-accent); background: var(--arka-control); }
+.arka-workflow .surface-section-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; border: 0; background: transparent; box-shadow: none; }
+
+.arka-workflow .ops-action-row,
+.arka-workflow-actions,
+.arka-create-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .75rem;
+}
+.arka-workflow-actions p { margin: 0; }
+
+.arka-workflow :is(.arka-workflow-disclosure, .ux-create-profile-details) { padding: .4rem 1rem; }
+.arka-workflow :is(.arka-workflow-disclosure, .ux-create-profile-details) > summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-block-size: 2.75rem;
+  padding-block: .625rem;
+}
+.arka-workflow .arka-workflow-disclosure > :not(summary) { margin-block-end: .75rem; }
+
+.arka-create-steps ol {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .375rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.arka-create-steps button {
+  display: flex;
+  width: 100%;
+  min-height: 3.25rem;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem;
+  text-align: start;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  color: var(--arka-muted);
+  font-size: .875rem;
+}
+.arka-create-steps button > span { color: var(--arka-muted); font-variant-numeric: tabular-nums; }
+.arka-create-steps button[aria-current="step"] { border-color: var(--arka-accent); color: var(--arka-text); background: var(--arka-control); }
+.arka-create-steps button[aria-current="step"] > span { color: var(--arka-accent); }
+
+.arka-create-panel { display: grid; gap: 1rem; }
+.arka-create-stage { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+.arka-create-stage span { color: var(--arka-muted); font-size: .875rem; }
+.arka-create-panel > p { margin: 0; }
+.arka-create-panel .create-step-surface { display: grid; gap: 1rem; min-inline-size: 0; padding: 0; background: transparent; border: 0; box-shadow: none; }
+.arka-create-panel .create-review-grid { grid-template-columns: minmax(0, 1fr); }
+.arka-create-panel :is(.create-assistant-launch-card, .create-assistant-result-card) { display: grid; gap: .75rem; min-inline-size: 0; }
+.arka-create-panel .create-assistant-launch-card { padding: 0; background: transparent; border: 0; box-shadow: none; }
+.arka-create-panel .create-asset-selection-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 1rem; }
+.arka-create-panel .create-asset-panel { padding: 1rem; }
+.arka-create-panel .create-asset-option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: .625rem; }
+.arka-create-panel .create-asset-option-card {
+  background: var(--arka-control);
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  box-shadow: none;
+}
+.arka-create-panel .create-asset-option-card-active { border-color: var(--arka-accent); }
+.arka-create-panel .create-asset-option-copy strong { white-space: normal; overflow-wrap: anywhere; }
+.arka-create-panel .create-asset-option-copy .surface-table-subtle { overflow-wrap: anywhere; }
+.arka-create-footer { border-block-start: 1px solid var(--arka-line); padding-block-start: 1rem; justify-content: space-between; }
+.arka-create-wallet { display: grid; gap: .75rem; }
+.arka-create-wallet p { margin: 0; color: var(--arka-muted); }
+.arka-create-wallet-status { font-weight: 600; }
+.arka-create-wallet-status code { font-size: .85rem; margin-inline-start: .45rem; }
+
+.arka-create-wallets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  list-style: none;
+  margin: .25rem 0 .5rem;
+  padding: 0;
+}
+.arka-create-wallets li { display: flex; align-items: center; gap: .5rem; font-size: .875rem; }
+.arka-create-wallets img { display: block; object-fit: contain; }
+
+.arka-governance .arka-governance-result {
+  display: grid;
+  gap: .625rem;
+  padding: .875rem 1rem;
+  margin-block: 1rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+}
+.arka-governance-result p { margin: 0; color: var(--arka-muted); }
+.arka-governance-result-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
+.arka-governance-result-title h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.arka-governance-tally { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; margin: .75rem 0 0; }
+.arka-governance-tally dt { color: var(--arka-muted); }
+
+.arka-integrations .integrations-product-catalog {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.arka-integrations .integrations-product-catalog-head { margin: 0; padding: 0; border: 0; background: transparent; }
+.arka-integrations .ux-protocol-checks { justify-content: space-between; }
+.arka-integrations .ux-protocol-checks p { margin: 0; }
+.arka-integrations .integrations-product-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: .875rem; }
+.arka-integrations .integrations-product-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: .875rem;
+  padding: 1rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: none;
+}
+.arka-integrations .integrations-product-card-top { flex-wrap: wrap; gap: .5rem; }
+.arka-integrations .integrations-product-brand {
+  display: grid;
+  width: auto;
+  min-width: 2.75rem;
+  max-width: 100%;
+  height: 2.75rem;
+  place-items: center;
+  padding: .2rem;
+  border: 0;
+  border-radius: .45rem;
+  background: transparent;
+  box-shadow: none;
+}
+.arka-integrations .integrations-product-brand-asset { display: block; width: auto; max-width: min(8.5rem, 100%); height: 2.25rem; object-fit: contain; }
+.arka-integrations .integrations-product-card-copy { display: grid; gap: .4rem; }
+.arka-integrations .integrations-product-card-copy h3 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.arka-integrations .integrations-product-card-copy :is(p, small) { margin: 0; color: var(--arka-muted); }
+.arka-integrations .integrations-product-card-footer { margin-block-start: auto; }
+.arka-integrations .integrations-product-card-action { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--arka-accent); }
+.arka-integrations .integrations-workspace-tabs { margin: 0; }
+.arka-integrations .arka-workflow-disclosure ol { list-style: decimal inside; }
+
+@media (max-width: 48rem) {
+  .arka-workflow .ops-form-grid,
+  .arka-create-panel .create-asset-selection-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.arka-workflow .arka-create-step-picker { display: none; }
+
+.arka-integrations .integrations-product-brand:not(.integrations-product-brand-sushi) img {
+  mix-blend-mode: screen;
+}
+
+.arka-workflow .status-pill {
+  border: 1px solid var(--arka-line);
+  border-radius: .375rem;
+  background: transparent;
+  color: var(--arka-muted);
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.arka-workflow .status-pill-positive { color: #b5eab9; }
+.arka-workflow .status-pill-warning { color: #f2c88e; }
+.arka-workflow .status-pill-critical { color: #f6a9b1; }
+
+@media (max-width: 48rem) {
+  .arka-workflow .arka-create-step-picker { display: flex; }
+  .arka-create-steps ol { display: none; }
+}

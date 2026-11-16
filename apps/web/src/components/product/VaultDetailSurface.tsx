@@ -112,7 +112,7 @@ function formatVaultTvlValue(arka: ArkaDetailBundle["arka"]): string {
     : formatVaultDenominationAmount(arka.economics?.navDenomination ?? arka.nav, arka);
 }
 
-export default function VaultDetailSurface(props: { arkaId: string }) {
+export default function VaultDetailSurface(props: { arkaId: string; redesign?: boolean }) {
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [reloadNonce, setReloadNonce] = useState(0);
   const [state, setState] = useState<VaultDetailSurfaceState>(INITIAL_STATE);
@@ -248,9 +248,59 @@ export default function VaultDetailSurface(props: { arkaId: string }) {
   const profileSignals = buildVaultProfileSignals(arka);
   const publicMetricTiles = buildVaultDetailPublicMetricDeck(state.data);
 
+  const metrics = (
+      <section
+        className={props.redesign ? "arka-redesign-profile-metrics" : "public-figma-metric-deck vault-detail-public-metric-deck public-detail-metric-deck-cutover"}
+        data-testid="vault-detail-public-metric-deck"
+        aria-label="Arka profile metrics"
+      >
+        {publicMetricTiles.map((tile) => (
+          <article
+            key={tile.id}
+            className={`public-figma-metric-card public-figma-metric-card-${tile.tone} public-figma-metric-card-${tile.id} public-detail-metric-card-cutover`}
+            data-testid={resolveVaultDetailPublicMetricTestId(tile)}
+          >
+            <div className="public-figma-metric-head">
+              <span className="public-figma-metric-icon" aria-hidden="true" />
+              <strong>{tile.label}</strong>
+            </div>
+            <div className="public-figma-metric-value">
+              {formatVaultDetailPublicMetricValue(tile)}
+            </div>
+            <p className="public-figma-metric-detail">{tile.detail}</p>
+          </article>
+        ))}
+      </section>
+  );
+
   return (
-    <div className="surface-stack vault-detail-fidelity-shell public-detail-shell-cutover public-vault-detail-cutover">
-      <SurfaceHero
+    <div className={props.redesign
+      ? "surface-stack arka-redesign-profile"
+      : "surface-stack vault-detail-fidelity-shell public-detail-shell-cutover public-vault-detail-cutover"}>
+      {props.redesign ? (
+        <header className="arka-redesign-page-heading arka-redesign-profile-heading">
+          <Link href="/discover" className="arka-redesign-back">← Explore Arkas</Link>
+          <div className="arka-redesign-profile-title">
+            <div>
+              <h1>{resolveArkaDisplayName(arka)}</h1>
+              <p>{arka.identity?.strategy?.trim() || arka.identity?.description?.trim() || "Strategy details unavailable"}</p>
+            </div>
+            <Link href={`/arkas/${arka.arkaId}?workspace=flow`} className="arka-redesign-button">Deposit or withdraw</Link>
+          </div>
+          {arka.identity?.riskDisclosure?.trim() ? (
+            <details className="arka-redesign-profile-risk">
+              <summary>Risk information from the manager</summary>
+              <p>{arka.identity.riskDisclosure}</p>
+            </details>
+          ) : null}
+          <dl className="arka-redesign-profile-facts">
+            <div><dt>Manager</dt><dd title={arka.manager}>{resolveManagerDisplayName(arka.manager)}</dd></div>
+            <div><dt>Allowed assets</dt><dd>{arka.whitelistContracts.length}</dd></div>
+            <div><dt>Last catalog update</dt><dd>{formatRelativeTime(arka.syncedAt)}</dd></div>
+            <div><dt>Contract</dt><dd title={arka.arkaId}>{formatContractLabel(arka.arkaId, 12, 6)}</dd></div>
+          </dl>
+        </header>
+      ) : <SurfaceHero
         eyebrow="Arka profile"
         title={resolveArkaDisplayName(arka)}
         description={resolveArkaSubtitle(arka)}
@@ -279,7 +329,7 @@ export default function VaultDetailSurface(props: { arkaId: string }) {
             </div>
           </div>
         }
-      />
+      />}
 
       <div className="surface-actions vault-identity-actions">
         <Link href={`/arkas/${arka.arkaId}?workspace=rebalance`} className="surface-button surface-button-secondary">Manage fund assets</Link>
@@ -296,28 +346,12 @@ export default function VaultDetailSurface(props: { arkaId: string }) {
         <StatusPill label={formatContractLabel(arka.arkaId, 10, 6)} tone="neutral" />
       </div>
 
-      <section
-        className="public-figma-metric-deck vault-detail-public-metric-deck public-detail-metric-deck-cutover"
-        data-testid="vault-detail-public-metric-deck"
-        aria-label="Arka profile metrics"
-      >
-        {publicMetricTiles.map((tile) => (
-          <article
-            key={tile.id}
-            className={`public-figma-metric-card public-figma-metric-card-${tile.tone} public-figma-metric-card-${tile.id} public-detail-metric-card-cutover`}
-            data-testid={resolveVaultDetailPublicMetricTestId(tile)}
-          >
-            <div className="public-figma-metric-head">
-              <span className="public-figma-metric-icon" aria-hidden="true" />
-              <strong>{tile.label}</strong>
-            </div>
-            <div className="public-figma-metric-value">
-              {formatVaultDetailPublicMetricValue(tile)}
-            </div>
-            <p className="public-figma-metric-detail">{tile.detail}</p>
-          </article>
-        ))}
-      </section>
+      {props.redesign ? (
+        <details className="arka-redesign-metrics-disclosure">
+          <summary>Financial and catalog metrics</summary>
+          {metrics}
+        </details>
+      ) : metrics}
 
       <div className="detail-tab-row vault-detail-tab-row public-detail-tabs-cutover" data-testid="vault-detail-tabs">
         {[
@@ -378,7 +412,7 @@ export default function VaultDetailSurface(props: { arkaId: string }) {
                 </div>
                 <div className="surface-data-item">
                   <span className="surface-data-label">Change</span>
-                  <strong className="surface-data-value">{formatSignedBpsAsPercent(trend.deltaBps)}</strong>
+                  <strong className="surface-data-value">{props.redesign && trend.deltaBps === null ? "Unavailable" : formatSignedBpsAsPercent(trend.deltaBps)}</strong>
                 </div>
               </div>
             </div>

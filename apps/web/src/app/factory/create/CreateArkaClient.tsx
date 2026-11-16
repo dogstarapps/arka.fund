@@ -140,9 +140,10 @@ function readStoredWalletPubkey(): string {
 
 type CreateArkaClientProps = {
   initialUrlState?: CreateWizardUrlState;
+  redesign?: boolean;
 };
 
-export default function CreateArkaClient({ initialUrlState }: CreateArkaClientProps = {}) {
+export default function CreateArkaClient({ initialUrlState, redesign = false }: CreateArkaClientProps = {}) {
   const router = useRouter();
   const [initialWizardState] = useState(() =>
     initialUrlState ??
@@ -152,6 +153,12 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
   );
   const [activeCreateStep, setActiveCreateStep] =
     useState<CreateWizardStepId>(initialWizardState.step);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const lastCreateStep = useRef(activeCreateStep);
+  useEffect(() => {
+    if (redesign && lastCreateStep.current !== activeCreateStep) stepHeading.current?.focus();
+    lastCreateStep.current = activeCreateStep;
+  }, [activeCreateStep, redesign]);
   const [setupIntent, setSetupIntent] =
     useState<SetupIntent>(initialWizardState.setupIntent);
   const [pubKey, setPubKey] = useState("");
@@ -865,7 +872,42 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
     }
   };
 
-  const renderWalletStartStep = (): ReactNode => (
+  const renderWalletStartStep = (): ReactNode => redesign ? (
+    <section className="arka-create-wallet" data-testid="create-start-panel">
+      <p className="arka-create-wallet-status" data-testid="create-arka-wallet">
+        {pubKey ? <>Wallet connected <code>{pubKey}</code></> : "Wallet disconnected"}
+      </p>
+      <p>Connect the wallet that will manage this Arka. You can prepare the draft first and connect before creating it.</p>
+      <ul className="arka-create-wallets" aria-label="Supported wallets">
+        {["Freighter", "Albedo", "xBull"].map(wallet => (
+          <li key={wallet} data-testid={`create-wallet-choice-${wallet.toLowerCase()}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/brand/wallets/${wallet.toLowerCase()}.png`} width={28} height={28} alt="" />
+            {wallet}
+          </li>
+        ))}
+      </ul>
+      {error ? <p role="alert" className="ops-field-error">{error}</p> : null}
+      <div className="arka-create-actions">
+        {!pubKey ? (
+          <button type="button" className="arka-redesign-button" data-testid="create-wallet-connect-button"
+            onClick={connectCreateWallet} disabled={walletConnectBusy || UX_REVIEW_PREVIEW}>
+            {walletConnectBusy ? "Connecting wallet…" : "Connect wallet"}
+          </button>
+        ) : null}
+        <button type="button" className={`arka-redesign-button${pubKey ? "" : " arka-redesign-button-secondary"}`}
+          data-testid="create-wallet-continue-button" onClick={() => goToStep("basics")}>
+          {pubKey ? "Continue to basics" : "Continue without wallet"}
+        </button>
+        {pubKey ? (
+          <button type="button" className="arka-redesign-button arka-redesign-button-secondary"
+            data-testid="create-wallet-connect-button" onClick={connectCreateWallet} disabled={walletConnectBusy || UX_REVIEW_PREVIEW}>
+            Switch wallet
+          </button>
+        ) : null}
+      </div>
+    </section>
+  ) : (
     <section className="create-step-surface create-start-grid" data-testid="create-start-panel">
       <article className="create-start-card create-start-card-primary">
         <div>
@@ -944,14 +986,14 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
 
   const renderBasicsStep = (): ReactNode => (
     <section className="create-step-surface" data-testid="create-profile-panel">
-      <div className="create-stage-banner create-stage-banner-soft" data-testid="create-basics-payload-banner">
+      {!redesign ? <div className="create-stage-banner create-stage-banner-soft" data-testid="create-basics-payload-banner">
         <span className="create-stage-banner-icon" aria-hidden="true">
           ◆
         </span>
         <div>
           Choose how deposits are valued and which assets this Arka may hold.
         </div>
-      </div>
+      </div> : null}
       <ActionField
         label="Arka public name"
         htmlFor="create-arka-display-name"
@@ -1530,9 +1572,57 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
 
   return (
     <main
-      className={`surface-stack create-assistant-shell create-assistant-step-${activeCreateStep}`}
+      className={redesign ? "arka-workflow arka-create" : `surface-stack create-assistant-shell create-assistant-step-${activeCreateStep}`}
       data-create-step={activeCreateStep}
     >
+      {redesign ? (
+        <>
+          <header className="arka-redesign-page-heading">
+            <Link href="/manage" className="arka-redesign-back">← Manage Arkas</Link>
+            <h1 data-testid="create-page-heading">Create an Arka</h1>
+          </header>
+          <nav aria-label="Creation steps" className="arka-create-steps">
+            <label className="ops-field arka-create-step-picker">
+              <span className="ops-field-label">Go to step</span>
+              <select className="ops-select" data-testid="create-step-select" value={activeCreateStep}
+                disabled={!wizardInteractive} onChange={event => {
+                  const step = visualStages.find(candidate => candidate.id === event.target.value);
+                  if (step) goToStep(step.id);
+                }}>
+                {visualStages.map(step => <option key={step.id} value={step.id}>{step.ordinal}. {step.label}</option>)}
+              </select>
+            </label>
+            <ol>
+              {visualStages.map(step => (
+                <li key={step.id}>
+                  <button type="button" data-testid={`create-step-${step.id}`}
+                    aria-current={step.state === "current" ? "step" : undefined}
+                    aria-label={step.ariaLabel} disabled={!wizardInteractive} onClick={() => goToStep(step.id)}>
+                    <span aria-hidden="true">{step.ordinal}</span>{step.label}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </nav>
+          <section className="arka-workflow-panel arka-create-panel" aria-labelledby="create-stage-heading">
+            <div className="arka-create-stage">
+              <h2 id="create-stage-heading" ref={stepHeading} tabIndex={-1}>{activeStep.label}</h2>
+              <span data-testid="create-progress-summary">Step {visualStages.findIndex(step => step.id === activeCreateStep) + 1} of {visualStages.length}</span>
+            </div>
+            {activeCreateStep !== "start" ? <p className="arka-workflow-note">{activeStep.detail}</p> : null}
+            {!activeStepReadiness.ready && activeCreateStep !== "start" && !UX_REVIEW_PREVIEW ? (
+              <p className="arka-workflow-note" role="status" data-testid="create-step-blocker">{activeStepReadiness.reason}</p>
+            ) : null}
+            {renderActiveCreateStep()}
+            {activeCreateStep !== "start" ? <div className="arka-create-actions arka-create-footer">
+              <button type="button" className="arka-redesign-button arka-redesign-button-secondary"
+                onClick={goBack} disabled={!wizardInteractive || !previousStep} data-testid="create-step-back">Back</button>
+              {nextStep ? <button type="button" className="arka-redesign-button"
+                onClick={goNext} disabled={!wizardInteractive} data-testid="create-step-next">Continue</button> : null}
+            </div> : null}
+          </section>
+        </>
+      ) : (
       <section className="create-assistant-layout">
         <section className="create-assistant-main">
           <header className="create-assistant-header create-assistant-active-header">
@@ -1669,6 +1759,7 @@ export default function CreateArkaClient({ initialUrlState }: CreateArkaClientPr
           </div>
         </aside>
       </section>
+      )}
       <TransactionConfirmDialog
         open={confirmCreate}
         title="Create a new Arka"

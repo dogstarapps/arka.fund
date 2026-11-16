@@ -12,11 +12,13 @@ import type { RankedArkaCatalogEntry } from '@/lib/catalog/types';
 import {MANAGED_PRODUCT_LOCAL} from '@/lib/managedProduct';
 import {GENERAL_MAINNET} from '@/lib/generalMainnet';
 import ManagedPortfolioSurface from './ManagedProductSurface';
+import PortfolioHeading from './PortfolioHeading';
 
-export default function WalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }) {
-  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedPortfolioSurface mode={mode}/> : <LegacyWalletPortfolioSurface mode={mode}/>;
+type WalletPortfolioProps = { mode: 'investor' | 'manager'; redesign?: boolean };
+export default function WalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) {
+  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedPortfolioSurface mode={mode} redesign={redesign}/> : <LegacyWalletPortfolioSurface mode={mode} redesign={redesign}/>;
 }
-function LegacyWalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }) {
+function LegacyWalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) {
   const [wallet, setWallet] = useState('');
   const [address, setAddress] = useState('');
   const [lookup, setLookup] = useState('');
@@ -50,12 +52,12 @@ function LegacyWalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }
   }, [viewedAddress, mode, refresh]);
   const funds = mode === 'investor' ? positions?.positions.map(p => p.fund) ?? [] : managed ?? [];
   return <main className="surface-stack ux-portfolio" data-testid="wallet-portfolio">
-    <header className="surface-panel ux-portfolio-heading">
+    {redesign ? <PortfolioHeading mode={mode} /> : <header className="surface-panel ux-portfolio-heading">
       <span className="surface-eyebrow">{mode === 'investor' ? 'Investor' : 'Fund manager'}</span>
       <h1>{mode === 'investor' ? 'My investments' : 'Funds I manage'}</h1>
       <p>{mode === 'investor' ? 'Your holdings in funds, whether or not you manage them.' : 'Manage fund portfolios, change fund assets and review liquidity. This does not swap your personal wallet tokens.'}</p>
       <div className="surface-entry-actions"><Link className="surface-button surface-button-secondary" href={mode === 'investor' ? '/manage' : '/investments'}>{mode === 'investor' ? 'Funds I manage' : 'My investments'}</Link><Link className="surface-button surface-button-secondary" href="/discover">Explore funds</Link>{mode === 'manager' ? <Link className="surface-button surface-button-primary" href="/factory/create">Create Arka</Link> : null}</div>
-    </header>
+    </header>}
     {!viewedAddress ? <section className="surface-panel"><h2>Connect a wallet to see your {mode === 'investor' ? 'investments' : 'managed funds'}</h2><p>Use Connect wallet above. A disconnected wallet is not an empty portfolio.</p></section> : <p className="ux-address-context">{address ? 'Public address lookup · read-only · not a wallet connection' : 'Connected wallet'}<br/><span className="ux-wallet-address">{viewedAddress}</span>{address ? <button className="surface-button surface-button-secondary" onClick={() => { setAddress(''); window.history.replaceState(null,'',window.location.pathname); }}>Use connected wallet</button> : null}</p>}
     <details className="surface-panel ux-public-lookup" open={UX_REVIEW_PREVIEW && !viewedAddress}>
       <summary>Look up a public wallet without connecting</summary>

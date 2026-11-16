@@ -29,6 +29,31 @@ describe("DiscoverSurface", () => {
     vi.restoreAllMocks();
   });
 
+  it("keeps the new catalog controls available through an error and retry", async () => {
+    const fetch = installCatalogFetchMock();
+    const user = userEvent.setup();
+    const fixtureFetch = fetch.getMockImplementation()!;
+    fetch.mockImplementation(async () => new Response(JSON.stringify({
+      message: "Catalog temporarily unavailable.",
+    }), { status: 503 }));
+
+    render(<DiscoverSurface redesign />);
+    expect(screen.getByRole("heading", { name: "Explore Arkas" })).toBeVisible();
+    expect(screen.getByRole("searchbox", { name: "Search Arkas" })).toBeVisible();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Try again");
+    expect(screen.queryAllByTestId("explore-arka-card")).toHaveLength(0);
+
+    fetch.mockImplementation(fixtureFetch);
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+    await waitFor(() => expect(screen.getAllByTestId("explore-arka-card")).toHaveLength(4));
+    expect(screen.getAllByRole("link", { name: /^View Arka/ })[0]).toHaveAttribute("href", expect.stringMatching(/^\/vaults\/C/));
+
+    await user.type(screen.getByRole("searchbox", { name: "Search Arkas" }), "gamma");
+    await waitFor(() => expect(screen.getAllByTestId("explore-arka-card")).toHaveLength(1));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Sort by" }), "fresh");
+    expect(new URLSearchParams(location.search).get("feature")).toBe("fresh");
+  });
+
   it("renders a focused public discovery board and filters real Arka cards", async () => {
     installCatalogFetchMock();
     const user = userEvent.setup();

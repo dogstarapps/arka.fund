@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "f7efa8997cfd76856ca706e7cfc79bd9cd882b96f84be6e2711f90db1fded610",
+  "releaseId": "0814077930096cf95b5cfa847ab5fd44d8b5d170000270fec995cc5dffe77f52",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -554,6 +554,26 @@
       "bytes": 5441
     },
     {
+      "path": "apps/web/public/brand/sushi.svg",
+      "sha256": "773deeff8ac455d57f04167067f5aabc80185cb42fcf56efb544df458454572c",
+      "bytes": 2228
+    },
+    {
+      "path": "apps/web/public/brand/wallets/albedo.png",
+      "sha256": "a638657658a08f64df95b0969fdddd299adcbea74399a597dc0fb2c2234fb3cb",
+      "bytes": 3069
+    },
+    {
+      "path": "apps/web/public/brand/wallets/freighter.png",
+      "sha256": "56132adb3281d902a63d65266a07fb1c2b33e10f57d92c07d07b653f9ac9a03a",
+      "bytes": 12255
+    },
+    {
+      "path": "apps/web/public/brand/wallets/xbull.png",
+      "sha256": "b0ef75becfc832dbfb30bc25115977eede00b870c78839747e8a46321d0a7d20",
+      "bytes": 27735
+    },
+    {
       "path": "apps/web/public/figma/create-reference.jpg",
       "sha256": "6f8bc0d936635eaff3994f7f1b5fb2d6045ec6443b100346f8d6fe307bf12ea2",
       "bytes": 1219148
@@ -1010,13 +1030,13 @@
     },
     {
       "path": "apps/web/src/app/discover/page.tsx",
-      "sha256": "6fb3a44c10cd57a25733c0aa3b3b1793049936fac930f57bd5d1d6fb65a9a82a",
-      "bytes": 509
+      "sha256": "352e0cb1475ac3b550d85cd7537309e8dcda2c9a705093a36d663a0c9a815306",
+      "bytes": 634
     },
     {
       "path": "apps/web/src/app/factory/create/CreateArkaClient.tsx",
-      "sha256": "4574995eabb6a1e4d3f0aeaef7112c55f0351216884aaf74d0be5e7a47492bf2",
-      "bytes": 69558
+      "sha256": "42bad55b78fc311ac9e2e927bc76a9b837e735842672c218c5454d9b819bb361",
+      "bytes": 74883
     },
     {
       "path": "apps/web/src/app/factory/create/creation-header.css",
@@ -1025,8 +1045,8 @@
     },
     {
       "path": "apps/web/src/app/factory/create/page.tsx",
-      "sha256": "5cdcb4f723cfe6b242c9f42412c51e7b2f601921c3a9c50a50cba1c38a9f6dd9",
-      "bytes": 746
+      "sha256": "dbe0c865018386655ac7faa581f0bd01dc730c2476fdc8155f6429ac55cb2687",
+      "bytes": 955
     },
     {
       "path": "apps/web/src/app/favicon.ico",
@@ -1050,48 +1070,48 @@
     },
     {
       "path": "apps/web/src/app/governance/console/page.tsx",
-      "sha256": "e5d0e92be66beced4a7928a6c798067bcf94a5b041aedf59178678d87f183e19",
-      "bytes": 154
+      "sha256": "3ae9288eac99a9d9ad491e4806ca3c10daf0ba7740c204e25fa9b66c7776ad00",
+      "bytes": 208
     },
     {
       "path": "apps/web/src/app/governance/GovernanceClient.tsx",
-      "sha256": "3e9751b1d7bdfd74889066c98109154333096b1c8207129312d3ea1dd8971e44",
-      "bytes": 68662
+      "sha256": "92c9d640d895b1b26962eba222abd049781db53b33e8f92ce2d683f4b17dda36",
+      "bytes": 71063
     },
     {
       "path": "apps/web/src/app/governance/page.tsx",
-      "sha256": "6625fb87e4b9e0a7bc42463a5ef1fdc58277b2b471109de27c4607fc1ae5422d",
-      "bytes": 128
+      "sha256": "ed96438952d9bf24ca87e0d6b6151c18597974eb6ffad2661576f7d78318face",
+      "bytes": 182
     },
     {
       "path": "apps/web/src/app/integrations/IntegrationsClient.tsx",
-      "sha256": "ac8f9482cda43b98f7953e4a3bee01a5570b0f9039ca45adef3636e2e527c0a7",
-      "bytes": 126955
+      "sha256": "6f6d16b1508272346dc49029aa81ff7ce108f7f4a90c86541db6f42d4e3f7644",
+      "bytes": 128238
     },
     {
       "path": "apps/web/src/app/integrations/operator/page.tsx",
-      "sha256": "0a7be9040d38a99052e905f8a81fdf9050823102ac551dc26e1fb61fc3665440",
-      "bytes": 163
+      "sha256": "6338592625ffae751a2d0846e273476abbbef035d83acdc63c5538ad0c676346",
+      "bytes": 217
     },
     {
       "path": "apps/web/src/app/integrations/page.tsx",
-      "sha256": "cca128dddf433c99a08a8582a5361042b35385098f10d9d864c08575d00580fb",
-      "bytes": 150
+      "sha256": "cb0e62c5a599679f1ba9e6c048a4e4ee5c41380b95b6bc762b368cabe56e992b",
+      "bytes": 204
     },
     {
       "path": "apps/web/src/app/investments/page.tsx",
-      "sha256": "3d910e2af39cfdf9b939169a0b728d9591bf93c9e8fd23548cfb3d66b7add2cd",
-      "bytes": 179
+      "sha256": "7bed7c4a2f2ddea04f0a1865d93f61004a8afd90c11200aedf3aa56392deebc4",
+      "bytes": 233
     },
     {
       "path": "apps/web/src/app/layout.tsx",
-      "sha256": "320793f687bdc6927dbfe91da99178d3bba2a8601efae86fe7ba04f77e6ae3e8",
-      "bytes": 963
+      "sha256": "e90634754339cb955ac4dcb60ef515c54a0d890c7650fe2a79dfdc3d6b5c4e5c",
+      "bytes": 1061
     },
     {
       "path": "apps/web/src/app/manage/page.tsx",
-      "sha256": "49fe4ff4e080a90f912f15140bfb8cf88d53aff53588c0e8b7e2b4347e249bbb",
-      "bytes": 173
+      "sha256": "439bdcb7e839e319bf8a3ae8285a0fa572a08f8037a283dac15a1d0900487ed8",
+      "bytes": 227
     },
     {
       "path": "apps/web/src/app/managed-withdrawals/integration.css",
@@ -1140,8 +1160,8 @@
     },
     {
       "path": "apps/web/src/app/page.tsx",
-      "sha256": "2f063d5a7b8eb20c69c691c8f556a04105b6bb69148c554eea6223c91e19772a",
-      "bytes": 137
+      "sha256": "dc6d4ad6ca9b52b5172f83b90544504080e000e4e03fafc0390d32aac1d57f63",
+      "bytes": 364
     },
     {
       "path": "apps/web/src/app/settings/page.tsx",
@@ -1170,8 +1190,8 @@
     },
     {
       "path": "apps/web/src/app/vaults/[id]/page.tsx",
-      "sha256": "33a7b9e13a61c39df089529dfe0e2025dc371d455fe3553e6c4d1fb7bf35677e",
-      "bytes": 276
+      "sha256": "c8635fbe64d646252fbf9ea1ced4eb1fd13760c2914be7315da57579e82898cf",
+      "bytes": 330
     },
     {
       "path": "apps/web/src/app/vaults/page.tsx",
@@ -1185,8 +1205,8 @@
     },
     {
       "path": "apps/web/src/components/product/AppChrome.tsx",
-      "sha256": "20a85187fac94d2e6764e6cc3a4c6464f638167576c45abc6f909b692fb3c1d3",
-      "bytes": 26800
+      "sha256": "b9782c2c855915619928efe2f73f4e477e3471cfe9491b829c24bf36ecb421c7",
+      "bytes": 29463
     },
     {
       "path": "apps/web/src/components/product/ArkaVersionBadge.tsx",
@@ -1210,8 +1230,8 @@
     },
     {
       "path": "apps/web/src/components/product/DiscoverSurface.tsx",
-      "sha256": "65f5df1707be7afac3c22e1fc75f87cf9032f48ee70b91c83e870974fe4a6cda",
-      "bytes": 21285
+      "sha256": "43f71692cd222e1cf95d667c9fbb60be44f13340f1f3b15722ac7501086830a0",
+      "bytes": 26149
     },
     {
       "path": "apps/web/src/components/product/FundSwapReview.tsx",
@@ -1240,8 +1260,8 @@
     },
     {
       "path": "apps/web/src/components/product/ManagedCreateSurface.tsx",
-      "sha256": "ad8abd66d9e57c65c73dd1e934bfffbefe86e2aab043f405db8b169f5f2e9735",
-      "bytes": 13155
+      "sha256": "7b7f23ea1adbeed4ff9ef55f24f0d5ffd1eb9a9bea821405e362ead5e855a8fb",
+      "bytes": 13347
     },
     {
       "path": "apps/web/src/components/product/ManagedLocalConnect.tsx",
@@ -1250,8 +1270,8 @@
     },
     {
       "path": "apps/web/src/components/product/ManagedProductSurface.tsx",
-      "sha256": "7cfbbe5a0723f1267be32ea102b4f1b01cd0116537a1485201b68fdbc2b65556",
-      "bytes": 41666
+      "sha256": "359d586eda2acb99efa088c78537fc8be456478fd0de76ecd83fac24f30e66de",
+      "bytes": 42063
     },
     {
       "path": "apps/web/src/components/product/ManagedWithdrawalHistory.tsx",
@@ -1272,6 +1292,16 @@
       "path": "apps/web/src/components/product/ManagersSurface.tsx",
       "sha256": "5726ef009fe0928f590ac8ab741a611c1ec9a46e7c9e969c366ff6afbfea7d23",
       "bytes": 16090
+    },
+    {
+      "path": "apps/web/src/components/product/PortfolioHeading.tsx",
+      "sha256": "0e87f8a0a92a55903cab3b75cd17a55306ab95fd49393e8ba3df4fd18d540c67",
+      "bytes": 720
+    },
+    {
+      "path": "apps/web/src/components/product/redesign.css",
+      "sha256": "cdfdc0dfc49a775fbbbd5a8dacce00e27686fa4fb0657efaa0b93b6c1a9a58ee",
+      "bytes": 20936
     },
     {
       "path": "apps/web/src/components/product/surfacePrimitives.tsx",
@@ -1295,8 +1325,8 @@
     },
     {
       "path": "apps/web/src/components/product/VaultDetailSurface.tsx",
-      "sha256": "de81497ea88a3a44d32d8e27312854e61bf899739ac5e58d7c4bae04f5b438f1",
-      "bytes": 24680
+      "sha256": "4be77c445c97727e521ed04b9ab6f8ca91d11ea03093577fe1bbe4f6740a3bed",
+      "bytes": 26508
     },
     {
       "path": "apps/web/src/components/product/VaultLeaderboardSurface.tsx",
@@ -1305,8 +1335,8 @@
     },
     {
       "path": "apps/web/src/components/product/WalletPortfolioSurface.tsx",
-      "sha256": "6848a68d65edfbf2fdd925c45d9d96fa65b165fd0dba8bf19f9dcbab0fa0818e",
-      "bytes": 8664
+      "sha256": "3f7eb0c8f9f883e09b45baa90499196f98735e7084f83caf0a8942871c6f4fc2",
+      "bytes": 8881
     },
     {
       "path": "apps/web/src/lib/catalog/api.ts",
@@ -2005,8 +2035,8 @@
     },
     {
       "path": "apps/web/tests/integration/app-chrome.test.tsx",
-      "sha256": "af80c038b0f2a6009982df05bde9f03a04cc961a226596b8326fe81a3db5f718",
-      "bytes": 18491
+      "sha256": "11c60426a7a5183d290faf311d68354afc9a91ed09a7b39e7abd2a7deadf234c",
+      "bytes": 19697
     },
     {
       "path": "apps/web/tests/integration/arka-detail-page.test.tsx",
@@ -2050,8 +2080,8 @@
     },
     {
       "path": "apps/web/tests/integration/discover-surface.test.tsx",
-      "sha256": "7381a0633b0302fb99b92a0694a9b331fd958483da1f1b7af20fa84b1370439d",
-      "bytes": 7225
+      "sha256": "4ca508184ab20756d68cd6726aaf182699b2134f0d28471abdf15161d34d560c",
+      "bytes": 8656
     },
     {
       "path": "apps/web/tests/integration/factory-mainnet-vm.test.tsx",
@@ -2205,8 +2235,8 @@
     },
     {
       "path": "apps/web/tests/integration/vault-detail-surface.test.tsx",
-      "sha256": "d6d2d529030d387aecaf0717b482cc26e53d1f3a84f93f3b4b4031bdb4328b1e",
-      "bytes": 4847
+      "sha256": "c41a38bb62009801d63d3a0ccd36f62ec606e084bfe7eaba62964dcd7e47e397",
+      "bytes": 5910
     },
     {
       "path": "apps/web/tests/integration/vault-entrypoints.test.tsx",
@@ -2240,8 +2270,8 @@
     },
     {
       "path": "apps/web/tests/integration/workflow-surfaces.test.tsx",
-      "sha256": "aa94644a543f1953e228d08da130336e995de9992f5b2bb36a7cb1c4f56847c5",
-      "bytes": 116731
+      "sha256": "b4e74133d83e9f6de6b07faa81062cf258fad474e836fac46e7557e4295c8783",
+      "bytes": 118628
     },
     {
       "path": "apps/web/tests/setup.ts",
@@ -4010,7 +4040,7 @@
     },
     {
       "path": "release/rustsec-risk-acceptance.json",
-      "sha256": "4ea44b864155da19f4d0612b313ee55b7c200107a220da6c48a887ca5c953a40",
+      "sha256": "80dee2f562c31e7d502b5d9309fd7d34dfd3a5e887256ab2091cf06af55d3c16",
       "bytes": 1586
     },
     {

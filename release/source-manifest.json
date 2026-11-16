@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "0814077930096cf95b5cfa847ab5fd44d8b5d170000270fec995cc5dffe77f52",
+  "releaseId": "f4f439394661a8770a6914e022bb890a919d7e976999a7dfdc8dcd4939fb8e96",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -10,8 +10,8 @@
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "2c2e8e36d22c1fc20d7021bd4125bbd6fd4d2b7fc1637d7746bbb19a63127afc",
-      "bytes": 7409
+      "sha256": "23d83575bba5d3eb90b9c3769bd7717e809b9550b04d008f55e05ed04dd388e7",
+      "bytes": 7408
     },
     {
       "path": ".gitignore",
@@ -4040,7 +4040,7 @@
     },
     {
       "path": "release/rustsec-risk-acceptance.json",
-      "sha256": "80dee2f562c31e7d502b5d9309fd7d34dfd3a5e887256ab2091cf06af55d3c16",
+      "sha256": "2f8098524620dba0da35095043a4ae8169e099d92dadc929350c93d69aa420f8",
       "bytes": 1586
     },
     {

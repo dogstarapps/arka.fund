@@ -457,8 +457,10 @@ describe("workflow surfaces", () => {
     const user = userEvent.setup();
     render(<GovernanceSurface redesign />);
 
-    expect(await screen.findByText("Proposal data unavailable.")).toBeInTheDocument();
+    expect(await screen.findByText("Enter a proposal ID to look it up.")).toBeInTheDocument();
     const input = screen.getByTestId("governance-proposal-id-input");
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("aria-invalid", "false");
     fireEvent.change(input, { target: { value: "2.5" } });
     expect(screen.getByText("Enter a valid proposal ID.")).toBeInTheDocument();
     const readVotes = sorobanMocks.readGovernorProposalVotes.getMockImplementation();

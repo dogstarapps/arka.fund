@@ -279,10 +279,10 @@ export default function VaultDetailSurface(props: { arkaId: string; redesign?: b
       : "surface-stack vault-detail-fidelity-shell public-detail-shell-cutover public-vault-detail-cutover"}>
       {props.redesign ? (
         <header className="arka-redesign-page-heading arka-redesign-profile-heading">
-          <Link href="/discover" className="arka-redesign-back">← Explore Arkas</Link>
+          <Link href="/" className="arka-redesign-back">← Leaderboard</Link>
           <div className="arka-redesign-profile-title">
             <div>
-              <h1>{resolveArkaDisplayName(arka)}</h1>
+              <h1>{resolveArkaDisplayName(arka, true)}</h1>
               <p>{arka.identity?.strategy?.trim() || arka.identity?.description?.trim() || "Strategy details unavailable"}</p>
             </div>
             <Link href={`/arkas/${arka.arkaId}?workspace=flow`} className="arka-redesign-button">Deposit or withdraw</Link>

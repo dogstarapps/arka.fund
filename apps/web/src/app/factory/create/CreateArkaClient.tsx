@@ -170,9 +170,9 @@ export default function CreateArkaClient({ initialUrlState, redesign = false }: 
   const walletAutoHydrationPausedRef = useRef(false);
 
   useEffect(() => {
-    setKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"]));
+    setKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"], redesign));
     setWizardInteractive(true);
-  }, []);
+  }, [redesign]);
 
   useEffect(() => {
     (async () => {
@@ -848,7 +848,7 @@ export default function CreateArkaClient({ initialUrlState, redesign = false }: 
     setError("");
     setWalletConnectBusy(true);
     try {
-      const activeKit = kit ?? getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"]);
+      const activeKit = kit ?? getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"], redesign);
       if (!kit) {
         setKit(activeKit);
       }

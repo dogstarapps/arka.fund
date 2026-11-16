@@ -6,17 +6,20 @@ import {MANAGED_PRODUCT_LOCAL} from '@/lib/managedProduct'
 import {GENERAL_MAINNET} from '@/lib/generalMainnet'
 import ManagedLocalConnect from './product/ManagedLocalConnect'
 
-export default function ClientConnect({ variant = 'chrome' }: { variant?: 'chrome' | 'rail' }) {
-  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedLocalConnect variant={variant}/> : <LegacyClientConnect variant={variant}/>;
+type ConnectProps = { variant?: 'chrome' | 'rail'; redesign?: boolean };
+
+export default function ClientConnect({ variant = 'chrome', redesign }: ConnectProps) {
+  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedLocalConnect variant={variant}/> : <LegacyClientConnect variant={variant} redesign={redesign}/>;
 }
-function LegacyClientConnect({ variant = 'chrome' }: { variant?: 'chrome' | 'rail' }) {
+function LegacyClientConnect({ variant = 'chrome', redesign = false }: ConnectProps) {
   const [kit, setKit] = useState<StellarWalletsKit | null>(null)
   const [pub, setPub] = useState('')
   const [err, setErr] = useState('')
   const [walletFns, setWalletFns] = useState<{
-    getWalletsKit: (modules?: ('FREIGHTER'|'ALBEDO'|'XBULL')[]) => StellarWalletsKit
+    getWalletsKit: (modules?: ('FREIGHTER'|'ALBEDO'|'XBULL')[], redesign?: boolean) => StellarWalletsKit
     connectWallet: (kit: StellarWalletsKit) => Promise<string>
     clearStoredWalletConnection: () => void
+    isWalletSelectionClosedError?: (error: unknown) => boolean
   } | null>(null)
 
   // Dynamically import wallet functions on client to avoid SSR window access
@@ -27,14 +30,15 @@ function LegacyClientConnect({ variant = 'chrome' }: { variant?: 'chrome' | 'rai
         getWalletsKit: mod.getWalletsKit,
         connectWallet: mod.connectWallet,
         clearStoredWalletConnection: mod.clearStoredWalletConnection,
+        isWalletSelectionClosedError: mod.isWalletSelectionClosedError,
       })
     })()
   }, [])
 
   useEffect(() => {
     if (!walletFns) return
-    setKit(walletFns.getWalletsKit(['FREIGHTER','ALBEDO','XBULL']))
-  }, [walletFns])
+    setKit(walletFns.getWalletsKit(['FREIGHTER','ALBEDO','XBULL'], redesign))
+  }, [walletFns, redesign])
   // Rehydrate connection from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('wallet:pubkey')
@@ -63,7 +67,7 @@ function LegacyClientConnect({ variant = 'chrome' }: { variant?: 'chrome' | 'rai
       localStorage.setItem('wallet:pubkey', key)
       window.dispatchEvent(new CustomEvent('wallet:pubkey-changed', { detail: key }))
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed to connect')
+      if (!walletFns?.isWalletSelectionClosedError?.(e)) setErr(e instanceof Error ? e.message : 'Failed to connect')
     }
   }
 
@@ -103,7 +107,7 @@ function LegacyClientConnect({ variant = 'chrome' }: { variant?: 'chrome' | 'rai
           CONNECT WALLET
         </button>
       )}
-      {err && <span className="chrome-connect-error">{err}</span>}
+      {err && <span role="alert" className="chrome-connect-error">{err}</span>}
     </div>
   )
 }

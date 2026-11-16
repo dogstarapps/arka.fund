@@ -252,7 +252,22 @@ export async function signMessageWithWallet(
   throw new Error('Wallet message signature missing')
 }
 
-export function getWalletsKit(modules: SupportedModule[] = ['FREIGHTER', 'ALBEDO', 'XBULL']): StellarWalletsKit {
+const arkaWalletTheme = {
+  bgColor: '#211c31',
+  textColor: '#c8bfd6',
+  solidTextColor: '#f5f2fa',
+  headerButtonColor: '#c8bfd6',
+  dividerColor: '#484056',
+  helpBgColor: '#2b243d',
+  notAvailableTextColor: '#c8bfd6',
+  notAvailableBgColor: '#2b243d',
+  notAvailableBorderColor: '#484056',
+}
+
+export function getWalletsKit(
+  modules: SupportedModule[] = ['FREIGHTER', 'ALBEDO', 'XBULL'],
+  redesign = false,
+): StellarWalletsKit {
   if (E2E_WALLET_ENABLED) {
     return createE2EWalletKit()
   }
@@ -270,7 +285,17 @@ export function getWalletsKit(modules: SupportedModule[] = ['FREIGHTER', 'ALBEDO
     }
   }).filter(Boolean) as unknown as ConstructorParameters<typeof StellarWalletsKit>[0]['modules']
 
-  const kit = new StellarWalletsKit({ network: resolveWalletNetwork(), modules: instances })
+  if (redesign) {
+    for (const wallet of instances) {
+      const id = wallet.productId.toLowerCase()
+      if (id === 'freighter' || id === 'albedo' || id === 'xbull') wallet.productIcon = `/brand/wallets/${id}.png`
+    }
+  }
+  const kit = new StellarWalletsKit({
+    network: resolveWalletNetwork(),
+    modules: instances,
+    modalTheme: redesign ? arkaWalletTheme : undefined,
+  })
   if (typeof kit.signTransaction === 'function') {
     const signTransaction = kit.signTransaction.bind(kit)
     kit.signTransaction = async (...args) => {

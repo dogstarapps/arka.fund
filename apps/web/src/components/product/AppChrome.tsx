@@ -156,7 +156,7 @@ function Wordmark({ compact = false, link = true, redesign = false }: { compact?
     <Link
       href={redesign ? "/discover" : "/dashboard"}
       className={`chrome-brand ${compact ? "chrome-brand-compact" : ""}`}
-      aria-label={redesign ? "Arka.fund · Explore Arkas" : "Arka.fund dashboard"}
+      aria-label={redesign ? "Arka.fund · Leaderboard" : "Arka.fund dashboard"}
     >
       {content}
     </Link>
@@ -558,7 +558,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
       ...PUBLIC_UTILITY_PRODUCT_NAV.filter(item => item.href === "/coverage"),
       ...OPERATOR_CONSOLE_NAV.filter(item => item.href === "/settings"),
     ];
-    const activePath = pathname === "/" ? "/discover" : pathname;
+    const activePath = pathname === "/" || pathname === "/vaults" ? "/discover" : pathname;
     const relatedPath = pathname.startsWith("/factory/") ? "/manage"
       : pathname.startsWith("/arkas/") || pathname.startsWith("/vaults/") ? "/discover" : activePath;
     const navLink = (item: ProductNavItem) => (
@@ -572,7 +572,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
           if (menu) menu.open = false;
         }}
       >
-        {item.href === "/discover" ? "Explore Arkas" : item.href === "/manage" ? "Manage Arkas" : item.href === "/dashboard" ? "Platform overview" : item.label}
+        {item.href === "/discover" ? "Leaderboard" : item.href === "/manage" ? "Manage Arkas" : item.href === "/dashboard" ? "Platform overview" : item.label}
       </Link>
     );
 
@@ -604,7 +604,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
                 </div>
               </details>
             </nav>
-            <div className="arka-redesign-wallet"><ClientConnect variant="chrome" /></div>
+            <div className="arka-redesign-wallet"><ClientConnect variant="chrome" redesign /></div>
           </div>
         </header>
         <div className="arka-redesign-frame arka-redesign-canvas" id="arka-main-content" tabIndex={-1} data-testid="product-canvas">

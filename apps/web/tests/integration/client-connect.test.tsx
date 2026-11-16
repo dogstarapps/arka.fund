@@ -13,6 +13,7 @@ const walletMocks = vi.hoisted(() => {
     kit,
     getWalletsKit: vi.fn(() => kit),
     connectWallet: vi.fn(async () => walletAddress),
+    isWalletSelectionClosedError: vi.fn((error: unknown) => error instanceof Error && error.message === "Wallet selection was closed"),
     clearStoredWalletConnection: vi.fn(() => {
       window.localStorage.removeItem("wallet:pubkey");
       window.localStorage.removeItem("wallet:module");
@@ -24,6 +25,7 @@ const walletMocks = vi.hoisted(() => {
 vi.mock("@/lib/walletKit", () => ({
   getWalletsKit: walletMocks.getWalletsKit,
   connectWallet: walletMocks.connectWallet,
+  isWalletSelectionClosedError: walletMocks.isWalletSelectionClosedError,
   clearStoredWalletConnection: walletMocks.clearStoredWalletConnection,
 }));
 
@@ -59,6 +61,20 @@ describe("ClientConnect", () => {
     );
     expect(window.localStorage.getItem("wallet:pubkey")).toBeNull();
     expect(window.localStorage.getItem("wallet:module")).toBeNull();
+  });
+
+  it("leaves the header quiet when the wallet chooser is dismissed", async () => {
+    const user = userEvent.setup();
+    walletMocks.connectWallet.mockRejectedValueOnce(new Error("Wallet selection was closed"));
+
+    render(<ClientConnect />);
+    await waitFor(() => expect(walletMocks.getWalletsKit).toHaveBeenCalled());
+    await user.click(screen.getByTestId("connect-wallet-chrome"));
+    await waitFor(() => expect(walletMocks.isWalletSelectionClosedError).toHaveBeenCalled());
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByTestId("connect-wallet-chrome")).toBeEnabled();
+    expect(window.localStorage.getItem("wallet:pubkey")).toBeNull();
   });
 
   it("connects through the selected wallet kit and stores the public key", async () => {

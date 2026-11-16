@@ -192,31 +192,39 @@
   color-scheme: dark;
 }
 
-.arka-explore-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
-  gap: 1rem;
+.arka-leaderboard-note { color: var(--arka-muted); font-size: .875rem; margin: .25rem 0 .75rem; }
+.arka-leaderboard-table { width: 100%; border-spacing: 0; }
+.arka-leaderboard-table th, .arka-leaderboard-table td { text-align: start; padding: .875rem 1rem; }
+.arka-leaderboard-table thead th { color: var(--arka-muted); font-size: .85rem; font-weight: 650; }
+.arka-leaderboard-table tbody :is(th, td) { background: var(--arka-panel); border-block-start: 1px solid var(--arka-line); }
+.arka-leaderboard-table tbody tr:last-child :is(th, td) { border-block-end: 1px solid var(--arka-line); }
+.arka-leaderboard-table tbody tr:first-child th { border-start-start-radius: .75rem; }
+.arka-leaderboard-table tbody tr:first-child td:last-child { border-start-end-radius: .75rem; }
+.arka-leaderboard-table tbody tr:last-child th { border-end-start-radius: .75rem; }
+.arka-leaderboard-table tbody tr:last-child td:last-child { border-end-end-radius: .75rem; }
+.arka-leaderboard-table td { font-weight: 650; font-variant-numeric: tabular-nums; }
+.arka-leaderboard-table td.arka-leaderboard-profit { font-size: 1.125rem; font-weight: 750; }
+.arka-leaderboard-identity { width: 31%; min-inline-size: 0; }
+.arka-leaderboard-identity a { color: var(--arka-text); font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: .2em; overflow-wrap: anywhere; }
+.arka-leaderboard-identity a:hover { color: var(--arka-accent); }
+.arka-leaderboard-manager { display: block; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-block-start: .35rem; color: var(--arka-muted); font-weight: 450; }
+.arka-leaderboard-performance { display: grid; justify-items: start; gap: .15rem; width: min(100%, 9rem); }
+.arka-leaderboard-performance svg { inline-size: min(100%, 7.5rem); block-size: 1.65rem; }
+.arka-leaderboard-performance path { fill: none; stroke: var(--arka-accent); stroke-width: 1.65; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.arka-leaderboard-performance strong[data-trend="-1"] { color: var(--arka-danger, #ff9ba7); }
+.arka-leaderboard-performance small { color: var(--arka-muted); font-weight: 450; }
+.arka-leaderboard-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: end; gap: .75rem; margin-block-start: 1rem; color: var(--arka-muted); }
+@media (max-width: 48rem) {
+  .arka-leaderboard-table, .arka-leaderboard-table tbody { display: block; }
+  .arka-leaderboard-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .arka-leaderboard-table tbody { display: grid; gap: .65rem; }
+  .arka-leaderboard-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--arka-panel); border: 1px solid var(--arka-line); border-radius: .75rem; }
+  .arka-leaderboard-table .arka-leaderboard-identity { grid-column: 1 / -1; inline-size: 100%; }
+  .arka-leaderboard-table tbody :is(th, td), .arka-leaderboard-table tbody tr:last-child :is(th, td) { padding: .65rem .85rem; min-inline-size: 0; background: none; border: 0; }
+  .arka-leaderboard-table tbody td { padding-block-start: .4rem; overflow-wrap: anywhere; }
+  .arka-leaderboard-table td::before { content: attr(data-label); display: block; margin-block-end: .22rem; color: var(--arka-muted); font-size: .8125rem; font-weight: 500; }
 }
 
-.arka-explore-card {
-  display: flex;
-  flex-direction: column;
-  min-inline-size: 0;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid var(--arka-line);
-  border-radius: .875rem;
-  background: var(--arka-panel);
-}
-
-.arka-explore-card-top { display: flex; justify-content: space-between; align-items: start; gap: .75rem; }
-.arka-explore-card h2 { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
-.arka-explore-strategy { margin: 0; color: var(--arka-muted); line-height: 1.5; overflow-wrap: anywhere; }
-.arka-explore-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: auto 0 0; padding-block-start: .875rem; border-block-start: 1px solid var(--arka-line); }
-.arka-explore-facts dt { color: var(--arka-muted); font-size: .825rem; }
-.arka-explore-facts dd { margin: .15rem 0 0; font-weight: 650; overflow-wrap: anywhere; }
-.arka-explore-footer { margin-block-start: 1.25rem; }
-.arka-explore-footer a { color: var(--arka-accent); text-underline-offset: .22em; }
 .arka-explore-message { display: flex; flex-wrap: wrap; align-items: center; gap: .875rem; margin-block-end: 1rem; }
 .arka-explore-message p { margin: 0; }
 
@@ -549,4 +557,32 @@
 @media (max-width: 48rem) {
   .arka-workflow .arka-create-step-picker { display: flex; }
   .arka-create-steps ol { display: none; }
+}
+
+.arka-platform-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.5rem;
+  margin: 0;
+}
+.arka-platform-stats dt { color: var(--arka-muted); font-size: .875rem; }
+.arka-platform-stats dd { margin: .3rem 0; font-size: 1.25rem; font-weight: 700; }
+.arka-platform-stats small { display: block; margin-block-start: .3rem; color: var(--arka-muted); font-size: .875rem; font-weight: 400; }
+
+.arka-redesign-menu:has([aria-current="page"]) > summary {
+  color: var(--arka-text);
+  box-shadow: inset 0 -2px var(--arka-accent);
+}
+.arka-redesign-wallet .chrome-connect-stack { position: relative; }
+.arka-redesign-wallet .chrome-connect-error {
+  position: absolute;
+  inset-block-start: calc(100% + .25rem);
+  inset-inline-end: 0;
+  z-index: 16;
+  inline-size: max-content;
+  max-inline-size: min(15rem, 72vw);
+  padding: .35rem .55rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .375rem;
+  background: var(--arka-panel);
 }

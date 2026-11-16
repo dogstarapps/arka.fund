@@ -14,6 +14,7 @@ import {
 import { buildCatalogFallbackUnavailableCopy } from "@/lib/catalog/errorPresentation";
 import {
   formatAssetAmount,
+  formatBaseUnitAmount,
   formatContractLabel,
   formatRelativeTime,
   formatUsdBaseUnitAmount,
@@ -72,7 +73,16 @@ function formatMetricValue(tile: PublicFigmaMetricTile): string {
   return tile.valueKind === "amount" ? formatUsdBaseUnitAmount(tile.value) : tile.value;
 }
 
-export default function DashboardSurface() {
+function catalogTvlInDenomination({ overview, arkas }: DashboardBundle): string | null {
+  if (overview.totalNavUsdEstimate != null || arkas.items.length !== overview.totalArkas) return null;
+  const asset = arkas.items[0]?.economics?.denominationAsset;
+  if (!asset?.symbol || !arkas.items.every(arka =>
+    arka.nav !== null && /^\d+$/.test(arka.nav) && arka.denominationContract === asset.contract)) return null;
+  const total = arkas.items.reduce((sum, arka) => sum + BigInt(arka.nav!), BigInt(0));
+  return `${formatBaseUnitAmount(total.toString(), asset.decimals, 2)} ${asset.symbol}`;
+}
+
+export default function DashboardSurface({ redesign = false }: { redesign?: boolean }) {
   const [initialUrlState] = useState(() =>
     typeof window === "undefined"
       ? normalizeDashboardUrlState({})
@@ -164,7 +174,7 @@ export default function DashboardSurface() {
     return () => controller.abort();
   }, [managedArkas, state.data]);
 
-  if (featuredMode === 'mine') return <WalletPortfolioSurface mode="investor" />;
+  if (featuredMode === 'mine' && !redesign) return <WalletPortfolioSurface mode="investor" />;
 
   if (state.status === "loading" && !state.data) {
     return <LoadingState testId="dashboard-loading" title="Loading dashboard" body="Loading portfolio values and current Arkas." />;
@@ -195,6 +205,27 @@ export default function DashboardSurface() {
 
   const dashboardData = state.data;
   const figmaMetricTiles = buildDashboardFigmaMetricTiles(dashboardData);
+  if (redesign) {
+    const tvlInDenomination = catalogTvlInDenomination(dashboardData);
+    return <main className="arka-workflow arka-platform-overview" aria-labelledby="platform-overview-title">
+      <header className="arka-redesign-page-heading arka-redesign-portfolio-heading">
+        <h1 id="platform-overview-title">Platform overview</h1>
+        <Link href="/" className="arka-redesign-button arka-redesign-button-secondary">View leaderboard</Link>
+      </header>
+      {state.status === "error" && <p role="status">The latest update is unavailable. Showing the last catalog reading.</p>}
+      <section className="arka-workflow-panel" aria-label="Platform statistics">
+        <dl className="arka-platform-stats">
+          {figmaMetricTiles.map(tile => {
+            const nativeTvl = tile.id === "nav" ? tvlInDenomination : null;
+            return <div key={tile.id}>
+              <dt>{tile.label}</dt>
+              <dd>{nativeTvl ?? formatMetricValue(tile)}<small>{nativeTvl ? "Total value in the fund denomination" : tile.detail}</small></dd>
+            </div>;
+          })}
+        </dl>
+      </section>
+    </main>;
+  }
   const featuredSource =
     featuredMode === "curated"
       ? dashboardData.arkas.items.filter((entry) => entry.curated)

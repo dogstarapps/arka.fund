@@ -74,3 +74,32 @@ Notes:
 - Historical test Arkas without the current `nav()` ABI are handled by an isolated legacy-storage compatibility reader.
 - `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records `tmp/graphql-backend-parity.json`.
 - `bash scripts/deploy-subquery-backend-parity-validation.sh` validates the SubQuery-compatible provider profile and records `tmp/subquery-backend-parity.json`.
+
+### Testnet catalog in the frontend preview
+
+Build and package the preview adapter with the locked catalog dependencies.
+
+```sh
+npm run build
+npm run preview:bundle
+```
+
+Include `dist/testnet-preview/testnetPreview.mjs` as
+`apps/web/src/lib/catalog/testnetPreview.mjs` in the protected Vercel preview
+deployment. The generated bundle and the archived observations are kept outside
+Git.
+
+Configure the preview project with the Testnet passphrase and network target,
+`NEXT_PUBLIC_UX_REVIEW_PREVIEW=1`, `NEXT_PUBLIC_ARKA_REGISTRY`,
+`ARKA_TESTNET_CATALOG_SOURCE_ACCOUNT` (a public read account),
+`ARKA_TESTNET_CATALOG_START_LEDGER`, and the comma-separated
+`ARKA_TESTNET_CATALOG_WASM_HASHES` for the reviewed Testnet deployments. Connect
+a private Vercel Blob store to Preview using OIDC and set
+`ARKA_TESTNET_HISTORY_BLOB_ID` to that store's ID. Use
+`ARKA_TESTNET_HISTORY_BOOTSTRAP=1` for the initial observation in a new store.
+Use the same store and registry on subsequent deployments.
+
+The archive at `catalog-history/v1/testnet/<registry>/history.json.gz` retains
+complete observations sampled once per five-minute interval with traffic.
+Concurrent appends merge using the object's ETag. Preview catalog endpoints
+perform Stellar reads and unsigned simulations.

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "366fd4894cd02de88be7fea8fbe04d469074c30bd440236a46be8ba18a0b8c71",
+  "releaseId": "a4bb89ac71c842adac7fed47933d33016e190a5f818b757f6adf549ba9e4393d",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -1025,8 +1025,8 @@
     },
     {
       "path": "apps/web/src/app/dashboard/page.tsx",
-      "sha256": "bd8caadbda063c4151898c7c745f063bbd70a33dc069d550d108f595f4a2ae80",
-      "bytes": 146
+      "sha256": "ec865e1dfe06bd1b7b7cc6206c29a8c4132b83657294281cdb1a78acf5b2d3fa",
+      "bytes": 614
     },
     {
       "path": "apps/web/src/app/discover/page.tsx",
@@ -1035,8 +1035,8 @@
     },
     {
       "path": "apps/web/src/app/factory/create/CreateArkaClient.tsx",
-      "sha256": "42bad55b78fc311ac9e2e927bc76a9b837e735842672c218c5454d9b819bb361",
-      "bytes": 74883
+      "sha256": "e62a5e519ea17fd0b50e246953c22952e003ad05b52440b6561764c66c19d1cb",
+      "bytes": 74911
     },
     {
       "path": "apps/web/src/app/factory/create/creation-header.css",
@@ -1075,8 +1075,8 @@
     },
     {
       "path": "apps/web/src/app/governance/GovernanceClient.tsx",
-      "sha256": "92c9d640d895b1b26962eba222abd049781db53b33e8f92ce2d683f4b17dda36",
-      "bytes": 71063
+      "sha256": "33fc7429885ae2658eb4e6092c89f421c0f2bc81696209f1b6c5a766f1e3e94c",
+      "bytes": 71271
     },
     {
       "path": "apps/web/src/app/governance/page.tsx",
@@ -1195,18 +1195,23 @@
     },
     {
       "path": "apps/web/src/app/vaults/page.tsx",
-      "sha256": "9b407d136b3fa7344302179dfe568d9dc9a12c2a47170f46ca595d6c00f4e24a",
-      "bytes": 174
+      "sha256": "4e660c9c6d22455014abf7f5278b43bfd43314a80f77664ac59d63e74a09f77f",
+      "bytes": 405
     },
     {
       "path": "apps/web/src/components/ClientConnect.tsx",
-      "sha256": "0fc0173cc7f219ee50c7a5a6164802e4e042ab5eb3525c33c5ee782970ff74d2",
-      "bytes": 3989
+      "sha256": "f6f5f278b6d590480719ee449e38db9842bcaf2f07b9205da1698d8339b28e16",
+      "bytes": 4312
     },
     {
       "path": "apps/web/src/components/product/AppChrome.tsx",
-      "sha256": "b9782c2c855915619928efe2f73f4e477e3471cfe9491b829c24bf36ecb421c7",
-      "bytes": 29463
+      "sha256": "dc978675abb1cbe0e9798e3cf0647497460986be61023fc5bbc10ac0a36e0ceb",
+      "bytes": 29494
+    },
+    {
+      "path": "apps/web/src/components/product/ArkaLeaderboard.tsx",
+      "sha256": "fd80dcdb44b3586146ae3f35c7999752230fcc91cab3456827f3bad8d76716f8",
+      "bytes": 17783
     },
     {
       "path": "apps/web/src/components/product/ArkaVersionBadge.tsx",
@@ -1225,13 +1230,13 @@
     },
     {
       "path": "apps/web/src/components/product/DashboardSurface.tsx",
-      "sha256": "044fb458f410e75555bc50f3068e8c6c4e9c092c4574c9013e7925864daba03a",
-      "bytes": 14420
+      "sha256": "982e36c3c2a141e5cfe6680ed61728b32d2616932e3d6191c06143a817e39026",
+      "bytes": 16240
     },
     {
       "path": "apps/web/src/components/product/DiscoverSurface.tsx",
-      "sha256": "43f71692cd222e1cf95d667c9fbb60be44f13340f1f3b15722ac7501086830a0",
-      "bytes": 26149
+      "sha256": "8845f9f414f46f44540e70fa73aaac9ee9c1a330e69a4dbc83b32b4c2311bb22",
+      "bytes": 21768
     },
     {
       "path": "apps/web/src/components/product/FundSwapReview.tsx",
@@ -1300,8 +1305,8 @@
     },
     {
       "path": "apps/web/src/components/product/redesign.css",
-      "sha256": "cdfdc0dfc49a775fbbbd5a8dacce00e27686fa4fb0657efaa0b93b6c1a9a58ee",
-      "bytes": 20936
+      "sha256": "93925987511f658904df352cee809d46c0ac3742a762ed7fa00b6654e1fb5fec",
+      "bytes": 24132
     },
     {
       "path": "apps/web/src/components/product/surfacePrimitives.tsx",
@@ -1325,8 +1330,8 @@
     },
     {
       "path": "apps/web/src/components/product/VaultDetailSurface.tsx",
-      "sha256": "4be77c445c97727e521ed04b9ab6f8ca91d11ea03093577fe1bbe4f6740a3bed",
-      "bytes": 26508
+      "sha256": "8afb5cb2f0521ec3890597b99e5981ba91b3cbdf69f79ff2963259982ed2e861",
+      "bytes": 26504
     },
     {
       "path": "apps/web/src/components/product/VaultLeaderboardSurface.tsx",
@@ -1335,13 +1340,13 @@
     },
     {
       "path": "apps/web/src/components/product/WalletPortfolioSurface.tsx",
-      "sha256": "3f7eb0c8f9f883e09b45baa90499196f98735e7084f83caf0a8942871c6f4fc2",
-      "bytes": 8881
+      "sha256": "955e078f4d7a9642051d9a5afc50e3cded07e2343dccafc65bc1c1a4d120d031",
+      "bytes": 8935
     },
     {
       "path": "apps/web/src/lib/catalog/api.ts",
-      "sha256": "dad6f52f3e4e29f618c451ece4c0980950cab430b454335cfdd5bf5a2f1c606b",
-      "bytes": 16927
+      "sha256": "2834197bc140144157332276eaebe0189fc8dd344e61158c2b2f494aa65e92bc",
+      "bytes": 18041
     },
     {
       "path": "apps/web/src/lib/catalog/arkas.ts",
@@ -1400,8 +1405,8 @@
     },
     {
       "path": "apps/web/src/lib/catalog/identity.ts",
-      "sha256": "155ebc7e85947a2a0a86b4a1c221aebc177bfa3465392d27c2de5f49750827c9",
-      "bytes": 6933
+      "sha256": "80c94562dcafe61dfd5c6e6292700702d4cdcfde1fbe86438bacd61f788f0bad",
+      "bytes": 7046
     },
     {
       "path": "apps/web/src/lib/catalog/leaderboardArkas.ts",
@@ -1415,13 +1420,13 @@
     },
     {
       "path": "apps/web/src/lib/catalog/onchainFallback.ts",
-      "sha256": "4b42d3200b6e06fdb2aedd062b3e9b514b67890e50f5dd59cef0483280bc4d92",
-      "bytes": 67676
+      "sha256": "56a7065d802620180582cd3f76bf9733a09cba1c6213cf79308f4ed11d1f94df",
+      "bytes": 68926
     },
     {
       "path": "apps/web/src/lib/catalog/proxy.ts",
-      "sha256": "a9bef8ae62d66a9dfefbfd661af410bc76ac6700b1f5e44a7c9cc8da3019b1fc",
-      "bytes": 5647
+      "sha256": "a31c77167d28c94f20d333a29cf92722ba35effe9169b97ab0b7fde968c1928b",
+      "bytes": 6181
     },
     {
       "path": "apps/web/src/lib/catalog/serverRouteClient.ts",
@@ -1434,9 +1439,19 @@
       "bytes": 32537
     },
     {
+      "path": "apps/web/src/lib/catalog/testnetPreview.d.mts",
+      "sha256": "b9989d300a07299183038bef404148273cccd6bbc0f3dabbb0b07d937d2833c3",
+      "bytes": 147
+    },
+    {
+      "path": "apps/web/src/lib/catalog/testnetPreview.mjs",
+      "sha256": "4464252d05c0fbb2a94ff268d34e3c0c79aff9629abf423891218a219ee8a1cc",
+      "bytes": 204
+    },
+    {
       "path": "apps/web/src/lib/catalog/types.ts",
-      "sha256": "5aabee0603357eb2649fc29823517ce0fddc942606b59ea4a95c31ac402357b4",
-      "bytes": 14852
+      "sha256": "3b394c3265da9f89104dac3e1c001e908e116a6d3ac2a16d06ee458452151f31",
+      "bytes": 14915
     },
     {
       "path": "apps/web/src/lib/catalog/valuation.ts",
@@ -1715,8 +1730,8 @@
     },
     {
       "path": "apps/web/src/lib/walletKit.ts",
-      "sha256": "697f137ed2e59b1ea7076ff978f4b473fcf00431239676ccaa26d9c1060b5876",
-      "bytes": 11748
+      "sha256": "53715ca69c80da6f9acfac2fcf8a53ae595fd35efeebb0c860f25492395956ab",
+      "bytes": 12366
     },
     {
       "path": "apps/web/src/lib/workflows/arkaWorkspaces.ts",
@@ -2035,8 +2050,8 @@
     },
     {
       "path": "apps/web/tests/integration/app-chrome.test.tsx",
-      "sha256": "11c60426a7a5183d290faf311d68354afc9a91ed09a7b39e7abd2a7deadf234c",
-      "bytes": 19697
+      "sha256": "6074c17b8db43e0b754656c2323db364b311c17fe27a222b6f798cf9776165ed",
+      "bytes": 19907
     },
     {
       "path": "apps/web/tests/integration/arka-detail-page.test.tsx",
@@ -2045,8 +2060,8 @@
     },
     {
       "path": "apps/web/tests/integration/client-connect.test.tsx",
-      "sha256": "efe54ff53dd2b76e8234e73f1f39f21ae601f1bd292f208f6969a5d44c5d2f31",
-      "bytes": 2695
+      "sha256": "a3db4ba116e564b6fcac44e57dbfe78e30b77da90ca857306483d7eb1d503ed1",
+      "bytes": 3604
     },
     {
       "path": "apps/web/tests/integration/contracts-page.test.tsx",
@@ -2080,8 +2095,8 @@
     },
     {
       "path": "apps/web/tests/integration/discover-surface.test.tsx",
-      "sha256": "4ca508184ab20756d68cd6726aaf182699b2134f0d28471abdf15161d34d560c",
-      "bytes": 8656
+      "sha256": "8de730f43a5297b21ff1b45094ab6088cb7a4f7f65ea38165894936d16d49660",
+      "bytes": 13061
     },
     {
       "path": "apps/web/tests/integration/factory-mainnet-vm.test.tsx",
@@ -2270,8 +2285,8 @@
     },
     {
       "path": "apps/web/tests/integration/workflow-surfaces.test.tsx",
-      "sha256": "b4e74133d83e9f6de6b07faa81062cf258fad474e836fac46e7557e4295c8783",
-      "bytes": 118628
+      "sha256": "1dcae49a76a12ee422684566ed570ab09793e7d79dea750ffda4c887f1b868ff",
+      "bytes": 118731
     },
     {
       "path": "apps/web/tests/setup.ts",
@@ -3935,8 +3950,8 @@
     },
     {
       "path": "release/check-local.mjs",
-      "sha256": "4cf06dfa24c8c642238c0f33834c319598c0f912e00bdc0c4a6b4cd7def26611",
-      "bytes": 2299
+      "sha256": "7bc0dbc51c1afe5b42315ffa11c8fb09c0ff4b74761bc0eca4cd0bd922e42bdc",
+      "bytes": 2516
     },
     {
       "path": "release/compiler-profile.json",
@@ -4040,7 +4055,7 @@
     },
     {
       "path": "release/rustsec-risk-acceptance.json",
-      "sha256": "641016938e533c498f7c1ed605df0c7e4968affeaa1111f0dab5ff7665cb59c1",
+      "sha256": "8c5693b4aaa99075f85ff4ad068a4d5e4f118c1952e4bc470ae4b49583c89c6d",
       "bytes": 1586
     },
     {
@@ -4645,18 +4660,43 @@
     },
     {
       "path": "services/catalog-api/package-lock.json",
-      "sha256": "8c3eb66e03df84b03aee77b6e40f6161f01f8b8ef996e76c3e343058fbd3f7ca",
-      "bytes": 43310
+      "sha256": "47a56b5bd7a53b686b57d98351468e0c9ba4d683df8f15b33a47a569ff9b2f43",
+      "bytes": 66778
     },
     {
       "path": "services/catalog-api/package.json",
-      "sha256": "d10451790035ff28e7e0ca5b0a99e3e5dc899a9bd8c44fd824e1dc9b413827b2",
-      "bytes": 1455
+      "sha256": "b55c1786fe7885d7cf99150f97b3efe5114e294a2b333152c76772b4c6dcd128",
+      "bytes": 1624
+    },
+    {
+      "path": "services/catalog-api/preview/blob-client.mjs",
+      "sha256": "a5d5452948a76ec5277b81f50ff5de34a4043e90ab5fe169bf1cd6b31ec6732a",
+      "bytes": 1397
+    },
+    {
+      "path": "services/catalog-api/preview/blob-history.mjs",
+      "sha256": "d26a794a17d2ba89b7e8f7cfbc90a2bf7d1ebd047caa75137b00f9d54fee7439",
+      "bytes": 5059
+    },
+    {
+      "path": "services/catalog-api/preview/index.mjs",
+      "sha256": "1b6180d13d3d3d447b6bb796d40c07a64a6f43d63890bab0fccd376e843b2663",
+      "bytes": 12899
+    },
+    {
+      "path": "services/catalog-api/preview/package-preview.mjs",
+      "sha256": "1f64aea11255bd2092c716ad2bd0247db3cf0a49a66c6b29e04a99ef3565eb65",
+      "bytes": 1152
+    },
+    {
+      "path": "services/catalog-api/preview/preview.test.mjs",
+      "sha256": "9409c891249ea2a86fdaf20d8173c4afd82320d578b058e6a374c30cc586984d",
+      "bytes": 3965
     },
     {
       "path": "services/catalog-api/README.md",
-      "sha256": "5b71180dc3654b275b41a5d21a51b1947c380f7fec1f5f683a168416ab425586",
-      "bytes": 3108
+      "sha256": "2c5c31c7aee421dd53b5103de84db108081c2d2b9b901b2d9e7b8903280d19f0",
+      "bytes": 4372
     },
     {
       "path": "services/catalog-api/review/archive.mjs",
@@ -4755,8 +4795,8 @@
     },
     {
       "path": "services/catalog-api/src/catalog.ts",
-      "sha256": "e733fabb8c7908402b2891ac773ac94a21fa178c4719e4e241e3390cc9ee4c4d",
-      "bytes": 21877
+      "sha256": "6b60b0c403f8912017c6b0a5e0c8c0868d508385a79889cb07bd6717104dd519",
+      "bytes": 22045
     },
     {
       "path": "services/catalog-api/src/clientOptions.ts",
@@ -4775,8 +4815,8 @@
     },
     {
       "path": "services/catalog-api/src/economics.ts",
-      "sha256": "5de651598bbee2b1b33285449f3e55be9ea22c774f59669e308a999b9fd14c0a",
-      "bytes": 10340
+      "sha256": "a9621eb3da766c4c68b25534eb314cd857cc468b4865c022c660cab11f4eebfb",
+      "bytes": 10524
     },
     {
       "path": "services/catalog-api/src/generated/adapter-sushi.ts",
@@ -4905,8 +4945,8 @@
     },
     {
       "path": "services/catalog-api/src/openapi/paths.ts",
-      "sha256": "7495a3a16ada3486841356693abb0fd55e83a49047b529e675b0d586cbf81e84",
-      "bytes": 17676
+      "sha256": "0f3470bbd5961391bb088d288143388dc8bb77f384c9d48d387b52ac1743bb65",
+      "bytes": 17701
     },
     {
       "path": "services/catalog-api/src/openapi/schemas.ts",
@@ -4935,8 +4975,8 @@
     },
     {
       "path": "services/catalog-api/src/runners.ts",
-      "sha256": "ec561259af877f959cd7f6fdeecdbdfd57e9b760ffb960ceca2b710b38cd1e9a",
-      "bytes": 21818
+      "sha256": "9ee7a29c2ac38c22dfc6a3321005cb9fd67800e265eae02fd5a69af10f7fc4b5",
+      "bytes": 22383
     },
     {
       "path": "services/catalog-api/src/runtime.ts",
@@ -4960,8 +5000,8 @@
     },
     {
       "path": "services/catalog-api/src/types.ts",
-      "sha256": "8c0aefa43cc7ff96523ce7193ed0d8b6a6556254739e80c7bac39dfbd5be318c",
-      "bytes": 14113
+      "sha256": "fc7a0780f615899e32d4704841581bcbaed124a90ab9bf3332cfa5988773f0c6",
+      "bytes": 14199
     },
     {
       "path": "services/catalog-api/tests/e2e/graphql-backend.test.ts",

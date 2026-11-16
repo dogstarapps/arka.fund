@@ -198,7 +198,7 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
   "/v1/arkas/{id}/history": {
     get: {
       tags: ["History"],
-      summary: "Read Arka NAV history",
+      summary: "Read Arka NAV and observed share-price history",
       operationId: "getArkaHistory",
       parameters: [idParameter("id", "Arka contract ID."), ...historyParameters],
       responses: {

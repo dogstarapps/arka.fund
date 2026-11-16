@@ -91,10 +91,14 @@ describe("AppChrome", () => {
     navigationState.pathname = "/investments";
     const { rerender } = render(<AppChrome redesign><p>Portfolio</p></AppChrome>);
 
-    expect(screen.getByRole("link", { name: "Explore Arkas" })).toHaveAttribute("href", "/discover");
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute("href", "/discover");
     expect(screen.getByRole("link", { name: "My investments" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: "Manage Arkas" })).toHaveAttribute("href", "/manage");
     expect(screen.getByTestId("chrome-nav-integrations")).toHaveAttribute("href", "/integrations");
+
+    navigationState.pathname = "/vaults";
+    rerender(<AppChrome redesign><p>Leaderboard</p></AppChrome>);
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute("aria-current", "page");
 
     navigationState.pathname = "/factory/create";
     rerender(<AppChrome redesign><p>Create wizard</p></AppChrome>);

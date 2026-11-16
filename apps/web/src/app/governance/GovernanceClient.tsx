@@ -122,7 +122,7 @@ export function GovernanceSurface({ operatorConsole = false, redesign = false }:
   const [walletsKit, setWalletsKit] = useState<StellarWalletsKit | null>(null);
   const [pubKey, setPubKey] = useState("");
   const [proposalKind, setProposalKind] = useState<ProposalKind>("Council");
-  const [proposalIdStr, setProposalIdStr] = useState("0");
+  const [proposalIdStr, setProposalIdStr] = useState(redesign && !operatorConsole ? "" : "0");
   const [support, setSupport] = useState("1");
   const [newCouncil, setNewCouncil] = useState("");
 
@@ -447,7 +447,7 @@ export function GovernanceSurface({ operatorConsole = false, redesign = false }:
   );
 
   useEffect(() => {
-    setWalletsKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"]));
+    setWalletsKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"], redesign));
     const saved = localStorage.getItem("wallet:pubkey");
     if (saved) setPubKey(saved);
   }, []);
@@ -864,7 +864,7 @@ export function GovernanceSurface({ operatorConsole = false, redesign = false }:
             className="ops-input"
             inputMode="numeric"
             pattern="[0-9]*"
-            aria-invalid={!hasProposalId}
+            aria-invalid={!hasProposalId && (!redesign || Boolean(proposalIdStr.trim()))}
             data-testid="governance-proposal-id-input"
           />
         </ActionField>
@@ -883,7 +883,7 @@ export function GovernanceSurface({ operatorConsole = false, redesign = false }:
       </div>
       {redesign ? (
         <div id="governance-proposals" className="arka-governance-result" data-testid="governance-overview-panel" aria-live="polite">
-          {!hasProposalId ? <p>Enter a valid proposal ID.</p> : readingProposal ? (
+          {!hasProposalId ? <p>{proposalIdStr.trim() ? "Enter a valid proposal ID." : "Enter a proposal ID to look it up."}</p> : readingProposal ? (
             <p role="status">Checking proposal…</p>
           ) : proposal?.id === proposalId ? (
             <article data-testid="governance-public-proposal">
@@ -1728,7 +1728,7 @@ export function GovernanceSurface({ operatorConsole = false, redesign = false }:
                   placeholder="Proposal ID"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  aria-invalid={!hasProposalId}
+                  aria-invalid={!hasProposalId && (!redesign || Boolean(proposalIdStr.trim()))}
                   data-testid="governance-proposal-id-input"
                 />
               </ActionField>

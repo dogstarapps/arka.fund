@@ -51,7 +51,7 @@ function LegacyWalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) 
     return () => controller.abort();
   }, [viewedAddress, mode, refresh]);
   const funds = mode === 'investor' ? positions?.positions.map(p => p.fund) ?? [] : managed ?? [];
-  return <main className="surface-stack ux-portfolio" data-testid="wallet-portfolio">
+  return <main className={redesign ? "arka-workflow ux-portfolio" : "surface-stack ux-portfolio"} data-testid="wallet-portfolio">
     {redesign ? <PortfolioHeading mode={mode} /> : <header className="surface-panel ux-portfolio-heading">
       <span className="surface-eyebrow">{mode === 'investor' ? 'Investor' : 'Fund manager'}</span>
       <h1>{mode === 'investor' ? 'My investments' : 'Funds I manage'}</h1>
@@ -75,7 +75,7 @@ function LegacyWalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) 
       const value = position && position.totalSharesBase && fund.nav !== null ? estimateMaximumRedemption({ navBase: Number(fund.nav), totalSharesBase: position.totalSharesBase, userSharesBase: position.sharesBase, redeemFeeBps: 0 }) : null;
       const symbol = fund.economics?.denominationAsset?.symbol || 'fund units';
       const actionHref = `/arkas/${fund.arkaId}?workspace=${mode==='investor'?'flow':'rebalance'}${address ? `&address=${encodeURIComponent(address)}` : ''}`;
-      return <article className="surface-panel ux-position-card" key={fund.arkaId} data-testid="wallet-position-card"><div><h2>{resolveArkaDisplayName(fund)}</h2><p>Manager {formatContractLabel(fund.manager,8,5)}</p>{position ? <><strong>{value !== null ? `${formatAssetAmount(String(value))} ${symbol}` : 'Position value unavailable'}</strong><p>{formatAssetAmount(String(position.sharesBase))} shares · estimated value, not cash available to withdraw</p></> : <p>Changes affect this fund’s portfolio and its investors.</p>}</div><div className="surface-entry-actions"><Link className="surface-button surface-button-primary" href={actionHref}>{mode === 'investor' ? 'Deposit or withdraw' : 'Manage fund assets'}</Link><Link className="surface-button surface-button-secondary" href={`/vaults/${fund.arkaId}`}>Fund details</Link></div></article>;
+      return <article className="surface-panel ux-position-card" key={fund.arkaId} data-testid="wallet-position-card"><div><h2>{resolveArkaDisplayName(fund, redesign)}</h2><p>Manager {formatContractLabel(fund.manager,8,5)}</p>{position ? <><strong>{value !== null ? `${formatAssetAmount(String(value))} ${symbol}` : 'Position value unavailable'}</strong><p>{formatAssetAmount(String(position.sharesBase))} shares · estimated value, not cash available to withdraw</p></> : <p>Changes affect this fund’s portfolio and its investors.</p>}</div><div className="surface-entry-actions"><Link className="surface-button surface-button-primary" href={actionHref}>{mode === 'investor' ? 'Deposit or withdraw' : 'Manage fund assets'}</Link><Link className="surface-button surface-button-secondary" href={`/vaults/${fund.arkaId}`}>Fund details</Link></div></article>;
     })}</div>
     {positions ? <p className="surface-note">Checked {positions.scanned} listed funds using on-chain shares. Values can change and withdrawals depend on fund cash and a fresh simulation.</p> : null}
   </main>;

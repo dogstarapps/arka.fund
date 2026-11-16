@@ -18,6 +18,8 @@ run(['release/dependency-scope.mjs']);
 for (const job of ['catalog-build', 'sdk-build', 'catalog-unit', 'catalog-integration', 'sdk-unit', 'web-build', 'web-test', 'web-types']) {
   run(['release/run-local.mjs', job, ...(signingRequested && ['web-test', 'catalog-unit', 'catalog-integration', 'sdk-unit'].includes(job) ? ['--ephemeral-signatures'] : [])]);
 }
+run(['--import', root + 'release/containment.mjs', '--test', 'services/catalog-api/preview/preview.test.mjs']);
+run(['--import', root + 'release/containment.mjs', 'services/catalog-api/preview/package-preview.mjs']);
 run(['--experimental-strip-types', '--import', root + 'release/containment.mjs', '--test', 'release/tests/source-gate.test.mjs', 'release/tests/artifact-bindings.test.mjs', 'release/tests/ci-configuration.test.mjs', 'release/tests/dependency-scope.test.mjs', 'release/tests/sdk-parser.test.mjs', 'release/tests/local-check-command.test.mjs', 'services/catalog-api/tests/review/canonical.test.mjs', 'services/catalog-api/tests/review/catalog.test.mjs', 'services/catalog-api/tests/review/runtime.test.mjs', 'services/catalog-api/tests/review/creation-fee.test.mjs', 'services/catalog-api/tests/review/withdrawal.test.mjs', 'services/catalog-api/tests/review/withdrawal-vm.test.mjs']);
 run(['release/signature-check.mjs','--verify-existing',
   signingRequested ? '--ephemeral-signatures' : '--unsigned']);

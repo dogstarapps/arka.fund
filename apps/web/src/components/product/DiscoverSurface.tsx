@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ArkaLeaderboard from "./ArkaLeaderboard";
 import { useEffect, useState } from "react";
 import {
   CURATED_ONLY_LABEL,
@@ -34,7 +35,7 @@ import {
   normalizeDiscoverUrlState,
   replaceBrowserQueryState,
 } from "@/lib/workflows/publicSurfaceUrlState";
-import type { ArkaHistoryPoint, DiscoverBundle, RankedArkaCatalogEntry } from "@/lib/catalog/types";
+import type { ArkaHistoryPoint, DiscoverBundle } from "@/lib/catalog/types";
 import {
   CatalogOfflineState,
   EmptyState,
@@ -141,47 +142,11 @@ function buildDiscoverArkaHistoryPath(history: ArkaHistoryPoint[]) {
   };
 }
 
-function ExploreCard({ entry }: { entry: RankedArkaCatalogEntry }) {
-  const postedStrategy = entry.identity?.strategy?.trim() || entry.identity?.description?.trim();
-  const symbol = entry.economics?.denominationAsset?.symbol;
-  const value = entry.nav !== null && /^\d+$/.test(entry.nav) && symbol
-    ? `${formatBaseUnitAmount(entry.nav, 7, 2)} ${symbol}`
-    : "Unavailable";
-  const fees = [
-    ["Deposit", entry.fees.depositBps],
-    ["Withdrawal", entry.fees.redeemBps],
-    ["Management", entry.fees.mgmtBps],
-    ["Performance", entry.fees.perfBps],
-  ] as const;
-
-  return (
-    <article className="arka-explore-card" data-testid="explore-arka-card">
-      <div className="arka-explore-card-top">
-        <h2>{resolveArkaDisplayName(entry)}</h2>
-        {entry.delisted ? <StatusPill label={STATUS_DELISTED_LABEL} tone="warning" /> : null}
-      </div>
-      <p className="arka-explore-strategy">{postedStrategy || "Strategy details unavailable"}</p>
-      <dl className="arka-explore-facts">
-        <div><dt>Manager</dt><dd title={entry.manager}>{formatContractLabel(entry.manager, 8, 5)}</dd></div>
-        <div><dt>Fund value</dt><dd>{value}</dd></div>
-        {fees.map(([label, bps]) => (
-          <div key={label}><dt>{label} fee</dt><dd>{Number.isInteger(bps) ? `${bps / 100}%` : "Unavailable"}</dd></div>
-        ))}
-      </dl>
-      <Link href={`/vaults/${entry.arkaId}`} className="arka-redesign-button arka-redesign-button-secondary">
-        View Arka<span className="sr-only"> {resolveArkaDisplayName(entry)}</span>
-      </Link>
-    </article>
-  );
+export default function DiscoverSurface({ initialQuery = "", redesign = false }: { initialQuery?: string; redesign?: boolean }) {
+  return redesign ? <ArkaLeaderboard initialQuery={initialQuery} /> : <LegacyDiscoverSurface initialQuery={initialQuery} />;
 }
 
-export default function DiscoverSurface({
-  initialQuery = "",
-  redesign = false,
-}: {
-  initialQuery?: string;
-  redesign?: boolean;
-}) {
+function LegacyDiscoverSurface({ initialQuery }: { initialQuery: string }) {
   const [initialUrlState] = useState(() =>
     typeof window === "undefined"
       ? normalizeDiscoverUrlState({ q: initialQuery })
@@ -244,63 +209,13 @@ export default function DiscoverSurface({
   const initialLoading = state.status === "loading" && !state.data;
   const initialError = state.status === "error" && !state.data;
   const retry = () => setReloadNonce((value) => value + 1);
-  if (!redesign && initialLoading) {
+  if (initialLoading) {
     return (
       <LoadingState
         testId="discover-loading"
         title="Refreshing discovery"
         body="Loading Arka, manager and asset results for the current filters."
       />
-    );
-  }
-
-  const catalogError = isCatalogConfigurationError(state.error);
-  const unavailable = catalogError ? buildCatalogFallbackUnavailableCopy("discover").body
-    : "We couldn’t load the Arka catalog. Try again.";
-
-  if (redesign) {
-    const entries = state.data?.arkas.items ?? [];
-    const filtered = curatedOnly ? entries.filter(entry => entry.curated) : entries;
-    const hasReportedProfit = (entry: RankedArkaCatalogEntry) => /^-?\d+$/.test(entry.profitBase ?? "");
-    const results = featuredMode === "profit"
-      ? [...sortDiscoverFeaturedEntries(filtered.filter(hasReportedProfit), "profit"), ...filtered.filter(entry => !hasReportedProfit(entry))]
-      : sortDiscoverFeaturedEntries(filtered, featuredMode, searchQuery);
-
-    return (
-      <main className="arka-explore" aria-labelledby="arka-explore-title">
-        <header className="arka-redesign-page-heading">
-          <h1 id="arka-explore-title">Explore Arkas</h1>
-          <p>Compare investment strategies, managers and fees before you invest.</p>
-        </header>
-        <section aria-label="Arka catalog">
-          <div className="arka-explore-filters">
-            <label className="arka-explore-search">Search Arkas
-              <input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Name, asset or manager" />
-            </label>
-            <label>Sort by
-              <select value={featuredMode} onChange={event => setFeaturedMode(event.target.value as DiscoverFeaturedMode)}>
-                <option value="ranked">Catalog ranking</option>
-                <option value="fresh">Recently updated</option>
-                <option value="profit">Reported profit</option>
-                <option value="search">Search relevance</option>
-              </select>
-            </label>
-            <label className="arka-explore-curated"><input type="checkbox" checked={curatedOnly} onChange={event => setCuratedOnly(event.target.checked)} /> Curated only</label>
-          </div>
-          {state.status === "loading" ? <p role="status">{initialLoading ? "Loading Arkas…" : "Updating results…"}</p> : null}
-          {state.status === "error" ? <div className="arka-explore-message" role="alert">
-            <p>{initialError ? unavailable : "The catalog couldn’t refresh. These are the last results we loaded."}</p>
-            <button type="button" className="arka-redesign-button arka-redesign-button-secondary" onClick={retry}>Retry</button>
-          </div> : null}
-          {state.status === "ready" && results.length === 0 ? <p>No Arkas match these filters.</p> : null}
-          {results.length > 0 ? (
-            <div className="arka-explore-results" aria-busy={state.status === "loading"}>
-              {results.map(entry => <ExploreCard key={entry.arkaId} entry={entry} />)}
-            </div>
-          ) : null}
-          <div className="arka-explore-footer"><Link href="/vaults">Open the full catalog</Link></div>
-        </section>
-      </main>
     );
   }
 

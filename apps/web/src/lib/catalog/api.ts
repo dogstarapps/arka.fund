@@ -236,6 +236,41 @@ export async function loadVaultLeaderboardPage(
   );
 }
 
+export async function loadExploreArkas(
+  query: DiscoverQuery,
+  signal?: AbortSignal,
+): Promise<RankedArkaCatalogEntry[]> {
+  const entries: RankedArkaCatalogEntry[] = [];
+  const seen = new Set<string>();
+  let offset = 0;
+  while (true) {
+    const page = await fetchCatalog<Page<RankedArkaCatalogEntry>>(
+      "/v1/arkas",
+      { search: query.search?.trim() || undefined, curated: query.curated, limit: 100, offset },
+      { signal },
+    );
+    for (const entry of page.items) {
+      if (seen.has(entry.arkaId)) continue;
+      seen.add(entry.arkaId);
+      entries.push(entry);
+    }
+    offset += page.items.length;
+    if (offset >= page.total) return entries;
+    if (!page.items.length) throw new CatalogApiError("The catalog returned an incomplete page.", 502);
+  }
+}
+
+export async function loadArkaPerformanceHistory(
+  arkaId: string,
+  signal?: AbortSignal,
+): Promise<Page<ArkaHistoryPoint>> {
+  return fetchCatalog<Page<ArkaHistoryPoint>>(
+    `/v1/arkas/${encodeURIComponent(arkaId)}/history`,
+    { order: "desc", limit: 24 },
+    { signal },
+  );
+}
+
 export async function loadArkasForAssetValuation(
   signal?: AbortSignal,
 ): Promise<Page<RankedArkaCatalogEntry>> {
@@ -339,7 +374,7 @@ export async function loadArkaInvestorCounts(
       if (!page || !Number.isFinite(page.total) || typeof page.complete !== "boolean") {
         throw new CatalogApiError("Investor count is unavailable.", 502);
       }
-      return [arkaId, { total: page.total, complete: page.complete }] as const;
+      return [arkaId, { total: page.total, complete: page.complete && !page.stale && !page.refreshFailed }] as const;
     }),
   );
 

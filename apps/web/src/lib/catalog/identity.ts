@@ -32,12 +32,13 @@ export interface EditableIdentityDraft {
 
 export function resolveArkaDisplayName(
   entry: Pick<RankedArkaCatalogEntry, "arkaId" | "rank" | "identity">,
+  showContractWhenUnnamed = false,
 ): string {
   const displayName = entry.identity?.displayName?.trim();
   if (displayName) {
     return displayName;
   }
-  return "Unnamed Arka";
+  return showContractWhenUnnamed ? `Arka ${formatContractLabel(entry.arkaId, 6, 4)}` : "Unnamed Arka";
 }
 
 export function resolveArkaSubtitle(

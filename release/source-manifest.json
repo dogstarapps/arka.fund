@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "releaseId": "f4f439394661a8770a6914e022bb890a919d7e976999a7dfdc8dcd4939fb8e96",
+  "releaseId": "366fd4894cd02de88be7fea8fbe04d469074c30bd440236a46be8ba18a0b8c71",
   "noah": {
     "address": "CCP7X4UYFSUNXWRUH7W25RQMEQEHXFIYHNHVGAYAGGOOHPMPJKZGOGPW",
     "version": 2,
@@ -500,13 +500,13 @@
     },
     {
       "path": "apps/web/package-lock.json",
-      "sha256": "ef752131e7bf813bde2d6700cac08aa93a78c7056a59e0f0d56c71b4ac1001cf",
-      "bytes": 289350
+      "sha256": "f3b5e86ea828ccfc2ec61a5cff471c25f84969811eab2dbe2d0f8b40b1525181",
+      "bytes": 287666
     },
     {
       "path": "apps/web/package.json",
-      "sha256": "a4392daffa865d2cb2fe011727e196efc7c427eb6ba4421ef8e8ebbb870fa0af",
-      "bytes": 4579
+      "sha256": "cf6ca28044bd577c7c9760086562ab19d93b2711f91c533dc1f76efb31725917",
+      "bytes": 4578
     },
     {
       "path": "apps/web/playwright.config.ts",
@@ -1015,8 +1015,8 @@
     },
     {
       "path": "apps/web/src/app/contracts/page.tsx",
-      "sha256": "2921f510c885b849a474d9b9b77156a5e1e36522d1593aca2f60b7550260dc7c",
-      "bytes": 127072
+      "sha256": "58aabf9abc5c50f259599d8ca4f42e4ac2ccfacb484dcf049c7fc1a9f5d6688e",
+      "bytes": 127030
     },
     {
       "path": "apps/web/src/app/coverage/page.tsx",
@@ -1520,8 +1520,8 @@
     },
     {
       "path": "apps/web/src/lib/managedSorobanTransport.ts",
-      "sha256": "1a24757ff06e4b6c5b80230cd40b5e02c725c5e50cf073b9b1fe6e789d04e1d1",
-      "bytes": 12967
+      "sha256": "ad81943e94a4ff66121ee38bacd06efb1ef14461116207c146a1a40c304e30ad",
+      "bytes": 12961
     },
     {
       "path": "apps/web/src/lib/managedWalletFlow.ts",
@@ -1695,8 +1695,8 @@
     },
     {
       "path": "apps/web/src/lib/soroban.ts",
-      "sha256": "71a9f02120e92eabee9d520541adb378dd184bace5d029ed290c60c7334db0e7",
-      "bytes": 125387
+      "sha256": "89b9c5ea5478bfc5b31482052de8f2a1e9cf759c4c2e028d39935f87a02fd99c",
+      "bytes": 125279
     },
     {
       "path": "apps/web/src/lib/tx.ts",
@@ -1790,8 +1790,8 @@
     },
     {
       "path": "apps/web/src/lib/workflows/governanceComposer.ts",
-      "sha256": "fa2ce0c66a124d21a65e931bc0e468fe4fbc9b1170be1909bf85226ea1a8a1e9",
-      "bytes": 49384
+      "sha256": "99ef6c8c41f9722422e146e6fa9a7fa8c0bdcd6f95c4984c50c77a3c924128d6",
+      "bytes": 49370
     },
     {
       "path": "apps/web/src/lib/workflows/governanceLifecycle.ts",
@@ -2275,8 +2275,8 @@
     },
     {
       "path": "apps/web/tests/setup.ts",
-      "sha256": "8373470af70f3a9a3620370df1785ae73d5025ecaace3eca1803d17344067b2f",
-      "bytes": 1711
+      "sha256": "e57e9e266c64060e9e9616935d7ff224246f63ebe31de7870c6c91bc40cc1f7e",
+      "bytes": 2009
     },
     {
       "path": "apps/web/tests/unit/api-hardening.test.ts",
@@ -4040,7 +4040,7 @@
     },
     {
       "path": "release/rustsec-risk-acceptance.json",
-      "sha256": "2f8098524620dba0da35095043a4ae8169e099d92dadc929350c93d69aa420f8",
+      "sha256": "641016938e533c498f7c1ed605df0c7e4968affeaa1111f0dab5ff7665cb59c1",
       "bytes": 1586
     },
     {
@@ -4340,13 +4340,13 @@
     },
     {
       "path": "sdk/typescript/package-lock.json",
-      "sha256": "488600c404dfa8960a61d0643b16da5d1334bd9e0eb4ecf402339212e17df16b",
-      "bytes": 30222
+      "sha256": "5a4031cc8b177bf1878d5ad7800b69909c2be8bf868b50cf96e6c38bc820890c",
+      "bytes": 30221
     },
     {
       "path": "sdk/typescript/package.json",
-      "sha256": "29226c343a56d0496bac4de46ddaeb8de878d6a170a90902459ea799939a4f2a",
-      "bytes": 1527
+      "sha256": "f13f93b65d90f283fa2e47f66efd8fedf758903afd1ad7d9ecaec47a37a74ca5",
+      "bytes": 1526
     },
     {
       "path": "sdk/typescript/README.md",
@@ -4415,8 +4415,8 @@
     },
     {
       "path": "sdk/typescript/src/core/config.ts",
-      "sha256": "ac11244b7674c4b98ad89be279d3f616b274efcd7166506137ae50e1cb675f6a",
-      "bytes": 2250
+      "sha256": "67376d0d25bfcab14195b1f875a0a8566218dc0f7c5e433f821a1f3c81da6d8e",
+      "bytes": 2244
     },
     {
       "path": "sdk/typescript/src/core/extensions.ts",
@@ -4645,18 +4645,18 @@
     },
     {
       "path": "services/catalog-api/package-lock.json",
-      "sha256": "7c3c97a1dcd57948ebc70b30f0f2fa28d36936a97b6e3515580d1df47184ac2d",
-      "bytes": 52337
+      "sha256": "8c3eb66e03df84b03aee77b6e40f6161f01f8b8ef996e76c3e343058fbd3f7ca",
+      "bytes": 43310
     },
     {
       "path": "services/catalog-api/package.json",
-      "sha256": "8f808922cdc599a7dc35bcacbfd6ec1355e2f12bebe6498fc109ef6280168af3",
-      "bytes": 1433
+      "sha256": "d10451790035ff28e7e0ca5b0a99e3e5dc899a9bd8c44fd824e1dc9b413827b2",
+      "bytes": 1455
     },
     {
       "path": "services/catalog-api/README.md",
-      "sha256": "1195d29d53dc6cc5fd228f8f3820b9b13677111fc06f55600458888c4a79bdb9",
-      "bytes": 3105
+      "sha256": "5b71180dc3654b275b41a5d21a51b1947c380f7fec1f5f683a168416ab425586",
+      "bytes": 3108
     },
     {
       "path": "services/catalog-api/review/archive.mjs",
@@ -4760,8 +4760,8 @@
     },
     {
       "path": "services/catalog-api/src/clientOptions.ts",
-      "sha256": "e61cca759438f03fd6466849dfd03869dd791d6dc748ca22bcc8c0865e1ad2a2",
-      "bytes": 4606
+      "sha256": "014fbd13a64c416b5725692c00cb2923c8c3be6ff1ce5d654a239bfb4882b0d6",
+      "bytes": 4600
     },
     {
       "path": "services/catalog-api/src/dashboard.ts",
@@ -4830,8 +4830,8 @@
     },
     {
       "path": "services/catalog-api/src/holders.ts",
-      "sha256": "a182c4f79ca7dc26d0653cf83f9c92922b21b0176c1c8fc17bd45756c5d54dfe",
-      "bytes": 14770
+      "sha256": "c11441a3b5aa005c15f6b9aa539d0274484e3245a6c2ffc991e21a88152bbb85",
+      "bytes": 14915
     },
     {
       "path": "services/catalog-api/src/identity.ts",
@@ -4850,8 +4850,8 @@
     },
     {
       "path": "services/catalog-api/src/managedCreation.ts",
-      "sha256": "e745736c4879187a55c9e48455704d21f5ec2b5ac56357a558b868d46073591d",
-      "bytes": 2849
+      "sha256": "72a9412445e253ac4fc5df508e96f45de1e7461dcf257f63f1bfeeb6b8703529",
+      "bytes": 2876
     },
     {
       "path": "services/catalog-api/src/managedHistory.ts",
@@ -4870,13 +4870,13 @@
     },
     {
       "path": "services/catalog-api/src/managedRuntime.ts",
-      "sha256": "d0b9488bf27f262d69fa0b4f4c6831e3ced07350f9df9228fd90c435a3830716",
-      "bytes": 4232
+      "sha256": "9844269938630f8e0b0c481c339d29d18323df81828046af6d738817f07476fd",
+      "bytes": 4417
     },
     {
       "path": "services/catalog-api/src/managedSource.ts",
-      "sha256": "b4711215a372b67ca43387858eace83be7c19e13f41f03d1e75d43642283a190",
-      "bytes": 8357
+      "sha256": "df7bfc6cc778a56286659aaff6c69e5a7773abd1a8dfd45acb0ba0b396f68242",
+      "bytes": 8376
     },
     {
       "path": "services/catalog-api/src/managedStore.ts",
@@ -4930,8 +4930,8 @@
     },
     {
       "path": "services/catalog-api/src/reviewOperations.ts",
-      "sha256": "6462e84200532ec6902004d158b302afc58f910b1c68c034d367cbcad4632f19",
-      "bytes": 8097
+      "sha256": "2854c8247a4094d458eea22d19651f547a418c96239d5d27bfea4667304fb3f6",
+      "bytes": 8313
     },
     {
       "path": "services/catalog-api/src/runners.ts",
@@ -5115,8 +5115,8 @@
     },
     {
       "path": "services/catalog-api/tests/unit/holders.test.ts",
-      "sha256": "9eadf9fd579e0832ff5d1c3f199dccb8611d3216e80e5cdca09ad206ae93003d",
-      "bytes": 5218
+      "sha256": "4760a194b63605bb3d87337840239716d87cb32c1c52e0b2bd71b3e16b194448",
+      "bytes": 5819
     },
     {
       "path": "services/catalog-api/tests/unit/identity.test.ts",
@@ -5125,8 +5125,13 @@
     },
     {
       "path": "services/catalog-api/tests/unit/managed-creation.test.ts",
-      "sha256": "d944bacd644d62d37816567a760bc50ce783a0a41ab82dcf31b0f8e3bac8a684",
-      "bytes": 3531
+      "sha256": "e43aa2793130aa345b8321f577475a4bd4bda0dea556fc4795ba1e8b0d0ee792",
+      "bytes": 4120
+    },
+    {
+      "path": "services/catalog-api/tests/unit/managed-ledger-header.test.ts",
+      "sha256": "09a42c692480e43c0905697e66cfea9f7f15c7d650b3027cbb295362d4ad28b6",
+      "bytes": 4069
     },
     {
       "path": "services/catalog-api/tests/unit/managed-lifetime-history.test.ts",

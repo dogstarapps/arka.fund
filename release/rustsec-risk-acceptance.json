@@ -10,7 +10,7 @@
     "contracts/Cargo.lock": "19bafc5f81c89f37924b2a61cf7dda763b22701c3f2e346a7924b52d125332ac",
     "release/quote-adapter/Cargo.lock": "91dabc8f95425f242d6443187c31bbef1c1378196eaa98a1c4dd35f5d4b793ae"
   },
-  "reviewedSourcesSha256": "f0e66c2456caa83dd6da080a6855849980a805f772c82b449b157fbb22a823c8",
+  "reviewedSourcesSha256": "9e945c3aae2904b4976ceaccd821e8ea4a9d1a6774da0cdb3f08b703bd930b7a",
   "risk": "Timing differences in affected operations could reveal secret operands to an observer able to measure them.",
   "rationale": "The dependency is present in the official native host used for validation and absent from the normal and build edges of both WASM guest graphs. The relevant Soroban curve paths operate on public signature verification data. This limits the direct risk in the reviewed Arka candidate.",
   "disposition": "Accept this finding only for the reviewed sources and locks. CI retains the full reports and warns on the accepted finding. Reassess after a change in sources, locks or cryptographic usage, or when a compatible upstream fix is available.",

@@ -20,7 +20,7 @@ function PublicAddress({label,value}:{label:string;value:string}){
 }
 
 /** Local factory-backed creator. No live factory, RPC selector or server signer. */
-export default function ManagedCreateSurface(){
+export default function ManagedCreateSurface({redesign=false}:{redesign?:boolean}={}){
  const wallet=useWallet(),[data,setData]=useState<ProductCreation|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[review,setReview]=useState<string|null>(null),[created,setCreated]=useState('');
  const [pending,setPending]=useState<PendingProductReceipt|null>(null),[blocked,setBlocked]=useState(false),[busy,setBusy]=useState(false),[phase,setPhase]=useState<WalletPhase|null>(null),[complete,setComplete]=useState(false);
  const [signing,setSigning]=useState<{id:string;expiresAt:number;feeRaw?:string}|null>(null),[clock,setClock]=useState(Date.now);
@@ -63,7 +63,7 @@ export default function ManagedCreateSurface(){
  const disabled=!data||!wallet||busy||!!pending||blocked||complete;
  const remaining=signing?Math.max(0,Math.ceil((signing.expiresAt-clock)/1000)):0;
  const denomination=data?.assets.find(a=>a.asset===data.config.denomination)?.symbol;
- return <main className="surface-stack managed-product managed-create" data-testid="managed-normal-create"><header className="managed-create-header"><Link href="/manage" className="surface-text-link">← Funds I manage</Link><h1 ref={heading} tabIndex={-1}>{review&&!pending&&!complete?'Review your Arka':'Create an Arka'}</h1><p>{review&&!pending&&!complete?'Check the details, then create an empty portfolio.':'Create your portfolio. Add funds afterwards.'}</p>{!wallet?<p className="surface-note">Connect your local wallet using the button above to continue.</p>:null}</header>
+ return <main className={`surface-stack managed-product managed-create${redesign ? " arka-workflow" : ""}`} data-testid="managed-normal-create"><header className={redesign ? "arka-redesign-page-heading" : "managed-create-header"}><Link href="/manage" className={redesign ? "arka-redesign-back" : "surface-text-link"}>{redesign ? "← Manage Arkas" : "← Funds I manage"}</Link><h1 ref={heading} tabIndex={-1}>{review&&!pending&&!complete?'Review your Arka':'Create an Arka'}</h1><p>{review&&!pending&&!complete?'Check the details, then create an empty portfolio.':'Create your portfolio. Add funds afterwards.'}</p>{!wallet?<p className="surface-note">Connect your local wallet using the button above to continue.</p>:null}</header>
  {error?<p className="ops-alert ops-alert-warning" role="alert">{error}</p>:null}{notice?<p className="ops-alert" role="status">{notice}</p>:null}
  {!data&&!error?<p role="status">Reading the local factory’s current template…</p>:null}
  {data&&!review&&!pending&&!complete?<section className="surface-panel managed-create-summary" aria-label="Arka summary">

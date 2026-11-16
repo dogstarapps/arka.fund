@@ -194,6 +194,15 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     const whitelist = await this.readWhitelist(vaultClient, readLegacyState);
     const shareToken = await this.readOptionalShareToken(vaultClient);
     const blendMarkets = await this.readOptionalBlendMarkets(vaultClient);
+    const sharePrice = nav !== null && nav > 0n && shareToken
+      ? await this.rpcRead(() => vaultClient.preview_fee_settlement(mergeCallOptions(undefined, true)))
+        .then((assembled) => {
+          const quote = expectSimulationResult(assembled, "preview_fee_settlement");
+          return quote.nav === nav && quote.total_shares_after > 0n && quote.share_price_after >= 0n
+            ? quote.share_price_after.toString()
+            : null;
+        }).catch(() => null)
+      : null;
 
     const curatedTx = await this.rpcRead(() =>
       this.registryClient.is_manager_curated(
@@ -226,6 +235,7 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       curated: expectSimulationResult(curatedTx, "is_manager_curated"),
       delisted: expectSimulationResult(delistedTx, "is_delisted"),
       nav: nav === null ? null : nav.toString(),
+      ...(nav !== null && sharePrice !== null ? { sharePrice } : {}),
       navUnavailableReason,
       denominationContract: denomination.contract,
       whitelistContracts: whitelist.map((asset) => asset.contract),

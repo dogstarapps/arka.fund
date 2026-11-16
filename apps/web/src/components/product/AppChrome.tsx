@@ -22,6 +22,7 @@ import {
 import {
   OPERATOR_CONSOLE_NAV,
   PRIMARY_PRODUCT_NAV,
+  PUBLIC_UTILITY_PRODUCT_NAV,
   buildPublicCreateArkaHref,
   isOperatorOnlyProductPath,
   isProductNavActive,
@@ -131,7 +132,7 @@ function NavGlyph({ icon }: { icon: ProductNavItem["icon"] }) {
   }
 }
 
-function Wordmark({ compact = false, link = true }: { compact?: boolean; link?: boolean }) {
+function Wordmark({ compact = false, link = true, redesign = false }: { compact?: boolean; link?: boolean; redesign?: boolean }) {
   const content = (
     <>
       <Image
@@ -153,9 +154,9 @@ function Wordmark({ compact = false, link = true }: { compact?: boolean; link?: 
 
   return (
     <Link
-      href="/dashboard"
+      href={redesign ? "/discover" : "/dashboard"}
       className={`chrome-brand ${compact ? "chrome-brand-compact" : ""}`}
-      aria-label="Arka.fund dashboard"
+      aria-label={redesign ? "Arka.fund · Leaderboard" : "Arka.fund dashboard"}
     >
       {content}
     </Link>
@@ -229,7 +230,7 @@ function OperatorSessionStrip(props: {
   );
 }
 
-export default function AppChrome({ children }: { children: ReactNode }) {
+export default function AppChrome({ children, redesign = false }: { children: ReactNode; redesign?: boolean }) {
   const pathname = usePathname();
   const localManagedPreview = process.env.NEXT_PUBLIC_MANAGED_PRODUCT_LOCAL === '1';
   const localManagedRoute = pathname === '/investments' || pathname === '/manage' || pathname?.startsWith('/arkas/') || pathname?.startsWith('/factory/create');
@@ -430,6 +431,195 @@ export default function AppChrome({ children }: { children: ReactNode }) {
     setAdvancedOpen(true);
   };
 
+  const content = blockedUtilityRoute && operatorRouteItem ? (
+    <OperatorRouteGate
+      routeLabel={operatorRouteItem.label}
+      accessStatus={operatorAccess.status}
+      busy={operatorBusy}
+      error={operatorAccess.error}
+      onVerify={verifyOperatorAccess}
+    />
+  ) : (
+    <>
+      {operatorVerified && operatorRouteItem ? (
+        <OperatorSessionStrip
+          routeLabel={operatorRouteItem.label}
+          pubkey={operatorAccess.pubkey}
+          onLock={() => {
+            void disableOperatorAccess();
+          }}
+        />
+      ) : null}
+      {children}
+    </>
+  );
+  const operatorConsole = renderAdvancedConsole ? (
+    <section
+      className={`chrome-advanced-console ${
+        showAdvancedConsole ? "chrome-advanced-console-open" : ""
+      } chrome-advanced-console-cutover`}
+      data-testid="advanced-console"
+    >
+      <button
+        type="button"
+        className="chrome-advanced-toggle"
+        aria-expanded={showAdvancedConsole}
+        aria-controls="advanced-console-links"
+        onClick={() => setAdvancedOpen((value) => !value)}
+        data-testid="advanced-console-toggle"
+      >
+        <span>Operator access</span>
+        <span className="chrome-advanced-toggle-icon" aria-hidden="true">
+          {showAdvancedConsole ? "-" : "+"}
+        </span>
+      </button>
+      {showAdvancedConsole ? (
+        operatorVerified ? (
+          <div className="chrome-advanced-body" data-testid="advanced-console-operator">
+            <div className="chrome-advanced-status" data-testid="advanced-console-status">
+              <span className="chrome-advanced-status-pill chrome-advanced-status-pill-active">
+                Operator wallet verified
+              </span>
+              {operatorAccess.pubkey ? (
+                <span className="chrome-advanced-status-wallet">
+                  {operatorAccess.pubkey.slice(0, 6)}…{operatorAccess.pubkey.slice(-4)}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                className="chrome-advanced-inline-action"
+                onClick={() => {
+                  void disableOperatorAccess();
+                }}
+                data-testid="advanced-console-disable"
+              >
+                Lock console
+              </button>
+            </div>
+            <div id="advanced-console-links" className="chrome-utility-grid">
+              {OPERATOR_CONSOLE_NAV.map((item) => {
+                const active = isProductNavActive(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`chrome-utility-link ${active ? "chrome-utility-link-active" : ""}`}
+                    data-testid={`chrome-utility-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  >
+                    <span className="chrome-utility-icon">
+                      <NavGlyph icon={item.icon} />
+                    </span>
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="chrome-advanced-guard" id="advanced-console-links" data-testid="advanced-console-guard">
+            <span className="chrome-advanced-status-pill">Operator wallet required</span>
+            <p className="chrome-advanced-guard-copy">
+              Connect an authorized wallet and sign an access challenge to reveal governance, contracts, settings, ops and other advanced routes.
+            </p>
+            {operatorRouteItem ? (
+              <p className="chrome-advanced-guard-copy chrome-advanced-guard-copy-muted">
+                Current route: {operatorRouteItem.label}
+              </p>
+            ) : null}
+            {operatorAccess.error ? (
+              <p className="chrome-advanced-guard-copy chrome-operator-gate-copy-error" role="alert">
+                {operatorAccess.error}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              className="chrome-advanced-inline-action chrome-advanced-inline-action-primary"
+              onClick={verifyOperatorAccess}
+              disabled={operatorBusy || operatorAccess.status === "checking"}
+              data-testid="advanced-console-enable"
+            >
+              {operatorAccess.status === "checking"
+                ? "Checking access"
+                : operatorBusy
+                  ? "Verifying wallet"
+                  : "Verify operator wallet"}
+            </button>
+          </div>
+        )
+      ) : null}
+    </section>
+  ) : null;
+  const previewBanner = UX_REVIEW_PREVIEW ? <div className="ux-preview-banner" role="status" data-testid="ux-preview-banner">{process.env.NEXT_PUBLIC_MAINNET_GENERAL_READONLY === '1' ? 'Mainnet read-only · Signing and sending disabled' : process.env.NEXT_PUBLIC_MANAGED_SNAPSHOT_REPLAY === '1' ? 'Snapshot preview · Signing disabled' : localManagedPreview ? localManagedRoute ? 'Local sandbox · Fictitious assets · Standalone only · Live funds disabled' : 'Public data preview · Read-only browsing · Live funds disabled' : pathname === '/managed-withdrawals' ? 'Managed withdrawals preview · Synthetic balances · No blockchain transactions · Production is unchanged' : 'UX review preview · Live public data · Signing and sending are disabled · Production is unchanged'}</div> : null;
+
+  if (redesign) {
+    const mainLinks = PRIMARY_PRODUCT_NAV.slice(0, 3);
+    const platformLinks = [
+      ...PRIMARY_PRODUCT_NAV.slice(3),
+      ...PUBLIC_UTILITY_PRODUCT_NAV.filter(item => item.href === "/coverage"),
+      ...OPERATOR_CONSOLE_NAV.filter(item => item.href === "/settings"),
+    ];
+    const activePath = pathname === "/" || pathname === "/vaults" ? "/discover" : pathname;
+    const relatedPath = pathname.startsWith("/factory/") ? "/manage"
+      : pathname.startsWith("/arkas/") || pathname.startsWith("/vaults/") ? "/discover" : activePath;
+    const navLink = (item: ProductNavItem) => (
+      <Link
+        key={item.href}
+        href={item.href}
+        aria-current={isProductNavActive(relatedPath, item.href) ? "page" : undefined}
+        data-testid={`chrome-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+        onClick={event => {
+          const menu = event.currentTarget.closest("details");
+          if (menu) menu.open = false;
+        }}
+      >
+        {item.href === "/discover" ? "Leaderboard" : item.href === "/manage" ? "Manage Arkas" : item.href === "/dashboard" ? "Platform overview" : item.label}
+      </Link>
+    );
+
+    return (
+      <div className="arka-redesign">
+        <a className="arka-redesign-skip" href="#arka-main-content">Skip to content</a>
+        <header className="arka-redesign-header">
+          <div className="arka-redesign-frame arka-redesign-header-row">
+            <Wordmark compact redesign />
+            <nav className="arka-redesign-nav" aria-label="Primary navigation">
+              {mainLinks.map(navLink)}
+              <details className="arka-redesign-menu" onKeyDown={event => {
+                if (event.key === "Escape" && event.currentTarget.open) {
+                  event.currentTarget.open = false;
+                  event.currentTarget.querySelector("summary")?.focus();
+                }
+              }}>
+                <summary>More</summary>
+                <div className="arka-redesign-menu-panel">
+                  <form aria-label="Global search" role="search" onSubmit={event => {
+                    const menu = event.currentTarget.closest("details");
+                    if (menu) menu.open = false;
+                    onSearchSubmit(event);
+                  }}>
+                    <input name="search" type="search" aria-label="Search Arkas, managers or assets" data-testid="chrome-search-input" value={searchValue} onChange={event => setSearchValue(event.target.value)} placeholder="Search Arkas, managers or assets" />
+                    <button type="submit" className="arka-redesign-button">Search</button>
+                  </form>
+                  <div className="arka-redesign-menu-links">{platformLinks.map(navLink)}</div>
+                </div>
+              </details>
+            </nav>
+            <div className="arka-redesign-wallet"><ClientConnect variant="chrome" redesign /></div>
+          </div>
+        </header>
+        <div className="arka-redesign-frame arka-redesign-canvas" id="arka-main-content" tabIndex={-1} data-testid="product-canvas">
+          {UX_REVIEW_PREVIEW ? (
+            <p className="ux-preview-banner" role="status" data-testid="ux-preview-banner">
+              Redesign preview · Read-only
+            </p>
+          ) : null}
+          {content}
+          {operatorConsole}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`chrome-shell chrome-shell-visual-cutover ${focusCanvas ? "chrome-shell-focus" : ""} ${
@@ -483,7 +673,7 @@ export default function AppChrome({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      {UX_REVIEW_PREVIEW ? <div className="ux-preview-banner" role="status" data-testid="ux-preview-banner">{process.env.NEXT_PUBLIC_MAINNET_GENERAL_READONLY === '1' ? 'Mainnet read-only · Signing and sending disabled' : process.env.NEXT_PUBLIC_MANAGED_SNAPSHOT_REPLAY === '1' ? 'Snapshot preview · Signing disabled' : localManagedPreview ? localManagedRoute ? 'Local sandbox · Fictitious assets · Standalone only · Live funds disabled' : 'Public data preview · Read-only browsing · Live funds disabled' : pathname === '/managed-withdrawals' ? 'Managed withdrawals preview · Synthetic balances · No blockchain transactions · Production is unchanged' : 'UX review preview · Live public data · Signing and sending are disabled · Production is unchanged'}</div> : null}
+      {previewBanner}
 
       <div
         className={`chrome-grid chrome-grid-visual-cutover ${focusCanvas ? "chrome-grid-focus" : ""} ${
@@ -499,28 +689,7 @@ export default function AppChrome({ children }: { children: ReactNode }) {
             }`}
             data-testid="product-canvas"
           >
-            {blockedUtilityRoute && operatorRouteItem ? (
-              <OperatorRouteGate
-                routeLabel={operatorRouteItem.label}
-                accessStatus={operatorAccess.status}
-                busy={operatorBusy}
-                error={operatorAccess.error}
-                onVerify={verifyOperatorAccess}
-              />
-            ) : (
-              <>
-                {operatorVerified && operatorRouteItem ? (
-                  <OperatorSessionStrip
-                    routeLabel={operatorRouteItem.label}
-                    pubkey={operatorAccess.pubkey}
-                    onLock={() => {
-                      void disableOperatorAccess();
-                    }}
-                  />
-                ) : null}
-                {children}
-              </>
-            )}
+            {content}
           </div>
         </section>
 
@@ -555,102 +724,7 @@ export default function AppChrome({ children }: { children: ReactNode }) {
             </details>
           </nav>
 
-          {renderAdvancedConsole ? (
-            <section
-              className={`chrome-advanced-console ${
-                showAdvancedConsole ? "chrome-advanced-console-open" : ""
-              } chrome-advanced-console-cutover`}
-              data-testid="advanced-console"
-            >
-              <button
-                type="button"
-                className="chrome-advanced-toggle"
-                aria-expanded={showAdvancedConsole}
-                aria-controls="advanced-console-links"
-                onClick={() => setAdvancedOpen((value) => !value)}
-                data-testid="advanced-console-toggle"
-              >
-                <span>Operator access</span>
-                <span className="chrome-advanced-toggle-icon" aria-hidden="true">
-                  {showAdvancedConsole ? "-" : "+"}
-                </span>
-              </button>
-              {showAdvancedConsole ? (
-                operatorVerified ? (
-                  <div className="chrome-advanced-body" data-testid="advanced-console-operator">
-                    <div className="chrome-advanced-status" data-testid="advanced-console-status">
-                      <span className="chrome-advanced-status-pill chrome-advanced-status-pill-active">
-                        Operator wallet verified
-                      </span>
-                      {operatorAccess.pubkey ? (
-                        <span className="chrome-advanced-status-wallet">
-                          {operatorAccess.pubkey.slice(0, 6)}…{operatorAccess.pubkey.slice(-4)}
-                        </span>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="chrome-advanced-inline-action"
-                        onClick={() => {
-                          void disableOperatorAccess();
-                        }}
-                        data-testid="advanced-console-disable"
-                      >
-                        Lock console
-                      </button>
-                    </div>
-                    <div id="advanced-console-links" className="chrome-utility-grid">
-                      {OPERATOR_CONSOLE_NAV.map((item) => {
-                        const active = isProductNavActive(pathname, item.href);
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`chrome-utility-link ${active ? "chrome-utility-link-active" : ""}`}
-                            data-testid={`chrome-utility-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                          >
-                            <span className="chrome-utility-icon">
-                              <NavGlyph icon={item.icon} />
-                            </span>
-                            <span>{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="chrome-advanced-guard" id="advanced-console-links" data-testid="advanced-console-guard">
-                    <span className="chrome-advanced-status-pill">Operator wallet required</span>
-                    <p className="chrome-advanced-guard-copy">
-                      Connect an authorized wallet and sign an access challenge to reveal governance, contracts, settings, ops and other advanced routes.
-                    </p>
-                    {operatorRouteItem ? (
-                      <p className="chrome-advanced-guard-copy chrome-advanced-guard-copy-muted">
-                        Current route: {operatorRouteItem.label}
-                      </p>
-                    ) : null}
-                    {operatorAccess.error ? (
-                      <p className="chrome-advanced-guard-copy chrome-operator-gate-copy-error" role="alert">
-                        {operatorAccess.error}
-                      </p>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="chrome-advanced-inline-action chrome-advanced-inline-action-primary"
-                      onClick={verifyOperatorAccess}
-                      disabled={operatorBusy || operatorAccess.status === "checking"}
-                      data-testid="advanced-console-enable"
-                    >
-                      {operatorAccess.status === "checking"
-                        ? "Checking access"
-                        : operatorBusy
-                          ? "Verifying wallet"
-                          : "Verify operator wallet"}
-                    </button>
-                  </div>
-                )
-              ) : null}
-            </section>
-          ) : null}
+          {operatorConsole}
         </aside>
       </div>
     </div>

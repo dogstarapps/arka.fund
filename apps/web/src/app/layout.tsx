@@ -4,6 +4,7 @@ import AppChrome from "@/components/product/AppChrome";
 import "./globals.css";
 import "./ux-priorities.css";
 import '@/components/product/managed-product.css';
+import '@/components/product/redesign.css';
 
 const displayFont = localFont({
   src: "./fonts/space-grotesk-latin.woff2",
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${displayFont.variable} ${sansFont.variable} antialiased`}>
-        <AppChrome>{children}</AppChrome>
+        <AppChrome redesign={process.env.ARKA_FRONTEND_REDESIGN === "1"}>{children}</AppChrome>
       </body>
     </html>
   );

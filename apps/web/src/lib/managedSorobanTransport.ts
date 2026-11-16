@@ -1,6 +1,6 @@
 /** Real Soroban RPC adapter, explicitly disabled unless a local sandbox is opted in.
  * It has no mainnet/testnet configuration and never loads private keys. */
-import {Account,Address,Contract,Keypair,StrKey,Transaction,TransactionBuilder,nativeToScVal,scValToNative,rpc} from '@stellar/stellar-sdk';
+import {Account,Address,Contract,Keypair,StrKey,Transaction,TransactionBuilder,nativeToScVal,scValToNative,rpc,xdr} from '@stellar/stellar-sdk';
 import {managedFactoryOperation,managedWithdrawalOperation,managedSpotOperation,managedSpotRecoveryOperation,managedLiquidationPlanOperation,sameManagedSpotStep,managedDepositOperation,managedDepositQuoteOperation,managedApproveOperation,type ManagedSpotStep} from './managedWithdrawalOperations';
 import {MANAGED_LOCAL_NETWORK,ManagedActionRejected,type ManagedTransport,type PreparedManagedTransaction} from './managedWalletFlow';
 import type {ManagedState,ManagedWalletAction} from './managedWithdrawals';
@@ -37,7 +37,7 @@ export async function localPortfolioQuote(fund:string,owner:string,asset:string,
  if(!/^[1-9]\d*$/.test(amountRaw)||BigInt(amountRaw)>=(BigInt(1)<<BigInt(127)))throw Error('Invalid trade amount.');
  const server=new rpc.Server('http://127.0.0.1:8000/rpc',{allowHttp:true});
  if((await server.getNetwork()).passphrase!==MANAGED_LOCAL_NETWORK)throw Error('Local network required.');
- const tx=new TransactionBuilder(new Account(owner,'0'),{fee:'100',networkPassphrase:MANAGED_LOCAL_NETWORK}).addOperation(new Contract(fund).call('portfolio_trade_quote',Address.fromString(asset).toScVal(),nativeToScVal(BigInt(amountRaw),{type:'i128'}),nativeToScVal(sell,{type:'bool'}))).setTimeout(60).build();
+ const tx=new TransactionBuilder(new Account(owner,'0'),{fee:'100',networkPassphrase:MANAGED_LOCAL_NETWORK}).addOperation(new Contract(fund).call('portfolio_trade_quote',Address.fromString(asset).toScVal(),nativeToScVal(BigInt(amountRaw),{type:'i128'}),xdr.ScVal.scvBool(sell))).setTimeout(60).build();
  const simulation=await server.simulateTransaction(tx);
  if(rpc.Api.isSimulationError(simulation)||rpc.Api.isSimulationRestore(simulation)||!simulation.result)throw Error('A fresh portfolio estimate is unavailable. Nothing was signed.');
  if((await server.getNetwork()).passphrase!==MANAGED_LOCAL_NETWORK)throw Error('Local network changed.');

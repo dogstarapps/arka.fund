@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ArkaLeaderboard from "./ArkaLeaderboard";
 import { useEffect, useState } from "react";
 import {
   CURATED_ONLY_LABEL,
@@ -141,11 +142,11 @@ function buildDiscoverArkaHistoryPath(history: ArkaHistoryPoint[]) {
   };
 }
 
-export default function DiscoverSurface({
-  initialQuery = "",
-}: {
-  initialQuery?: string;
-}) {
+export default function DiscoverSurface({ initialQuery = "", redesign = false }: { initialQuery?: string; redesign?: boolean }) {
+  return redesign ? <ArkaLeaderboard initialQuery={initialQuery} /> : <LegacyDiscoverSurface initialQuery={initialQuery} />;
+}
+
+function LegacyDiscoverSurface({ initialQuery }: { initialQuery: string }) {
   const [initialUrlState] = useState(() =>
     typeof window === "undefined"
       ? normalizeDiscoverUrlState({ q: initialQuery })
@@ -183,7 +184,7 @@ export default function DiscoverSurface({
           },
           controller.signal,
         );
-        setState({ status: "ready", data, error: null });
+        if (!controller.signal.aborted) setState({ status: "ready", data, error: null });
       } catch (error) {
         if (controller.signal.aborted) {
           return;
@@ -205,7 +206,10 @@ export default function DiscoverSurface({
     return () => controller.abort();
   }, [curatedOnly, reloadNonce, searchQuery]);
 
-  if (state.status === "loading" && !state.data) {
+  const initialLoading = state.status === "loading" && !state.data;
+  const initialError = state.status === "error" && !state.data;
+  const retry = () => setReloadNonce((value) => value + 1);
+  if (initialLoading) {
     return (
       <LoadingState
         testId="discover-loading"

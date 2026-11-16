@@ -8,11 +8,12 @@
   },
   "types": "./dist/src/index.d.ts",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/server.js",
+    "preview:bundle": "node preview/package-preview.mjs",
     "regen:bindings": "bash ./scripts/generate-bindings.sh",
     "test:unit": "npm run build && node --test dist/tests/unit/*.test.js",
     "test:integration": "npm run build && node --test dist/tests/integration/http-api.test.js dist/tests/integration/graphql-runner.test.js dist/tests/integration/graphql-mirror.test.js dist/tests/integration/nav-unavailable-http.test.js",
@@ -22,16 +23,22 @@
     "evidence:pagerduty": "npm run build && node ./scripts/pagerduty-simulation.mjs"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^14.1.1",
+    "@stellar/stellar-sdk": "16.4.1",
     "buffer": "6.0.3",
     "fastify": "^5.8.4"
   },
   "overrides": {
+    "@vercel/cli-config": {
+      "zod": "4.6.7"
+    },
+    "axios": "1.21.0",
     "toml": "5.0.1",
     "follow-redirects": "1.16.2"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "@vercel/blob": "2.8.0",
+    "rolldown": "1.2.12",
     "typescript": "^5.9.2"
   }
 }

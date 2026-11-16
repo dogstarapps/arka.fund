@@ -28,7 +28,7 @@ interface HolderArchive {
 }
 
 export interface HolderReader {
-  list(arka: ArkaCatalogEntry, query?: HolderQuery): Promise<ArkaHolderPage>;
+  list(arka: ArkaCatalogEntry, query?: HolderQuery, options?: { fresh?: boolean }): Promise<ArkaHolderPage>;
 }
 
 export class NoopHolderReader implements HolderReader {
@@ -88,11 +88,11 @@ export class RpcHolderReader implements HolderReader {
     this.now = options.now ?? (() => new Date());
   }
 
-  async list(arka: ArkaCatalogEntry, query: HolderQuery = {}): Promise<ArkaHolderPage> {
+  async list(arka: ArkaCatalogEntry, query: HolderQuery = {}, options?: { fresh?: boolean }): Promise<ArkaHolderPage> {
     const cached = this.verifiedPages.get(arka.arkaId);
     const age = cached ? this.now().getTime() - Date.parse(cached.indexedAt) : Number.POSITIVE_INFINITY;
     let page: ArkaHolderPage;
-    if (cached && cached.shareToken === arka.shareToken && age >= 0 && age <= this.maxCacheAgeMs) {
+    if (!options?.fresh && cached && cached.shareToken === arka.shareToken && age >= 0 && age <= this.maxCacheAgeMs) {
       const stale = age > this.cacheTtlMs;
       if (stale) {
         // Only last on-chain verified data, bounded to two minutes. Never
@@ -101,7 +101,7 @@ export class RpcHolderReader implements HolderReader {
       }
       page = { ...cached, stale, refreshFailed: this.refreshFailures.has(arka.arkaId) };
     } else {
-      // Cold/expired caches fail normally if the chain cannot be read.
+      // Fresh observations and cold/expired caches both require a successful chain read.
       page = { ...await this.beginRefresh(arka), stale: false, refreshFailed: false };
     }
     const offset = normalizeOffset(query.offset);
@@ -258,7 +258,7 @@ export class RpcHolderReader implements HolderReader {
     let pages = 0;
     let response = await this.rpcRead(() => this.server.getEvents({
       startLedger,
-      endLedger,
+      endLedger: endLedger + 1, // RPC range end is exclusive.
       filters,
       limit: this.pageSize,
     }));

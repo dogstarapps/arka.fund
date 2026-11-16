@@ -363,6 +363,10 @@ export function getArkaHistory(
       arkaId,
       syncedAt: run.syncedAt,
       nav: arka.nav,
+      ...(arka.economics?.sharePrice == null ? {} : {
+        sharePrice: arka.economics.sharePrice,
+        denominationContract: arka.denominationContract,
+      }),
       manager: arka.manager,
       curated: arka.curated,
       delisted: arka.delisted,

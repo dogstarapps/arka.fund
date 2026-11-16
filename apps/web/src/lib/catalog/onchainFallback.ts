@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { Address, Contract, TransactionBuilder, nativeToScVal, rpc, xdr } from "@stellar/stellar-sdk";
+import { Address, Asset, Contract, TransactionBuilder, nativeToScVal, rpc, scValToNative, xdr } from "@stellar/stellar-sdk";
 import mainnetDeployments from "../../../config/deployments.mainnet.json";
 import testnetDeployments from "../../../config/deployments.testnet.json";
 import type { NextRequest } from "next/server";
@@ -718,8 +718,8 @@ async function readArkaCatalogEntry(
   const [manager, valuation, denominationContract, shareToken, whitelistContracts, fees] =
     await Promise.all([
       readAddressMethod(context, arkaId, "manager"),
-      readNumberMethod(context, arkaId, "nav").then(
-        (value) => ({ nav: numberToCatalogString(value), reason: null as string | null }),
+      simulateReadonly(context, arkaId, "nav").then(readExactNonnegativeAmount).then(
+        (nav) => ({ nav, reason: nav === null ? "nav_unavailable: on-chain NAV simulation did not return a value" : null }),
         () => ({ nav: null, reason: "nav_unavailable: on-chain NAV simulation failed" }),
       ),
       readAssetContractMethod(context, arkaId, "denomination"),
@@ -759,7 +759,17 @@ async function readArkaCatalogEntry(
     assets,
     syncedAt,
   };
-  const economics = await buildOnchainArkaEconomics(context, entryWithoutEconomics);
+  const sharePrice = shareToken && valuation.nav !== null && BigInt(valuation.nav) > BigInt(0)
+    ? await simulateReadonly(context, arkaId, "preview_fee_settlement").then((result) => {
+        const fields = new Map(parseMapEntries(result).map(item => [parseSymbol(item.key()), item.val()]));
+        const shares = readExactNonnegativeAmount(fields.get("total_shares_after"));
+        return shares !== null && BigInt(shares) > BigInt(0) &&
+          readExactNonnegativeAmount(fields.get("nav")) === valuation.nav
+          ? readExactNonnegativeAmount(fields.get("share_price_after"))
+          : null;
+      }).catch(() => null)
+    : null;
+  const economics = await buildOnchainArkaEconomics(context, entryWithoutEconomics, sharePrice);
   return {
     ...entryWithoutEconomics,
     economics,
@@ -768,6 +778,9 @@ async function readArkaCatalogEntry(
 
 function buildOnchainAssetIdentity(contract: string | null): CatalogAssetIdentity | null {
   if (!contract) return null;
+  if (resolveArkafundDeployments().networkTarget === "testnet" && contract === Asset.native().contractId(TESTNET)) {
+    return { contract, symbol: "XLM", label: "Stellar Lumens", decimals: 7, usdPegged: false };
+  }
   const registryAsset = findCoreStellarAssetByContract(contract);
   if (!registryAsset) {
     const symbol = readOnchainValuationConfig().contractToSymbol.get(contract.toUpperCase()) ?? null;
@@ -795,6 +808,7 @@ function buildEmptyPeriodMetric(): CatalogEconomicMetrics["returns"]["1d"] {
 async function buildOnchainArkaEconomics(
   context: Awaited<ReturnType<typeof createSorobanReadContext>>,
   entry: RankedArkaCatalogEntry,
+  sharePrice: string | null,
 ): Promise<CatalogEconomicMetrics> {
   const denominationAsset = buildOnchainAssetIdentity(entry.denominationContract);
   const assetPrices = await mapWithConcurrency(
@@ -849,7 +863,7 @@ async function buildOnchainArkaEconomics(
     denominationAsset,
     navDenomination: entry.nav,
     navUsdEstimate,
-    sharePrice: null,
+    sharePrice,
     returns: {
       "1d": buildEmptyPeriodMetric(),
       "7d": buildEmptyPeriodMetric(),
@@ -1045,14 +1059,6 @@ async function readAssetContractMethod(
 ): Promise<string | null> {
   const retval = await simulateReadonly(context, contractId, method);
   return parseAssetContract(retval) ?? parseAddress(retval);
-}
-
-async function readNumberMethod(
-  context: Awaited<ReturnType<typeof createSorobanReadContext>>,
-  contractId: string,
-  method: string,
-): Promise<number> {
-  return parseScValNumber(await simulateReadonly(context, contractId, method));
 }
 
 async function readWhitelist(
@@ -1293,6 +1299,10 @@ function buildArkaHistoryPoint(arka: RankedArkaCatalogEntry): ArkaHistoryPoint {
     arkaId: arka.arkaId,
     syncedAt: arka.syncedAt,
     nav: arka.nav,
+    ...(arka.economics?.sharePrice == null ? {} : {
+      sharePrice: arka.economics.sharePrice,
+      denominationContract: arka.denominationContract,
+    }),
     manager: arka.manager,
     curated: arka.curated,
     delisted: arka.delisted,
@@ -1859,6 +1869,13 @@ function parseMapEntries(retval: xdr.ScVal | null | undefined): xdr.ScMapEntry[]
 
 function parseSymbol(retval: xdr.ScVal): string {
   return retval.sym?.()?.toString?.() ?? "";
+}
+
+function readExactNonnegativeAmount(retval: xdr.ScVal | null | undefined): string | null {
+  if (!retval) return null;
+  const value = scValToNative(retval);
+  if (typeof value === "bigint" && value >= BigInt(0)) return value.toString();
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? String(value) : null;
 }
 
 function parseScValNumber(retval: xdr.ScVal | null | undefined): number {

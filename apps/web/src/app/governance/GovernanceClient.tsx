@@ -75,6 +75,7 @@ type ProposalKind = "Council" | "Snapshot";
 type GovernanceConfirmIntent = "propose" | "vote" | "close" | "execute";
 type GovernanceSurfaceProps = {
   operatorConsole?: boolean;
+  redesign?: boolean;
 };
 
 function GovernanceHandoffAction({
@@ -117,11 +118,11 @@ function GovernanceHandoffAction({
   );
 }
 
-export function GovernanceSurface({ operatorConsole = false }: GovernanceSurfaceProps = {}) {
+export function GovernanceSurface({ operatorConsole = false, redesign = false }: GovernanceSurfaceProps = {}) {
   const [walletsKit, setWalletsKit] = useState<StellarWalletsKit | null>(null);
   const [pubKey, setPubKey] = useState("");
   const [proposalKind, setProposalKind] = useState<ProposalKind>("Council");
-  const [proposalIdStr, setProposalIdStr] = useState("0");
+  const [proposalIdStr, setProposalIdStr] = useState(redesign && !operatorConsole ? "" : "0");
   const [support, setSupport] = useState("1");
   const [newCouncil, setNewCouncil] = useState("");
 
@@ -132,6 +133,8 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
   const [voteState, setVoteState] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [readingProposal, setReadingProposal] = useState(false);
+  const proposalRead = useRef(0);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [confirmIntent, setConfirmIntent] =
@@ -155,7 +158,9 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
   const [composerDraftVersion, setComposerDraftVersion] = useState(0);
 
   const proposalId = Number(proposalIdStr);
-  const hasProposalId = Number.isFinite(proposalId) && proposalId >= 0;
+  const hasProposalId = redesign && !operatorConsole
+    ? /^\d+$/.test(proposalIdStr.trim()) && proposalId <= 0xffffffff
+    : Number.isFinite(proposalId) && proposalId >= 0;
   const canAct = useMemo(
     () => Boolean(!UX_REVIEW_PREVIEW && pubKey && walletsKit && !loading),
     [pubKey, walletsKit, loading],
@@ -442,7 +447,7 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
   );
 
   useEffect(() => {
-    setWalletsKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"]));
+    setWalletsKit(getWalletsKit(["FREIGHTER", "ALBEDO", "XBULL"], redesign));
     const saved = localStorage.getItem("wallet:pubkey");
     if (saved) setPubKey(saved);
   }, []);
@@ -671,10 +676,13 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
   };
 
   const refreshGovernor = async (): Promise<void> => {
+    const request = ++proposalRead.current;
+    setReadingProposal(hasProposalId);
     const nextSettings = await readGovernorSettings(
       GOVERNOR_ID,
       pubKey || undefined,
     ).catch(() => null);
+    if (request !== proposalRead.current) return;
     setSettings(nextSettings);
     if (!hasProposalId) {
       setProposal(null);
@@ -697,9 +705,11 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
           )
         : Promise.resolve(null),
     ]);
+    if (request !== proposalRead.current) return;
     setProposal(nextProposal);
     setProposalVotes(nextVotes);
     setVoteState(nextVoteState);
+    setReadingProposal(false);
   };
 
   useEffect(() => {
@@ -844,9 +854,75 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
     setConfirmIntent(commandId);
   };
 
+  const publicVoteControls = (
+    <>
+      <div className="ops-form-grid">
+        <ActionField label="Proposal ID" hint={redesign ? undefined : "Enter the proposal you want to review."}>
+          <input
+            value={proposalIdStr}
+            onChange={(event) => setProposalIdStr(event.target.value)}
+            className="ops-input"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            aria-invalid={!hasProposalId && (!redesign || Boolean(proposalIdStr.trim()))}
+            data-testid="governance-proposal-id-input"
+          />
+        </ActionField>
+        <ActionField label="Your vote">
+          <select
+            value={support}
+            onChange={(event) => setSupport(event.target.value)}
+            className="ops-select"
+            data-testid="governance-support-select"
+          >
+            <option value="1">For</option>
+            <option value="0">Against</option>
+            <option value="2">Abstain</option>
+          </select>
+        </ActionField>
+      </div>
+      {redesign ? (
+        <div id="governance-proposals" className="arka-governance-result" data-testid="governance-overview-panel" aria-live="polite">
+          {!hasProposalId ? <p>{proposalIdStr.trim() ? "Enter a valid proposal ID." : "Enter a proposal ID to look it up."}</p> : readingProposal ? (
+            <p role="status">Checking proposal…</p>
+          ) : proposal?.id === proposalId ? (
+            <article data-testid="governance-public-proposal">
+              <div className="arka-governance-result-title">
+                <h3>Proposal #{proposal.id}</h3>
+                <StatusPill label={proposalStatusLabel(proposal.status)} tone="neutral" />
+              </div>
+              <p>Voting ends at ledger {proposal.vote_end}.</p>
+              {proposalVotes ? <dl className="arka-governance-tally">
+                <div><dt>For</dt><dd>{proposalVotes._for}</dd></div>
+                <div><dt>Against</dt><dd>{proposalVotes.against}</dd></div>
+                <div><dt>Abstain</dt><dd>{proposalVotes.abstain}</dd></div>
+              </dl> : <p>Vote totals unavailable.</p>}
+            </article>
+          ) : <div className="arka-workflow-actions">
+            <p data-testid="governance-public-empty">Proposal data unavailable.</p>
+            <button type="button" className="arka-redesign-button arka-redesign-button-secondary" onClick={() => void refreshGovernor()}>Retry lookup</button>
+          </div>}
+        </div>
+      ) : null}
+      <div className="ops-action-row">
+        {!pubKey ? (
+          <button type="button" onClick={connect} className="surface-button surface-button-primary" data-testid="governance-connect-button">Connect wallet</button>
+        ) : (
+          <button type="button" onClick={() => setConfirmIntent("vote")} disabled={UX_REVIEW_PREVIEW || !proposal || loading || (redesign && (readingProposal || !hasProposalId || proposal.id !== proposalId))} title={UX_REVIEW_PREVIEW ? "Voting is disabled in this review preview." : undefined} className="surface-button surface-button-primary" data-testid="governance-vote-button">Vote</button>
+        )}
+      </div>
+      <TransactionFeedbackRail loading={loading} loadingLabel="Submitting vote..." status={status} error={error} />
+    </>
+  );
+
   return (
-    <main className="surface-stack governance-fidelity-shell">
-      <header className="surface-stage-header">
+    <main className={redesign ? "arka-workflow arka-governance" : "surface-stack governance-fidelity-shell"}>
+      {redesign ? (
+        <header className="arka-redesign-page-heading">
+          <h1>{operatorConsole ? "Governance console" : "Governance"}</h1>
+          <p>{operatorConsole ? "Prepare governed proposals and review their execution." : "Look up a proposal and vote with your wallet."}</p>
+        </header>
+      ) : <header className="surface-stage-header">
         <span className="surface-eyebrow">
           {operatorConsole ? "Operator governance" : "Governance"}
         </span>
@@ -858,7 +934,8 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
             ? "Verified operator console for governed packages, proposal lifecycle review and executor handoff."
             : "Review proposals and vote with your connected wallet."}
         </p>
-      </header>
+      </header>}
+      {!redesign || operatorConsole ? <>
       <nav
         className="surface-section-tabs governance-section-tabs"
         aria-label="Governance sections"
@@ -1179,6 +1256,8 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
           </Panel>
         </div> : null}
       </section>
+
+      </> : null}
 
       {operatorConsole ? (
         <Panel
@@ -1562,43 +1641,11 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
       {!operatorConsole ? (
         <Panel
           id="governance-voting"
-          title="Vote"
-          subtitle="Review a proposal and record your choice"
+          title={redesign ? "Review and vote" : "Vote"}
+          subtitle={redesign ? undefined : "Review a proposal and record your choice"}
           testId="governance-public-vote-panel"
         >
-          <div className="ops-form-grid">
-            <ActionField label="Proposal ID" hint="Enter the proposal you want to review.">
-              <input
-                value={proposalIdStr}
-                onChange={(event) => setProposalIdStr(event.target.value)}
-                className="ops-input"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                aria-invalid={!hasProposalId}
-                data-testid="governance-proposal-id-input"
-              />
-            </ActionField>
-            <ActionField label="Your vote">
-              <select
-                value={support}
-                onChange={(event) => setSupport(event.target.value)}
-                className="ops-select"
-                data-testid="governance-support-select"
-              >
-                <option value="1">For</option>
-                <option value="0">Against</option>
-                <option value="2">Abstain</option>
-              </select>
-            </ActionField>
-          </div>
-          <div className="ops-action-row">
-            {!pubKey ? (
-              <button type="button" onClick={connect} className="surface-button surface-button-primary" data-testid="governance-connect-button">Connect wallet</button>
-            ) : (
-              <button type="button" onClick={() => setConfirmIntent("vote")} disabled={UX_REVIEW_PREVIEW || !proposal || loading} title={UX_REVIEW_PREVIEW ? "Voting is disabled in this review preview." : undefined} className="surface-button surface-button-primary" data-testid="governance-vote-button">Vote</button>
-            )}
-          </div>
-          <TransactionFeedbackRail loading={loading} loadingLabel="Submitting vote..." status={status} error={error} />
+          {publicVoteControls}
         </Panel>
       ) : null}
 
@@ -1681,7 +1728,7 @@ export function GovernanceSurface({ operatorConsole = false }: GovernanceSurface
                   placeholder="Proposal ID"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  aria-invalid={!hasProposalId}
+                  aria-invalid={!hasProposalId && (!redesign || Boolean(proposalIdStr.trim()))}
                   data-testid="governance-proposal-id-input"
                 />
               </ActionField>

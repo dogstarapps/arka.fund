@@ -5,6 +5,7 @@ import {
   redactApiText,
 } from "@/lib/server/apiHardening";
 import { readOnchainCatalogResponse } from "./onchainFallback";
+import { readTestnetIndexedCatalog, testnetIndexPackaged } from "./testnetPreview.mjs";
 
 const CATALOG_REQUEST_TIMEOUT_MS = 10_000;
 const CATALOG_UPSTREAM_FALLBACK_STATUSES = new Set([401, 403, 404, 500, 502, 503, 504]);
@@ -36,6 +37,15 @@ export async function proxyCatalogRequest(
       return jsonNoStore({error: "real_catalog_unavailable", message: "Real local catalog unavailable. No holdings have been treated as zero."}, {status: 503});
     }
   }
+  if (process.env.VERCEL_ENV === "preview" &&
+      process.env.ARKAFUND_NETWORK_TARGET === "testnet" &&
+      process.env.NEXT_PUBLIC_UX_REVIEW_PREVIEW === "1" &&
+      process.env.ARKA_TESTNET_HISTORY_BLOB_ID) {
+    if (!testnetIndexPackaged) return jsonNoStore({ error: "Testnet catalog bundle unavailable." }, { status: 503 });
+    const indexed = await readTestnetIndexedCatalog(request, pathSegments);
+    if (indexed) return indexed;
+  }
+
   const generalReadOnly = process.env.NEXT_PUBLIC_MAINNET_GENERAL_READONLY === '1';
   if (generalReadOnly && request.method !== 'GET') return jsonNoStore({error:'Read-only catalog.'}, {status:405});
   const configuredBaseUrl = resolveCatalogApiBaseUrl();

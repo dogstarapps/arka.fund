@@ -2389,8 +2389,8 @@ export async function buildArkaSetSwapRiskPolicy(
 ) {
   return buildContractInvokeTx(callerPubKey, arkaId, 'set_swap_risk_policy', [
     xdr.ScVal.scvAddress(Address.fromString(callerPubKey).toScAddress()),
-    nativeToScVal(Boolean(params.enabled), { type: 'bool' }),
-    nativeToScVal(Boolean(params.oracle_checks_enabled), { type: 'bool' }),
+    xdr.ScVal.scvBool(Boolean(params.enabled)),
+    xdr.ScVal.scvBool(Boolean(params.oracle_checks_enabled)),
     nativeToScVal(Math.trunc(params.max_price_impact_bps), { type: 'i32' }),
     nativeToScVal(Math.trunc(params.max_slippage_bps), { type: 'i32' }),
     nativeToScVal(Math.trunc(params.max_twap_deviation_bps), { type: 'i32' }),
@@ -2472,11 +2472,11 @@ export async function buildArkaConfigureCreditMarket(
     creditProtocolScVal(params.protocol),
     nativeToScVal(BigInt(Math.trunc(params.market_id)), { type: 'u128' }),
     xdr.ScVal.scvAddress(Address.fromString(params.adapter).toScAddress()),
-    nativeToScVal(Boolean(params.allow_supply), { type: 'bool' }),
-    nativeToScVal(Boolean(params.allow_borrow), { type: 'bool' }),
-    nativeToScVal(Boolean(params.allow_repay), { type: 'bool' }),
-    nativeToScVal(Boolean(params.allow_withdraw), { type: 'bool' }),
-    nativeToScVal(Boolean(params.enabled), { type: 'bool' }),
+    xdr.ScVal.scvBool(Boolean(params.allow_supply)),
+    xdr.ScVal.scvBool(Boolean(params.allow_borrow)),
+    xdr.ScVal.scvBool(Boolean(params.allow_repay)),
+    xdr.ScVal.scvBool(Boolean(params.allow_withdraw)),
+    xdr.ScVal.scvBool(Boolean(params.enabled)),
   ])
 }
 
@@ -3248,7 +3248,7 @@ export async function readSushiEstimateOut(adapter:string,poolId:number,tokenIn:
   const registered=await native(factory,'get_pool',[Address.fromString(token0).toScVal(),Address.fromString(token1).toScVal(),nativeToScVal(Number(fee),{type:'u32'})])
   if(registered!==route.pool)throw new Error('Sushi pool is not registered in the configured factory.')
   const zeroForOne=tokenIn===token0,limit=zeroForOne?BigInt("4295128740"):BigInt("1461446703485210103287273052203988822378723970341")
-  const result=await native(route.pool,'quote_exact_input',[nativeToScVal(zeroForOne,{type:'bool'}),nativeToScVal(BigInt(amountBase),{type:'i128'}),nativeToScVal(limit,{type:'u256'})])
+  const result=await native(route.pool,'quote_exact_input',[xdr.ScVal.scvBool(zeroForOne),nativeToScVal(BigInt(amountBase),{type:'i128'}),nativeToScVal(limit,{type:'u256'})])
   const spent=BigInt(zeroForOne?result.amount0:result.amount1),received=-BigInt(zeroForOne?result.amount1:result.amount0)
   if(spent!==BigInt(amountBase)||received<=BigInt(0)||received>BigInt(Number.MAX_SAFE_INTEGER))throw new Error('Sushi quote cannot fill this amount precisely.')
   return Number(received)

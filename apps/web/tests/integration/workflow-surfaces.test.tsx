@@ -1,5 +1,5 @@
 import React from "react";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -143,6 +143,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import CoveragePage from "@/app/coverage/page";
+import { GovernanceSurface } from "@/app/governance/GovernanceClient";
 import CreateArkaClient from "@/app/factory/create/CreateArkaClient";
 import GovernancePage from "@/app/governance/page";
 import GovernanceConsolePage from "@/app/governance/console/page";
@@ -452,6 +453,32 @@ describe("workflow surfaces", () => {
     expect(txMocks.waitForTx).toHaveBeenCalledTimes(2);
   });
 
+  it("reads a selected proposal in the redesign and shows unavailable tallies without zeroes", async () => {
+    const user = userEvent.setup();
+    render(<GovernanceSurface redesign />);
+
+    expect(await screen.findByText("Enter a proposal ID to look it up.")).toBeInTheDocument();
+    const input = screen.getByTestId("governance-proposal-id-input");
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    fireEvent.change(input, { target: { value: "2.5" } });
+    expect(screen.getByText("Enter a valid proposal ID.")).toBeInTheDocument();
+    const readVotes = sorobanMocks.readGovernorProposalVotes.getMockImplementation();
+    sorobanMocks.readGovernorProposalVotes.mockRejectedValueOnce(new Error("Read unavailable"));
+    try {
+      fireEvent.change(input, { target: { value: "12" } });
+      expect(await screen.findByRole("heading", { name: "Proposal #12" })).toBeInTheDocument();
+      expect(screen.getByText("Vote totals unavailable.")).toBeInTheDocument();
+      await user.selectOptions(screen.getByTestId("governance-support-select"), "2");
+      expect(screen.getByTestId("governance-support-select")).toHaveValue("2");
+      expect(screen.getByTestId("governance-vote-button")).toBeEnabled();
+      expect(screen.queryByTestId("governance-composer-panel")).not.toBeInTheDocument();
+      expect(txMocks.submitSignedTx).not.toHaveBeenCalled();
+    } finally {
+      if (readVotes) sorobanMocks.readGovernorProposalVotes.mockImplementation(readVotes);
+    }
+  });
+
   it("keeps public governance readable without exposing the operator composer", async () => {
     render(<GovernancePage />);
 
@@ -479,9 +506,9 @@ describe("workflow surfaces", () => {
     ).not.toHaveTextContent("Composer");
   });
 
-  it("renders governance operator console with proposal telemetry and lifecycle controls", async () => {
+  it.each([false, true])("renders governance operator console with proposal telemetry and lifecycle controls (redesign=%s)", async (redesign) => {
     const user = userEvent.setup();
-    render(<GovernanceConsolePage />);
+    render(<GovernanceSurface operatorConsole redesign={redesign} />);
 
     await waitFor(() =>
       expect(
@@ -1051,7 +1078,7 @@ describe("workflow surfaces", () => {
     expect(screen.queryByTestId("integrations-actions-panel")).toBeNull();
   });
 
-  it("renders integrations operator shell with router health and action controls", async () => {
+  it.each([false, true])("renders integrations operator shell with router health and action controls (redesign=%s)", async (redesign) => {
     const fetchMock = vi.fn(
       async (input: string | URL | Request, init?: RequestInit) => {
         const url =
@@ -1347,7 +1374,7 @@ describe("workflow surfaces", () => {
     );
     vi.stubGlobal("fetch", fetchMock as typeof fetch);
     const user = userEvent.setup();
-    render(<IntegrationsSurface mode="operator" />);
+    render(<IntegrationsSurface mode="operator" redesign={redesign} />);
 
     await waitFor(() =>
       expect(
@@ -1361,7 +1388,7 @@ describe("workflow surfaces", () => {
       screen.getByTestId("integrations-workspace-tab-routing"),
     ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("integrations-product-catalog")).toHaveTextContent(
-      "Supported protocols",
+      redesign ? "Protocol connections" : "Supported protocols",
     );
     expect(screen.getByTestId("integrations-product-card-grid")).toHaveTextContent(
       "Blend",
@@ -1385,6 +1412,7 @@ describe("workflow surfaces", () => {
       screen.getByTestId("integrations-workspace-tab-sodax"),
     ).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByTestId("integrations-workspace-tab-routing"));
+    if (redesign) await user.click(screen.getByText("Adapter diagnostics", { exact: true }));
     expect(screen.getByTestId("integrations-public-metric-deck")).toHaveTextContent(
       "Protocol coverage",
     );
@@ -1712,7 +1740,7 @@ describe("workflow surfaces", () => {
     );
   });
 
-  it("keeps the Balanced SODAX intent surface degraded and retryable without inventing execution", async () => {
+  it.each([false, true])("keeps the Balanced SODAX intent surface degraded and retryable without inventing execution (redesign=%s)", async (redesign) => {
     let catalogRequests = 0;
     let quoteRequests = 0;
     let statusRequests = 0;
@@ -1973,7 +2001,7 @@ describe("workflow surfaces", () => {
     vi.stubGlobal("fetch", fetchMock as typeof fetch);
     const user = userEvent.setup();
 
-    render(<IntegrationsSurface mode="operator" />);
+    render(<IntegrationsSurface mode="operator" redesign={redesign} />);
 
     await user.click(screen.getByTestId("integrations-workspace-tab-sodax"));
     await user.click(
@@ -2243,7 +2271,7 @@ describe("workflow surfaces", () => {
     expect(screen.getByTestId("integrations-run-balanced")).toBeDisabled();
   });
 
-  it("keeps an incomplete asset catalog out of creation and loads all pages on retry", async () => {
+  it.each([false, true])("keeps an incomplete asset catalog out of creation and loads all pages on retry (redesign=%s)", async (redesign) => {
     const user = userEvent.setup();
     const available = creationCatalogFixture(new URLSearchParams()).items;
     const offsets: number[] = [];
@@ -2259,7 +2287,7 @@ describe("workflow surfaces", () => {
       return Response.json({ offset, limit: items.length, total: available.length, items });
     }));
 
-    render(<CreateArkaClient />);
+    render(<CreateArkaClient redesign={redesign} />);
     await screen.findByText("Asset catalog unavailable.");
     expect(screen.queryByTestId("create-arka-denomination-select")).not.toBeInTheDocument();
     await user.click(screen.getByTestId("create-step-review"));

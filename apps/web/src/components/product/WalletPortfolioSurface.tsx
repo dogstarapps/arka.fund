@@ -12,11 +12,13 @@ import type { RankedArkaCatalogEntry } from '@/lib/catalog/types';
 import {MANAGED_PRODUCT_LOCAL} from '@/lib/managedProduct';
 import {GENERAL_MAINNET} from '@/lib/generalMainnet';
 import ManagedPortfolioSurface from './ManagedProductSurface';
+import PortfolioHeading from './PortfolioHeading';
 
-export default function WalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }) {
-  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedPortfolioSurface mode={mode}/> : <LegacyWalletPortfolioSurface mode={mode}/>;
+type WalletPortfolioProps = { mode: 'investor' | 'manager'; redesign?: boolean };
+export default function WalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) {
+  return (GENERAL_MAINNET||MANAGED_PRODUCT_LOCAL) ? <ManagedPortfolioSurface mode={mode} redesign={redesign}/> : <LegacyWalletPortfolioSurface mode={mode} redesign={redesign}/>;
 }
-function LegacyWalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }) {
+function LegacyWalletPortfolioSurface({ mode, redesign }: WalletPortfolioProps) {
   const [wallet, setWallet] = useState('');
   const [address, setAddress] = useState('');
   const [lookup, setLookup] = useState('');
@@ -49,13 +51,13 @@ function LegacyWalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }
     return () => controller.abort();
   }, [viewedAddress, mode, refresh]);
   const funds = mode === 'investor' ? positions?.positions.map(p => p.fund) ?? [] : managed ?? [];
-  return <main className="surface-stack ux-portfolio" data-testid="wallet-portfolio">
-    <header className="surface-panel ux-portfolio-heading">
+  return <main className={redesign ? "arka-workflow ux-portfolio" : "surface-stack ux-portfolio"} data-testid="wallet-portfolio">
+    {redesign ? <PortfolioHeading mode={mode} /> : <header className="surface-panel ux-portfolio-heading">
       <span className="surface-eyebrow">{mode === 'investor' ? 'Investor' : 'Fund manager'}</span>
       <h1>{mode === 'investor' ? 'My investments' : 'Funds I manage'}</h1>
       <p>{mode === 'investor' ? 'Your holdings in funds, whether or not you manage them.' : 'Manage fund portfolios, change fund assets and review liquidity. This does not swap your personal wallet tokens.'}</p>
       <div className="surface-entry-actions"><Link className="surface-button surface-button-secondary" href={mode === 'investor' ? '/manage' : '/investments'}>{mode === 'investor' ? 'Funds I manage' : 'My investments'}</Link><Link className="surface-button surface-button-secondary" href="/discover">Explore funds</Link>{mode === 'manager' ? <Link className="surface-button surface-button-primary" href="/factory/create">Create Arka</Link> : null}</div>
-    </header>
+    </header>}
     {!viewedAddress ? <section className="surface-panel"><h2>Connect a wallet to see your {mode === 'investor' ? 'investments' : 'managed funds'}</h2><p>Use Connect wallet above. A disconnected wallet is not an empty portfolio.</p></section> : <p className="ux-address-context">{address ? 'Public address lookup · read-only · not a wallet connection' : 'Connected wallet'}<br/><span className="ux-wallet-address">{viewedAddress}</span>{address ? <button className="surface-button surface-button-secondary" onClick={() => { setAddress(''); window.history.replaceState(null,'',window.location.pathname); }}>Use connected wallet</button> : null}</p>}
     <details className="surface-panel ux-public-lookup" open={UX_REVIEW_PREVIEW && !viewedAddress}>
       <summary>Look up a public wallet without connecting</summary>
@@ -73,7 +75,7 @@ function LegacyWalletPortfolioSurface({ mode }: { mode: 'investor' | 'manager' }
       const value = position && position.totalSharesBase && fund.nav !== null ? estimateMaximumRedemption({ navBase: Number(fund.nav), totalSharesBase: position.totalSharesBase, userSharesBase: position.sharesBase, redeemFeeBps: 0 }) : null;
       const symbol = fund.economics?.denominationAsset?.symbol || 'fund units';
       const actionHref = `/arkas/${fund.arkaId}?workspace=${mode==='investor'?'flow':'rebalance'}${address ? `&address=${encodeURIComponent(address)}` : ''}`;
-      return <article className="surface-panel ux-position-card" key={fund.arkaId} data-testid="wallet-position-card"><div><h2>{resolveArkaDisplayName(fund)}</h2><p>Manager {formatContractLabel(fund.manager,8,5)}</p>{position ? <><strong>{value !== null ? `${formatAssetAmount(String(value))} ${symbol}` : 'Position value unavailable'}</strong><p>{formatAssetAmount(String(position.sharesBase))} shares · estimated value, not cash available to withdraw</p></> : <p>Changes affect this fund’s portfolio and its investors.</p>}</div><div className="surface-entry-actions"><Link className="surface-button surface-button-primary" href={actionHref}>{mode === 'investor' ? 'Deposit or withdraw' : 'Manage fund assets'}</Link><Link className="surface-button surface-button-secondary" href={`/vaults/${fund.arkaId}`}>Fund details</Link></div></article>;
+      return <article className="surface-panel ux-position-card" key={fund.arkaId} data-testid="wallet-position-card"><div><h2>{resolveArkaDisplayName(fund, redesign)}</h2><p>Manager {formatContractLabel(fund.manager,8,5)}</p>{position ? <><strong>{value !== null ? `${formatAssetAmount(String(value))} ${symbol}` : 'Position value unavailable'}</strong><p>{formatAssetAmount(String(position.sharesBase))} shares · estimated value, not cash available to withdraw</p></> : <p>Changes affect this fund’s portfolio and its investors.</p>}</div><div className="surface-entry-actions"><Link className="surface-button surface-button-primary" href={actionHref}>{mode === 'investor' ? 'Deposit or withdraw' : 'Manage fund assets'}</Link><Link className="surface-button surface-button-secondary" href={`/vaults/${fund.arkaId}`}>Fund details</Link></div></article>;
     })}</div>
     {positions ? <p className="surface-note">Checked {positions.scanned} listed funds using on-chain shares. Values can change and withdrawals depend on fund cash and a fresh simulation.</p> : null}
   </main>;

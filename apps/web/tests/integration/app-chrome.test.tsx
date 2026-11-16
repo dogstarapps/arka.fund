@@ -87,6 +87,30 @@ describe("AppChrome", () => {
     walletMocks.signMessageWithWallet.mockClear();
   });
 
+  it("keeps the redesigned navigation and operator gate across routes", () => {
+    navigationState.pathname = "/investments";
+    const { rerender } = render(<AppChrome redesign><p>Portfolio</p></AppChrome>);
+
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute("href", "/discover");
+    expect(screen.getByRole("link", { name: "My investments" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Manage Arkas" })).toHaveAttribute("href", "/manage");
+    expect(screen.getByTestId("chrome-nav-integrations")).toHaveAttribute("href", "/integrations");
+
+    navigationState.pathname = "/vaults";
+    rerender(<AppChrome redesign><p>Leaderboard</p></AppChrome>);
+    expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute("aria-current", "page");
+
+    navigationState.pathname = "/factory/create";
+    rerender(<AppChrome redesign><p>Create wizard</p></AppChrome>);
+    expect(screen.getByRole("link", { name: "Manage Arkas" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "My investments" })).toBeVisible();
+
+    navigationState.pathname = "/integrations/operator";
+    rerender(<AppChrome redesign><p>Restricted content</p></AppChrome>);
+    expect(screen.getByTestId("operator-route-gate")).toBeVisible();
+    expect(screen.queryByText("Restricted content")).not.toBeInTheDocument();
+  });
+
   it("gates utility routes until an operator wallet signs the access challenge", async () => {
     render(
       <AppChrome>

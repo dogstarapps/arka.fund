@@ -1,5 +1,12 @@
 import "@testing-library/jest-dom/vitest";
+import { Buffer } from "node:buffer";
 import { vi } from "vitest";
+
+// XDR serializes to Node buffers. Keep their byte-array constructor in the
+// same realm as the SDK's hash checks when Vitest runs with JSDOM globals.
+if (!(Buffer.alloc(0) instanceof Uint8Array)) {
+  globalThis.Uint8Array = Object.getPrototypeOf(Buffer);
+}
 
 // Vitest may load SDK constructors in a separate module realm. Register the
 // actual test-realm implementation with the same process-wide signing policy.

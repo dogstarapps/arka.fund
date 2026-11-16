@@ -17,7 +17,7 @@ This service builds and serves the indexed catalog required for discovery and le
 
 ## Runtime
 
-- Node 20 or newer
+- Node.js 22 or newer
 
 ## Commands
 

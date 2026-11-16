@@ -73,6 +73,20 @@ test('holder fresh cache preserves verified timestamp, totals and pagination', a
   assert.equal(second.items[0].holder,'G2');assert.equal(second.stale,false);
 });
 
+test("a fresh holder read waits for chain data even inside the cache TTL", async () => {
+  const { reader, advance } = fixture();
+  const original = await reader.list(arka);
+  advance(1000);
+  const refreshed = await reader.list(arka, { limit: 1 }, { fresh: true });
+  assert.equal(reader.calls, 2);
+  assert.notEqual(refreshed.indexedAt, original.indexedAt);
+  assert.equal(refreshed.stale, false);
+  assert.equal(refreshed.items.length, 1);
+
+  reader.read = async () => { throw new Error("RPC unavailable"); };
+  await assert.rejects(reader.list(arka, {}, { fresh: true }), /RPC unavailable/);
+});
+
 test('cold simultaneous holder requests share one chain read', async () => {
   const {reader}=fixture();let finish!: (value:ArkaHolderPage)=>void;
   reader.read=()=>new Promise(resolve=>{finish=resolve;});

@@ -1,6 +1,6 @@
 import test from'node:test';import assert from'node:assert/strict';import{mkdtemp}from'node:fs/promises';import{tmpdir}from'node:os';import{join}from'node:path';import{Contract,nativeToScVal,StrKey}from'@stellar/stellar-sdk';import{RpcManagedCreationReader,FileManagedObservationStore}from'../../src/index.js';import{baseEntries,V3,MANAGER,state}from'../support/managedFixture.js';
 const network='Public Global Stellar Network ; September 2015',registry=StrKey.encodeContract(Buffer.alloc(32,7)),factory=StrKey.encodeContract(Buffer.alloc(32,8)),cursor=(n:number)=>String((BigInt(n)<<32n)|4294967295n)+'-4294967295';
-async function setup(){const directory=await mkdtemp(join(tmpdir(),'arka-creation-')),options={rpcUrl:'http://127.0.0.1:9999',networkPassphrase:network,registry,factory,initialLedger:90,directory,pageSize:2,maxPages:1},entry={...baseEntries()[0],arkaId:V3,manager:MANAGER};let calls=0;const event={id:'event-1',ledger:95,contractId:new Contract(registry),topic:[nativeToScVal('register',{type:'symbol'})],value:nativeToScVal([factory,MANAGER,V3])};let page:any={events:[event],cursor:cursor(100),latestLedger:100};const rpc={getHealth:async()=>({latestLedger:100,oldestLedger:90}),getEvents:async()=>{calls++;return page;}};const create=()=>{const r=new RpcManagedCreationReader(options);(r as any).server=rpc;return r;};return{entry,options,event,rpc,create,page:(p:any)=>{page=p;},calls:()=>calls};}
+async function setup(){const directory=await mkdtemp(join(tmpdir(),'arka-creation-')),options={rpcUrl:'http://127.0.0.1:9999',networkPassphrase:network,registry,factory,initialLedger:90,directory,pageSize:2,maxPages:1},entry={...baseEntries()[0],arkaId:V3,manager:MANAGER};let calls=0;const event={id:'event-1',ledger:95,contractId:new Contract(registry),topic:[nativeToScVal('register',{type:'symbol'})],value:nativeToScVal([factory,MANAGER,V3])};let page:any={events:[event],cursor:cursor(100),latestLedger:100};const rpc={getHealth:async()=>({latestLedger:100,oldestLedger:90}),getEvents:async(_request:{startLedger?:number;endLedger?:number;cursor?:string})=>{calls++;return page;}};const create=()=>{const r=new RpcManagedCreationReader(options);(r as any).server=rpc;return r;};return{entry,options,event,rpc,create,page:(p:any)=>{page=p;},calls:()=>calls};}
 test('factory birth is recovered from persisted paginated registry history after restart',async()=>{const f=await setup();f.page({events:[f.event],cursor:String(95n<<32n)+'-0',latestLedger:100});await assert.rejects(f.create().read(f.entry,100),/COVERAGE_INCOMPLETE/);f.page({events:[],cursor:cursor(100),latestLedger:100});assert.equal(await f.create().read(f.entry,100),95);const before=f.calls();assert.equal(await f.create().read(f.entry,100),95);assert.equal(f.calls(),before);});
 test('a complete registry scan does not grant factory birth to another registrar',async()=>{const f=await setup();f.event.value=nativeToScVal([registry,MANAGER,V3]);await assert.rejects(f.create().read(f.entry,100),/FACTORY_CREATION_EVENT_REQUIRED/);});
 test('retention gaps cannot be treated as creation coverage',async()=>{const f=await setup();f.rpc.getHealth=async()=>({latestLedger:100,oldestLedger:91});await assert.rejects(f.create().read(f.entry,100),/COVERAGE_INCOMPLETE/);});
@@ -13,4 +13,21 @@ test('published factory birth cannot move or disappear after restart',async()=>{
 test('factory birth outside the covered ledger interval cannot be published',async()=>{
  const directory=await mkdtemp(join(tmpdir(),'arka-birth-coverage-')),store=new FileManagedObservationStore(join(directory,'observations.json'));
  for(const creationLedger of [0,101])await assert.rejects(store.put({...state('requested',100),creationLedger}),/CREATION_COVERAGE_GAP/);
+});
+
+test("creation scan includes its target ledger and excludes later events", async () => {
+  const fixture = await setup();
+  fixture.rpc.getEvents = async (range) => {
+    assert.equal(range.startLedger, 90);
+    assert.equal(range.endLedger, 101);
+    return {
+      events: [
+        { ...fixture.event, ledger: 100 },
+        { ...fixture.event, id: "event-2", ledger: 101 },
+      ],
+      cursor: cursor(101),
+      latestLedger: 101,
+    };
+  };
+  assert.equal(await fixture.create().read(fixture.entry, 100), 100);
 });

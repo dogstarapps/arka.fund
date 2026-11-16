@@ -2,13 +2,14 @@ import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
   MethodOptions,
+  SignTransaction,
 } from "@stellar/stellar-sdk/contract";
 
 export interface ArkafundSdkConfig {
   rpcUrl: string;
   networkPassphrase: string;
   publicKey?: string;
-  signTransaction?: ContractClientOptions["signTransaction"];
+  signTransaction?: SignTransaction;
   allowHttp?: boolean;
   fee?: string | number;
   timeoutInSeconds?: number;

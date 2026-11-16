@@ -67,7 +67,7 @@ export class RpcManagedSnapshotSource implements ManagedSnapshotSource {
     }
     const owners=new Set([id,arka.manager,...requests.map(r=>r.owner)]);let offset=0,coverage: number|null=null;
     while(true){
-      const page=await this.holders.list(arka,{offset,limit:100});
+      const page=await this.holders.list(arka,{offset,limit:100},{fresh:offset===0});
       if(!page.complete||page.stale||page.refreshFailed||page.coverageFromLedger===null||page.total>this.limits.maxHolders)throw new Error("MANAGED_HOLDERS_INCOMPLETE");
       if(coverage!==null&&coverage!==page.coverageFromLedger)throw new Error("MANAGED_HOLDERS_CHANGED");coverage=page.coverageFromLedger;
       if(page.items.length!==Math.min(100,page.total-offset))throw new Error("MANAGED_HOLDERS_PAGE_GAP");

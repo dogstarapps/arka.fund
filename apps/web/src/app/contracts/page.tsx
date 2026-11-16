@@ -2274,7 +2274,7 @@ function parseField(field: FieldSpec, raw: string): xdr.ScVal {
     case "i32":
       return nativeToScVal(Number(parseInteger(value, field.label)), { type: "i32" });
     case "bool":
-      return nativeToScVal(value === "true", { type: "bool" });
+      return xdr.ScVal.scvBool(value === "true");
     case "string":
       return nativeToScVal(value, { type: "string" });
     case "credit_protocol":
@@ -2294,7 +2294,7 @@ function parseField(field: FieldSpec, raw: string): xdr.ScVal {
 
 function rawToScVal(input: RawArg): xdr.ScVal {
   if (input === null) return xdr.ScVal.scvVoid();
-  if (typeof input === "boolean") return nativeToScVal(input, { type: "bool" });
+  if (typeof input === "boolean") return xdr.ScVal.scvBool(input);
   if (typeof input === "number") return nativeToScVal(Math.trunc(input), { type: "i32" });
   if (typeof input === "string") return nativeToScVal(input, { type: "string" });
 
@@ -2314,7 +2314,7 @@ function rawToScVal(input: RawArg): xdr.ScVal {
     case "void":
       return xdr.ScVal.scvVoid();
     case "bool":
-      return nativeToScVal(Boolean(value), { type: "bool" });
+      return xdr.ScVal.scvBool(Boolean(value));
     case "address":
       return parseAddress(String(value ?? ""), "raw.address");
     case "symbol":

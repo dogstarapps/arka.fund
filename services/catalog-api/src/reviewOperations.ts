@@ -1,14 +1,15 @@
 /** Unsigned ABI operations only: no RPC, wallet, key, signing or submission. */
 import { Address, Contract, nativeToScVal, xdr } from '@stellar/stellar-sdk';
+type ContractInvocation = ReturnType<Contract['call']>;
 type OwnerRequest = { owner: string; id: string };
 export type ManagedSpotStep={adapter:string;pool_id:string;asset_in:{contract:string};asset_out:{contract:string};amount_in:string;min_out:string;router_addr:string};
 function wireStruct(fields:Record<string,xdr.ScVal>){return xdr.ScVal.scvMap(Object.entries(fields).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([key,val])=>new xdr.ScMapEntry({key:xdr.ScVal.scvSymbol(key),val})));}
 function spotValue(step:ManagedSpotStep){
  return wireStruct({adapter:Address.fromString(step.adapter).toScVal(),pool_id:nativeToScVal(BigInt(step.pool_id),{type:'u128'}),asset_in:wireStruct({contract:Address.fromString(step.asset_in.contract).toScVal()}),asset_out:wireStruct({contract:Address.fromString(step.asset_out.contract).toScVal()}),amount_in:nativeToScVal(integer(step.amount_in,127),{type:'i128'}),min_out:nativeToScVal(integer(step.min_out,127),{type:'i128'}),router_addr:Address.fromString(step.router_addr).toScVal()});
 }
-export function managedSpotOperation(fund:string,manager:string,step:ManagedSpotStep){return new Contract(fund).call('rebalance',Address.fromString(manager).toScVal(),xdr.ScVal.scvVec([spotValue(step)]));}
-export function managedSpotRecoveryOperation(fund:string,caller:string,step:ManagedSpotStep){return new Contract(fund).call('liquidate_withdrawal',Address.fromString(caller).toScVal(),spotValue(step));}
-export function managedLiquidationPlanOperation(fund:string){return new Contract(fund).call('portfolio_liquidation_steps',nativeToScVal((BigInt(1)<<BigInt(127))-BigInt(1),{type:'i128'}));}
+export function managedSpotOperation(fund:string,manager:string,step:ManagedSpotStep): ContractInvocation{return new Contract(fund).call('rebalance',Address.fromString(manager).toScVal(),xdr.ScVal.scvVec([spotValue(step)]));}
+export function managedSpotRecoveryOperation(fund:string,caller:string,step:ManagedSpotStep): ContractInvocation{return new Contract(fund).call('liquidate_withdrawal',Address.fromString(caller).toScVal(),spotValue(step));}
+export function managedLiquidationPlanOperation(fund:string): ContractInvocation{return new Contract(fund).call('portfolio_liquidation_steps',nativeToScVal((BigInt(1)<<BigInt(127))-BigInt(1),{type:'i128'}));}
 export function sameManagedSpotStep(a:ManagedSpotStep,b:ManagedSpotStep){return spotValue(a).toXDR('base64')===spotValue(b).toXDR('base64');}
 /** withdrawal_status advances a COPY of the queue over at most 16 closed
  * requests. A greater head therefore proves bounded maintenance can progress,
@@ -43,19 +44,19 @@ function integer(s: string, bits: number) {
   if (v >= BigInt(1) << BigInt(bits)) throw new Error('Integer overflow.');
   return v;
 }
-export function managedDepositOperation(fund:string,owner:string,asset:string,amountRaw:string,minSharesRaw:string){
+export function managedDepositOperation(fund:string,owner:string,asset:string,amountRaw:string,minSharesRaw:string): ContractInvocation{
  return new Contract(fund).call('deposit_protected',Address.fromString(owner).toScVal(),wireStruct({contract:Address.fromString(asset).toScVal()}),nativeToScVal(integer(amountRaw,127),{type:'i128'}),nativeToScVal(integer(minSharesRaw,127),{type:'i128'}));
 }
-export function managedDepositQuoteOperation(fund:string,asset:string,amountRaw:string){
+export function managedDepositQuoteOperation(fund:string,asset:string,amountRaw:string): ContractInvocation{
  return new Contract(fund).call('quote_deposit',wireStruct({contract:Address.fromString(asset).toScVal()}),nativeToScVal(integer(amountRaw,127),{type:'i128'}));
 }
-export function managedApproveOperation(fund:string,owner:string,asset:string,amountRaw:string,expirationLedger:number){
+export function managedApproveOperation(fund:string,owner:string,asset:string,amountRaw:string,expirationLedger:number): ContractInvocation{
  const amount=amountRaw==='0'?BigInt(0):integer(amountRaw,127);
  if(!Number.isSafeInteger(expirationLedger)||expirationLedger<=0||expirationLedger>0xffffffff)throw Error('Invalid allowance expiry.');
  return new Contract(asset).call('approve',Address.fromString(owner).toScVal(),Address.fromString(fund).toScVal(),nativeToScVal(amount,{type:'i128'}),nativeToScVal(expirationLedger,{type:'u32'}));
 }
 
-export function managedFactoryOperation(factory:string,manager:string,saltHex:string,config:{templateHash:string;denomination:string;router:string;mgmtBps:number;perfBps:number;depositBps:number}) {
+export function managedFactoryOperation(factory:string,manager:string,saltHex:string,config:{templateHash:string;denomination:string;router:string;mgmtBps:number;perfBps:number;depositBps:number}): ContractInvocation {
   if(!/^[a-f0-9]{64}$/i.test(saltHex))throw new Error('Creation salt must contain 32 bytes.');
   if(!/^[a-f0-9]{64}$/i.test(config.templateHash))throw new Error('A reviewed template hash is required.');
   for(const bps of [config.mgmtBps,config.perfBps,config.depositBps])if(!Number.isInteger(bps)||bps<0||bps>10000)throw new Error('Invalid creation fees.');
@@ -64,7 +65,7 @@ export function managedFactoryOperation(factory:string,manager:string,saltHex:st
   const value=xdr.ScVal.scvMap(Object.entries(fields).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([k,val])=>new xdr.ScMapEntry({key:xdr.ScVal.scvSymbol(k),val})));
   return new Contract(factory).call('create_managed',nativeToScVal(Buffer.from(saltHex,'hex'),{type:'bytes'}),Address.fromString(manager).toScVal(),value);
 }
-export function managedWithdrawalOperation(fund: string, input: ManagedOperation) {
+export function managedWithdrawalOperation(fund: string, input: ManagedOperation): ContractInvocation {
   const c = new Contract(fund);
   switch (input.method) {
     case 'request_withdrawal': case 'redeem_liquid': return c.call(input.method,Address.fromString(input.owner).toScVal(),nativeToScVal(integer(input.sharesRaw,127),{type:'i128'}));

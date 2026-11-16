@@ -3,6 +3,7 @@ import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
   MethodOptions,
+  SignTransaction,
 } from "@stellar/stellar-sdk/contract";
 
 export interface NetworkConfig {
@@ -10,7 +11,7 @@ export interface NetworkConfig {
   networkPassphrase: string;
   allowHttp?: boolean;
   publicKey?: string;
-  signTransaction?: ContractClientOptions["signTransaction"];
+  signTransaction?: SignTransaction;
 }
 
 export interface CallOptions {

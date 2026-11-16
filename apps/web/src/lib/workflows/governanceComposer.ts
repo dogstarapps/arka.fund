@@ -1221,7 +1221,7 @@ export function governedRawArgToScVal(arg: GovernanceComposerRawArg): xdr.ScVal 
     case "void":
       return xdr.ScVal.scvVoid();
     case "bool":
-      return nativeToScVal(arg.value, { type: "bool" });
+      return xdr.ScVal.scvBool(arg.value);
     case "symbol":
       return xdr.ScVal.scvSymbol(arg.value);
     case "i32":

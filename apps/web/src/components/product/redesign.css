@@ -710,3 +710,125 @@
   border-radius: .5rem;
   box-shadow: none;
 }
+
+/* Operator routes use the same frame and controls as other Arka pages. */
+.arka-redesign :is(.chrome-operator-gate, .chrome-operator-session-strip, .chrome-advanced-console) {
+  min-width: 0;
+  margin: 0 0 1.25rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  border: 1px solid var(--arka-line);
+  border-image: none;
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: none;
+}
+
+.arka-redesign :is(.chrome-operator-gate, .chrome-operator-session-strip, .chrome-advanced-console)::before {
+  content: none;
+}
+
+.arka-redesign .chrome-operator-gate-title {
+  margin: .25rem 0 .75rem;
+  color: var(--arka-text);
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -.025em;
+}
+
+.arka-redesign :is(.chrome-operator-gate-copy, .chrome-operator-session-copy, .chrome-advanced-guard-copy) {
+  color: var(--arka-muted);
+  overflow-wrap: anywhere;
+}
+
+.arka-redesign .chrome-operator-gate-copy-error { color: #f39da8; }
+.arka-redesign .chrome-advanced-console { margin: 1.25rem 0 0; }
+
+.arka-redesign .control-room-fidelity-shell :is(.surface-panel, .surface-table-row, .transaction-review-card, .ops-field) {
+  border-color: var(--arka-line) !important;
+  border-image: none !important;
+  border-radius: .75rem;
+  background: var(--arka-panel) !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign .control-room-fidelity-shell :is(.transaction-review-card, .surface-panel)::before {
+  content: none !important;
+}
+
+.arka-redesign .control-room-fidelity-shell .surface-section-tabs {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.arka-redesign :is(.chrome-advanced-inline-action, .chrome-utility-link, .chrome-operator-gate-actions .surface-button),
+.arka-redesign .control-room-fidelity-shell :is(.ops-input, .ops-select, .ops-textarea, .surface-section-tabs > a, .surface-section-tabs > button) {
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  border: 1px solid var(--arka-line) !important;
+  border-radius: .5rem;
+  color: var(--arka-text);
+  background: var(--arka-control) !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign .control-room-fidelity-shell :is(.ops-input, .ops-select, .ops-textarea) {
+  font-size: 1rem;
+  color-scheme: dark;
+}
+
+.arka-redesign :is(.chrome-utility-link-active, .chrome-operator-gate-actions .surface-button-primary),
+.arka-redesign .control-room-fidelity-shell .surface-section-tabs :is([aria-current="page"], [aria-pressed="true"], .surface-tab-active) {
+  border-color: var(--arka-accent) !important;
+}
+
+.arka-redesign .chrome-utility-link-active { color: var(--arka-accent); }
+.arka-redesign .chrome-operator-gate-actions .surface-button-primary:disabled { opacity: .6; }
+
+.arka-redesign :is(.operator-workspace-summary, .status-workspace-summary, .integrations-protocol-orbit,
+  .governance-power-card, .governance-lifecycle-command-card, .integrations-public-metric-deck,
+  .transaction-rail-card, .chrome-advanced-status-pill) {
+  border: 1px solid var(--arka-line) !important;
+  border-radius: .75rem;
+  border-image: none !important;
+  background: var(--arka-panel) !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign :is(.operator-workspace-summary, .status-workspace-summary, .integrations-public-metric-deck)::before {
+  content: none !important;
+}
+
+.arka-redesign :is(.operator-workspace-tabs, .chrome-advanced-toggle, .integrations-public-metric-deck .public-figma-metric-head) {
+  color: var(--arka-text);
+  border-color: var(--arka-line);
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign .operator-workspace-tabs .surface-tab,
+.arka-redesign .control-room-fidelity-shell .surface-button-secondary {
+  border: 1px solid var(--arka-line) !important;
+  border-radius: .5rem;
+  color: var(--arka-text);
+  background: var(--arka-control) !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign .operator-workspace-tabs .surface-tab-active {
+  border-color: var(--arka-accent) !important;
+}
+
+.arka-redesign .control-room-fidelity-shell .surface-button-primary {
+  border-color: var(--arka-accent) !important;
+  border-radius: .5rem;
+  color: var(--arka-page);
+  background: var(--arka-accent) !important;
+  box-shadow: none !important;
+}
+
+.arka-redesign .control-room-fidelity-shell .surface-table-header {
+  border-color: var(--arka-line) !important;
+  background: var(--arka-control) !important;
+}

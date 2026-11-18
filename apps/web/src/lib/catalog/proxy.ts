@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import type { NextRequest } from "next/server";
 import {
   jsonNoStore,
@@ -7,6 +8,7 @@ import {
 import { readOnchainCatalogResponse } from "./onchainFallback";
 import { readCurrentHolderLedger } from "./currentHolders";
 import type { ArkaHolderPage } from "./types";
+import { mergePreviewProfit } from "./previewProfit";
 
 const CATALOG_REQUEST_TIMEOUT_MS = 10_000;
 const CATALOG_UPSTREAM_FALLBACK_STATUSES = new Set([401, 403, 404, 500, 502, 503, 504]);
@@ -109,6 +111,15 @@ export async function proxyCatalogRequest(
       return fallbackResponse;
     }
     const body = await upstreamResponse.text();
+    const profitArchivePath = process.env.ARKA_LOCAL_MAINNET_PROFIT_PATH;
+    if (upstreamResponse.ok && verifiedReadOnlyPreview && profitArchivePath &&
+        /^127\.0\.0\.1:\d+$/.test(request.headers.get("host") ?? "") &&
+        request.method === "GET" && pathSegments.join("/") === "v1/arkas") {
+      const archive = await readFile(profitArchivePath, "utf8")
+        .then(contents => JSON.parse(contents) as unknown)
+        .catch(() => null);
+      if (archive) return jsonNoStore(mergePreviewProfit(JSON.parse(body), archive));
+    }
     if (verifyHolders && upstreamResponse.ok) {
       const page = JSON.parse(body) as ArkaHolderPage;
       const currentBalancesLedger = page.complete && !page.stale && !page.refreshFailed ? undefined : await readCurrentHolderLedger(page, pathSegments[2]);

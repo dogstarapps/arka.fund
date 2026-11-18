@@ -30,6 +30,10 @@ const percent = new Intl.NumberFormat("en", {
   style: "percent", signDisplay: "exceptZero", maximumFractionDigits: 2,
 });
 const date = new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" });
+const profitDate = new Intl.DateTimeFormat("en", {
+  month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  timeZone: "UTC", timeZoneName: "short",
+});
 
 function exactAmount(value: string | null | undefined): bigint | null {
   return value && /^-?\d+$/.test(value) ? BigInt(value) : null;
@@ -54,6 +58,17 @@ function denominationAmount(entry: RankedArkaCatalogEntry, amount: bigint | null
   if (amount === null) return "—";
   const symbol = entry.economics?.denominationAsset?.symbol;
   return symbol ? `${formatBaseUnitAmount(amount.toString(), amountDecimals(entry), 2)} ${symbol}` : "—";
+}
+
+function formatProfit(entry: RankedArkaCatalogEntry, profit: bigint | null, usd: bigint | null) {
+  if (!entry.verifiedProfit) return usd === null ? denominationAmount(entry, profit) : formatUsdBaseUnitAmount(usd.toString());
+  const source = entry.economics?.denominationAsset;
+  if (!source?.symbol || profit === null) return "—";
+  const abs = profit < BigInt(0) ? -profit : profit;
+  const decimals = amountDecimals(entry);
+  const precision = abs > BigInt(0) && abs * BigInt(100) < BigInt(10) ** BigInt(decimals) ? decimals : 2;
+  const value = formatBaseUnitAmount(profit.toString(), decimals, precision);
+  return `${entry.verifiedProfit.estimated ? "≈ " : ""}${value} ${source.symbol}`;
 }
 
 function chartFor(entry: RankedArkaCatalogEntry, history: ArkaHistoryPoint[], metric: "sharePrice" | "nav"): Chart | null {
@@ -141,7 +156,7 @@ export default function ArkaLeaderboard({ initialQuery = "" }: { initialQuery?: 
     const filtered = data.filter(entry => window === "all" ||
       (window === "current" ? Date.parse(entry.syncedAt) === newest : Date.parse(entry.syncedAt) >= lower))
       .map(entry => {
-        const profit = exactAmount(entry.economics ? entry.economics.pnl?.amount : entry.profitBase);
+        const profit = exactAmount(entry.verifiedProfit?.amount ?? (entry.economics ? entry.economics.pnl?.amount : entry.profitBase));
         const volume = exactAmount(entry.economics ? entry.economics.volume?.amount : entry.volumeBase);
         const nav = exactAmount(entry.nav);
         const tvl = nav === null ? null : exactAmount(entry.economics?.navUsdEstimate);
@@ -195,6 +210,9 @@ export default function ArkaLeaderboard({ initialQuery = "" }: { initialQuery?: 
     return { rows, rankingUnit };
   }, [state.data, window, counts, sort, ascending, term]);
 
+  const verifiedProfits = rows.flatMap(({ entry }) => entry.verifiedProfit ? [entry.verifiedProfit] : []);
+  const latestProfitAt = verifiedProfits.reduce((latest, proof) => Math.max(latest, Date.parse(proof.asOf)), 0);
+  const hasEstimatedProfit = verifiedProfits.some(proof => proof.estimated);
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount - 1);
   const visible = rows.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
@@ -276,7 +294,8 @@ export default function ArkaLeaderboard({ initialQuery = "" }: { initialQuery?: 
         <p className="arka-leaderboard-note">
           {sort === "profit" && rows.every(row => row.profit === null) ? "Profit needs verified deposit and withdrawal history. " :
             sort === "nav" || sort === "profit" || sort === "volume" ? `Ranked in ${rankingUnit}. ` : ""}
-          — means data is unavailable.
+          {latestProfitAt > 0 ? `Profit as of ${profitDate.format(latestProfitAt)}.` : "— means data is unavailable."}
+          {hasEstimatedProfit && " ≈ uses historical exchange rates."}
         </p>
         {sort === "participants" && missingCounts !== "[]" && <p role="status">Checking participants…</p>}
         <table className="arka-leaderboard-table" role="table" aria-label="Arka leaderboard" aria-busy={state.status === "loading"}>
@@ -296,7 +315,10 @@ export default function ArkaLeaderboard({ initialQuery = "" }: { initialQuery?: 
                 <Link href={`/vaults/${entry.arkaId}`} aria-label={`View Arka ${arkaName}`}>{arkaName}</Link>
                 <small className="arka-leaderboard-manager" title={entry.manager}>Manager {formatContractLabel(entry.manager, 6, 4)}</small>
               </th>
-              <td role="cell" className="arka-leaderboard-profit" data-label="Profit">{profitUsd === null ? denominationAmount(entry, profit) : formatUsdBaseUnitAmount(profitUsd.toString())}
+              <td role="cell" className="arka-leaderboard-profit" data-label="Profit"><span
+                data-testid={entry.verifiedProfit ? "arka-profit-verified" : undefined}
+                title={entry.verifiedProfit ? `Mainnet ledger ${entry.verifiedProfit.ledger} · ${profitDate.format(Date.parse(entry.verifiedProfit.asOf))}` : undefined}
+              >{formatProfit(entry, profit, profitUsd)}</span>
                 {sort === "volume" && <small className="arka-leaderboard-manager">Volume {volumeUsd === null ? denominationAmount(entry, volume) : formatUsdBaseUnitAmount(volumeUsd.toString())}</small>}</td>
               <td role="cell" data-label="TVL">{tvl === null ? denominationAmount(entry, exactAmount(entry.nav)) : formatUsdBaseUnitAmount(tvl.toString())}</td>
               <td role="cell" data-label="Participants">{participants?.toLocaleString("en") ?? "—"}</td>

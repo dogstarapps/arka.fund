@@ -133,6 +133,13 @@ export interface ManagerIdentityMetadata extends IdentityMetadataBase {
   manager: string;
 }
 
+export interface VerifiedArkaProfit {
+  amount: string;
+  asOf: string;
+  ledger: number;
+  estimated: boolean;
+}
+
 export interface RankedArkaCatalogEntry {
   rank: number;
   arkaId: string;
@@ -142,6 +149,7 @@ export interface RankedArkaCatalogEntry {
   nav: string | null;
   navUnavailableReason?: string | null;
   profitBase?: string | null;
+  verifiedProfit?: VerifiedArkaProfit;
   volumeBase?: string | null;
   denominationContract: string | null;
   whitelistContracts: string[];

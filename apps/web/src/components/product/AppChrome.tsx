@@ -176,10 +176,9 @@ function OperatorRouteGate(props: {
       <span className="surface-eyebrow">Verified operator wallet</span>
       <h1 className="chrome-operator-gate-title">{props.routeLabel} stays behind governed access</h1>
       <p className="chrome-operator-gate-copy">
-        This route belongs to the advanced governance and operations surface. Connect an authorized operator wallet and sign the access challenge to open it from this shell.
-      </p>
-      <p className="chrome-operator-gate-copy chrome-operator-gate-copy-muted">
-        Contract-level authorization, transaction signatures and timelock execution still apply independently when a write action is attempted.
+        {UX_REVIEW_PREVIEW
+          ? "Operator verification is disabled in this read-only preview."
+          : "Connect an authorized operator wallet and sign the access challenge."}
       </p>
       {props.error ? (
         <p className="chrome-operator-gate-copy chrome-operator-gate-copy-error" role="alert">
@@ -191,7 +190,7 @@ function OperatorRouteGate(props: {
           type="button"
           className="surface-button surface-button-primary"
           onClick={props.onVerify}
-          disabled={props.busy || checking}
+          disabled={UX_REVIEW_PREVIEW || props.busy || checking}
           data-testid="operator-route-enable"
         >
           {checking ? "Checking access" : props.busy ? "Verifying wallet" : "Verify operator wallet"}
@@ -387,6 +386,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
   };
 
   const verifyOperatorAccess = async () => {
+    if (UX_REVIEW_PREVIEW) return;
     setOperatorBusy(true);
     setOperatorAccess((current) => ({ ...current, error: undefined }));
     try {
@@ -535,7 +535,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
               type="button"
               className="chrome-advanced-inline-action chrome-advanced-inline-action-primary"
               onClick={verifyOperatorAccess}
-              disabled={operatorBusy || operatorAccess.status === "checking"}
+              disabled={UX_REVIEW_PREVIEW || operatorBusy || operatorAccess.status === "checking"}
               data-testid="advanced-console-enable"
             >
               {operatorAccess.status === "checking"
@@ -614,7 +614,7 @@ export default function AppChrome({ children, redesign = false }: { children: Re
             </p>
           ) : null}
           {content}
-          {operatorConsole}
+          {!blockedUtilityRoute && operatorConsole}
         </div>
       </div>
     );

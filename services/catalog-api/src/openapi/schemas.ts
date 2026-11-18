@@ -271,6 +271,16 @@ export const catalogOpenApiSchemas: Record<string, unknown> = {
       curated: { type: "boolean" },
       delisted: { type: "boolean" },
       nav: exactInteger,
+      verifiedProfit: {
+        type: "object",
+        required: ["amount", "asOf", "ledger", "estimated"],
+        properties: {
+          amount: exactInteger,
+          asOf: { type: "string", format: "date-time" },
+          ledger: { type: "integer", minimum: 1 },
+          estimated: { type: "boolean" },
+        },
+      },
       denominationContract: { ...stellarAddress, nullable: true },
       whitelistContracts: { type: "array", items: stellarAddress },
       shareToken: { ...stellarAddress, nullable: true },

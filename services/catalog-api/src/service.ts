@@ -117,6 +117,7 @@ export class CatalogService {
   private readonly notifier: MonitoringNotifier;
   private readonly activityReader: ActivityReader;
   private readonly now: () => Date;
+  private syncInFlight?: Promise<CatalogSnapshot>;
 
   constructor(
     private readonly store: FileCatalogStore,
@@ -149,7 +150,12 @@ export class CatalogService {
     return this.identityStore.read();
   }
 
-  async sync(): Promise<CatalogSnapshot> {
+  sync(): Promise<CatalogSnapshot> {
+    this.syncInFlight ??= this.runSync().finally(() => { this.syncInFlight = undefined; });
+    return this.syncInFlight;
+  }
+
+  private async runSync(): Promise<CatalogSnapshot> {
     const startedAt = this.now().toISOString();
     try {
       const snapshot = await this.runner.run();

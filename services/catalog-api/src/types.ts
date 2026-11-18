@@ -87,6 +87,13 @@ export interface ArkaAssetExposure {
   syncedAt: string;
 }
 
+export interface VerifiedArkaProfit {
+  amount: string;
+  asOf: string;
+  ledger: number;
+  estimated: boolean;
+}
+
 export interface ArkaCatalogEntry {
   arkaId: string;
   manager: string;
@@ -94,6 +101,7 @@ export interface ArkaCatalogEntry {
   delisted: boolean;
   nav: string;
   sharePrice?: string;
+  verifiedProfit?: VerifiedArkaProfit;
   denominationContract: string | null;
   whitelistContracts: string[];
   shareToken: string | null;

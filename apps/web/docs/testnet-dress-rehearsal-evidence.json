@@ -1,0 +1,1101 @@
+{
+  "artifact": "arkafund-testnet-dress-rehearsal",
+  "version": 1,
+  "generatedAt": "2026-06-03T20:04:57.230Z",
+  "network": "testnet",
+  "status": "ready",
+  "paths": {
+    "reportPath": "docs/testnet-dress-rehearsal-evidence.json",
+    "evidenceRoot": "../arkafund/tmp",
+    "deploymentsPath": "config/deployments.testnet.json",
+    "txManifestPath": "../arkafund/deployments.testnet.json"
+  },
+  "summary": {
+    "requiredStepCount": 7,
+    "readyStepCount": 7,
+    "blockedStepCount": 0,
+    "sourceFileCount": 15,
+    "readableSourceFileCount": 15,
+    "contractIdCount": 250,
+    "transactionHashCount": 70,
+    "stateProofCount": 76,
+    "blockerCount": 0,
+    "warningCount": 4,
+    "maxReportAgeDays": 120
+  },
+  "blockers": [],
+  "warnings": [
+    "create_factory: Factory create legacy artifact proves state after execution but does not expose a direct Stellar transaction hash.",
+    "deposit_redeem: Deposit/redeem legacy artifact proves post-state balances but does not expose direct transaction hashes.",
+    "route_rebalance: Rebalance legacy artifact proves output delta and final balance but does not expose a direct transaction hash.",
+    "operator_protocols: Balanced/SODAX testnet lane is honestly recorded as blocked because no official public Stellar testnet quote/status/confirm surface is available."
+  ],
+  "steps": [
+    {
+      "id": "deployment_manifest",
+      "label": "Deploy/redeploy canonical testnet contracts",
+      "description": "Canonical testnet deployments, contract IDs, module transaction hashes and registry posture are present.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "dApp testnet deployments",
+          "path": "config/deployments.testnet.json",
+          "found": true,
+          "readable": true,
+          "sha256": "7f0cf55aa9f160f54ef2e3958782e9efd3122be25702bb1b37dd573dc034f632",
+          "bytes": 41113,
+          "error": null
+        },
+        {
+          "label": "contracts testnet transaction manifest",
+          "path": "../arkafund/deployments.testnet.json",
+          "found": true,
+          "readable": true,
+          "sha256": "3c3b1db35125041bdf842a5848332d7e6d11e0a242e263f4d6d1540346664831",
+          "bytes": 40882,
+          "error": null
+        }
+      ],
+      "contractCount": 129,
+      "accountCount": 16,
+      "transactionHashCount": 54,
+      "stateProofCount": 9,
+      "transactionHashes": [
+        {
+          "path": "txs.adapterSoroswap.init",
+          "value": "023a095f2415c4fcc2da8b7588c8539348481a168b8b97136cc121aa8070de91"
+        },
+        {
+          "path": "txs.adapterSoroswap.set_path",
+          "value": "0d21e28bd9571a12a9cf2fbb9f7c91bb56a9dbfa9a3283f2daa4c91837ad68b3"
+        },
+        {
+          "path": "txs.governedPolicy.set_governor",
+          "value": "33d3d501f2a4e38dce4d08bf296657fba4c70a8a078cc31f5232f5a27fa79f63"
+        },
+        {
+          "path": "txs.governedPolicy.set_fees",
+          "value": "4b71519f39764c02b8f0d1eb367e8fce81cc60356a1abd737501ff68f8f91013"
+        },
+        {
+          "path": "txs.coverageVault.deploy_token",
+          "value": "b908df56a1204496c4d774c423b28243fee3bd55ebd783d637d83aeb49cd5f35"
+        },
+        {
+          "path": "txs.coverageVault.deploy_vault",
+          "value": "1c149d4fa87cf073543081f9b07517b0553bb91b239313695137f2071c7f1662"
+        },
+        {
+          "path": "txs.coverageVault.init_token",
+          "value": "77ad622ab01be8e88980e135d82b88e19a55e9da80e6f7f81deb3f8d548f710b"
+        },
+        {
+          "path": "txs.coverageVault.init_vault",
+          "value": "16bbc1f71d02bc3935aec19540fb28d6421affc5c2bb18af67a480fb4453a61b"
+        },
+        {
+          "path": "txs.coverageVault.mint",
+          "value": "1245b0f4b23774367e8f00fbf515b27306cffecb3d6ae7659fda9c21c00bd340"
+        },
+        {
+          "path": "txs.coverageVault.approve",
+          "value": "cb6fcdcde8de4b13fd760791acf2a2c14cc1717df4c77c6c52ee0bcde88d44ea"
+        },
+        {
+          "path": "txs.coverageVault.deposit",
+          "value": "1c7e81b795be64c882203727f9351de13f44d6d1ef12621489c25bef1bdd5ae3"
+        },
+        {
+          "path": "txs.coverageVault.set_governor",
+          "value": "1f7b91de2d3460aa8f76e003a6d82a4f6711d6bfb8ff56cbd9805a0459d09825"
+        },
+        {
+          "path": "txs.coverageVault.set_lock_bps",
+          "value": "90f5bac186eaf6dd00a4a4b39358c27ffef56bd58bba3ab959e40ad9811a9e88"
+        },
+        {
+          "path": "txs.coverageVault.withdraw_700",
+          "value": "8e19bfce0e81b994cbffd643cd973d0dbfcc4da227b1be083aa94f227b8964b5"
+        },
+        {
+          "path": "txs.coverageVault.withdraw_1",
+          "value": "7035ba199a5216a05a2bc4487ce9ec0640a8c920ce349dd18fd11308c49c8228"
+        },
+        {
+          "path": "txs.coverageFund.deploy",
+          "value": "1d490d5404095f40bf070c91404697934fc56380755b70dbcc455329ead618d0"
+        },
+        {
+          "path": "txs.coverageFund.init",
+          "value": "8d6fa057e366ec9824fe5bfb45e05f91e56d8d84de05248dfe3eb908eebb6b98"
+        },
+        {
+          "path": "txs.coverageFund.mint_staker",
+          "value": "4322766c6186e1adb58207cc55635f7ee2d3698d7dc9bc2e50449b9288c9a744"
+        },
+        {
+          "path": "txs.coverageFund.mint_reward",
+          "value": "6680dc26d0dbe6be2f78efc24ce1a3852fca531f84f851f746dde7ac774fb31f"
+        },
+        {
+          "path": "txs.coverageFund.approve_staker",
+          "value": "ba8d1e9f0292b5ea3750fcc95b90d08cd86d810a0d2eaafdb239f5643a699702"
+        },
+        {
+          "path": "txs.coverageFund.approve_reward",
+          "value": "be42e5781aee33ad6bc88e3beb37778ef744f81bbb7e83a802ce61d5a1141357"
+        },
+        {
+          "path": "txs.coverageFund.stake",
+          "value": "1b72b3906a5590fbeb5ad6467eaf434f42e0aaf7b91919fbdaf3030214745e8f"
+        },
+        {
+          "path": "txs.coverageFund.add_rewards",
+          "value": "2a0012810e3d1779646e2c9764e92b8e6942ea0ed917b1307c3420c340f00b08"
+        },
+        {
+          "path": "txs.coverageFund.claim",
+          "value": "fba092fc747e01ad167a94104e58ec8c73747b25a285183679b15065bb41e944"
+        },
+        {
+          "path": "txs.coverageFund.unstake",
+          "value": "d0e72a6425ecc090a68de3c88e03c4d6c5c17824a92d134b2b15602759ba4229"
+        },
+        {
+          "path": "txs.adapterBlend.deploy_router_mock",
+          "value": "ee0a1203cdf157fcbbe025fffc21444e5c532bc4390d4f85d7682f2e7699af5a"
+        },
+        {
+          "path": "txs.adapterBlend.deploy_adapter",
+          "value": "9d60cc2a0f3dbd9f1f536a7d393435081e45e115ea273b6dfa431941d1508c17"
+        },
+        {
+          "path": "txs.adapterBlend.init",
+          "value": "aebcb84f956250002b03a5ea545aa8be58cb893a5b505b5d1f5c339dece386b6"
+        },
+        {
+          "path": "txs.adapterBlend.borrow",
+          "value": "eb73052ce7a527a6f142540bd5325ea6b221f4c33965e75cf9174ef67f2348ca"
+        },
+        {
+          "path": "txs.adapterBlend.liquidate",
+          "value": "d49cd2fd002fc837865ca18cc1726af3736c333a90772f77aa7fd233dd72515e"
+        },
+        {
+          "path": "txs.managerTier.deploy",
+          "value": "588da23071ff4e16ddc59e9116c0bcd055ca0784e09ca41c4449c8ff4fe3f18d"
+        },
+        {
+          "path": "txs.managerTier.init",
+          "value": "35a652fe323881b0c3d4d9da4798b4fb6e53b460a82936b3bc7f2c00a6d39f09"
+        },
+        {
+          "path": "txs.managerTier.set_governor",
+          "value": "9b666dc4a03d3a4d8d6923d590c5356de6f9af6d79ab633c174730162cc24d54"
+        },
+        {
+          "path": "txs.managerTier.add_points_120",
+          "value": "fc83d38a567e0a629b3277f1c143b48dc93e05975255901c8582616edf873191"
+        },
+        {
+          "path": "txs.managerTier.add_points_900",
+          "value": "06a2a5472ce027d0f7ed76adf6173932d495550b82b52b13c6df7e8e097e13c1"
+        },
+        {
+          "path": "txs.arkaMigration.factory_deploy",
+          "value": "d76c910c4d626a0aa6f3c1d755f284c9bf93cea4c44a26d0fc2e860f9ae7c324"
+        },
+        {
+          "path": "txs.arkaMigration.set_governor",
+          "value": "4c5895fee06ac1ba6f2565917c041b0382bc69ed8dbd2544cdcf1fbcebbcd51a"
+        },
+        {
+          "path": "txs.arkaMigration.set_implementation",
+          "value": "cb31be21983fffda840f3135e540964a51930387e172d57fac2676509e1242d7"
+        },
+        {
+          "path": "txs.arkaMigration.migrate",
+          "value": "ea1620a66d25251c974b700d2ff6de5fe1e81f335774ad7e8ef503f4153930fc"
+        },
+        {
+          "path": "validations.governanceHandoff.proposal.proposalTxHash",
+          "value": "50789af147b1aece90b58f252df57150c6ab55677c3914d0996058344c6dff3c"
+        },
+        {
+          "path": "txs.adapterPhoenix.deploy",
+          "value": "9af6030391c87e8196651e56cdcd6b21a5b66577d45e0d2f0912fb7676965098"
+        },
+        {
+          "path": "txs.adapterPhoenix.init",
+          "value": "2a6927c750e5be2ef9fb01d41555466522abb8af55d05d2e7e309a55796e4ab3"
+        },
+        {
+          "path": "validations.governanceHandoff.proposal.operationIdHex",
+          "value": "d8c0d87bd112ab28a2db3960bfe159da6b8a8fe04f2c9dba617c0391b02e6923"
+        },
+        {
+          "path": "validations.claimsCircuit.results.rejectedIncident.meta_hash",
+          "value": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        {
+          "path": "validations.claimsCircuit.results.executedIncident.meta_hash",
+          "value": "0202020202020202020202020202020202020202020202020202020202020202"
+        },
+        {
+          "path": "validations.graphqlBackendParity.digests.native",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.graphqlBackendParity.digests.graphql",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.subqueryBackendParity.digests.native",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.subqueryBackendParity.digests.graphql",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.ammTestnetRedeploy.aquariusPoolIndex",
+          "value": "9ac7a9cde23ac2ada11105eeaa42e43c2ea8332ca0aa8f41f58d7160274d718e"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.deploy_router_mock",
+          "value": "c36947e7926bf82cf83fd8102f295e74c0b5c1d212f4c53a8c24ecbc35cc09a4"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.deploy_adapter",
+          "value": "49f0a0e3269eb3ef67ab252b151a0a1ca5f903e4e0f44b6686aede649d73c2c3"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.init",
+          "value": "95fa6d11fe69650fd3b97b81d3e1599fbe174539686a78ef78e717e95804a7f9"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.execute_ok",
+          "value": "c53e4838cd8bd746b3b859e312fe9e175eb6a3d242ce9f7c2ece1c235210bf70"
+        }
+      ],
+      "stateProofs": [
+        {
+          "label": "deployments.network",
+          "value": "testnet"
+        },
+        {
+          "label": "canonical testnet RPC",
+          "value": "https://soroban-testnet.stellar.org"
+        },
+        {
+          "label": "validated module declarations",
+          "value": "5 fields"
+        },
+        {
+          "label": "tx namespace coverageVault",
+          "value": "11 fields"
+        },
+        {
+          "label": "tx namespace coverageFund",
+          "value": "10 fields"
+        },
+        {
+          "label": "tx namespace adapterBlend",
+          "value": "5 fields"
+        },
+        {
+          "label": "tx namespace governedPolicy",
+          "value": "2 fields"
+        },
+        {
+          "label": "tx namespace managerTier",
+          "value": "5 fields"
+        },
+        {
+          "label": "tx namespace arkaMigration",
+          "value": "6 fields"
+        }
+      ],
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "id": "create_factory",
+      "label": "Create Arka through the factory",
+      "description": "Factory-created Arka is visible in the manager list and has denomination, router and whitelist readbacks.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "create live validation",
+          "path": "../arkafund/tmp/create-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "37fd005df11429abec9cea8ea2fee020c7597744ce9ed691dda1b4ffb91a1a87",
+          "bytes": 3852,
+          "error": null
+        }
+      ],
+      "contractCount": 54,
+      "accountCount": 1,
+      "transactionHashCount": 0,
+      "stateProofCount": 6,
+      "transactionHashes": [],
+      "stateProofs": [
+        {
+          "label": "factory contract",
+          "value": "CAZPR5MIUHXH46ZJ5OAMRZXD7PXIHMF5HHSSKQPDUBEXVID5SAGSZ3HW"
+        },
+        {
+          "label": "new Arka contract",
+          "value": "CAIYJKY6KAPRQI5OHH2UKWQ5EXVWPUKCC2A45LYTENYEP5GI46CDU5XC"
+        },
+        {
+          "label": "router readback",
+          "value": "CAARCDANGZNLDR7CF5MRUA32VUBD6KAZMTNTVJKA5ISQHHKYMP7YFTTI"
+        },
+        {
+          "label": "manager Arka list grew and includes new Arka",
+          "value": "11 fields"
+        },
+        {
+          "label": "on-chain denomination matches requested denomination",
+          "value": "11 fields"
+        },
+        {
+          "label": "on-chain whitelist contains requested assets",
+          "value": "2 entries"
+        }
+      ],
+      "blockers": [],
+      "warnings": [
+        "Factory create legacy artifact proves state after execution but does not expose a direct Stellar transaction hash."
+      ]
+    },
+    {
+      "id": "deposit_redeem",
+      "label": "Deposit and redeem through a live Arka",
+      "description": "Wallet-backed holder balance, shares, NAV and liquid balance prove deposit/redeem state after execution.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "deposit/redeem live validation",
+          "path": "../arkafund/tmp/deposit-redeem-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "eb553dc33ef26a15e1b645218ed3eaf36e4a7b5fd8c8ef1cc4102099bb86f648",
+          "bytes": 507,
+          "error": null
+        }
+      ],
+      "contractCount": 2,
+      "accountCount": 2,
+      "transactionHashCount": 0,
+      "stateProofCount": 9,
+      "transactionHashes": [],
+      "stateProofs": [
+        {
+          "label": "Arka contract",
+          "value": "CDI5ORO35JQZMD33ILCSQ5QJGGGFLIDACN3CU2BGKL7VYPGHV6UD23XX"
+        },
+        {
+          "label": "deposit token",
+          "value": "CCZTCLMZFQ6MJSLIB72D5K3Z3B77XB2VZF3R6JIFDLWAKJLTVLIPBGKJ"
+        },
+        {
+          "label": "holder minted balance",
+          "value": "5000000"
+        },
+        {
+          "label": "validation deposit amount",
+          "value": "100000"
+        },
+        {
+          "label": "validation redeem shares",
+          "value": "50000"
+        },
+        {
+          "label": "holder balance after",
+          "value": "4950000"
+        },
+        {
+          "label": "holder shares after",
+          "value": "50000"
+        },
+        {
+          "label": "Arka NAV after",
+          "value": "50000"
+        },
+        {
+          "label": "Arka liquid balance after",
+          "value": "50000"
+        }
+      ],
+      "blockers": [],
+      "warnings": [
+        "Deposit/redeem legacy artifact proves post-state balances but does not expose direct transaction hashes."
+      ]
+    },
+    {
+      "id": "route_rebalance",
+      "label": "Route and rebalance against live adapters",
+      "description": "Live rebalance evidence proves protocol selection, router wiring, input/output assets and output delta.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "rebalance live validation",
+          "path": "../arkafund/tmp/rebalance-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "463db9e378b16fd5dfc71ee7017728cf39bc235327fec39c29dcc6aa1763100a",
+          "bytes": 890,
+          "error": null
+        }
+      ],
+      "contractCount": 7,
+      "accountCount": 1,
+      "transactionHashCount": 0,
+      "stateProofCount": 8,
+      "transactionHashes": [],
+      "stateProofs": [
+        {
+          "label": "Arka contract",
+          "value": "CAAF7UR755RTUJOIDYFVYBIVIWU543NQUBMNKELBQJI5TCUVZ7K5KYGW"
+        },
+        {
+          "label": "selected protocol",
+          "value": "AQUARIUS"
+        },
+        {
+          "label": "router contract",
+          "value": "CBCFTQSPDBAIZ6R6PJQKSQWKNKWH2QIV3I4J72SHWBIK3ADRRAM5A6GD"
+        },
+        {
+          "label": "input asset",
+          "value": "CBK4ZJLRNLURQ3YAVV65SF5EK42E3ZTJQEGPKNYEJOLYGADFVL4VIIFJ"
+        },
+        {
+          "label": "output asset",
+          "value": "CC6SCUIVRSQW6EPXGXXSY2HPZ6USWT56H4YR5XG37MMXYZ22UVJPPRR5"
+        },
+        {
+          "label": "swap amount",
+          "value": "100000"
+        },
+        {
+          "label": "wallet output delta",
+          "value": "97750"
+        },
+        {
+          "label": "after output balance",
+          "value": "97750"
+        }
+      ],
+      "blockers": [],
+      "warnings": [
+        "Rebalance legacy artifact proves output delta and final balance but does not expose a direct transaction hash."
+      ]
+    },
+    {
+      "id": "coverage_claims",
+      "label": "Coverage reserve, claims and rewards",
+      "description": "Coverage economics and claims-circuit evidence prove reserve accounting, incident approval and payout state.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "coverage claims live validation",
+          "path": "../arkafund/tmp/coverage-claims-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "d76929863e659b473117669a38d5f86872cb4f9c1f77b530d090ac76fdb2c039",
+          "bytes": 6208,
+          "error": null
+        }
+      ],
+      "contractCount": 142,
+      "accountCount": 25,
+      "transactionHashCount": 54,
+      "stateProofCount": 8,
+      "transactionHashes": [
+        {
+          "path": "txs.adapterSoroswap.init",
+          "value": "023a095f2415c4fcc2da8b7588c8539348481a168b8b97136cc121aa8070de91"
+        },
+        {
+          "path": "txs.adapterSoroswap.set_path",
+          "value": "0d21e28bd9571a12a9cf2fbb9f7c91bb56a9dbfa9a3283f2daa4c91837ad68b3"
+        },
+        {
+          "path": "txs.adapterPhoenix.deploy",
+          "value": "9af6030391c87e8196651e56cdcd6b21a5b66577d45e0d2f0912fb7676965098"
+        },
+        {
+          "path": "txs.adapterPhoenix.init",
+          "value": "2a6927c750e5be2ef9fb01d41555466522abb8af55d05d2e7e309a55796e4ab3"
+        },
+        {
+          "path": "txs.governedPolicy.set_governor",
+          "value": "33d3d501f2a4e38dce4d08bf296657fba4c70a8a078cc31f5232f5a27fa79f63"
+        },
+        {
+          "path": "txs.governedPolicy.set_fees",
+          "value": "4b71519f39764c02b8f0d1eb367e8fce81cc60356a1abd737501ff68f8f91013"
+        },
+        {
+          "path": "txs.coverageVault.deploy_token",
+          "value": "b908df56a1204496c4d774c423b28243fee3bd55ebd783d637d83aeb49cd5f35"
+        },
+        {
+          "path": "txs.coverageVault.deploy_vault",
+          "value": "1c149d4fa87cf073543081f9b07517b0553bb91b239313695137f2071c7f1662"
+        },
+        {
+          "path": "txs.coverageVault.init_token",
+          "value": "77ad622ab01be8e88980e135d82b88e19a55e9da80e6f7f81deb3f8d548f710b"
+        },
+        {
+          "path": "txs.coverageVault.init_vault",
+          "value": "16bbc1f71d02bc3935aec19540fb28d6421affc5c2bb18af67a480fb4453a61b"
+        },
+        {
+          "path": "txs.coverageVault.mint",
+          "value": "1245b0f4b23774367e8f00fbf515b27306cffecb3d6ae7659fda9c21c00bd340"
+        },
+        {
+          "path": "txs.coverageVault.approve",
+          "value": "cb6fcdcde8de4b13fd760791acf2a2c14cc1717df4c77c6c52ee0bcde88d44ea"
+        },
+        {
+          "path": "txs.coverageVault.deposit",
+          "value": "1c7e81b795be64c882203727f9351de13f44d6d1ef12621489c25bef1bdd5ae3"
+        },
+        {
+          "path": "txs.coverageVault.set_governor",
+          "value": "1f7b91de2d3460aa8f76e003a6d82a4f6711d6bfb8ff56cbd9805a0459d09825"
+        },
+        {
+          "path": "txs.coverageVault.set_lock_bps",
+          "value": "90f5bac186eaf6dd00a4a4b39358c27ffef56bd58bba3ab959e40ad9811a9e88"
+        },
+        {
+          "path": "txs.coverageVault.withdraw_700",
+          "value": "8e19bfce0e81b994cbffd643cd973d0dbfcc4da227b1be083aa94f227b8964b5"
+        },
+        {
+          "path": "txs.coverageVault.withdraw_1",
+          "value": "7035ba199a5216a05a2bc4487ce9ec0640a8c920ce349dd18fd11308c49c8228"
+        },
+        {
+          "path": "txs.coverageFund.deploy",
+          "value": "1d490d5404095f40bf070c91404697934fc56380755b70dbcc455329ead618d0"
+        },
+        {
+          "path": "txs.coverageFund.init",
+          "value": "8d6fa057e366ec9824fe5bfb45e05f91e56d8d84de05248dfe3eb908eebb6b98"
+        },
+        {
+          "path": "txs.coverageFund.mint_staker",
+          "value": "4322766c6186e1adb58207cc55635f7ee2d3698d7dc9bc2e50449b9288c9a744"
+        },
+        {
+          "path": "txs.coverageFund.mint_reward",
+          "value": "6680dc26d0dbe6be2f78efc24ce1a3852fca531f84f851f746dde7ac774fb31f"
+        },
+        {
+          "path": "txs.coverageFund.approve_staker",
+          "value": "ba8d1e9f0292b5ea3750fcc95b90d08cd86d810a0d2eaafdb239f5643a699702"
+        },
+        {
+          "path": "txs.coverageFund.approve_reward",
+          "value": "be42e5781aee33ad6bc88e3beb37778ef744f81bbb7e83a802ce61d5a1141357"
+        },
+        {
+          "path": "txs.coverageFund.stake",
+          "value": "1b72b3906a5590fbeb5ad6467eaf434f42e0aaf7b91919fbdaf3030214745e8f"
+        },
+        {
+          "path": "txs.coverageFund.add_rewards",
+          "value": "2a0012810e3d1779646e2c9764e92b8e6942ea0ed917b1307c3420c340f00b08"
+        },
+        {
+          "path": "txs.coverageFund.claim",
+          "value": "fba092fc747e01ad167a94104e58ec8c73747b25a285183679b15065bb41e944"
+        },
+        {
+          "path": "txs.coverageFund.unstake",
+          "value": "d0e72a6425ecc090a68de3c88e03c4d6c5c17824a92d134b2b15602759ba4229"
+        },
+        {
+          "path": "txs.adapterBlend.deploy_router_mock",
+          "value": "ee0a1203cdf157fcbbe025fffc21444e5c532bc4390d4f85d7682f2e7699af5a"
+        },
+        {
+          "path": "txs.adapterBlend.deploy_adapter",
+          "value": "9d60cc2a0f3dbd9f1f536a7d393435081e45e115ea273b6dfa431941d1508c17"
+        },
+        {
+          "path": "txs.adapterBlend.init",
+          "value": "aebcb84f956250002b03a5ea545aa8be58cb893a5b505b5d1f5c339dece386b6"
+        },
+        {
+          "path": "txs.adapterBlend.borrow",
+          "value": "eb73052ce7a527a6f142540bd5325ea6b221f4c33965e75cf9174ef67f2348ca"
+        },
+        {
+          "path": "txs.adapterBlend.liquidate",
+          "value": "d49cd2fd002fc837865ca18cc1726af3736c333a90772f77aa7fd233dd72515e"
+        },
+        {
+          "path": "txs.managerTier.deploy",
+          "value": "588da23071ff4e16ddc59e9116c0bcd055ca0784e09ca41c4449c8ff4fe3f18d"
+        },
+        {
+          "path": "txs.managerTier.init",
+          "value": "35a652fe323881b0c3d4d9da4798b4fb6e53b460a82936b3bc7f2c00a6d39f09"
+        },
+        {
+          "path": "txs.managerTier.set_governor",
+          "value": "9b666dc4a03d3a4d8d6923d590c5356de6f9af6d79ab633c174730162cc24d54"
+        },
+        {
+          "path": "txs.managerTier.add_points_120",
+          "value": "fc83d38a567e0a629b3277f1c143b48dc93e05975255901c8582616edf873191"
+        },
+        {
+          "path": "txs.managerTier.add_points_900",
+          "value": "06a2a5472ce027d0f7ed76adf6173932d495550b82b52b13c6df7e8e097e13c1"
+        },
+        {
+          "path": "txs.arkaMigration.factory_deploy",
+          "value": "d76c910c4d626a0aa6f3c1d755f284c9bf93cea4c44a26d0fc2e860f9ae7c324"
+        },
+        {
+          "path": "txs.arkaMigration.set_governor",
+          "value": "4c5895fee06ac1ba6f2565917c041b0382bc69ed8dbd2544cdcf1fbcebbcd51a"
+        },
+        {
+          "path": "txs.arkaMigration.set_implementation",
+          "value": "cb31be21983fffda840f3135e540964a51930387e172d57fac2676509e1242d7"
+        },
+        {
+          "path": "txs.arkaMigration.migrate",
+          "value": "ea1620a66d25251c974b700d2ff6de5fe1e81f335774ad7e8ef503f4153930fc"
+        },
+        {
+          "path": "validations.governanceHandoff.proposal.proposalTxHash",
+          "value": "50789af147b1aece90b58f252df57150c6ab55677c3914d0996058344c6dff3c"
+        },
+        {
+          "path": "validations.governanceHandoff.proposal.operationIdHex",
+          "value": "d8c0d87bd112ab28a2db3960bfe159da6b8a8fe04f2c9dba617c0391b02e6923"
+        },
+        {
+          "path": "validations.claimsCircuit.results.rejectedIncident.meta_hash",
+          "value": "0101010101010101010101010101010101010101010101010101010101010101"
+        },
+        {
+          "path": "validations.claimsCircuit.results.executedIncident.meta_hash",
+          "value": "0202020202020202020202020202020202020202020202020202020202020202"
+        },
+        {
+          "path": "validations.graphqlBackendParity.digests.native",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.graphqlBackendParity.digests.graphql",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.subqueryBackendParity.digests.native",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.subqueryBackendParity.digests.graphql",
+          "value": "5378ae352f7ed4d7a1e4d55f85574265c95c0d7fcd3057bb4cdbd8cabaad2c55"
+        },
+        {
+          "path": "validations.ammTestnetRedeploy.aquariusPoolIndex",
+          "value": "9ac7a9cde23ac2ada11105eeaa42e43c2ea8332ca0aa8f41f58d7160274d718e"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.deploy_router_mock",
+          "value": "c36947e7926bf82cf83fd8102f295e74c0b5c1d212f4c53a8c24ecbc35cc09a4"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.deploy_adapter",
+          "value": "49f0a0e3269eb3ef67ab252b151a0a1ca5f903e4e0f44b6686aede649d73c2c3"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.init",
+          "value": "95fa6d11fe69650fd3b97b81d3e1599fbe174539686a78ef78e717e95804a7f9"
+        },
+        {
+          "path": "legacyTxs.adapterBalanced.execute_ok",
+          "value": "c53e4838cd8bd746b3b859e312fe9e175eb6a3d242ce9f7c2ece1c235210bf70"
+        }
+      ],
+      "stateProofs": [
+        {
+          "label": "coverageEconomics.network",
+          "value": "testnet"
+        },
+        {
+          "label": "claimsCircuit.network",
+          "value": "testnet"
+        },
+        {
+          "label": "coverage premium receipt",
+          "value": "7 fields"
+        },
+        {
+          "label": "coverage reward claim",
+          "value": "2 fields"
+        },
+        {
+          "label": "fund metrics after premium",
+          "value": "23 fields"
+        },
+        {
+          "label": "rejected claim state",
+          "value": "19 fields"
+        },
+        {
+          "label": "approved claim plan",
+          "value": "5 fields"
+        },
+        {
+          "label": "executed claim state",
+          "value": "19 fields"
+        }
+      ],
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "id": "governance_execution",
+      "label": "Governance voting, timelock and execution handoff",
+      "description": "Governor, votes, executor, lock and proposal transaction evidence prove governed execution posture.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "governance live validation",
+          "path": "../arkafund/tmp/governance-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "23dce08e1be3e8774dba16e3bd3652337a2cac9f7ac8abb12fb05147f799c14b",
+          "bytes": 558,
+          "error": null
+        },
+        {
+          "label": "governance handoff live validation",
+          "path": "../arkafund/tmp/governance-handoff-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "1642a3b73f23f9f24184610482cc5467751b5f4392f3f81fe2e960b7fa8eeb8d",
+          "bytes": 829,
+          "error": null
+        }
+      ],
+      "contractCount": 7,
+      "accountCount": 2,
+      "transactionHashCount": 1,
+      "stateProofCount": 10,
+      "transactionHashes": [
+        {
+          "path": "proposal.proposalTxHash",
+          "value": "50789af147b1aece90b58f252df57150c6ab55677c3914d0996058344c6dff3c"
+        }
+      ],
+      "stateProofs": [
+        {
+          "label": "governor contract",
+          "value": "CA7M24IEJYLHK7VXMBFO5JRDOPWGHH2AZI4XC3SV5BZIGYDLQVFSFQ2G"
+        },
+        {
+          "label": "votes contract",
+          "value": "CB2YJNQZKQRG56ZEQAJ3IXRVAXMQF2X5RKKAEKZLM4G6UBUC54T7L4M2"
+        },
+        {
+          "label": "proposal threshold",
+          "value": "1"
+        },
+        {
+          "label": "vote period",
+          "value": "720"
+        },
+        {
+          "label": "timelock",
+          "value": "5"
+        },
+        {
+          "label": "quorum bps",
+          "value": "100"
+        },
+        {
+          "label": "governance handoff network",
+          "value": "testnet"
+        },
+        {
+          "label": "proposal transaction hash",
+          "value": "50789af147b1aece90b58f252df57150c6ab55677c3914d0996058344c6dff3c"
+        },
+        {
+          "label": "current votes after handoff",
+          "value": "220"
+        },
+        {
+          "label": "locked balance after handoff",
+          "value": "220"
+        }
+      ],
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "id": "operator_protocols",
+      "label": "Operator, oracle, routing, protocol and indexer lanes",
+      "description": "Oracle guard, swap guardrails, Blend, Balanced/SODAX posture, tokenomics, off-chain catalog and indexer evidence are present.",
+      "status": "ready",
+      "evidenceFiles": [
+        {
+          "label": "oracle guard live validation",
+          "path": "../arkafund/tmp/oracle-guard-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "1e63908e1078b548ea7f0bb981591456f603742b80d1d7766b3eb925227d33b3",
+          "bytes": 1756,
+          "error": null
+        },
+        {
+          "label": "swap guardrails live validation",
+          "path": "../arkafund/tmp/swap-guardrails-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "17b9c1f8c180d1f128ea5f28a2e59ee76686093d30a7bad53996dc195816e79a",
+          "bytes": 1052,
+          "error": null
+        },
+        {
+          "label": "Balanced/SODAX readiness validation",
+          "path": "../arkafund/tmp/balanced-readiness-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "f44f3c46b3e41e2bec3d20184acbcd2ff837f540b69fadedf30b7001c8c6e745",
+          "bytes": 1013,
+          "error": null
+        },
+        {
+          "label": "Blend live validation",
+          "path": "../arkafund/tmp/blend-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "2bb5df6c9c945426b103852c202bff4243acf9de4b02fede24154a8b10af0eae",
+          "bytes": 447,
+          "error": null
+        },
+        {
+          "label": "indexer event surface validation",
+          "path": "../arkafund/tmp/indexer-event-surface-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "f0a7530e957b54e8ed78788e5bcc67d10e37f7cfd6f2a62f0aebf168d4b21066",
+          "bytes": 5329,
+          "error": null
+        },
+        {
+          "label": "tokenomics live validation",
+          "path": "../arkafund/tmp/tokenomics-live-validation.json",
+          "found": true,
+          "readable": true,
+          "sha256": "5bf6e90ddebf958f48fcecd81563e13416320a8fe4f8474ff2859a45806eea61",
+          "bytes": 1785,
+          "error": null
+        },
+        {
+          "label": "off-chain testnet stack validation",
+          "path": "../arkafund/tmp/offchain-testnet-stack.json",
+          "found": true,
+          "readable": true,
+          "sha256": "31a377783844cad4277cd9e49469f071a6920c7172772c7cdb9da3269425ccd6",
+          "bytes": 2181,
+          "error": null
+        }
+      ],
+      "contractCount": 36,
+      "accountCount": 25,
+      "transactionHashCount": 15,
+      "stateProofCount": 26,
+      "transactionHashes": [
+        {
+          "path": "registryEvents[0].txHash",
+          "value": "6dfaa7b56ba746518b4e45ea784fb47763c756934bb2bd1bf63f2c8fa2dff7f3"
+        },
+        {
+          "path": "registryEvents[1].txHash",
+          "value": "cef598cb66b8737766d974968fbc02862d238c10cfc742e154ce2a0a943ed8c6"
+        },
+        {
+          "path": "registryEvents[2].txHash",
+          "value": "112b8ebed1ce37366b8cabb6e76e2ae800b527bb6324ff8310414c474ebd304f"
+        },
+        {
+          "path": "registryEvents[3].txHash",
+          "value": "c4814cb9fb491d0a1c0094bd90e1a7675bc44a9deed283e3caf56a01a2a808f1"
+        },
+        {
+          "path": "registryEvents[4].txHash",
+          "value": "3f04dc0717d7e5e433d87f9f1f8c720e29438f42556c941ac08f74dce0f37ac3"
+        },
+        {
+          "path": "arkaEvents[0].txHash",
+          "value": "b570a301c8c7d2b10062e7af0799673e57ffc2c6c4718e1f0875b200397d85f8"
+        },
+        {
+          "path": "arkaEvents[1].txHash",
+          "value": "0902e51c2f2ab2ed644301cd2a9190b81abb83aa54603d118021275cf779ca84"
+        },
+        {
+          "path": "arkaEvents[2].txHash",
+          "value": "36e02cdf16a8a01b80de18a49ae77bde705efd44cc7740156dbfdcec1bb8316f"
+        },
+        {
+          "path": "arkaEvents[3].txHash",
+          "value": "34fbad8b057a0e3841ba47b4c035837dc4530324027a33554284b15e71392542"
+        },
+        {
+          "path": "arkaEvents[4].txHash",
+          "value": "96aa1561b3f504beedab28ce702955c76f3fb7747e5b39a767af1873550afc1e"
+        },
+        {
+          "path": "arkaEvents[5].txHash",
+          "value": "9a8543d1a5403a5291ac9848807e5f267974d6d7ebf4c03cca05dd5eb84935af"
+        },
+        {
+          "path": "arkaEvents[6].txHash",
+          "value": "4d2b0966fea3b50895bbf2fca7664555693a66eec8fbcc176bba445113185efb"
+        },
+        {
+          "path": "arkaEvents[7].txHash",
+          "value": "bd573290bf5b70dbc0ff7522aff9ee909515a76520cfbd09ad76031a2ed03db4"
+        },
+        {
+          "path": "arkaEvents[8].txHash",
+          "value": "87b18a5ccd24eb6db502af2212557990a0bec5f5dc6fc45cec1e8584cf83fd48"
+        },
+        {
+          "path": "arkaEvents[9].txHash",
+          "value": "389f09ba27be131e491012876d639e2280bfd0449e456b93dd3a1ef8a52315bd"
+        }
+      ],
+      "stateProofs": [
+        {
+          "label": "oracle guard network",
+          "value": "testnet"
+        },
+        {
+          "label": "oracle guard secondary selection",
+          "value": "12 fields"
+        },
+        {
+          "label": "oracle guard stale fallback",
+          "value": "12 fields"
+        },
+        {
+          "label": "oracle guard fail-closed",
+          "value": "12 fields"
+        },
+        {
+          "label": "swap guardrails network",
+          "value": "testnet"
+        },
+        {
+          "label": "successful guarded rebalance",
+          "value": "100000"
+        },
+        {
+          "label": "blocked disallowed adapter",
+          "value": "true"
+        },
+        {
+          "label": "blocked price impact",
+          "value": "true"
+        },
+        {
+          "label": "Balanced readiness network",
+          "value": "testnet"
+        },
+        {
+          "label": "Balanced support state declared",
+          "value": "blocked"
+        },
+        {
+          "label": "Balanced lane mode declared",
+          "value": "legacy_comet"
+        },
+        {
+          "label": "Blend Arka",
+          "value": "CDWRIYBJDT7VQBD67VXR2GYDE6GMF7QTQ7UB6FB3LQOXUOT5J7IU2243"
+        },
+        {
+          "label": "Blend pool",
+          "value": "CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF"
+        },
+        {
+          "label": "Blend action amount",
+          "value": "1000000"
+        },
+        {
+          "label": "Blend minimum health factor",
+          "value": "12500000"
+        },
+        {
+          "label": "indexer start ledger",
+          "value": "1757965"
+        },
+        {
+          "label": "indexer end ledger",
+          "value": "1757986"
+        },
+        {
+          "label": "registry events",
+          "value": "5 entries"
+        },
+        {
+          "label": "Arka events",
+          "value": "10 entries"
+        },
+        {
+          "label": "tokenomics network",
+          "value": "testnet"
+        },
+        {
+          "label": "tokenomics grant",
+          "value": "9 fields"
+        },
+        {
+          "label": "tokenomics stream",
+          "value": "7 fields"
+        },
+        {
+          "label": "team votes final",
+          "value": "1000"
+        },
+        {
+          "label": "off-chain stack network",
+          "value": "testnet"
+        },
+        {
+          "label": "catalog bootstrap health",
+          "value": "9 fields"
+        },
+        {
+          "label": "dApp catalog health",
+          "value": "200"
+        }
+      ],
+      "blockers": [],
+      "warnings": [
+        "Balanced/SODAX testnet lane is honestly recorded as blocked because no official public Stellar testnet quote/status/confirm surface is available."
+      ]
+    }
+  ]
+}

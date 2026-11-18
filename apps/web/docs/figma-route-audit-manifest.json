@@ -1,0 +1,1164 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-05-19",
+  "figmaFile": "3RlH484r3hru8HUuqqM9e9/dogstar-value",
+  "referenceRoot": "public/figma/references",
+  "currentRoot": "../arkafund/tmp/design-audit/current",
+  "manualRoot": "docs/screenshots/dapp-manual",
+  "defaultViewport": {
+    "width": 1365,
+    "height": 768
+  },
+  "captures": [
+    {
+      "key": "dashboard",
+      "title": "Dashboard shell",
+      "route": "/dashboard",
+      "figmaNode": "1:2",
+      "frameFamily": "public-dashboard",
+      "currentFile": "dashboard-current.png",
+      "manualFile": "dashboard-current.png",
+      "referenceFile": "vaults screens(4).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "metric-values-and-captions",
+          "xPct": 5.4,
+          "yPct": 31.5,
+          "widthPct": 68.4,
+          "heightPct": 15.8
+        },
+        {
+          "label": "featured-arka-card-values",
+          "xPct": 6.2,
+          "yPct": 69.2,
+          "widthPct": 67.2,
+          "heightPct": 24.4
+        }
+      ],
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(4).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "discover",
+      "title": "Discover landing",
+      "route": "/discover",
+      "figmaNode": "1:2",
+      "frameFamily": "public-dashboard",
+      "currentFile": "discover-current.png",
+      "manualFile": "discover-current.png",
+      "referenceFile": "vaults screens(4).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "metric-values-and-captions",
+          "xPct": 5.4,
+          "yPct": 31.5,
+          "widthPct": 68.4,
+          "heightPct": 15.8
+        },
+        {
+          "label": "featured-arka-card-values",
+          "xPct": 6.2,
+          "yPct": 69.2,
+          "widthPct": 67.2,
+          "heightPct": 24.4
+        }
+      ],
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(4).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create",
+      "title": "Create wizard",
+      "route": "/factory/create",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-current.png",
+      "manualFile": "create-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-entry"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-basics",
+      "title": "Create wizard - basics step",
+      "route": "/factory/create?step=basics",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-basics-current.png",
+      "manualFile": "create-basics-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-basics"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-fees",
+      "title": "Create wizard - fees step",
+      "route": "/factory/create?step=fees",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-fees-current.png",
+      "manualFile": "create-fees-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-fees"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-deposits",
+      "title": "Create wizard - deposits step",
+      "route": "/factory/create?step=deposits",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-deposits-current.png",
+      "manualFile": "create-deposits-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-deposits"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-redemptions",
+      "title": "Create wizard - redemptions step",
+      "route": "/factory/create?step=redemptions",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-redemptions-current.png",
+      "manualFile": "create-redemptions-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-redemptions"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-assets",
+      "title": "Create wizard - assets management step",
+      "route": "/factory/create?step=assets",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-assets-current.png",
+      "manualFile": "create-assets-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-assets-management"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "create-review",
+      "title": "Create wizard - review step",
+      "route": "/factory/create?step=review",
+      "figmaNode": "61:7007",
+      "frameFamily": "create-wizard",
+      "currentFile": "create-review-current.png",
+      "manualFile": "create-review-current.png",
+      "referenceFile": "vaults screens(13).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "dynamicMaskRegions": [
+        {
+          "label": "create-stage-copy",
+          "xPct": 5.6,
+          "yPct": 15.3,
+          "widthPct": 72.5,
+          "heightPct": 15.4
+        },
+        {
+          "label": "create-step-card-copy",
+          "xPct": 6.2,
+          "yPct": 36,
+          "widthPct": 39,
+          "heightPct": 30.8
+        },
+        {
+          "label": "create-stepper-state",
+          "xPct": 81.5,
+          "yPct": 25.5,
+          "widthPct": 13.5,
+          "heightPct": 43
+        }
+      ],
+      "states": [
+        "loaded",
+        "wizard-review"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(13).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "bounded-dynamic-mask-regions",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "vaults",
+      "title": "Arkas leaderboard",
+      "route": "/vaults",
+      "figmaNode": "34:7072",
+      "frameFamily": "arkas-leaderboard",
+      "currentFile": "vaults-current.png",
+      "manualFile": "vaults-current.png",
+      "referenceFile": "vaults screens(5).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(5).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "assets",
+      "title": "Assets surface",
+      "route": "/assets",
+      "figmaNode": "66:7347",
+      "frameFamily": "assets-table",
+      "currentFile": "assets-current.png",
+      "manualFile": "assets-current.png",
+      "referenceFile": "vaults screens(9).png",
+      "strictSimilarity": 0.9,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(9).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "vault-profile",
+      "title": "Vault profile",
+      "route": "/vaults/CA7ALPHAQFK2MZKJY4R5S8N2P1T6V9W3X7Y2Z5ABCD1EFGH2345678IJ",
+      "figmaNode": "39:300",
+      "frameFamily": "vault-detail",
+      "currentFile": "vault-profile-current.png",
+      "manualFile": "vault-profile-current.png",
+      "referenceFile": "vaults screens(6).png",
+      "strictSimilarity": 0.88,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(6).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "integrations",
+      "title": "Integrations product/operator surface",
+      "route": "/integrations",
+      "figmaNode": "87:15027",
+      "frameFamily": "integrations",
+      "currentFile": "integrations-current.png",
+      "manualFile": "integrations-current.png",
+      "referenceFile": "vaults screens(10).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(10).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "managers",
+      "title": "Managers leaderboard",
+      "route": "/managers",
+      "figmaNode": "34:7072",
+      "frameFamily": "derived-leaderboard",
+      "currentFile": "managers-current.png",
+      "manualFile": "managers-current.png",
+      "referenceFile": "vaults screens(14).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(14).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "asset-profile",
+      "title": "Asset profile",
+      "route": "/assets/CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
+      "figmaNode": "66:7347",
+      "frameFamily": "derived-assets",
+      "currentFile": "asset-profile-current.png",
+      "manualFile": "asset-profile-current.png",
+      "referenceFile": "vaults screens(9).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(9).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "asset-profile-core-registry",
+      "title": "Asset profile - core registry fallback",
+      "route": "/assets/CDCKFBZYF2AQCSM3JOF2ZM27O3Y6AJAI4OTCQKAFNZ3FHBYUTFOKICIY",
+      "figmaNode": "66:7347",
+      "frameFamily": "derived-assets",
+      "currentFile": "asset-profile-core-registry-current.png",
+      "manualFile": "asset-profile-core-registry-current.png",
+      "referenceFile": "vaults screens(9).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(9).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "manager-profile",
+      "title": "Manager profile",
+      "route": "/managers/GCAALPHA7RTH9KLMNOPQ2UVWX3YZ56789ABCDEFGHJKLMNPRSTUV4WX",
+      "figmaNode": "34:7072",
+      "frameFamily": "derived-leaderboard",
+      "currentFile": "manager-profile-current.png",
+      "manualFile": "manager-profile-current.png",
+      "referenceFile": "vaults screens(14).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(14).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "vault-ops-index",
+      "title": "Vault ops index",
+      "route": "/arkas",
+      "figmaNode": "39:300",
+      "frameFamily": "wallet-execution",
+      "currentFile": "vault-ops-current.png",
+      "manualFile": "vault-ops-current.png",
+      "referenceFile": "vaults screens(6).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(6).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "vault-ops-detail",
+      "title": "Vault ops detail",
+      "route": "/arkas/TEST_BLEND_VAULT",
+      "figmaNode": "39:300",
+      "frameFamily": "wallet-execution",
+      "currentFile": "vault-ops-detail-current.png",
+      "manualFile": "vault-ops-detail-current.png",
+      "referenceFile": "vaults screens(6).png",
+      "strictSimilarity": 0.86,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "figma-reference",
+      "sourceAsset": "public/figma/references/vaults screens(6).png",
+      "auditRules": [
+        "pixel-compare-against-committed-figma-export",
+        "typography-rhythm",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "governance",
+      "title": "Governance",
+      "route": "/governance",
+      "figmaNode": null,
+      "frameFamily": "derived-governance",
+      "currentFile": "governance-current.png",
+      "manualFile": "governance-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "derived-control-surface-layout",
+        "dao-state-must-be-runtime-backed",
+        "transaction-controls-require-wallet-state",
+        "no-overlap-or-horizontal-overflow",
+        "operator-only-actions-must-stay-visually-separated"
+      ]
+    },
+    {
+      "key": "coverage",
+      "title": "Coverage",
+      "route": "/coverage",
+      "figmaNode": null,
+      "frameFamily": "derived-coverage",
+      "currentFile": "coverage-current.png",
+      "manualFile": "coverage-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": false,
+      "states": [
+        "public-loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "derived-coverage-surface-layout",
+        "coverage-balances-must-be-runtime-backed",
+        "wallet-actions-require-confirmation-state",
+        "no-overlap-or-horizontal-overflow",
+        "public-copy-must-not-promise-unavailable-actions"
+      ]
+    },
+    {
+      "key": "ops",
+      "title": "Operations control room",
+      "route": "/ops",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "ops-current.png",
+      "manualFile": "ops-current.png",
+      "referenceFile": "vaults screens(11).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-from-figma-family",
+      "sourceAsset": "public/figma/references/vaults screens(11).png",
+      "auditRules": [
+        "derived-from-nearest-figma-family",
+        "visual-rhythm-match",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "contracts",
+      "title": "Contracts",
+      "route": "/contracts",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "contracts-current.png",
+      "manualFile": "contracts-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "derived-contract-console-layout",
+        "mutation-controls-must-be-operator-gated",
+        "payload-preview-must-show-target-method-and-typed-args",
+        "no-overlap-or-horizontal-overflow",
+        "json-panels-must-wrap-and-scroll-inside-container"
+      ]
+    },
+    {
+      "key": "settings",
+      "title": "Settings",
+      "route": "/settings",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "settings-current.png",
+      "manualFile": "settings-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "derived-settings-surface-layout",
+        "configuration-values-must-come-from-runtime-env-or-contract-map",
+        "guardrail-copy-must-match-dao-policy",
+        "no-overlap-or-horizontal-overflow",
+        "raw-json-debug-output-must-stay-operator-contextual"
+      ]
+    },
+    {
+      "key": "status",
+      "title": "Status",
+      "route": "/status",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "status-current.png",
+      "manualFile": "status-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "derived-status-surface-layout",
+        "oracle-cutover-state-must-be-runtime-backed",
+        "routing-solver-state-must-be-runtime-backed",
+        "no-overlap-or-horizontal-overflow",
+        "blocked-state-copy-must-name-missing-evidence"
+      ]
+    },
+    {
+      "key": "tiers",
+      "title": "Manager tiers",
+      "route": "/tiers",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "tiers-current.png",
+      "manualFile": "tiers-current.png",
+      "referenceFile": "vaults screens(8).png",
+      "strictSimilarity": 0.84,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-from-figma-family",
+      "sourceAsset": "public/figma/references/vaults screens(8).png",
+      "auditRules": [
+        "derived-from-nearest-figma-family",
+        "visual-rhythm-match",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "migrations",
+      "title": "Migrations",
+      "route": "/migrations",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "migrations-current.png",
+      "manualFile": "migrations-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "operator-migration-workspace-layout",
+        "migration-payloads-must-be-previewed-before-execution",
+        "dao-boundary-copy-must-stay-visible",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "governance-console",
+      "title": "DAO Console",
+      "route": "/governance/console",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "governance-console-current.png",
+      "manualFile": "governance-console-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "dao-composer-console-layout",
+        "proposal-payload-preview-must-be-visible",
+        "governed-action-risk-copy-must-stay-attached",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    },
+    {
+      "key": "integrations-operator",
+      "title": "Integration Ops",
+      "route": "/integrations/operator",
+      "figmaNode": null,
+      "frameFamily": "operator-console",
+      "currentFile": "integrations-operator-current.png",
+      "manualFile": "integrations-operator-current.png",
+      "referenceFile": null,
+      "strictSimilarity": null,
+      "fullPage": false,
+      "requiresOperator": true,
+      "states": [
+        "operator-verified",
+        "loaded"
+      ],
+      "viewports": [
+        {
+          "name": "desktop",
+          "width": 1365,
+          "height": 768
+        }
+      ],
+      "referenceDisposition": "derived-without-figma-reference",
+      "sourceAsset": null,
+      "auditRules": [
+        "operator-integration-workspace-layout",
+        "protocol-execution-evidence-must-be-runtime-backed",
+        "balanced-sodax-status-must-not-pretend-router-contract",
+        "no-overlap-or-horizontal-overflow",
+        "truthful-runtime-data-only"
+      ]
+    }
+  ],
+  "requiredViewportFamilies": [
+    {
+      "name": "desktop",
+      "width": 1365,
+      "height": 768,
+      "purpose": "primary Figma desktop frame and pixel-diff baseline"
+    },
+    {
+      "name": "tablet",
+      "width": 1024,
+      "height": 768,
+      "purpose": "containment regression for public and operator shells"
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844,
+      "purpose": "responsive no-overflow regression; not a strict Figma pixel target"
+    }
+  ],
+  "referencePolicy": {
+    "figmaMapped": "Every capture with a figmaNode must use a committed Figma export under public/figma/references.",
+    "derived": "A capture without a direct Figma node must declare referenceDisposition and auditRules instead of pretending to be pixel-comparable.",
+    "dynamicRegions": "Dynamic live data may be masked only through bounded dynamicMaskRegions and must stay sparse."
+  }
+}

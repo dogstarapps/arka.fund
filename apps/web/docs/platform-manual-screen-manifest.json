@@ -1,0 +1,461 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-05-21",
+  "manualPath": "docs/ARKAFUND_FINAL_PLATFORM_MANUAL_2026-05-21.md",
+  "screenshotRoot": "docs/screenshots/dapp-manual",
+  "figmaAuditManifest": "docs/figma-route-audit-manifest.json",
+  "status": {
+    "scope": "Final T25 platform manual for the current dApp before testnet dress rehearsal and final mainnet cutover.",
+    "globalProgressAfterCompletion": "98.74% implemented / 1.26% remaining",
+    "completedItemsAfterCompletion": "25 / 27",
+    "remainingItemsAfterCompletion": [
+      "T26 Testnet Dress Rehearsal",
+      "T27 Final Mainnet Cutover"
+    ]
+  },
+  "mainnetBlockers": [
+    {
+      "key": "testnet-dress-rehearsal",
+      "title": "T26 testnet dress rehearsal is not yet complete",
+      "evidenceRef": "docs/REMAINING_SINGLE_ITERATION_PLAN_2026-05-18.md",
+      "description": "The full create/deposit/route/rebalance/coverage/governance/operator path still needs final production-like testnet evidence and transaction hashes."
+    },
+    {
+      "key": "mainnet-cutover",
+      "title": "T27 final mainnet cutover is intentionally pending",
+      "evidenceRef": "docs/REMAINING_SINGLE_ITERATION_PLAN_2026-05-18.md",
+      "description": "The repository must not claim 100% mainnet launch completion until canonical mainnet deployment, Vercel production env and post-deploy canary evidence are recorded."
+    },
+    {
+      "key": "raw-audit-exceptions",
+      "title": "Production dependency audit has expiring SODAX transitive exceptions",
+      "evidenceRef": "config/production-audit-policy.json",
+      "description": "The production audit gate has zero unapproved high/critical blockers, but the current SODAX transitive exception policy remains explicitly documented and expiring."
+    }
+  ],
+  "claims": [
+    {
+      "key": "product-operator-route-boundary",
+      "claim": "Public product routes are separated from verified operator console routes.",
+      "implementationRefs": [
+        "src/lib/workflows/productNavigation.ts",
+        "src/components/product/AppChrome.tsx"
+      ],
+      "testRefs": [
+        "tests/unit/product-navigation.test.ts",
+        "tests/integration/app-chrome.test.tsx",
+        "e2e/access-state.spec.ts"
+      ]
+    },
+    {
+      "key": "dao-governed-write-boundary",
+      "claim": "DAO-governed mutations are classified and routed through governance policy instead of being silently exposed as arbitrary writes.",
+      "implementationRefs": [
+        "src/lib/workflows/daoExecutionPolicy.ts",
+        "src/lib/workflows/governanceComposer.ts",
+        "src/app/governance/console/page.tsx"
+      ],
+      "testRefs": [
+        "tests/unit/dao-execution-policy.test.ts",
+        "tests/unit/governance-composer.test.ts",
+        "tests/integration/contracts-page.test.tsx"
+      ]
+    },
+    {
+      "key": "smart-routing-source-of-truth",
+      "claim": "Smart Routing uses the broker-scale planner, benchmark gate and canary gate instead of static UI route claims.",
+      "implementationRefs": [
+        "src/lib/workflows/rebalanceRouting.ts",
+        "src/lib/workflows/rebalanceBenchmark.ts",
+        "src/lib/runtime/rebalanceBenchmarkGate.ts",
+        "src/lib/runtime/rebalanceCanaryGate.ts"
+      ],
+      "testRefs": [
+        "tests/unit/rebalance-routing.test.ts",
+        "tests/unit/rebalance-benchmark.test.ts",
+        "tests/unit/rebalance-benchmark-gate.test.ts",
+        "tests/unit/rebalance-canary-gate.test.ts",
+        "tests/integration/api-rebalance-benchmark-route.test.ts"
+      ]
+    },
+    {
+      "key": "balanced-sodax-auto-boundary",
+      "claim": "Balanced/SODAX AUTO is documented as intent-surface evidence and not as a fabricated public router contract.",
+      "implementationRefs": [
+        "src/lib/workflows/balancedOfficialSurfaceEvidence.ts",
+        "src/lib/runtime/balancedAutoSurfaceGate.ts",
+        "src/app/api/intents/balanced/evidence/route.ts"
+      ],
+      "testRefs": [
+        "tests/unit/balanced-official-surface-evidence.test.ts",
+        "tests/unit/balanced-auto-surface-gate.test.ts",
+        "tests/integration/api-balanced-evidence-route.test.ts",
+        "e2e/balanced-intent-surface.spec.ts"
+      ]
+    },
+    {
+      "key": "storage-lifecycle-hardening",
+      "claim": "Soroban storage lifecycle and extension operations are documented as an operator runbook and script path.",
+      "implementationRefs": [
+        "src/lib/contracts/storageLifecycle.ts",
+        "scripts/contracts_storage_extend.mjs",
+        "docs/STORAGE_LIFECYCLE_RUNBOOK_2026-05-20.md"
+      ],
+      "testRefs": [
+        "tests/unit/contracts-storage-lifecycle.test.ts",
+        "tests/integration/contracts-storage-extend-script.test.ts",
+        "tests/integration/api-contracts-storage-lifecycle-route.test.ts"
+      ]
+    },
+    {
+      "key": "production-release-gate",
+      "claim": "Production deployment is blocked by a machine-consumable release gate until environment, oracle, routing, API, visual and audit posture are ready.",
+      "implementationRefs": [
+        "src/lib/runtime/productionEnvironmentGate.ts",
+        "src/app/api/release/gate/route.ts",
+        "vercel.json",
+        "scripts/production_dependency_audit.mjs"
+      ],
+      "testRefs": [
+        "tests/unit/production-environment-gate.test.ts",
+        "tests/integration/api-release-gate-route.test.ts",
+        "e2e/release-gate.spec.ts"
+      ]
+    },
+    {
+      "key": "visual-screenshot-contract",
+      "claim": "The manual screenshots are generated from the same Playwright route manifest used by the design audit.",
+      "implementationRefs": [
+        "docs/figma-route-audit-manifest.json",
+        "e2e/design-audit.spec.ts",
+        "scripts/generate_platform_manual.mjs"
+      ],
+      "testRefs": [
+        "tests/unit/figma-route-audit-manifest.test.ts",
+        "tests/unit/platform-manual-manifest.test.ts",
+        "tests/integration/platform-manual-generator.test.ts"
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "key": "dashboard",
+      "classification": "public product",
+      "audience": "Depositors, managers and operators reviewing the global product posture.",
+      "purpose": "Summarize indexed Arkas, manager posture, NAV history and public operating health from catalog-backed data.",
+      "reads": ["dashboard catalog summary", "ranked Arkas", "ranked managers", "NAV/activity snapshots"],
+      "actions": ["change dashboard tabs and ranges", "open product routes", "open Create Arka"],
+      "boundary": "No wallet write is performed on this screen; unavailable history is shown explicitly instead of fabricated charts.",
+      "implementationRefs": ["src/components/product/DashboardSurface.tsx", "src/lib/catalog/dashboardDiscoverSurfaces.ts"],
+      "testRefs": ["tests/integration/dashboard-surface.test.tsx", "e2e/product-surfaces.spec.ts"]
+    },
+    {
+      "key": "discover",
+      "classification": "public product",
+      "audience": "Users searching the indexed Arka, manager and asset universe.",
+      "purpose": "Search and filter the catalog before opening product profiles or execution routes.",
+      "reads": ["catalog Arkas", "catalog managers", "catalog assets", "leaderboard source telemetry"],
+      "actions": ["search", "toggle curated/window filters", "open leaderboard/profile routes", "open Create Arka"],
+      "boundary": "Discovery is read-only and does not sign transactions.",
+      "implementationRefs": ["src/components/product/DiscoverSurface.tsx", "src/lib/catalog/dashboardDiscoverSurfaces.ts"],
+      "testRefs": ["tests/integration/discover-surface.test.tsx", "e2e/product-surfaces.spec.ts"]
+    },
+    {
+      "key": "create",
+      "classification": "public deployment flow",
+      "audience": "Users creating a new Arka through the guided wizard.",
+      "purpose": "Entry frame for the Figma-aligned Create Arka wizard before parameters are selected.",
+      "reads": ["asset registry", "runtime factory config", "wizard state"],
+      "actions": ["start guided creation", "select next wizard step"],
+      "boundary": "No protocol strategy is configured during creation; execution actions happen after an Arka exists.",
+      "implementationRefs": ["src/app/factory/create/CreateArkaClient.tsx", "src/lib/workflows/createWizardState.ts"],
+      "testRefs": ["tests/unit/create-wizard-state.test.ts", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "create-basics",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Collect the basic name, manager and denomination setup for a new Arka.",
+      "reads": ["core Stellar asset registry", "wallet identity", "factory defaults"],
+      "actions": ["choose denomination", "enter manager/basic fields", "validate fields"],
+      "boundary": "Field validation happens before build/submit; no invented asset IDs are injected.",
+      "implementationRefs": ["src/app/factory/create/CreateArkaClient.tsx", "src/lib/workflows/assetSelection.ts"],
+      "testRefs": ["tests/unit/asset-selection.test.ts", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "create-fees",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Configure management/performance fee posture with reviewable numeric inputs.",
+      "reads": ["wizard fee state", "factory constraints"],
+      "actions": ["set fee values", "move to deposits step"],
+      "boundary": "Fee values are typed and validated before transaction payload construction.",
+      "implementationRefs": ["src/app/factory/create/CreateArkaClient.tsx", "src/lib/workflows/createWizardState.ts"],
+      "testRefs": ["tests/unit/create-wizard-state.test.ts", "tests/integration/workflow-surfaces.test.tsx"]
+    },
+    {
+      "key": "create-deposits",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Configure deposit policy, permitted wallet posture and deposit limits.",
+      "reads": ["wizard deposit state", "policy defaults"],
+      "actions": ["enable/disable deposit restrictions", "set minimum/maximum policy fields"],
+      "boundary": "Deposit policy is surfaced as creation policy, not as a post-hoc fake badge.",
+      "implementationRefs": ["src/app/factory/create/CreateArkaClient.tsx", "src/lib/workflows/createWizardState.ts"],
+      "testRefs": ["tests/unit/create-wizard-state.test.ts", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "create-redemptions",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Configure redemption policy before final review.",
+      "reads": ["wizard redemption state", "policy defaults"],
+      "actions": ["set redemption posture", "continue to asset management"],
+      "boundary": "Redemption policy remains part of the deployment payload review path.",
+      "implementationRefs": ["src/app/factory/create/CreateArkaClient.tsx", "src/lib/workflows/createWizardState.ts"],
+      "testRefs": ["tests/unit/create-wizard-state.test.ts", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "create-assets",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Select initial supported assets from the real registry with icons/metadata where available.",
+      "reads": ["core Stellar asset registry", "stellar.toml-derived metadata", "wizard asset state"],
+      "actions": ["search assets", "select assets", "review selected set"],
+      "boundary": "Known assets are selected from registry data; unsupported assets are not presented as configured.",
+      "implementationRefs": ["src/lib/catalog/coreStellarAssetRegistry.ts", "src/lib/server/stellarToml.ts", "src/app/factory/create/CreateArkaClient.tsx"],
+      "testRefs": ["tests/unit/core-stellar-asset-registry.test.ts", "tests/unit/asset-selection.test.ts", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "create-review",
+      "classification": "public deployment flow",
+      "audience": "Arka creator.",
+      "purpose": "Review the complete creation payload before wallet signing.",
+      "reads": ["wizard state", "factory build route", "wallet state"],
+      "actions": ["build payload", "submit create transaction when wallet permits"],
+      "boundary": "Review is explicit; the UI does not silently instantiate without payload visibility.",
+      "implementationRefs": ["src/app/api/factory/create/build/route.ts", "src/app/factory/create/CreateArkaClient.tsx"],
+      "testRefs": ["tests/integration/workflow-surfaces.test.tsx", "e2e/create-wizard-matrix.spec.ts"]
+    },
+    {
+      "key": "vaults",
+      "classification": "public product",
+      "audience": "Users comparing Arkas before selecting one.",
+      "purpose": "Rank and filter Arkas by truthful catalog-backed metrics.",
+      "reads": ["Arka leaderboard API", "leaderboard source", "catalog-derived metrics"],
+      "actions": ["search", "sort", "page", "open product profile", "open live ops"],
+      "boundary": "This is review mode; deposits/rebalances live under /arkas/[id].",
+      "implementationRefs": ["src/components/product/VaultLeaderboardSurface.tsx", "src/lib/catalog/vaults.ts"],
+      "testRefs": ["tests/integration/vault-entrypoints.test.tsx", "e2e/vault-entrypoints.spec.ts"]
+    },
+    {
+      "key": "assets",
+      "classification": "public product",
+      "audience": "Users reviewing concentration and asset availability.",
+      "purpose": "Expose core Stellar assets and catalog-linked exposure without requiring raw contract IDs.",
+      "reads": ["core Stellar asset registry", "asset catalog", "asset metadata/icons"],
+      "actions": ["search assets", "open asset detail"],
+      "boundary": "Asset icons/metadata come from registry or stellar.toml/CDN fallbacks, not invented UI constants.",
+      "implementationRefs": ["src/components/product/AssetsSurface.tsx", "src/lib/catalog/coreStellarAssetRegistry.ts"],
+      "testRefs": ["tests/unit/core-stellar-asset-registry.test.ts", "tests/integration/manager-asset-surfaces.test.tsx"]
+    },
+    {
+      "key": "vault-profile",
+      "classification": "public product",
+      "audience": "Users inspecting one Arka before live execution.",
+      "purpose": "Show the indexed product profile, manager, allocation and route posture.",
+      "reads": ["vault detail catalog", "linked asset/manager context"],
+      "actions": ["open live execution", "return to leaderboard"],
+      "boundary": "Profile mode is separate from live wallet-backed execution.",
+      "implementationRefs": ["src/components/product/VaultDetailSurface.tsx", "src/app/vaults/[id]/page.tsx"],
+      "testRefs": ["tests/integration/vault-detail-surface.test.tsx", "e2e/vault-profile.spec.ts"]
+    },
+    {
+      "key": "integrations",
+      "classification": "public protocol overview",
+      "audience": "Users and operators reviewing supported protocol posture.",
+      "purpose": "Explain Aquarius, SoroSwap, Balanced/SODAX and Blend support status with runtime-backed evidence.",
+      "reads": ["protocol support", "Balanced/SODAX evidence", "adapter config"],
+      "actions": ["inspect quote/status surfaces", "open operator lane when verified"],
+      "boundary": "Balanced/SODAX is shown as intent integration evidence, not as a fake router contract.",
+      "implementationRefs": ["src/app/integrations/page.tsx", "src/lib/workflows/integrationWorkspaces.ts", "src/lib/workflows/balancedOfficialSurfaceEvidence.ts"],
+      "testRefs": ["tests/integration/live-ops-surfaces.test.tsx", "e2e/balanced-intent-surface.spec.ts"]
+    },
+    {
+      "key": "managers",
+      "classification": "public product",
+      "audience": "Users comparing manager mandate and reputation context.",
+      "purpose": "Rank managers using catalog-backed NAV, curated mandate and search signals.",
+      "reads": ["manager leaderboard API", "leaderboard source", "catalog manager profiles"],
+      "actions": ["search", "sort", "open manager detail"],
+      "boundary": "Manager reputation is read here; governed mutations are not performed from this public list.",
+      "implementationRefs": ["src/components/product/ManagersSurface.tsx", "src/lib/catalog/explorerSurfaces.ts"],
+      "testRefs": ["tests/integration/manager-asset-surfaces.test.tsx", "e2e/product-surfaces.spec.ts"]
+    },
+    {
+      "key": "asset-profile",
+      "classification": "public product",
+      "audience": "Users inspecting one asset exposure.",
+      "purpose": "Show a selected asset's indexed exposure and linked Arkas.",
+      "reads": ["asset detail catalog", "linked Arka context"],
+      "actions": ["open linked Arkas", "return to assets"],
+      "boundary": "Asset detail is read-only and catalog-backed.",
+      "implementationRefs": ["src/components/product/AssetDetailSurface.tsx", "src/app/assets/[id]/page.tsx"],
+      "testRefs": ["tests/integration/manager-asset-surfaces.test.tsx", "e2e/product-surfaces.spec.ts"]
+    },
+    {
+      "key": "asset-profile-core-registry",
+      "classification": "public product",
+      "audience": "Users inspecting a core Stellar asset.",
+      "purpose": "Show the registry-backed asset profile for known Stellar assets such as XLM, USDC, AQUA, XTAR and BLND.",
+      "reads": ["core Stellar asset registry", "stellar.toml/CDN metadata fallback"],
+      "actions": ["open related Arkas where indexed"],
+      "boundary": "When a core asset is not indexed in current catalog data, the UI says so instead of fabricating exposure.",
+      "implementationRefs": ["src/lib/catalog/coreStellarAssetRegistry.ts", "src/components/product/AssetDetailSurface.tsx"],
+      "testRefs": ["tests/unit/core-stellar-asset-registry.test.ts", "tests/integration/api-assets-core-registry-route.test.ts"]
+    },
+    {
+      "key": "manager-profile",
+      "classification": "public product",
+      "audience": "Users evaluating one manager.",
+      "purpose": "Show manager mandate, linked Arkas and catalog-backed track context.",
+      "reads": ["manager detail catalog", "linked Arka set"],
+      "actions": ["open linked Arka profiles"],
+      "boundary": "Score/tier changes remain governed/operator actions outside this public profile.",
+      "implementationRefs": ["src/components/product/ManagerDetailSurface.tsx", "src/app/managers/[id]/page.tsx"],
+      "testRefs": ["tests/integration/manager-asset-surfaces.test.tsx", "e2e/product-surfaces.spec.ts"]
+    },
+    {
+      "key": "vault-ops-index",
+      "classification": "live execution launcher",
+      "audience": "Users and managers moving from product browsing into live Arka operations.",
+      "purpose": "Provide the operational entrypoint for known Arkas and clarify product-vs-execution route boundaries.",
+      "reads": ["recent Arkas", "catalog/live route hints", "wallet state"],
+      "actions": ["open live Arka execution", "open Create Arka"],
+      "boundary": "This index launches execution but does not itself perform the write.",
+      "implementationRefs": ["src/app/arkas/page.tsx", "src/lib/workflows/arkaWorkspaces.ts"],
+      "testRefs": ["tests/integration/vault-entrypoints.test.tsx", "e2e/vault-entrypoints.spec.ts"]
+    },
+    {
+      "key": "vault-ops-detail",
+      "classification": "live execution",
+      "audience": "Wallet users and authorized managers operating one Arka.",
+      "purpose": "Deposit, redeem, rebalance and inspect credit/routing posture for one Arka.",
+      "reads": ["Arka contract config", "wallet identity", "rebalance planner", "protocol adapters"],
+      "actions": ["deposit", "redeem", "rebalance", "run supported credit action"],
+      "boundary": "Writes require wallet flow, review and confirmation; protocol strategy is used here after creation.",
+      "implementationRefs": ["src/app/arkas/[id]/page.tsx", "src/lib/workflows/rebalanceRouting.ts", "src/lib/tx.ts"],
+      "testRefs": ["tests/integration/arka-detail-page.test.tsx", "e2e/wallet-backed.spec.ts", "e2e/wallet-backed-matrix.spec.ts"]
+    },
+    {
+      "key": "governance",
+      "classification": "DAO lifecycle",
+      "audience": "Governance participants.",
+      "purpose": "Run proposal lifecycle operations: propose, vote, close and execute.",
+      "reads": ["governor config", "proposal state", "wallet vote posture"],
+      "actions": ["propose", "vote", "close", "execute"],
+      "boundary": "Governance-sensitive writes belong here or in the verified DAO console; they do not bypass timelock/executor controls.",
+      "implementationRefs": ["src/app/governance/page.tsx", "src/lib/workflows/governanceLifecycle.ts"],
+      "testRefs": ["tests/unit/governance-lifecycle.test.ts", "tests/integration/control-room-surfaces.test.tsx"]
+    },
+    {
+      "key": "coverage",
+      "classification": "coverage fund",
+      "audience": "Members and operators reviewing reserve posture.",
+      "purpose": "Operate first-loss/reserve coverage actions and member reward posture.",
+      "reads": ["coverage reserve state", "member stake", "pending rewards"],
+      "actions": ["stake", "unstake", "claim rewards"],
+      "boundary": "Coverage fund mutations require wallet confirmation and typed amount validation.",
+      "implementationRefs": ["src/app/coverage/page.tsx", "src/lib/workflows/coverageWorkspaces.ts"],
+      "testRefs": ["tests/unit/coverage-workspaces.test.ts", "tests/integration/control-room-surfaces.test.tsx"]
+    },
+    {
+      "key": "ops",
+      "classification": "verified operator console",
+      "audience": "Operators checking runbook readiness.",
+      "purpose": "Show operational baselines, health checks and runbook status before risky actions.",
+      "reads": ["operator workspace", "health endpoints", "runtime config"],
+      "actions": ["inspect health", "open relevant operator surfaces"],
+      "boundary": "Ops is diagnostic; it does not pretend to close testnet/mainnet evidence by itself.",
+      "implementationRefs": ["src/app/ops/page.tsx", "src/lib/workflows/operatorWorkspaces.ts"],
+      "testRefs": ["tests/unit/operator-workspaces.test.ts", "e2e/operator-surface-matrix.spec.ts"]
+    },
+    {
+      "key": "contracts",
+      "classification": "verified operator console",
+      "audience": "Operators performing low-level contract reads/writes under policy.",
+      "purpose": "Typed and raw contract interaction with mutation and storage matrices.",
+      "reads": ["mutation matrix", "storage lifecycle", "contract wiring"],
+      "actions": ["typed read", "typed write", "raw read", "raw write", "inspect storage"],
+      "boundary": "DAO-governed writes are blocked or routed to governance; raw controls are not public product UI.",
+      "implementationRefs": ["src/app/contracts/page.tsx", "src/lib/contracts/mutationMatrix.ts", "src/lib/contracts/storageLifecycle.ts"],
+      "testRefs": ["tests/unit/contracts-mutation-matrix.test.ts", "tests/unit/contracts-storage-lifecycle.test.ts", "tests/integration/contracts-page.test.tsx"]
+    },
+    {
+      "key": "settings",
+      "classification": "verified operator console",
+      "audience": "Operators verifying environment and contract wiring.",
+      "purpose": "Inspect runtime config, contract IDs and guarded rebalance settings.",
+      "reads": ["environment config", "contract map", "rebalance guardrail profile"],
+      "actions": ["inspect wiring", "copy/check config values"],
+      "boundary": "Settings is an inspection surface; changes to governed values require DAO flow.",
+      "implementationRefs": ["src/app/settings/page.tsx", "src/lib/config.ts", "src/lib/workflows/rebalanceGuardrailState.ts"],
+      "testRefs": ["tests/unit/rebalance-guardrail-state.test.ts", "tests/integration/workflow-surfaces.test.tsx"]
+    },
+    {
+      "key": "status",
+      "classification": "verified operator console",
+      "audience": "Operators validating release readiness.",
+      "purpose": "Show release blockers, oracle cutover posture, routing gate status and known limits.",
+      "reads": ["oracle cutover gate", "routing canary gate", "production environment gate", "reference links"],
+      "actions": ["inspect blockers", "open reference docs"],
+      "boundary": "Status can report readiness but cannot create missing mainnet evidence.",
+      "implementationRefs": ["src/app/status/page.tsx", "src/lib/workflows/statusWorkspaces.ts", "src/lib/runtime/oracleCutoverGate.ts", "src/lib/runtime/rebalanceCanaryGate.ts"],
+      "testRefs": ["tests/unit/status-workspaces.test.ts", "tests/unit/oracle-cutover-gate.test.ts", "tests/unit/rebalance-canary-gate.test.ts"]
+    },
+    {
+      "key": "tiers",
+      "classification": "verified operator console",
+      "audience": "Operators and governance reviewers managing manager reputation posture.",
+      "purpose": "Inspect and apply tier/points posture where authorization and governance policy allow it.",
+      "reads": ["manager tier config", "scorecard data", "governance policy"],
+      "actions": ["review tier thresholds", "prepare governed tier/point changes"],
+      "boundary": "Manager reputation changes are governed/operator actions, not public leaderboard edits.",
+      "implementationRefs": ["src/app/tiers/page.tsx", "src/lib/workflows/controlSurfaces.ts", "src/lib/workflows/daoExecutionPolicy.ts"],
+      "testRefs": ["tests/unit/control-surfaces.test.ts", "tests/integration/control-room-surfaces.test.tsx"]
+    },
+    {
+      "key": "migrations",
+      "classification": "verified operator console",
+      "audience": "Operators preparing governed migrations.",
+      "purpose": "Inspect, simulate and prepare migration payloads before they are executed through approved governance/operator paths.",
+      "reads": ["migration workspace", "migration inspect API", "simulation output"],
+      "actions": ["inspect migration", "simulate migration", "review payload"],
+      "boundary": "Migration payloads are previewed and validated; final mainnet migration remains a governed/cutover operation.",
+      "implementationRefs": ["src/app/migrations/page.tsx", "src/lib/workflows/migrationWorkspace.ts", "src/app/api/migrations/simulate/route.ts"],
+      "testRefs": ["tests/unit/migration-workspace.test.ts", "tests/integration/migration-page.test.tsx", "tests/integration/api-migrations-simulate-route.test.ts"]
+    },
+    {
+      "key": "governance-console",
+      "classification": "verified operator console",
+      "audience": "Verified governance operators preparing executable DAO payloads.",
+      "purpose": "Compose and review governed action packages before proposal/execution lanes.",
+      "reads": ["governance composer policy", "DAO execution policy", "operator session"],
+      "actions": ["select governed package", "validate arguments", "review execution effect"],
+      "boundary": "The console prepares validated packages; it does not fabricate a generic Governor batch primitive if the contract does not expose one.",
+      "implementationRefs": ["src/app/governance/console/page.tsx", "src/lib/workflows/governanceComposer.ts", "src/lib/workflows/daoExecutionPolicy.ts"],
+      "testRefs": ["tests/unit/governance-composer.test.ts", "tests/unit/dao-execution-policy.test.ts", "e2e/operator-surface-matrix.spec.ts"]
+    },
+    {
+      "key": "integrations-operator",
+      "classification": "verified operator console",
+      "audience": "Operators validating protocol execution lanes.",
+      "purpose": "Inspect adapter evidence, quote/status/confirm posture and operator-only integration controls.",
+      "reads": ["integration workspace", "protocol evidence", "Balanced/SODAX status"],
+      "actions": ["inspect protocol readiness", "open execution evidence", "refresh integration status"],
+      "boundary": "Operator integration controls remain separate from public protocol overview and are wallet/operator-gated.",
+      "implementationRefs": ["src/app/integrations/operator/page.tsx", "src/lib/workflows/integrationWorkspaces.ts", "src/lib/workflows/intentVenueSources.ts"],
+      "testRefs": ["tests/unit/integration-workspaces.test.ts", "tests/unit/intent-venue-sources.test.ts", "e2e/operator-surface-matrix.spec.ts"]
+    }
+  ]
+}

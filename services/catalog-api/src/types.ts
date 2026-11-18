@@ -93,6 +93,7 @@ export interface ArkaCatalogEntry {
   curated: boolean;
   delisted: boolean;
   nav: string;
+  sharePrice?: string;
   denominationContract: string | null;
   whitelistContracts: string[];
   shareToken: string | null;
@@ -446,6 +447,8 @@ export interface ArkaHistoryPoint {
   arkaId: string;
   syncedAt: string;
   nav: string;
+  denominationContract?: string | null;
+  sharePrice?: string;
   manager: string;
   curated: boolean;
   delisted: boolean;

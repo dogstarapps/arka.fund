@@ -78,4 +78,3 @@ it.each(['stale','incomplete','wrong-owner','wrong-fund','wrong-token','wrong-na
   expect(()=>withManagedCatalogPosition(wire,INVESTOR,d,kind==='expired'?Date.parse(d.indexedAt)+120001:Date.now())).toThrow(/reconciliation unavailable/);
  }finally{await model.app.close();}
 });
-

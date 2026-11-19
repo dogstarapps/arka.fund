@@ -44,4 +44,3 @@ it('surfaces stale or malformed catalog data instead of inventing zero holdings'
  expect(screen.queryByRole('heading',{name:'Catalog and portfolio reconciled'})).not.toBeInTheDocument();
  expect(mocks.prepare).not.toHaveBeenCalled();expect(mocks.sign).not.toHaveBeenCalled();
 });
-

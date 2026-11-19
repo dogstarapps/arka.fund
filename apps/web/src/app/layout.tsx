@@ -5,6 +5,7 @@ import "./globals.css";
 import "./ux-priorities.css";
 import '@/components/product/managed-product.css';
 import '@/components/product/redesign.css';
+import '@/components/product/redesign-polish.css';
 
 const displayFont = localFont({
   src: "./fonts/space-grotesk-latin.woff2",

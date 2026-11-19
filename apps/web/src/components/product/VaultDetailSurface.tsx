@@ -469,7 +469,7 @@ export default function VaultDetailSurface(props: { arkaId: string; redesign?: b
 
           <Panel
             title="Asset book"
-            subtitle="Current tracked positions"
+            subtitle={portfolio.syncedAt ? `Positions updated ${formatRelativeTime(portfolio.syncedAt)}` : "Current tracked positions"}
             testId="vault-assets-panel"
             className="vault-tab-workspace-panel vault-portfolio-assets-panel public-detail-panel-cutover"
           >

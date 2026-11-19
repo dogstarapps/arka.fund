@@ -2,18 +2,38 @@ import { rememberProtocolReview } from './workflows/protocolReviewRegistry'
 import { protocolVenueAllowed, type ProtocolId, type VenueSnapshot } from './workflows/protocolLifecycle'
 // Soroban (Stellar SDK) helpers for building swap transactions
 import {GENERAL_MAINNET,generalRead} from './generalMainnet';
-import { Account, Address, Contract, TransactionBuilder, nativeToScVal, scValToNative as sdkScValToNative, rpc, xdr } from '@stellar/stellar-sdk'
+import { Account, Address, Contract, Networks, TransactionBuilder, nativeToScVal, scValToNative as sdkScValToNative, rpc, xdr } from '@stellar/stellar-sdk'
 import { NETWORK_PASSPHRASE, SIM_ACCOUNT, SOROBAN_RPC_URL, SOROSWAP_ROUTER, SOROSWAP_ADAPTER, AQUARIUS_ADAPTER, ADAPTER_BALANCED, PHOENIX_ADAPTER, SUSHI_ADAPTER, SUSHI_FACTORY, ADAPTER_BLEND, PLATFORM_VENUE_REGISTRY } from './config'
 
-export const TESTNET = NETWORK_PASSPHRASE
-import { isStagingReadOnlyRpcEnabled } from './previewSafety'
+import { isStagingReadOnlyRpcEnabled, UX_REVIEW_PREVIEW } from './previewSafety'
 import { STAGING_PUBLIC_RPC, isAllowedStagingRpcRequest } from './stagingReadOnlyRpc'
 
+export const TESTNET = NETWORK_PASSPHRASE
 export const RPC_URL = SOROBAN_RPC_URL
+
+function publicHttpsUrl(value: string): URL | null {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash ? url : null
+  } catch {
+    return null
+  }
+}
 
 export function resolveRpcUrl(): string {
   if (typeof window === 'undefined') return RPC_URL
-  return `${window.location.origin}/api/soroban/rpc`
+
+  const origin = window.location.origin
+  if (
+    process.env.NEXT_PUBLIC_ARKA_V2_DIRECT_RPC === '1' &&
+    !UX_REVIEW_PREVIEW && !GENERAL_MAINNET &&
+    NETWORK_PASSPHRASE === Networks.PUBLIC &&
+    publicHttpsUrl(process.env.NEXT_PUBLIC_APP_URL ?? '')?.origin === origin &&
+    publicHttpsUrl(RPC_URL)
+  ) {
+    return RPC_URL
+  }
+  return `${origin}/api/soroban/rpc`
 }
 
 function createRpcServer(): rpc.Server {

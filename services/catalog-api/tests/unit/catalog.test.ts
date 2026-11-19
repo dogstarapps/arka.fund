@@ -282,3 +282,19 @@ test("history helpers expose ordered series for Arka, asset, and manager views",
     ["2000", "2500"],
   );
 });
+
+test("Arka history preserves settled share prices without inventing prices for old snapshots", () => {
+  const [arka] = fixtureArkas();
+  const firstAt = "2026-03-27T10:00:00.000Z";
+  const secondAt = "2026-03-27T11:00:00.000Z";
+  const before = buildSnapshot([arka], [], firstAt);
+  const after = buildSnapshot([{ ...arka, sharePrice: "1450000000" }], [], secondAt);
+  const archive = appendSnapshotToHistory(
+    appendSnapshotToHistory(createEmptyHistoryArchive(10), before, 10), after, 10,
+  );
+  const [old, current] = getArkaHistory(archive, arka.arkaId).items;
+  assert.equal(old.sharePrice, undefined);
+  assert.equal(current.denominationContract, arka.denominationContract);
+  assert.equal(current.sharePrice, "1450000000");
+  assert.equal(after.arkas[0].economics?.pnl.amount, null);
+});

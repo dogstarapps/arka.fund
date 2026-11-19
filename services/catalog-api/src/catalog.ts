@@ -357,6 +357,8 @@ export function getArkaHistory(
       arkaId,
       syncedAt: run.syncedAt,
       nav: arka.nav,
+      denominationContract: arka.denominationContract,
+      ...(arka.sharePrice === undefined ? {} : { sharePrice: arka.sharePrice }),
       manager: arka.manager,
       curated: arka.curated,
       delisted: arka.delisted,

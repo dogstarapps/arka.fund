@@ -22,7 +22,7 @@
     "evidence:pagerduty": "npm run build && node ./scripts/pagerduty-simulation.mjs"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^14.1.1",
+    "@stellar/stellar-sdk": "16.4.1",
     "buffer": "6.0.3",
     "fastify": "^5.8.4"
   },

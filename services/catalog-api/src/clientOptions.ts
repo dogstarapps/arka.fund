@@ -3,6 +3,7 @@ import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
   MethodOptions,
+  SignTransaction,
 } from "@stellar/stellar-sdk/contract";
 
 export interface NetworkConfig {
@@ -10,7 +11,7 @@ export interface NetworkConfig {
   networkPassphrase: string;
   allowHttp?: boolean;
   publicKey?: string;
-  signTransaction?: ContractClientOptions["signTransaction"];
+  signTransaction?: SignTransaction;
 }
 
 export interface CallOptions {
@@ -60,6 +61,20 @@ export function expectSimulationResult<T>(
 ): T {
   if (assembled.result === undefined) {
     throw new Error(`Simulation for ${method} did not produce a decoded result`);
+  }
+  // The SDK can return an Err object even for bindings typed as a plain i128.
+  // Never let it become "[object Object]" in a monetary field.
+  const result = assembled.result as unknown as {
+    isErr?: () => boolean;
+    unwrapErr?: () => { message?: string };
+    isOk?: () => boolean;
+    unwrap?: () => T;
+  } | null;
+  if (result && typeof result.isErr === "function" && result.isErr()) {
+    throw new Error(`Simulation for ${method} failed: ${result.unwrapErr?.()?.message || "contract_error"}`);
+  }
+  if (result && typeof result.isOk === "function" && result.isOk() && typeof result.unwrap === "function") {
+    return result.unwrap();
   }
   return assembled.result;
 }

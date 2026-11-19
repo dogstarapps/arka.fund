@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { NoopHolderReader, type HolderReader } from "./holders.js";
 import { NoopActivityReader, type ActivityReader } from "./activity.js";
 import {
   findAsset,
@@ -55,6 +56,8 @@ import type { CatalogSyncRunner } from "./runners.js";
 import type {
   ActivityEntry,
   ActivityQuery,
+  ArkaHolderPage,
+  HolderQuery,
   AlertTransition,
   ArkaCatalogEntry,
   ArkaAssetExposure,
@@ -107,6 +110,7 @@ export interface CatalogServiceOptions {
   monitoringThresholds?: MonitoringThresholds;
   notifier?: MonitoringNotifier;
   activityReader?: ActivityReader;
+  holderReader?: HolderReader;
   now?: () => Date;
 }
 
@@ -116,7 +120,9 @@ export class CatalogService {
   private readonly monitoringThresholds: MonitoringThresholds;
   private readonly notifier: MonitoringNotifier;
   private readonly activityReader: ActivityReader;
+  private readonly holderReader: HolderReader;
   private readonly now: () => Date;
+  private syncInFlight?: Promise<CatalogSnapshot>;
 
   constructor(
     private readonly store: FileCatalogStore,
@@ -130,6 +136,7 @@ export class CatalogService {
       options.monitoringThresholds ?? defaultMonitoringThresholds();
     this.notifier = options.notifier ?? new NoopMonitoringNotifier();
     this.activityReader = options.activityReader ?? new NoopActivityReader();
+    this.holderReader = options.holderReader ?? new NoopHolderReader();
     this.now = options.now ?? (() => new Date());
   }
 
@@ -149,7 +156,12 @@ export class CatalogService {
     return this.identityStore.read();
   }
 
-  async sync(): Promise<CatalogSnapshot> {
+  sync(): Promise<CatalogSnapshot> {
+    this.syncInFlight ??= this.runSync().finally(() => { this.syncInFlight = undefined; });
+    return this.syncInFlight;
+  }
+
+  private async runSync(): Promise<CatalogSnapshot> {
     const startedAt = this.now().toISOString();
     try {
       const snapshot = await this.runner.run();
@@ -439,6 +451,12 @@ export class CatalogService {
       return emptyPage(query.limit);
     }
     return this.readActivity([arka], query);
+  }
+
+  async arkaHolders(arkaId: string, query: HolderQuery = {}): Promise<ArkaHolderPage | null> {
+    const snapshot = await this.current();
+    const arka = snapshot ? findArka(snapshot, arkaId) : null;
+    return arka ? this.holderReader.list(arka, query) : null;
   }
 
   async monitoringStatus(): Promise<MonitoringStatus> {

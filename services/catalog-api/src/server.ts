@@ -8,7 +8,7 @@ import {
   WebhookMonitoringNotifier,
   type MonitoringNotifier,
 } from "./notifier.js";
-import { createActivityReaderFromEnv, createCatalogSyncRunnerFromEnv } from "./runtime.js";
+import { createActivityReaderFromEnv, createCatalogSyncRunnerFromEnv, createHolderReaderFromEnv } from "./runtime.js";
 import { CatalogService } from "./service.js";
 import {
   FileCatalogHistoryStore,
@@ -56,6 +56,7 @@ async function main(): Promise<void> {
       monitoringThresholds: loadMonitoringThresholds(),
       notifier: loadNotifier(),
       activityReader: createActivityReaderFromEnv(process.env),
+      holderReader: createHolderReaderFromEnv(process.env),
     },
   );
   const app = createCatalogApp({ service, syncToken });

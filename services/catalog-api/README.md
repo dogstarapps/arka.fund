@@ -74,3 +74,11 @@ Notes:
 - Historical test Arkas without the current `nav()` ABI are handled by an isolated legacy-storage compatibility reader.
 - `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records `tmp/graphql-backend-parity.json`.
 - `bash scripts/deploy-subquery-backend-parity-validation.sh` validates the SubQuery-compatible provider profile and records `tmp/subquery-backend-parity.json`.
+
+### Verified mainnet profit
+
+Set `CATALOG_API_PROFIT_SEED_FILE` to the independently verified lifetime cash-flow checkpoint and `CATALOG_API_PROFIT_CHECKPOINT_FILE` to a separate file on the catalogue's persistent volume. Use the configured HTTPS Stellar mainnet RPC and the existing authenticated `POST /v1/sync` schedule. The catalogue files have one writer. The profit checkpoint advances atomically and overlapping sync requests share the same run.
+
+Each seeded Arka includes its creation ledger, last fully covered ledger, denomination, share token, executable hash, cumulative deposits and withdrawals in base units, and whether any amounts were converted. Keep the seed and its ledger evidence together outside Git. On each sync, the catalogue checks the Arka's identity at the NAV ledger and verifies any new deposits and withdrawals against the settled transfers. The result is NAV plus net withdrawals minus gross deposits. XLM/USDC conversions use the last confirmed trade before the event ledger and are marked as estimates.
+
+`GET /v1/arkas` and `GET /v1/arkas/:id` expose `verifiedProfit` with the amount, timestamp, ledger and estimate flag. The current sync omits that field when a required event, ledger interval or exchange rate cannot be verified. The last valid checkpoint remains available for recovery. If the RPC has pruned the missing interval or the contract identity changed, verify the gap against archived ledgers before extending or replacing the seed.

@@ -93,7 +93,7 @@ export function buildArkaEconomicMetrics(
     denominationPrice,
     navDenomination: entry.nav,
     navUsdEstimate,
-    sharePrice: null,
+    sharePrice: entry.sharePrice ?? null,
     returns: {
       "1d": EMPTY_PERIOD,
       "7d": EMPTY_PERIOD,

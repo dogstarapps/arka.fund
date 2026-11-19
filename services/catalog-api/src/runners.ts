@@ -183,6 +183,9 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     const whitelist = await this.readWhitelist(vaultClient, readLegacyState);
     const shareToken = await this.readOptionalShareToken(vaultClient);
     const blendMarkets = await this.readOptionalBlendMarkets(vaultClient);
+    const sharePrice = shareToken && nav > 0n
+      ? await this.readSettledSharePrice(vaultClient, nav)
+      : null;
 
     const curatedTx = await this.rpcRead(() =>
       this.registryClient.is_manager_curated(
@@ -211,6 +214,7 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       curated: expectSimulationResult(curatedTx, "is_manager_curated"),
       delisted: expectSimulationResult(delistedTx, "is_delisted"),
       nav: nav.toString(),
+      ...(sharePrice === null ? {} : { sharePrice }),
       denominationContract: denomination.contract,
       whitelistContracts: whitelist.map((asset) => asset.contract),
       shareToken: shareToken ?? null,
@@ -223,6 +227,21 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
       assets,
       syncedAt,
     };
+  }
+
+  private async readSettledSharePrice(vaultClient: ArkaClient, nav: bigint): Promise<string | null> {
+    try {
+      const simulated = await this.rpcRead(() =>
+        vaultClient.preview_fee_settlement(mergeCallOptions(undefined, true)),
+      );
+      const quote = expectSimulationResult(simulated, "preview_fee_settlement");
+      return quote.nav === nav && quote.total_shares_after > 0n &&
+        typeof quote.share_price_after === "bigint" && quote.share_price_after >= 0n
+        ? quote.share_price_after.toString()
+        : null;
+    } catch {
+      return null;
+    }
   }
 
   private async readManager(

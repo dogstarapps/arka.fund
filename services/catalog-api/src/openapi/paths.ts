@@ -218,6 +218,21 @@ export const catalogOpenApiPaths: Record<string, unknown> = {
       responses: { "200": response("Paginated activity.", schemaRef("ActivityPage")) },
     },
   },
+  "/v1/arkas/{id}/holders": {
+    get: {
+      tags: ["Arkas"],
+      summary: "List current Arka investors",
+      operationId: "getArkaHolders",
+      description:
+        "Returns current share-token balances discovered from indexed contract activity and verified against the Arka contract.",
+      parameters: [idParameter("id", "Arka contract ID."), ...pagination],
+      responses: {
+        "200": response("Paginated current investors.", schemaRef("ArkaHolderPage")),
+        "404": errorResponses["404"],
+        "503": errorResponses["503"],
+      },
+    },
+  },
   "/v1/assets": {
     get: {
       tags: ["Assets"],

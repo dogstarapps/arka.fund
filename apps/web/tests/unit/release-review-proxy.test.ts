@@ -1,0 +1,15 @@
+// @vitest-environment node
+import {afterEach,beforeEach,expect,it,vi} from 'vitest';
+import {NextRequest} from 'next/server';
+import nextConfig from '../../next.config.mjs';
+import {GET} from '@/app/api/mainnet-connector/[kind]/route';
+const context={params:Promise.resolve({kind:'identity'})};
+beforeEach(()=>{vi.stubEnv('__NEXT_NO_MIDDLEWARE_URL_NORMALIZE',nextConfig.skipMiddlewareUrlNormalize?'1':'');vi.stubEnv('NEXT_PUBLIC_MAINNET_GENERAL_READONLY','1');vi.stubEnv('NEXT_PUBLIC_MANAGED_CATALOG_READ_ONLY','1');vi.stubEnv('ARKA_REVIEW_PUBLIC_ORIGINS','https://app.example.invalid');vi.stubEnv('ARKA_MAINNET_GENERAL_URL','https://review.example.invalid');vi.stubGlobal('fetch',vi.fn(async()=>Response.json({id:'fixture',version:2})));});
+afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();});
+it('supports an explicitly configured HTTPS deployment without archive paths',async()=>{const r=await GET(new NextRequest('https://app.example.invalid/api?fund=fixture',{headers:{host:'app.example.invalid',origin:'https://app.example.invalid'}}),context);expect(r.status).toBe(200);expect(await r.json()).toEqual({id:'fixture',version:2});expect(fetch).toHaveBeenCalledWith('https://review.example.invalid/identity?fund=fixture',expect.objectContaining({redirect:'error'}));});
+it.each([{url:'https://evil.invalid/api',host:'evil.invalid'},{url:'https://app.example.invalid/api',host:'evil.invalid'},{url:'https://app.example.invalid/api',host:'app.example.invalid',origin:'https://evil.invalid'}])('rejects a changed public request origin before I/O: $host',async c=>{const r=await GET(new NextRequest(c.url,{headers:{host:c.host,...(c.origin?{origin:c.origin}:{})}}),context);expect(r.status).toBe(503);expect(fetch).not.toHaveBeenCalled();});
+it('keeps public origins disabled by default',async()=>{vi.stubEnv('ARKA_REVIEW_PUBLIC_ORIGINS','');const r=await GET(new NextRequest('https://app.example.invalid/api',{headers:{host:'app.example.invalid'}}),context);expect(r.status).toBe(503);expect(fetch).not.toHaveBeenCalled();});
+it.each(['http://remote.example.invalid/','https://user:pass@review.example.invalid/','https://review.example.invalid/path'])('rejects an unsafe backend: %s',async backend=>{vi.stubEnv('ARKA_MAINNET_GENERAL_URL',backend);const r=await GET(new NextRequest('https://app.example.invalid/api',{headers:{host:'app.example.invalid'}}),context);expect(r.status).toBe(503);expect(fetch).not.toHaveBeenCalled();});
+
+it.each([undefined,'http://127.0.0.1:4500'])('accepts the configured native NextRequest on loopback with origin %s',async origin=>{const r=await GET(new NextRequest('http://127.0.0.1:4500/api',{headers:{host:'127.0.0.1:4500',...(origin?{origin}:{})}}),context);expect(r.status).toBe(200);expect(fetch).toHaveBeenCalledOnce();});
+it.each([{host:'127.0.0.1:4501'},{host:'127.0.0.1:4500',origin:'http://127.0.0.1:4501'},{host:'localhost:4500'}])('keeps native loopback Host and Origin checks exact: $host',async c=>{const r=await GET(new NextRequest('http://127.0.0.1:4500/api',{headers:{...c}}),context);expect(r.status).toBe(503);expect(fetch).not.toHaveBeenCalled();});

@@ -1,0 +1,405 @@
+.arka-redesign {
+  --arka-page: #161922;
+  --arka-panel: #202532;
+  --arka-control: #292f3e;
+  --arka-line: #41495b;
+  --arka-text: #f2f4f8;
+  --arka-muted: #bdc5d4;
+  --arka-warning: #f1cc92;
+  --arka-danger: #ffacb7;
+  --surface-bg: var(--arka-page);
+  --surface-bg-strong: var(--arka-page);
+  --surface-frame: var(--arka-panel);
+  --surface-card-raised: var(--arka-control);
+  --accent-cyan: var(--arka-accent);
+  --surface-panel: var(--arka-panel);
+  --surface-panel-soft: var(--arka-control);
+  --surface-card: var(--arka-panel);
+  --surface-border: var(--arka-line);
+  --surface-border-strong: var(--arka-line);
+  --text-strong: var(--arka-text);
+  --text-soft: var(--arka-muted);
+  --text-muted: var(--arka-muted);
+}
+
+.arka-redesign .ux-preview-banner {
+  background: var(--arka-panel);
+  color: var(--arka-muted);
+}
+
+.arka-redesign .surface-panel { border-image: none !important; }
+.arka-redesign .surface-panel::before { content: none; }
+.arka-redesign .surface-eyebrow { color: var(--arka-muted); }
+
+.arka-redesign .status-pill {
+  background: var(--arka-control);
+  border: 1px solid var(--arka-line);
+  border-radius: .375rem;
+  color: var(--arka-muted);
+  box-shadow: none;
+}
+
+.arka-redesign .status-pill-positive { color: #b5eab9; }
+.arka-redesign .status-pill-warning { color: var(--arka-warning); }
+.arka-redesign .status-pill-critical { color: var(--arka-danger); }
+
+.arka-redesign .ops-alert {
+  border-color: var(--arka-line);
+  border-radius: .5rem;
+  background: var(--arka-control);
+  color: var(--arka-muted);
+}
+
+.arka-redesign :is(.ops-alert-warning, .ops-alert-critical) { border-inline-start: 2px solid currentColor; }
+.arka-redesign .ops-alert-warning { color: var(--arka-warning); }
+.arka-redesign .ops-alert-critical { color: var(--arka-danger); }
+
+.arka-redesign .arka-redesign-profile .surface-button-secondary {
+  background: var(--arka-control);
+  color: var(--arka-text);
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  box-shadow: none;
+}
+
+.arka-redesign .public-figma-metric-head {
+  display: flex;
+  align-items: baseline;
+  min-block-size: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--arka-muted);
+  box-shadow: none;
+}
+
+.arka-redesign .public-figma-metric-head strong {
+  color: inherit;
+  font-family: inherit;
+  font-size: .875rem;
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.arka-redesign-profile-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.arka-redesign-profile-metrics .public-figma-metric-card {
+  display: grid;
+  align-content: start;
+  gap: .5rem;
+  min-block-size: 0;
+}
+
+.arka-redesign-profile-metrics .public-figma-metric-value {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.arka-redesign-profile-metrics .public-figma-metric-card-fees .public-figma-metric-value {
+  font-family: inherit;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.arka-redesign-profile-metrics .public-figma-metric-detail {
+  margin: 0;
+  color: var(--arka-muted);
+  line-height: 1.4;
+}
+
+.arka-redesign .history-bars-track { background: var(--arka-control); }
+.arka-redesign .history-bars-fill { background: var(--arka-accent); }
+
+.arka-redesign-profile .vault-trend-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.arka-redesign-profile .vault-trend-grid .surface-data-item {
+  min-inline-size: 0;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  background: var(--arka-control);
+}
+
+.arka-redesign .ux-manager-workspace {
+  --management-inset: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.arka-redesign .ux-manager-workspace :is(.arka-stage-panel, .arka-action-stack .surface-panel) {
+  padding: var(--management-inset);
+}
+
+.arka-redesign .ux-manager-workspace .ux-compact-swap-panel {
+  max-inline-size: none;
+  margin-inline: 0;
+}
+
+.arka-redesign .ux-manager-workspace :is(
+  .arka-stage-summary-list, .credit-position-list, .rebalance-trade-limits,
+  .rebalance-route-review, .rebalance-route-summary-card, .rebalance-route-summary-grid > div,
+  .credit-action-shell
+) {
+  color: var(--arka-text);
+  border-color: var(--arka-line);
+  border-image: none;
+  border-radius: .5rem;
+  background: var(--arka-control);
+  box-shadow: none;
+}
+
+.arka-redesign .ux-manager-workspace :is(.arka-stage-summary-row, .credit-position-row, .credit-market-line) {
+  border-color: var(--arka-line);
+}
+
+.arka-redesign .ux-manager-workspace .credit-position-row-secondary {
+  border-end-start-radius: .5rem;
+  border-end-end-radius: .5rem;
+  background: var(--arka-panel);
+}
+
+.arka-redesign .ux-manager-workspace :is(.arka-stage-summary-row, .credit-position-row) dt {
+  font-size: .8125rem;
+  text-transform: none;
+}
+
+.arka-redesign .ux-manager-workspace .arka-workspace-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .5rem;
+}
+
+.arka-redesign .ux-manager-workspace .detail-tab {
+  width: auto;
+  text-align: center;
+}
+
+@media (min-width: 48.01rem) {
+  .arka-redesign .ux-manager-workspace .arka-stage-chip-row { display: flex; }
+  .arka-redesign .ux-manager-workspace .arka-stage-summary-list { display: grid; }
+  .arka-redesign .ux-manager-workspace .ux-role-explanation { display: block; }
+
+  .arka-redesign .ux-manager-workspace .ux-compact-swap-panel .ux-swap-form {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 2.5rem minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .arka-redesign .ux-manager-workspace .ux-swap-form > * { grid-column: 1 / -1; }
+  .arka-redesign .ux-manager-workspace .ux-swap-form > .ux-swap-pay { grid-column: 1; }
+  .arka-redesign .ux-manager-workspace .ux-swap-form > .ux-swap-direction {
+    grid-column: 2;
+    align-self: center;
+    transform: rotate(-90deg);
+  }
+  .arka-redesign .ux-manager-workspace .ux-swap-form > .ux-swap-receive { grid-column: 3; }
+}
+
+@media (max-width: 48rem) {
+  .arka-redesign-profile-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .arka-redesign .ux-manager-workspace .ux-role-explanation { display: block; }
+  .arka-redesign .ux-manager-workspace .ux-credit-refresh { margin-block: 0; }
+  .arka-redesign .ux-manager-workspace .ux-credit-refresh p { flex-basis: 100%; }
+  .arka-redesign .ux-manager-workspace .credit-position-row {
+    gap: .5rem;
+    padding: .7rem .75rem;
+  }
+}
+
+@media (max-width: 24rem) {
+  .arka-redesign-profile-metrics { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Apply the same surfaces and controls to the public catalog and utility states. */
+.arka-redesign-canvas > :is(main, .surface-stack, .arka-workflow) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin-inline: 0;
+}
+
+.arka-redesign .control-room-fidelity-shell {
+  --catalog-line: var(--arka-line);
+  --catalog-line-soft: var(--arka-line);
+}
+
+.arka-redesign .arka-redesign-canvas :is(
+  .surface-panel, .surface-empty-state, .surface-data-item, .surface-table,
+  .arka-stage-summary-list, .credit-position-list
+) {
+  min-inline-size: 0;
+  border-color: var(--arka-line);
+  border-radius: .75rem;
+  background: var(--arka-panel);
+  box-shadow: none;
+}
+
+.arka-redesign .arka-redesign-canvas :is(.arka-stage-summary-list, .credit-position-list, .surface-data-item) {
+  background: var(--arka-control);
+}
+
+.arka-redesign .arka-redesign-canvas :is(.surface-table-header, .surface-table-row) {
+  border-color: var(--arka-line);
+  background: var(--arka-panel);
+}
+
+.arka-redesign .arka-redesign-canvas .surface-table-header {
+  background: var(--arka-control);
+  color: var(--arka-muted);
+}
+
+.arka-redesign .arka-redesign-canvas :is(
+  .arka-stage-summary-row, .arka-stage-access-row, .credit-position-row,
+  .discover-field, .surface-list-row
+) {
+  min-inline-size: 0;
+  border-color: var(--arka-line);
+}
+
+.arka-redesign .arka-redesign-canvas :is(.surface-stage-header, .surface-panel) :is(h1, h2, p, dd) {
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.arka-redesign .control-room-fidelity-shell :is(.discover-input, .discover-select, .surface-tab) {
+  min-inline-size: 0;
+  min-block-size: 2.75rem;
+  border: 1px solid var(--arka-line);
+  border-radius: .5rem;
+  background: var(--arka-control);
+  color: var(--arka-text);
+  box-shadow: none;
+  color-scheme: dark;
+}
+
+.arka-redesign .control-room-fidelity-shell :is(.discover-input, .discover-select) {
+  inline-size: 100%;
+  padding-inline: .75rem;
+}
+
+.arka-redesign :is(.control-room-fidelity-shell, .arka-redesign-canvas) input::placeholder {
+  color: var(--arka-muted);
+  opacity: .85;
+}
+
+.arka-redesign .control-room-fidelity-shell .surface-tab {
+  align-items: center;
+  padding: .5rem .75rem;
+  white-space: normal;
+}
+
+.arka-redesign .control-room-fidelity-shell .surface-tab-active {
+  border-color: var(--arka-accent);
+  box-shadow: inset 0 -1px var(--arka-accent);
+}
+
+/* These catalog selectors replace important declarations in the legacy layout. */
+.arka-redesign :is(.assets-fidelity-shell, .managers-fidelity-shell) .surface-spotlight-tabs .surface-tab {
+  border-color: var(--arka-line) !important;
+  background: var(--arka-control) !important;
+  min-block-size: 2.75rem !important;
+  padding: .5rem .75rem !important;
+}
+
+.arka-redesign :is(.assets-fidelity-shell, .managers-fidelity-shell) .surface-spotlight-tabs .surface-tab-active {
+  border-color: var(--arka-accent) !important;
+}
+
+.arka-redesign .managers-fidelity-shell .managers-filter-deck-cutover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.arka-redesign .assets-fidelity-shell .assets-command-toolbar {
+  border-color: var(--arka-line) !important;
+  border-radius: .5rem;
+  background: var(--arka-panel) !important;
+  box-shadow: none;
+}
+
+.arka-redesign .control-room-fidelity-shell > .public-detail-stage-header-cutover {
+  border: 0 !important;
+  border-image: none !important;
+  background: transparent !important;
+}
+
+.arka-redesign .arka-redesign-canvas :is(.asset-mark, .asset-glyph) {
+  border-color: var(--arka-line);
+  background: var(--arka-control);
+  color: var(--arka-text);
+  box-shadow: none;
+}
+
+.arka-redesign .arka-redesign-canvas :is(.surface-spotlight-strip, .vault-spotlight-strip) {
+  border-color: var(--arka-line);
+  background: var(--arka-control);
+}
+
+.arka-redesign .arka-redesign-canvas :is(.surface-spotlight-strip, .vault-spotlight-strip) > span {
+  background: var(--arka-accent);
+}
+
+.arka-redesign .assets-fidelity-shell .assets-public-metric-deck {
+  gap: .75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.arka-redesign .assets-fidelity-shell .public-figma-metric-card {
+  display: grid;
+  align-content: start;
+  gap: .5rem;
+  min-block-size: 0;
+  padding: 1rem;
+}
+
+.arka-redesign .assets-fidelity-shell .public-figma-metric-icon {
+  display: none;
+}
+
+.arka-redesign .assets-fidelity-shell :is(.public-figma-metric-detail, .public-figma-metric-value) {
+  margin: 0;
+}
+
+.arka-redesign .assets-fidelity-shell .public-figma-metric-value {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+@media (max-width: 48rem) {
+  .arka-redesign .assets-fidelity-shell .assets-public-metric-deck {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .arka-redesign .assets-fidelity-shell .public-figma-metric-card {
+    padding: .75rem;
+  }
+
+  .arka-redesign .control-room-fidelity-shell :is(.discover-toolbar, .public-detail-hero-grid-cutover) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arka-redesign .control-room-fidelity-shell .surface-tab-strip {
+    gap: .5rem;
+  }
+
+}
+
+@media (max-width: 54rem) {
+  .arka-redesign-header-row { position: relative; }
+  .arka-redesign-nav > a,
+  .arka-redesign-menu > summary {
+    min-inline-size: 0;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.25;
+  }
+  .arka-redesign-nav > a { white-space: normal; }
+  .arka-redesign-menu { position: static; }
+  .arka-redesign-menu-panel {
+    inset-block-start: 100%;
+    inline-size: min(24rem, 100%);
+  }
+  .arka-redesign-menu-panel :is(form, .arka-redesign-menu-links) > * {
+    min-inline-size: 0;
+  }
+}

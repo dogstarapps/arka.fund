@@ -19,6 +19,8 @@ import {
   WebhookMonitoringNotifier,
 } from "../../src/index.js";
 
+import { StaticHolderReader } from "../../src/holders.js";
+
 const syncedAt = "2026-03-27T10:00:00.000Z";
 const tokenContract = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -73,6 +75,55 @@ const arkaTwo = {
   ],
   syncedAt,
 };
+
+test("HTTP API serves paginated participants and distinguishes unknown data from zero holders", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "catalog-api-holders-"));
+  const store = new FileCatalogStore(join(directory, "snapshot.json"));
+  const snapshot = buildSnapshot([arkaOne, arkaTwo], [], syncedAt);
+  await store.write(snapshot);
+  const service = new CatalogService(
+    store,
+    new FileCatalogHistoryStore(join(directory, "history.json")),
+    new StaticCatalogSyncRunner(snapshot),
+    { holderReader: new StaticHolderReader({
+      [arkaOne.arkaId]: {
+        arkaId: arkaOne.arkaId,
+        shareToken: arkaOne.shareToken,
+        totalShares: "100",
+        indexedAt: syncedAt,
+        complete: false,
+        currentBalancesLedger: 250,
+        coverageFromLedger: 201,
+        coverageToLedger: 249,
+        total: 2,
+        offset: 0,
+        limit: 2,
+        items: [
+          { holder: arkaOne.manager, shares: "75", ownershipBps: 7500, firstSeenLedger: 233, lastActivityLedger: 245 },
+          { holder: arkaTwo.manager, shares: "25", ownershipBps: 2500, firstSeenLedger: 236, lastActivityLedger: 249 },
+        ],
+      },
+    }) },
+  );
+  const app = createCatalogApp({ service });
+  try {
+    const page = await app.inject({ method: "GET", url: `/v1/arkas/${arkaOne.arkaId}/holders?offset=1&limit=1` });
+    assert.equal(page.statusCode, 200);
+    const body = page.json();
+    assert.deepEqual([body.total, body.totalShares, body.currentBalancesLedger, body.complete], [2, "100", 250, false]);
+    assert.deepEqual(body.items.map((item: { holder: string }) => item.holder), [arkaTwo.manager]);
+
+    const unindexed = await app.inject({ method: "GET", url: `/v1/arkas/${arkaTwo.arkaId}/holders` });
+    assert.equal(unindexed.statusCode, 200);
+    assert.equal(unindexed.json().complete, false);
+    assert.equal(unindexed.json().currentBalancesLedger, undefined);
+
+    const unknown = await app.inject({ method: "GET", url: "/v1/arkas/unknown/holders" });
+    assert.equal(unknown.statusCode, 404);
+  } finally {
+    await app.close();
+  }
+});
 
 test("HTTP API serves dashboard, assets, portfolio, and activity endpoints", async () => {
   const directory = await mkdtemp(join(tmpdir(), "catalog-api-assets-"));

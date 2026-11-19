@@ -41,6 +41,8 @@ import {
 import { evaluateBalancedSodaxCanaryPolicy } from "@/lib/workflows/balancedSodaxCanaryPolicy";
 import { jsonNoStore, readJsonObjectBody, redactApiText } from "@/lib/server/apiHardening";
 
+import { isStagingReadOnlyRpcEnabled } from "@/lib/previewSafety";
+
 export const dynamic = "force-dynamic";
 
 type RebalancePlanRequestBody = {
@@ -196,6 +198,11 @@ export async function POST(request: NextRequest): Promise<Response> {
         ? body.intentTxHash.trim()
         : null;
 
+    const stagingReadOnly = isStagingReadOnlyRpcEnabled();
+    if (stagingReadOnly && intentTxHash) {
+      return jsonNoStore({ ok: false, error: "Staging only accepts route estimates." }, { status: 403 });
+    }
+
     const balancedSupport = await readBalancedProtocolHealth();
     const balancedIntentDriver = buildBalancedIntentExecutionDriver(balancedSupport);
     const balancedLane = deriveBalancedRouteLaneFromDriver(balancedIntentDriver);
@@ -203,8 +210,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     const balancedComparableLifecycleReady =
       balancedAutoSurface.officialEvidenceReady &&
       balancedAutoSurface.officialAutoComparable;
-    const balancedLaneReady = balancedAutoSurface.laneReady;
-    const balancedPlanningEnabled = balancedAutoSurface.autoReady;
+    const balancedLaneReady = !stagingReadOnly && balancedAutoSurface.laneReady;
+    const balancedPlanningEnabled = !stagingReadOnly && balancedAutoSurface.autoReady;
     const balancedCanaryPolicy =
       amountBase > 0 && tokenIn && tokenOut
         ? evaluateBalancedSodaxCanaryPolicy({ tokenIn, tokenOut, amountBase })
@@ -267,6 +274,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           planningEnabled: balancedPlanningEnabled,
           executionEnabled: balancedLaneReady,
           disabledReason:
+            (stagingReadOnly ? "This preview estimates on-chain routes only." : "") ||
             balancedAutoSurface.reason ||
             balancedIntentDriver.plannerDetail ||
             balancedSupport.blockingReasons[0] ||
@@ -296,7 +304,9 @@ export async function POST(request: NextRequest): Promise<Response> {
         configuredPhoenixPool: configuredPhoenixPool || undefined,
         configuredAquariusPoolIndex: configuredAquariusPoolIndex || undefined,
         routingAssets,
-        routingSearch,
+        routingSearch: stagingReadOnly
+          ? { maxIntermediaries: 2, maxHops: 2, quoteBudget: 6, splitParts: 1 }
+          : routingSearch,
         balancedLane,
         balancedLaneReady,
         balancedComparableLifecycleReady,

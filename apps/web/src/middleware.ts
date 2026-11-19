@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UX_REVIEW_PREVIEW, PREVIEW_READ_ONLY_MESSAGE, isReadOnlyRpcPayload } from '@/lib/previewSafety';
+import { UX_REVIEW_PREVIEW, PREVIEW_READ_ONLY_MESSAGE, isReadOnlyRpcPayload, isHostedStagingPreview, isStagingReadOnlyRpcEnabled } from '@/lib/previewSafety';
 
 export async function middleware(request: NextRequest) {
   if (!UX_REVIEW_PREVIEW || request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS') return NextResponse.next();
   const path = request.nextUrl.pathname;
+  if (isHostedStagingPreview()) {
+    if (request.method === 'POST' && path === '/api/preview-staging-refresh') return NextResponse.next();
+    if (!isStagingReadOnlyRpcEnabled() || !['/api/soroban/rpc', '/api/routing/rebalance/plan'].includes(path)) {
+      return NextResponse.json({ error: { code: -32601, message: PREVIEW_READ_ONLY_MESSAGE } }, { status: 403 });
+    }
+  }
   // This single loopback-only endpoint mutates an in-memory native test host,
   // never blockchain state. Its route independently validates every action.
   const host = request.headers.get('host') ?? '';

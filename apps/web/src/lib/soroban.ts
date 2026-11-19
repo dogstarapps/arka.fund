@@ -6,6 +6,9 @@ import { Account, Address, Contract, TransactionBuilder, nativeToScVal, scValToN
 import { NETWORK_PASSPHRASE, SIM_ACCOUNT, SOROBAN_RPC_URL, SOROSWAP_ROUTER, SOROSWAP_ADAPTER, AQUARIUS_ADAPTER, ADAPTER_BALANCED, PHOENIX_ADAPTER, SUSHI_ADAPTER, SUSHI_FACTORY, ADAPTER_BLEND, PLATFORM_VENUE_REGISTRY } from './config'
 
 export const TESTNET = NETWORK_PASSPHRASE
+import { isStagingReadOnlyRpcEnabled } from './previewSafety'
+import { STAGING_PUBLIC_RPC, isAllowedStagingRpcRequest } from './stagingReadOnlyRpc'
+
 export const RPC_URL = SOROBAN_RPC_URL
 
 export function resolveRpcUrl(): string {
@@ -14,6 +17,20 @@ export function resolveRpcUrl(): string {
 }
 
 function createRpcServer(): rpc.Server {
+  if (typeof window === 'undefined' && isStagingReadOnlyRpcEnabled()) {
+    const server = new rpc.Server(STAGING_PUBLIC_RPC)
+    server.httpClient.interceptors.request.use(config => {
+      const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+      if (config.method !== 'post' || new URL(config.url ?? '').href !== STAGING_PUBLIC_RPC ||
+          !isAllowedStagingRpcRequest(body)) {
+        throw new Error('Staging RPC rejected this request.')
+      }
+      config.maxRedirects = 0
+      config.timeout = 12_000
+      return config
+    })
+    return server
+  }
   return new rpc.Server(resolveRpcUrl(), { allowHttp: true })
 }
 

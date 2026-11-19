@@ -122,8 +122,13 @@ export async function proxyCatalogRequest(
     }
     if (verifyHolders && upstreamResponse.ok) {
       const page = JSON.parse(body) as ArkaHolderPage;
-      const currentBalancesLedger = page.complete && !page.stale && !page.refreshFailed ? undefined : await readCurrentHolderLedger(page, pathSegments[2]);
+      const currentBalancesLedger = !page.stale && !page.refreshFailed && (page.complete || Number.isSafeInteger(page.currentBalancesLedger))
+        ? undefined : await readCurrentHolderLedger(page, pathSegments[2]);
       if (currentBalancesLedger !== undefined) return jsonNoStore({ ...page, currentBalancesLedger });
+      if ((page.stale || page.refreshFailed) && page.currentBalancesLedger !== undefined) {
+        delete page.currentBalancesLedger;
+        return jsonNoStore(page);
+      }
     }
     return new Response(body, {
       status: upstreamResponse.status,

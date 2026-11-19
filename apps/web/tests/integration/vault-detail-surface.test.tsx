@@ -99,6 +99,7 @@ describe("VaultDetailSurface", () => {
     expect(screen.getByTestId("vault-portfolio-tab")).toHaveClass("public-detail-tab-panel-cutover");
     expect(screen.getByTestId("vault-portfolio-panel")).toHaveTextContent("Current value contribution by asset");
     expect(screen.getByTestId("vault-assets-table")).toHaveTextContent("value contribution");
+    expect(screen.getByTestId("vault-assets-table")).toHaveTextContent("1 market · 0.19 USDC net position");
     expect(screen.getByTestId("vault-assets-table")).not.toHaveTextContent("base units");
 
     await user.click(screen.getByRole("button", { name: "Activity" }));

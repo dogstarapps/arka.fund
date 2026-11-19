@@ -256,6 +256,22 @@ export function createCatalogApp(options: CatalogAppOptions): FastifyInstance {
     return options.service.arkaAssets(params.id);
   });
 
+  app.get("/v1/arkas/:id/holders", async (request, reply) => {
+    const { id } = request.params as RequestParams;
+    const query = request.query as RequestQuery;
+    try {
+      const holders = await options.service.arkaHolders(id, {
+        offset: parseOptionalInt(query.offset),
+        limit: parseOptionalInt(query.limit),
+      });
+      if (!holders) return reply.code(404).send({ error: "not_found" });
+      reply.header("cache-control", "public, max-age=5");
+      return holders;
+    } catch {
+      return reply.code(503).send({ error: "holders_unavailable" });
+    }
+  });
+
   app.get("/v1/arkas/:id/portfolio", async (request, reply) => {
     const snapshot = await options.service.current();
     if (!snapshot) {

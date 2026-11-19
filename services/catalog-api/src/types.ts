@@ -543,6 +543,32 @@ export interface HistoryQuery {
   limit?: number;
 }
 
+export interface HolderQuery {
+  offset?: number;
+  limit?: number;
+}
+
+export interface ArkaHolderEntry {
+  holder: string;
+  shares: string;
+  ownershipBps: number;
+  firstSeenLedger: number | null;
+  lastActivityLedger: number | null;
+}
+
+export interface ArkaHolderPage extends Page<ArkaHolderEntry> {
+  arkaId: string;
+  shareToken: string | null;
+  totalShares: string;
+  indexedAt: string;
+  complete: boolean;
+  currentBalancesLedger?: number;
+  stale?: boolean;
+  refreshFailed?: boolean;
+  coverageFromLedger: number | null;
+  coverageToLedger: number | null;
+}
+
 export interface ActivityQuery {
   kind?: ActivityKind;
   fromLedger?: number;

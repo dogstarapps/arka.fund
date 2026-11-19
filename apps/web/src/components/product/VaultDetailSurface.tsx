@@ -492,7 +492,7 @@ export default function VaultDetailSurface(props: { arkaId: string; redesign?: b
                       </span>
 	                  </div>
 	                  <div className="surface-note">
-                      {item.marketIds.length} {item.marketIds.length === 1 ? "market" : "markets"} · {formatBaseUnitAmount(item.netPositionValue)} {resolveAssetDisplayLabel(item.assetContract)} net position
+                      {item.marketIds.length} {item.marketIds.length === 1 ? "market" : "markets"} · {formatVaultDenominationAmount(item.netPositionValue, arka)} net position
                     </div>
                 </article>
               ))}

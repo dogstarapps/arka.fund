@@ -1,4 +1,5 @@
 import { Networks } from "@stellar/stellar-sdk";
+import { NoopHolderReader, RpcHolderReader, type HolderReader } from "./holders.js";
 import { withVerifiedProfit } from "./profitSync.js";
 import { createMainnetProfitSource } from "./profitRpc.js";
 import { NoopActivityReader, RpcActivityReader, type ActivityReader } from "./activity.js";
@@ -88,6 +89,20 @@ export function resolveActivityBackend(
     return env.CATALOG_API_ACTIVITY_BACKEND as ActivityBackend;
   }
   return env.CATALOG_API_RPC_URL && env.CATALOG_API_NETWORK_PASSPHRASE ? "rpc" : "none";
+}
+
+export function createHolderReaderFromEnv(env: NodeJS.ProcessEnv = process.env): HolderReader {
+  if (!env.CATALOG_API_RPC_URL || !env.CATALOG_API_NETWORK_PASSPHRASE) return new NoopHolderReader();
+  return new RpcHolderReader({
+    rpcUrl: env.CATALOG_API_RPC_URL,
+    networkPassphrase: env.CATALOG_API_NETWORK_PASSPHRASE,
+    archiveFile: env.CATALOG_API_HOLDER_FILE ?? "./var/catalog-holders.json",
+    initialLedger: optionalInteger(env.CATALOG_API_HOLDER_INITIAL_LEDGER),
+    pageSize: optionalInteger(env.CATALOG_API_HOLDER_PAGE_SIZE),
+    maxPages: optionalInteger(env.CATALOG_API_HOLDER_MAX_PAGES),
+    retryAttempts: optionalInteger(env.CATALOG_API_RPC_RETRY_ATTEMPTS),
+    retryDelayMs: optionalInteger(env.CATALOG_API_RPC_RETRY_DELAY_MS),
+  });
 }
 
 function optionalInteger(value: string | undefined): number | undefined {

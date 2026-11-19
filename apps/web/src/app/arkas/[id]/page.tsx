@@ -327,7 +327,8 @@ function LegacyArkaDetail() {
   const [creditAction, setCreditAction] = useState<CreditPositionAction>('Supply')
   const [assetIn, setAssetIn] = useState<string>(ROUTING_ASSET_A)
   const [assetOut, setAssetOut] = useState<string>(ROUTING_ASSET_B)
-  const [denominationAsset, setDenominationAsset] = useState('')
+  const [fundDenomination, setFundDenomination] = useState<{ arkaId: string; asset: string } | null>(null)
+  const denominationAsset = fundDenomination?.arkaId === arkaId ? fundDenomination.asset : ''
   const [arkaBalances, setArkaBalances] = useState<Record<string, number>>({})
   const [walletBalances, setWalletBalances] = useState<Record<string, number>>({})
   const [depositPricesByAsset, setDepositPricesByAsset] = useState<Record<string, CatalogAssetPrice | null>>({})
@@ -850,9 +851,10 @@ function LegacyArkaDetail() {
     setSharesLoadError(false)
     if (activeWorkspace === 'credit') setCreditReadState('loading')
     try {
-    const catalogSnapshot = catalogArka ?? await loadArkaCatalogEntry(arkaId).catch(() => null)
+    const currentCatalogEntry = catalogArka?.arkaId === arkaId ? catalogArka : null
+    const catalogSnapshot = currentCatalogEntry ?? await loadArkaCatalogEntry(arkaId).catch(() => null)
     if (version !== refreshVersion.current) return
-    if (catalogSnapshot && !catalogArka) setCatalogArka(catalogSnapshot)
+    if (catalogSnapshot && !currentCatalogEntry) setCatalogArka(catalogSnapshot)
     const indexedNav = Number(catalogSnapshot?.nav ?? Number.NaN)
     setArkaNav(Number.isFinite(indexedNav) ? indexedNav : -1)
     const m = catalogSnapshot?.manager || await readArkaManager(arkaId, pubKey || undefined)
@@ -947,7 +949,9 @@ function LegacyArkaDetail() {
     const marketAssets = activeConfig
       ? BLEND_MARKET_ASSETS.filter((asset) => whitelist.includes(asset))
       : positionAssets.filter((asset) => whitelist.includes(asset))
+    if (version !== refreshVersion.current) return
     const resolvedDenomination = denomination || catalogSnapshot?.denominationContract || ''
+    setFundDenomination({ arkaId, asset: resolvedDenomination })
     const freshCash = resolvedDenomination ? await readArkaLiquidBalance(arkaId, resolvedDenomination, pubKey || undefined).catch(() => null) : null
     if (version !== refreshVersion.current) return
     setRedemptionCashBase(freshCash)
@@ -994,7 +998,6 @@ function LegacyArkaDetail() {
     if (version !== refreshVersion.current) return
     setArkaNav(nav)
     setArkaBalances(liquidBalanceMap)
-    setDenominationAsset(resolvedDenomination)
     setWhitelistAssets(whitelist)
     setCreditPositionValues(positionValues)
     setCreditRiskPolicy(riskPolicy)
@@ -1660,10 +1663,12 @@ function LegacyArkaDetail() {
     : `${shareLabel} shares`
   const amountBase = toBaseUnits(parseDecimalInput(amountStr))
   const selectedAssetLabel = formatAssetDisplayLabel(assetIn)
-  const redemptionAsset = denominationAsset || assetIn
-  const denominationLabel = formatAssetDisplayLabel(redemptionAsset)
+  const denominationLabel = denominationAsset ? formatAssetDisplayLabel(denominationAsset) : ''
+  const redemptionCashLabel = denominationAsset && redemptionCashBase !== null
+    ? formatBaseAmountWithAsset(redemptionCashBase, denominationAsset)
+    : cashLoading ? 'Checking cash…' : 'Cash unavailable'
   const redeemFeeBps = catalogArka?.economics?.fees.redeemBps ?? catalogArka?.fees.redeemBps ?? 0
-  const maximumRedemptionBase = totalShares !== null
+  const maximumRedemptionBase = denominationAsset && totalShares !== null
     ? estimateMaximumRedemption({
         navBase: arkaNav,
         totalSharesBase: totalShares,
@@ -1672,7 +1677,7 @@ function LegacyArkaDetail() {
       })
     : null
   const requestedRedemptionBase = toBaseUnits(parseDecimalInput(redeemAmountStr))
-  const redemptionQuote = totalShares !== null
+  const redemptionQuote = denominationAsset && totalShares !== null
     ? quoteRedemptionByDenominationAmount({
         requestedNetOutBase: requestedRedemptionBase,
         navBase: arkaNav,
@@ -1682,11 +1687,11 @@ function LegacyArkaDetail() {
       })
     : null
   const maximumRedemptionLabel = maximumRedemptionBase !== null
-    ? formatBaseAmountWithAsset(maximumRedemptionBase, redemptionAsset)
+    ? formatBaseAmountWithAsset(maximumRedemptionBase, denominationAsset)
     : 'unavailable'
   const withdrawableNowBase = estimateWithdrawableNow(maximumRedemptionBase, redemptionCashBase)
   const exceedsCash = redemptionCashBase !== null && redemptionQuote !== null && redemptionQuote.estimatedNetOutBase > redemptionCashBase
-  const redemptionInputError = !ownershipAddress || !sharesLoaded
+  const redemptionInputError = !denominationAsset || !ownershipAddress || !sharesLoaded
     ? undefined
     : requestedRedemptionBase <= 0
     ? 'Enter a positive amount.'
@@ -1980,7 +1985,7 @@ function LegacyArkaDetail() {
           </div>
           <div className="arka-stage-summary-row">
             <dt>{managementWorkspace ? 'Fund cash for withdrawals' : 'My investments'}</dt>
-            <dd>{managementWorkspace ? redemptionCashBase !== null ? formatBaseAmountWithAsset(redemptionCashBase, redemptionAsset) : cashLoading ? 'Checking cash…' : 'Cash unavailable' : <Link href="/investments">View all my holdings</Link>}</dd>
+            <dd>{managementWorkspace ? redemptionCashLabel : <Link href="/investments">View all my holdings</Link>}</dd>
           </div>
         </dl>
 
@@ -2198,12 +2203,16 @@ function LegacyArkaDetail() {
           </div>
           <div className="arka-capital-section" id="withdraw-investment" data-testid="arka-redeem-section">
             <h3 className="arka-capital-section-title">Withdraw to your wallet</h3>
-            <dl className="ux-withdrawal-balances" data-testid="withdrawal-balances"><div><dt>Your position value, estimated</dt><dd>{ownershipAddress && sharesLoaded ? maximumRedemptionLabel : ownershipAddress ? sharesLoadError ? 'Position unavailable' : 'Checking position…' : 'Connect wallet'}</dd></div><div><dt>Fund cash in {denominationLabel}, shared by all investors</dt><dd>{redemptionCashBase !== null ? formatBaseAmountWithAsset(redemptionCashBase, redemptionAsset) : cashLoading ? 'Checking cash…' : 'Cash unavailable'}</dd></div><div><dt>Estimated amount available now</dt><dd>{ownershipAddress && sharesLoaded && withdrawableNowBase !== null ? formatBaseAmountWithAsset(withdrawableNowBase, redemptionAsset) : 'Not yet available'}</dd></div></dl>
+            <dl className="ux-withdrawal-balances" data-testid="withdrawal-balances">
+              <div><dt>Your position value, estimated</dt><dd>{ownershipAddress && sharesLoaded ? maximumRedemptionLabel : ownershipAddress ? sharesLoadError ? 'Position unavailable' : 'Checking position…' : 'Connect wallet'}</dd></div>
+              <div><dt>{denominationLabel ? `Fund cash in ${denominationLabel}, shared by all investors` : 'Fund cash, shared by all investors'}</dt><dd>{redemptionCashLabel}</dd></div>
+              <div><dt>Estimated amount available now</dt><dd>{ownershipAddress && sharesLoaded && withdrawableNowBase !== null ? formatBaseAmountWithAsset(withdrawableNowBase, denominationAsset) : 'Not yet available'}</dd></div>
+            </dl>
             <button className="surface-button surface-button-secondary" onClick={()=>void refreshArka().catch(()=>{})}>Refresh position and cash</button>
-            <p className="surface-note">A withdrawal pays {denominationLabel} to your wallet and burns the required shares. Fund assets in other tokens are not automatically sold. Cash is shared, fees can accrue, and the amount must pass a fresh simulation before signing.</p>
+            <p className="surface-note">A withdrawal pays {denominationLabel || 'the fund currency'} to your wallet and burns the required shares. Fund assets in other tokens are not automatically sold. Cash is shared, fees can accrue, and the amount must pass a fresh simulation before signing.</p>
             <div className="ops-form-grid">
               <ActionField
-                label={`Amount to withdraw in ${denominationLabel}`}
+                label={denominationLabel ? `Amount to withdraw in ${denominationLabel}` : 'Amount to withdraw'}
                 hint="Enter the value you want returned to your wallet. The required shares are calculated automatically."
                 error={redemptionInputError}
                 span
@@ -2213,7 +2222,7 @@ function LegacyArkaDetail() {
                   className="ops-input"
                   value={redeemAmountStr}
                   onChange={event => setRedeemAmountStr(event.target.value)}
-                  placeholder={`e.g. 3 ${denominationLabel}`}
+                  placeholder={denominationLabel ? `e.g. 3 ${denominationLabel}` : 'e.g. 3'}
                   inputMode="decimal"
                   aria-invalid={Boolean(redemptionInputError)}
                 />
@@ -2221,16 +2230,16 @@ function LegacyArkaDetail() {
             </div>
             {redemptionQuote ? (
               <p className="surface-note" data-testid="arka-redemption-quote">
-                This will redeem {formatHumanAmount(redemptionQuote.sharesToRedeemBase / 10_000_000)} shares for about {formatBaseAmountWithAsset(redemptionQuote.estimatedNetOutBase, redemptionAsset)}.
+                This will redeem {formatHumanAmount(redemptionQuote.sharesToRedeemBase / 10_000_000)} shares for about {formatBaseAmountWithAsset(redemptionQuote.estimatedNetOutBase, denominationAsset)}.
               </p>
             ) : null}
             <div className="ops-action-row">
               <button data-testid="arka-redeem-button" className="surface-button surface-button-primary" disabled={UX_REVIEW_PREVIEW || !pubKey || vaultActionPending || !redemptionQuote || redemptionCashBase === null || exceedsCash} onClick={()=>runVaultAction('The redemption could not be completed.', async()=>{
-                  if(!pubKey || !redemptionQuote) return; const sh=redemptionQuote.sharesToRedeemBase; const shareAmountLabel = `${formatHumanAmount(sh / 10_000_000)} shares`; const valueLabel = formatBaseAmountWithAsset(redemptionQuote.estimatedNetOutBase, redemptionAsset); setVaultStatus(`Submitting redemption of about ${valueLabel}`); const rx=await buildArkaRedeem(pubKey, arkaId, sh); const rs=await signXdr(rx); const rh=await submitSigned(rs); setVaultStatus(`Confirming redemption of about ${valueLabel}`); await waitForSorobanTx(rh); await refreshArka(); setVaultStatus(`Redemption confirmed: about ${valueLabel} (${shareAmountLabel}) · tx ${formatTransactionHashLabel(rh)}`)
-              })}>{`Withdraw ${formatHumanAmount(parseDecimalInput(redeemAmountStr || '0'))} ${denominationLabel}`}</button>
+                  if(!pubKey || !redemptionQuote) return; const sh=redemptionQuote.sharesToRedeemBase; const shareAmountLabel = `${formatHumanAmount(sh / 10_000_000)} shares`; const valueLabel = formatBaseAmountWithAsset(redemptionQuote.estimatedNetOutBase, denominationAsset); setVaultStatus(`Submitting redemption of about ${valueLabel}`); const rx=await buildArkaRedeem(pubKey, arkaId, sh); const rs=await signXdr(rx); const rh=await submitSigned(rs); setVaultStatus(`Confirming redemption of about ${valueLabel}`); await waitForSorobanTx(rh); await refreshArka(); setVaultStatus(`Redemption confirmed: about ${valueLabel} (${shareAmountLabel}) · tx ${formatTransactionHashLabel(rh)}`)
+              })}>{denominationLabel ? `Withdraw ${formatInputAmountWithAsset(redeemAmountStr, denominationAsset)}` : 'Withdraw'}</button>
               <button className="surface-button surface-button-secondary" data-testid="arka-use-available-button" disabled={!sharesLoaded || withdrawableNowBase === null || withdrawableNowBase <= 0} onClick={()=>setRedeemAmountStr(String((withdrawableNowBase || 0) / 1e7))}>Use available amount</button>
               <button data-testid="arka-redeem-all-button" className="surface-button surface-button-secondary" disabled={UX_REVIEW_PREVIEW || !pubKey || vaultActionPending || shares <= 0 || maximumRedemptionBase === null || redemptionCashBase === null || maximumRedemptionBase > redemptionCashBase} onClick={()=>runVaultAction('The redemption could not be completed.', async()=>{
-                  if(!pubKey) return; if (shares<=0 || maximumRedemptionBase === null) throw new Error('No redeemable position'); const shareAmountLabel = `${formatHumanAmount(shares / 10_000_000)} shares`; const valueLabel = formatBaseAmountWithAsset(maximumRedemptionBase, redemptionAsset); setVaultStatus(`Submitting redemption of about ${valueLabel}`); const rx=await buildArkaRedeem(pubKey, arkaId, shares); const rs=await signXdr(rx); const rh=await submitSigned(rs); setVaultStatus(`Confirming redemption of about ${valueLabel}`); await waitForSorobanTx(rh); await refreshArka(); setVaultStatus(`Redemption confirmed: about ${valueLabel} (${shareAmountLabel}) · tx ${formatTransactionHashLabel(rh)}`)
+                  if(!pubKey) return; if (shares<=0 || maximumRedemptionBase === null) throw new Error('No redeemable position'); const shareAmountLabel = `${formatHumanAmount(shares / 10_000_000)} shares`; const valueLabel = formatBaseAmountWithAsset(maximumRedemptionBase, denominationAsset); setVaultStatus(`Submitting redemption of about ${valueLabel}`); const rx=await buildArkaRedeem(pubKey, arkaId, shares); const rs=await signXdr(rx); const rh=await submitSigned(rs); setVaultStatus(`Confirming redemption of about ${valueLabel}`); await waitForSorobanTx(rh); await refreshArka(); setVaultStatus(`Redemption confirmed: about ${valueLabel} (${shareAmountLabel}) · tx ${formatTransactionHashLabel(rh)}`)
               })}>Withdraw entire position</button>
             </div>
             {UX_REVIEW_PREVIEW ? <p className="surface-note">Read-only UX preview: you can review estimates, but no transaction can be signed or sent.</p> : null}

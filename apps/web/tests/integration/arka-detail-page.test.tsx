@@ -997,6 +997,29 @@ describe("ArkaDetailPage", () => {
     expect(screen.queryByTestId("arka-investors-panel")).not.toBeInTheDocument();
   });
 
+  it("waits for the fund currency before showing or enabling a withdrawal amount", async () => {
+    const { promise, resolve } = Promise.withResolvers<string>();
+    sorobanMocks.readArkaDenomination.mockReturnValue(promise);
+    navigationState.search = "workspace=flow";
+
+    await renderVerifiedLegacyPage();
+    const section = screen.getByTestId("arka-redeem-section");
+    const button = screen.getByTestId("arka-redeem-button");
+    const amount = screen.getByTestId("arka-redeem-amount-input");
+    expect(section).not.toHaveTextContent(resolveAssetDisplayLabel(defaultRoutingAssetA));
+    expect(button).toHaveAccessibleName("Withdraw");
+    expect(button).toBeDisabled();
+    expect(screen.getByTestId("arka-redeem-all-button")).toBeDisabled();
+    expect(amount).toHaveAccessibleName(/^Amount to withdraw Enter/);
+    expect(amount).toHaveAttribute("placeholder", "e.g. 3");
+    expect(screen.queryByTestId("arka-redemption-quote")).not.toBeInTheDocument();
+
+    resolve(defaultRoutingAssetB);
+    const denomination = resolveAssetDisplayLabel(defaultRoutingAssetB);
+    await waitFor(() => expect(button).toHaveAccessibleName(`Withdraw 1 ${denomination}`));
+    expect(amount).toHaveAttribute("placeholder", `e.g. 3 ${denomination}`);
+  });
+
   it("lets investors request a redemption in the Arka denomination instead of shares", async () => {
     const user = userEvent.setup();
     await renderVerifiedLegacyPage();

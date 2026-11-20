@@ -75,6 +75,10 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
       - run: npm run test:integration
+      - name: Build and exercise the catalog container
+        run: |
+          docker build --tag arka-catalog-ci .
+          docker run --rm arka-catalog-ci node --input-type=module -e 'await import("@stellar/stellar-sdk"); console.log(process.version)'
 
   typescript-sdk:
     runs-on: ubuntu-latest

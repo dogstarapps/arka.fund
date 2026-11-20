@@ -260,3 +260,55 @@ test("the canonical registry resolves every launch asset without exposing raw un
     "BLND",
   );
 });
+
+test("catalog values liquid assets and positions in their respective currencies", () => {
+  const xlmPrice = {
+    ...classifyOracleInspection({
+      assetContract: XLM,
+      inspection: inspection(),
+      policy,
+      paused: false,
+      oracleDecimals: 14,
+      observedAt: OBSERVED_AT,
+    }),
+    priceUsd: "20000000000000",
+  };
+  const asset = {
+    collateralAmount: "0",
+    debtAmount: "0",
+    netManagedAmount: "0",
+    marketIds: [],
+    syncedAt: OBSERVED_AT,
+  };
+  const vault: ArkaCatalogEntry = {
+    ...arka(XLM, "529999999"),
+    whitelistContracts: [XLM, USDC],
+    assets: [
+      {
+        ...asset,
+        assetContract: XLM,
+        isDenomination: true,
+        liquidBalance: "10000000",
+        netPositionValue: "0",
+      },
+      {
+        ...asset,
+        assetContract: USDC,
+        isDenomination: false,
+        liquidBalance: "100000000",
+        netPositionValue: "20000000",
+      },
+    ],
+  };
+  const valuation = buildSnapshot([vault], [], OBSERVED_AT, [xlmPrice, usdParityPrice(USDC, OBSERVED_AT)]);
+  const economics = valuation.arkas[0].economics;
+  assert.equal(economics?.navDenomination, vault.nav);
+  assert.equal(economics?.navUsdEstimate, "106000000");
+  assert.equal(economics?.valuationSource, "oracle_verified");
+  const usdc = economics?.portfolioWeights.find(position => position.assetContract === USDC);
+  assert.equal(usdc?.valueUsdEstimate, "104000000");
+  assert.equal(usdc?.valueDenomination, "520000000");
+
+  const unpriced = buildSnapshot([vault], [], OBSERVED_AT, []);
+  assert.equal(unpriced.arkas[0].economics?.navUsdEstimate, null);
+});

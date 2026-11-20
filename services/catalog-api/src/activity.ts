@@ -47,7 +47,7 @@ export class RpcActivityReader implements ActivityReader {
   private readonly maxPages: number;
 
   constructor(private readonly options: RpcActivityReaderOptions) {
-    this.server = new rpc.Server(options.rpcUrl, {
+    this.server = options.rpcServer ?? new rpc.Server(options.rpcUrl, {
       allowHttp: options.allowHttp ?? options.rpcUrl.startsWith("http://"),
     });
     this.lookbackLedgers = options.lookbackLedgers ?? 2_000;

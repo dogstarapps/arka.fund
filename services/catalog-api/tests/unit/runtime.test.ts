@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   createActivityReaderFromEnv,
+  createCatalogRpcFromEnv,
   createCatalogSyncRunnerFromEnv,
   resolveGraphqlProfile,
   resolveActivityBackend,
@@ -9,6 +10,25 @@ import {
 import { GraphqlCatalogSyncRunner } from "../../src/graphqlRunner.js";
 import { NoopActivityReader, RpcActivityReader } from "../../src/activity.js";
 import { OnChainCatalogSyncRunner } from "../../src/runners.js";
+
+test("spaces requests sharing the catalog RPC transport", async () => {
+  assert.equal(createCatalogRpcFromEnv({}), undefined);
+  assert.throws(() => createCatalogRpcFromEnv({ CATALOG_API_RPC_MIN_INTERVAL_MS: "-1" }));
+  const server = createCatalogRpcFromEnv({
+    CATALOG_API_RPC_URL: "http://127.0.0.1:8000",
+    CATALOG_API_RPC_MIN_INTERVAL_MS: "20",
+  });
+  const interceptor = server?.httpClient.interceptors.request.handlers.at(-1);
+  assert.ok(interceptor);
+  const releasedAt: number[] = [];
+  await Promise.all(Array.from({ length: 3 }, async () => {
+    const request = { url: "/" };
+    assert.equal(await interceptor.fulfilled(request), request);
+    releasedAt.push(performance.now());
+  }));
+  assert.equal(releasedAt.length, 3);
+  assert.ok(releasedAt[2] - releasedAt[0] >= 38);
+});
 
 test("createCatalogSyncRunnerFromEnv builds the native runner by default", () => {
   const runner = createCatalogSyncRunnerFromEnv({

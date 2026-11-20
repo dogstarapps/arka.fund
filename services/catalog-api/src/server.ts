@@ -8,7 +8,12 @@ import {
   WebhookMonitoringNotifier,
   type MonitoringNotifier,
 } from "./notifier.js";
-import { createActivityReaderFromEnv, createCatalogSyncRunnerFromEnv, createHolderReaderFromEnv } from "./runtime.js";
+import {
+  createActivityReaderFromEnv,
+  createCatalogRpcFromEnv,
+  createCatalogSyncRunnerFromEnv,
+  createHolderReaderFromEnv,
+} from "./runtime.js";
 import { CatalogService } from "./service.js";
 import {
   FileCatalogHistoryStore,
@@ -42,7 +47,8 @@ async function main(): Promise<void> {
   await mkdir(dirname(monitoringFile), { recursive: true });
   await mkdir(dirname(identityFile), { recursive: true });
 
-  const runner = createCatalogSyncRunnerFromEnv(process.env);
+  const rpcServer = createCatalogRpcFromEnv(process.env);
+  const runner = createCatalogSyncRunnerFromEnv(process.env, rpcServer);
   const service = new CatalogService(
     new FileCatalogStore(dataFile),
     new FileCatalogHistoryStore(historyFile, historyRetentionRuns),
@@ -55,8 +61,8 @@ async function main(): Promise<void> {
       identityStore: new FileIdentityStore(identityFile),
       monitoringThresholds: loadMonitoringThresholds(),
       notifier: loadNotifier(),
-      activityReader: createActivityReaderFromEnv(process.env),
-      holderReader: createHolderReaderFromEnv(process.env),
+      activityReader: createActivityReaderFromEnv(process.env, rpcServer),
+      holderReader: createHolderReaderFromEnv(process.env, rpcServer),
     },
   );
   const app = createCatalogApp({ service, syncToken });

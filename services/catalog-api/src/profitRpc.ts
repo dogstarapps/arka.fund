@@ -9,8 +9,11 @@ const USDC = new Asset("USDC", USDC_ISSUER).contractId(Networks.PUBLIC);
 const PAGE_SIZE = 100;
 const MAX_PAGES = 20;
 
-export function createMainnetProfitSource(rpcUrl: string): ProfitSource {
-  const server = new rpc.Server(rpcUrl, { timeout: 12_000, allowHttp: false });
+export function createMainnetProfitSource(rpcUrl: string, rpcServer?: rpc.Server): ProfitSource {
+  if (new URL(rpcUrl).protocol !== "https:") {
+    throw new Error("Verified profit requires an HTTPS Stellar RPC");
+  }
+  const server = rpcServer ?? new rpc.Server(rpcUrl, { timeout: 12_000, allowHttp: false });
   const read = <T>(call: () => Promise<T>) => retryTransientRpc(call, { attempts: 3, baseDelayMs: 400 });
 
   return {

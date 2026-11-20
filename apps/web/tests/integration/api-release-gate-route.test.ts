@@ -24,6 +24,9 @@ describe("GET /api/release/gate", () => {
   let tempDir: string | null = null;
 
   beforeEach(() => {
+    // Resolve the domain from each test fixture, independent of the build environment.
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+
     // Tests of other gates must not depend on the age of checked-in rehearsal
     // evidence. This clock applies only to this test process, never deployment.
     vi.stubEnv("ARKAFUND_TESTNET_REHEARSAL_NOW", "2026-06-03T20:05:00.000Z");

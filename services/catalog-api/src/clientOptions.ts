@@ -1,4 +1,4 @@
-import { Keypair, Transaction } from "@stellar/stellar-sdk";
+import { Keypair, Transaction, type rpc } from "@stellar/stellar-sdk";
 import type {
   AssembledTransaction,
   ClientOptions as ContractClientOptions,
@@ -8,6 +8,7 @@ import type {
 
 export interface NetworkConfig {
   rpcUrl: string;
+  rpcServer?: rpc.Server;
   networkPassphrase: string;
   allowHttp?: boolean;
   publicKey?: string;
@@ -37,6 +38,7 @@ export function createClientOptions(
   return {
     contractId,
     rpcUrl: config.rpcUrl,
+    ...(config.rpcServer ? { server: config.rpcServer } : {}),
     networkPassphrase: config.networkPassphrase,
     publicKey: config.publicKey,
     signTransaction: config.signTransaction,

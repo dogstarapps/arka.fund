@@ -66,7 +66,7 @@ export class OnChainCatalogSyncRunner implements CatalogSyncRunner {
     this.registryClient = new RegistryClient(
       createClientOptions(options, options.registryContractId),
     );
-    this.rpcServer = new rpc.Server(options.rpcUrl, {
+    this.rpcServer = options.rpcServer ?? new rpc.Server(options.rpcUrl, {
       allowHttp: options.allowHttp ?? options.rpcUrl.startsWith("http://"),
     });
     this.oraclePriceReader = options.oraclePriceReader ?? (

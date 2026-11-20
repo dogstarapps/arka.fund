@@ -75,6 +75,10 @@ Notes:
 - `bash scripts/deploy-graphql-backend-parity-validation.sh` validates backend parity on testnet and records `tmp/graphql-backend-parity.json`.
 - `bash scripts/deploy-subquery-backend-parity-validation.sh` validates the SubQuery-compatible provider profile and records `tmp/subquery-backend-parity.json`.
 
+### Stellar RPC request pacing
+
+For rate-limited RPCs, set `CATALOG_API_RPC_MIN_INTERVAL_MS` to the minimum time in milliseconds between outgoing Stellar RPC requests. Sync, contract reads, profit, activity and holder lookups share the same pacing inside the catalog API process. The default `0` preserves the existing request timing.
+
 ### Verified mainnet profit
 
 Set `CATALOG_API_PROFIT_SEED_FILE` to the independently verified lifetime cash-flow checkpoint and `CATALOG_API_PROFIT_CHECKPOINT_FILE` to a separate file on the catalogue's persistent volume. Use the configured HTTPS Stellar mainnet RPC and the existing authenticated `POST /v1/sync` schedule. The catalogue files have one writer. The profit checkpoint advances atomically and overlapping sync requests share the same run.

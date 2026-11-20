@@ -81,7 +81,7 @@ export class RpcHolderReader implements HolderReader {
   private archiveMutation: Promise<void> = Promise.resolve();
 
   constructor(private readonly options: RpcHolderReaderOptions) {
-    this.server = new rpc.Server(options.rpcUrl, {
+    this.server = options.rpcServer ?? new rpc.Server(options.rpcUrl, {
       allowHttp: options.allowHttp ?? options.rpcUrl.startsWith("http://"),
     });
     this.pageSize = normalizePositiveInteger(options.pageSize, 100);
